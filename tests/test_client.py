@@ -251,6 +251,46 @@ def test_free_alpha_signals_and_economics():
     assert agent_manifest["auth"]["amount_usdc"] == 0.005
 
 
+def test_mcp_stdio_jsonrpc_protocol():
+    """Verify MCP stdio protocol handlers: initialize, ping, tools/list, tools/call."""
+    from app.mcp_stdio import handle_initialize, handle_tools_list, handle_tool_call
+
+    # 1. Test initialize
+    init_res = handle_initialize(1)
+    assert init_res["id"] == 1
+    assert init_res["result"]["serverInfo"]["name"] == "minerals-oracle-x402"
+    assert init_res["result"]["protocolVersion"] == "2024-11-05"
+
+    # 2. Test tools/list
+    tools_res = handle_tools_list(2)
+    assert tools_res["id"] == 2
+    tools = tools_res["result"]["tools"]
+    assert len(tools) == 3
+    tool_names = [t["name"] for t in tools]
+    assert "get_mineral_prices" in tool_names
+    assert "get_arbitrage_spreads" in tool_names
+    assert "calculate_urban_mining_value" in tool_names
+
+    # 3. Test tools/call (prices)
+    call_prices = handle_tool_call(3, "get_mineral_prices", {})
+    assert call_prices["id"] == 3
+    assert "Ag" in call_prices["result"]["content"][0]["text"]
+
+    # 4. Test tools/call (arbitrage)
+    call_arb = handle_tool_call(4, "get_arbitrage_spreads", {})
+    assert call_arb["id"] == 4
+    assert "spreads" in call_arb["result"]["content"][0]["text"]
+
+    # 5. Test tools/call (urban mining)
+    call_um = handle_tool_call(5, "calculate_urban_mining_value", {
+        "scrap_category": "EV_BATTERY_BLACK_MASS",
+        "quantity_metric_tons": 5.0
+    })
+    assert call_um["id"] == 5
+    assert "net_settlement_value_usd" in call_um["result"]["content"][0]["text"]
+
+
 if __name__ == "__main__":
     pytest.main(["-v", __file__])
+
 

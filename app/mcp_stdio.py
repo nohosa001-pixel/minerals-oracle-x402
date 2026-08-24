@@ -1,7 +1,10 @@
 import sys
 import json
+from typing import Dict, Any, Optional, List
+
 from app.feed_engine import feed_engine
 from app.schemas import CommoditySymbol, UrbanMiningRequest
+
 
 
 def handle_initialize(req_id: Any) -> Dict[str, Any]:
@@ -172,5 +175,5 @@ def main():
 
 
 if __name__ == "__main__":
-    from typing import Dict, Any
     main()
+
