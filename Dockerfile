@@ -19,17 +19,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Create virtualenv and install dependencies using uv
+# Create virtualenv and install dependencies using uv (both in venv and system)
 COPY requirements.txt .
 COPY pyproject.toml .
 RUN uv venv /app/.venv && \
-    uv pip install --no-cache -r requirements.txt
+    uv pip install --no-cache -r requirements.txt && \
+    uv pip install --system --no-cache -r requirements.txt
 
-# Copy all application files and install project in editable mode
+# Copy all application files and install project
 COPY . .
-RUN uv pip install --no-cache -e .
+RUN uv pip install --no-cache -e . && \
+    uv pip install --system --no-cache -e .
 
-# Symlink all .venv binaries to /usr/local/bin, /usr/bin, and /bin for 100% path coverage
+# Symlink all binaries across all system search paths for 100% execution guarantee
 RUN ln -sf /app/.venv/bin/uvicorn /usr/local/bin/uvicorn && \
     ln -sf /app/.venv/bin/uvicorn /usr/bin/uvicorn && \
     ln -sf /app/.venv/bin/uvicorn /bin/uvicorn && \
