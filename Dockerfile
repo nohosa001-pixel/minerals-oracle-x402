@@ -19,13 +19,16 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Create guaranteed executable wrappers for uvicorn & python across all standard PATH locations
-RUN python3 -c "with open('/usr/local/bin/uvicorn', 'w') as f: f.write('#!/bin/sh\nexec python3 -m uvicorn \"$@\"\n')" && \
+# Create guaranteed executable wrappers for uvicorn with absolute python3 path and cross-link all binaries
+RUN python3 -c "with open('/usr/local/bin/uvicorn', 'w') as f: f.write('#!/bin/sh\nexec /usr/local/bin/python3 -m uvicorn \"$@\"\n')" && \
     chmod 755 /usr/local/bin/uvicorn && \
     cp -f /usr/local/bin/uvicorn /usr/bin/uvicorn && \
     cp -f /usr/local/bin/uvicorn /bin/uvicorn && \
-    ln -sf $(which python3) /usr/bin/python && \
-    ln -sf $(which python3) /usr/local/bin/python
+    ln -sf /usr/local/bin/python3 /usr/bin/python3 && \
+    ln -sf /usr/local/bin/python3 /usr/bin/python && \
+    ln -sf /usr/local/bin/python3 /bin/python3 && \
+    ln -sf /usr/local/bin/python3 /bin/python && \
+    chmod -R 755 /usr/local/bin /usr/bin /bin
 
 # Copy application files
 COPY app/ ./app/
