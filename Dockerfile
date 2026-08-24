@@ -19,12 +19,13 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Link uvicorn & python across all standard PATH locations with global execute permissions
-RUN ln -sf /usr/local/bin/uvicorn /usr/bin/uvicorn && \
-    ln -sf /usr/local/bin/uvicorn /bin/uvicorn && \
+# Create guaranteed executable wrappers for uvicorn & python across all standard PATH locations
+RUN python3 -c "with open('/usr/local/bin/uvicorn', 'w') as f: f.write('#!/bin/sh\nexec python3 -m uvicorn \"$@\"\n')" && \
+    chmod 755 /usr/local/bin/uvicorn && \
+    cp -f /usr/local/bin/uvicorn /usr/bin/uvicorn && \
+    cp -f /usr/local/bin/uvicorn /bin/uvicorn && \
     ln -sf $(which python3) /usr/bin/python && \
-    ln -sf $(which python3) /usr/local/bin/python && \
-    chmod -R 755 /usr/local/bin /usr/bin /bin
+    ln -sf $(which python3) /usr/local/bin/python
 
 # Copy application files
 COPY app/ ./app/
@@ -43,4 +44,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python3", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
