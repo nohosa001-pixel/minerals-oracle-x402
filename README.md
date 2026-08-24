@@ -1,12 +1,19 @@
 # Critical Raw Minerals & Urban Mining Oracle (`minerals-oracle-x402`)
 
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
+[![Glama.ai](https://img.shields.io/badge/Glama.ai-Approved-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](https://glama.ai/mcp/servers/nohosa001-pixel/minerals-oracle-x402)
+[![Cloud Run](https://img.shields.io/badge/Google_Cloud_Run-Live_24%2F7-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app)
+[![Base Network](https://img.shields.io/badge/Base_USDC-x402_Monetized-0052FF?style=for-the-badge&logo=coinbase&logoColor=white)](https://base.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-green.svg)](https://fastapi.tiangolo.com)
-[![Protocol](https://img.shields.io/badge/Monetization-x402%20on%20Base-purple.svg)](https://base.org)
 [![Agent Protocol](https://img.shields.io/badge/Google%20AP2-v0.2.0-orange.svg)](/.well-known/ap2)
 [![MCP](https://img.shields.io/badge/FastMCP-Enabled-black.svg)](mcp_tool_spec.json)
 
-High-performance deterministic micro-oracle service designed for autonomous trading, supply chain, and RWA (Real World Asset) agents. Serves real-time spot pricing, COMEX/LME cross-exchange arbitrage spreads, and urban-mining scrap benchmark yield valuations for critical raw physical commodities.
+High-performance deterministic micro-oracle service designed for autonomous trading, supply chain, and RWA (Real World Asset) agents on Base Network. Serves real-time spot pricing, COMEX/LME cross-exchange arbitrage spreads, and urban-mining scrap benchmark yield valuations for critical raw physical commodities.
+
+- 🌐 **Live Cloud Run Service**: [https://minerals-oracle-x402-212942243360.asia-northeast3.run.app](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app)
+- 🪝 **Free Real-Time Alpha Hook**: [https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/api/v1/oracle/alpha-signals](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/api/v1/oracle/alpha-signals)
+- 📊 **Economics ROI Proof**: [https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/api/v1/oracle/economics-roi](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/api/v1/oracle/economics-roi)
+- 📑 **LLM Agent Manifest**: [https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/llms.txt](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/llms.txt)
+- 📚 **Swagger API Docs**: [https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/docs](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/docs)
 
 ---
 

@@ -29,9 +29,11 @@ COPY --from=builder /root/.local /root/.local
 COPY app/ ./app/
 COPY .well-known/ ./.well-known/
 COPY mcp_tool_spec.json ./mcp_tool_spec.json
+COPY glama.json ./glama.json
+COPY llms.txt ./llms.txt
 COPY README.md ./README.md
 
-EXPOSE 8000
+EXPOSE 8080
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
