@@ -16,6 +16,8 @@ from app.schemas import (
     ScrapYieldItem,
     UrbanMiningRequest,
     UrbanMiningResponse,
+    AlphaSignalItem,
+    AlphaSignalsSummary,
 )
 
 # Standard Metrology & Conversions
@@ -580,6 +582,56 @@ class FeedEngine:
             attestation_hash=attestation_hash,
         )
 
+    def get_alpha_signals_summary(self) -> AlphaSignalsSummary:
+        """
+        Public, high-frequency Free Alpha Teaser for autonomous agents.
+        Allows trading/arbitrage agents to poll live opportunities for free,
+        triggering paid x402 calls (0.005 USDC) when profitable margins are detected.
+        """
+        now_utc = datetime.now(timezone.utc).isoformat()
+        quotes = {sym: self.get_single_quote(sym) for sym in CommoditySymbol}
+        spreads_resp = self.get_arbitrage_spreads()
+
+        signals: List[AlphaSignalItem] = []
+        profitable_count = 0
+        best_commodity = "Cu (Copper)"
+        max_margin = -999.0
+
+        for sp in spreads_resp.spreads:
+            sym_meta = quotes[sp.symbol]
+            is_prof = sp.is_arbitrage_profitable
+            if is_prof:
+                profitable_count += 1
+                if sp.net_arbitrage_margin_usd > max_margin:
+                    max_margin = sp.net_arbitrage_margin_usd
+                    best_commodity = f"{sp.symbol.value} ({sp.arbitrage_direction})"
+
+            teaser = (
+                f"🚨 Arbitrage Opportunity Detected! Margin: +${sp.net_arbitrage_margin_usd:.2f} (Spread: {sp.spread_basis_points} bps). "
+                f"Unlock full certified EIP-712 quote via x402 (0.005 USDC)."
+                if is_prof
+                else f"Market balanced. Spread: {sp.spread_basis_points} bps ({sp.primary_exchange} vs {sp.secondary_exchange})."
+            )
+
+            signals.append(AlphaSignalItem(
+                symbol=sp.symbol.value,
+                name=sym_meta.name,
+                spot_price_usd=sym_meta.spot_price_usd,
+                unit=sym_meta.unit.value,
+                primary_venue=sp.primary_exchange,
+                arbitrage_detected=is_prof,
+                estimated_margin_bps=sp.spread_basis_points,
+                teaser_message=teaser,
+            ))
+
+        return AlphaSignalsSummary(
+            timestamp_utc=now_utc,
+            arbitrage_opportunities_active=profitable_count,
+            highest_profit_commodity=best_commodity,
+            signals=signals,
+        )
+
 
 # Singleton feed engine instance
 feed_engine = FeedEngine()
+

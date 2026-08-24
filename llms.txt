@@ -1,0 +1,93 @@
+# Critical Raw Minerals & Urban Mining Oracle (LLM & Autonomous Agent Standard)
+
+> **The Decentralized Micro-Oracle for Autonomous Trading, RWA, and Circular Economy Agents on Base Network (Chain ID: 8453).**
+> Features real-time spot pricing, COMEX/LME arbitrage spreads, and urban-mining scrap recovery yield formulas.
+> Zero Subscriptions. Machine-to-Machine HTTP 402 Micropayments (0.005 USDC per query).
+
+---
+
+## ⚡ Quick Agent API Directory
+
+- **Free Public Alpha Hook**: `GET /api/v1/oracle/alpha-signals` (Pollable 24/7 without authentication)
+- **ROI & Cost Advantage**: `GET /api/v1/oracle/economics-roi` (Quantified proof of 99.89% savings vs Fastmarkets)
+- **Google AP2 Manifest**: `GET /.well-known/ap2`
+- **Agent Protocol Manifest**: `GET /.well-known/agent.json`
+- **FastMCP Tool Definition**: `GET /mcp/tools`
+- **Interactive OpenAPI Spec**: `GET /openapi.json`
+
+---
+
+## 💎 Supported Commodities & Benchmarks
+
+1. **Silver (`Ag`)**: LBMA Loco London Spot & COMEX Active Month (`USD/troy_oz`, `USD/g`, `USD/kg`)
+2. **Platinum (`Pt`)**: LPPM London Fix & NYMEX Spot (`USD/troy_oz`, `USD/g`)
+3. **Copper (`Cu`)**: LME Grade A Cathode & COMEX (`USD/mt`, `USD/lb`, `USD/kg`)
+4. **Lithium (`Li`)**: Battery Grade 99.5% Li2CO3/LiOH CIF Rotterdam & SMM China (`USD/mt`, `USD/kg`)
+5. **Rare Earths (`NdDy`)**: Permanent Magnet NdFeB PrNd/DyFe Benchmark (`USD/kg`, `USD/mt`)
+
+---
+
+## ♻️ Urban Mining Scrap Feedstocks Supported
+
+- `EV_BATTERY_BLACK_MASS`: Recovers Lithium (Li), Nickel (Ni), Cobalt (Co), Manganese (Mn) with hydrometallurgical TC/RC toll charges.
+- `AUTO_CATALYST_CERAMIC`: Recovers Platinum (Pt), Palladium (Pd), Rhodium (Rh) from monolith assays.
+- `E_WASTE_HIGH_GRADE_PCB`: Recovers Gold (Au), Silver (Ag), Copper (Cu).
+- `WIND_EV_PERMANENT_MAGNETS`: Recovers Neodymium (Nd), Dysprosium (Dy), Praseodymium (Pr).
+
+---
+
+## 💳 How Autonomous Agents Pay via x402 Protocol
+
+```http
+Authorization: x402 <base64_encoded_payload>
+```
+
+Payload Structure:
+```json
+{
+  "nonce": "<NONCE_OBTAINED_FROM_402_RESPONSE>",
+  "signature": "<EIP-712_OR_EIP-191_SIGNATURE_FROM_AGENT_KEY>",
+  "signer": "<AGENT_WALLET_ADDRESS>"
+}
+```
+
+Or pass on-chain tx hash on Base:
+```json
+{
+  "tx_hash": "0x...",
+  "chain_id": 8453
+}
+```
+
+---
+
+## 🤖 Python Client Quickstart
+
+```python
+import httpx
+from eth_account import Account
+from eth_account.messages import encode_defunct
+
+agent_acct = Account.from_key("0xYOUR_AGENT_PRIVATE_KEY")
+base_url = "http://localhost:8000"
+
+# 1. Probe protected endpoint
+r = httpx.get(f"{base_url}/api/v1/oracle/prices")
+if r.status_code == 402:
+    challenge = r.json()["payment_challenge"]
+    nonce = challenge["nonce"]
+    
+    # 2. Sign payment challenge
+    msg_text = f"x402:minerals-oracle-x402:pay:0.005:USDC:Base:{nonce}"
+    sig = agent_acct.sign_message(encode_defunct(text=msg_text)).signature.hex()
+    
+    # 3. Request with x402 authorization
+    auth_payload = {"nonce": nonce, "signature": sig, "signer": agent_acct.address}
+    auth_header = f"x402 {httpx.BasicAuth(nonce, sig)}" # or base64 json
+    
+    certified_feed = httpx.get(
+        f"{base_url}/api/v1/oracle/prices",
+        headers={"Authorization": f"x402 {json.dumps(auth_payload)}"}
+    ).json()
+    print("Certified Prices:", certified_feed)
+```

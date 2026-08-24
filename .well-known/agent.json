@@ -1,0 +1,20 @@
+{
+  "schema_version": "v1",
+  "name_for_model": "minerals_oracle_x402",
+  "name_for_human": "Critical Raw Minerals & Urban Mining Oracle",
+  "description_for_model": "Provides real-time certified spot prices (Silver, Platinum, Copper, Lithium, NdDy Rare Earths), COMEX/LME arbitrage spreads, and urban-mining scrap batch valuations (EV Black Mass, Auto Catalysts, E-Waste PCBs, Permanent Magnets). Monetized via HTTP 402 with 0.005 USDC on Base.",
+  "description_for_human": "Autonomous Base x402 Oracle for Physical Commodities & Urban Mining.",
+  "auth": {
+    "type": "x402",
+    "chain_id": 8453,
+    "token": "USDC",
+    "amount_usdc": 0.005,
+    "recipient": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "/openapi.json"
+  },
+  "contact_email": "developer@minerals-oracle.com",
+  "legal_info_url": "https://github.com/nohosa001-pixel/minerals-oracle-x402"
+}

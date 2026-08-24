@@ -139,3 +139,30 @@ class MCPToolCallRequest(BaseModel):
 class MCPToolCallResponse(BaseModel):
     content: List[Dict[str, Any]]
     isError: bool = False
+
+
+class AlphaSignalItem(BaseModel):
+    symbol: str
+    name: str
+    spot_price_usd: float
+    unit: str
+    primary_venue: str
+    arbitrage_detected: bool
+    estimated_margin_bps: float
+    teaser_message: str
+
+
+class AlphaSignalsSummary(BaseModel):
+    oracle: str = "minerals-oracle-x402"
+    status: str = "operational"
+    timestamp_utc: str
+    network: str = "Base (Chain ID 8453)"
+    free_tier_status: str = "PUBLIC_REALTIME_ALPHA_TEASER"
+    arbitrage_opportunities_active: int
+    highest_profit_commodity: str
+    signals: List[AlphaSignalItem]
+    unlock_instruction: str = (
+        "Pay 0.005 USDC on Base (Chain ID 8453) via x402 protocol at /api/v1/oracle/prices or "
+        "/api/v1/oracle/spreads to obtain complete EIP-712 certified quotes, net logistics formulas, and scrap matrices."
+    )
+

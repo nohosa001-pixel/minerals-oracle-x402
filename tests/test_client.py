@@ -221,5 +221,36 @@ def test_invalid_signature_rejection():
     assert resp.status_code == 402
 
 
+def test_free_alpha_signals_and_economics():
+    """Verify public alpha signals, ROI economics, llms.txt and agent.json work unauthenticated."""
+    # 1. Free Alpha Signals
+    resp_alpha = client.get("/api/v1/oracle/alpha-signals")
+    assert resp_alpha.status_code == 200
+    data_alpha = resp_alpha.json()
+    assert data_alpha["status"] == "operational"
+    assert len(data_alpha["signals"]) >= 4
+    assert "unlock_instruction" in data_alpha
+
+    # 2. Economics ROI Proof
+    resp_roi = client.get("/api/v1/oracle/economics-roi")
+    assert resp_roi.status_code == 200
+    data_roi = resp_roi.json()
+    assert data_roi["cost_per_query_usdc"] == 0.005
+    assert "cost_comparison" in data_roi
+
+    # 3. llms.txt Machine Discovery
+    resp_llms = client.get("/llms.txt")
+    assert resp_llms.status_code == 200
+    assert "# Critical Raw Minerals" in resp_llms.text or "# minerals-oracle-x402" in resp_llms.text
+
+    # 4. agent.json Manifest
+    resp_agent = client.get("/.well-known/agent.json")
+    assert resp_agent.status_code == 200
+    agent_manifest = resp_agent.json()
+    assert agent_manifest["schema_version"] == "v1"
+    assert agent_manifest["auth"]["amount_usdc"] == 0.005
+
+
 if __name__ == "__main__":
     pytest.main(["-v", __file__])
+

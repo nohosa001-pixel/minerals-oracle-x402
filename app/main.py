@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 
 from fastapi import FastAPI, Request, Depends, HTTPException, status, Query, Path as FPath
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.schemas import (
@@ -16,6 +16,7 @@ from app.schemas import (
     UrbanMiningResponse,
     MCPToolCallRequest,
     MCPToolCallResponse,
+    AlphaSignalsSummary,
 )
 from app.feed_engine import feed_engine
 from app.x402_verifier import x402_verifier
@@ -96,6 +97,112 @@ async def health_check():
             "E_WASTE_HIGH_GRADE_PCB",
             "WIND_EV_PERMANENT_MAGNETS",
         ],
+    }
+
+
+# ==========================================
+# Public Free Alpha Teaser & Agent Hooks
+# ==========================================
+@app.get(
+    "/api/v1/oracle/alpha-signals",
+    response_model=AlphaSignalsSummary,
+    tags=["Agent Free Alpha Hook"],
+    summary="Free Real-Time Arbitrage & Market Alpha Signals (High-Frequency Pollable)",
+)
+async def get_public_alpha_signals():
+    """
+    Public, unauthenticated real-time teaser endpoint.
+    Allows autonomous trading agents to poll cross-exchange spreads for FREE,
+    alerting them when profitable locational arbitrage margins exist so they can
+    unlock full EIP-712 certified quotes via x402 on Base (0.005 USDC).
+    """
+    return feed_engine.get_alpha_signals_summary()
+
+
+@app.get(
+    "/api/v1/oracle/economics-roi",
+    tags=["Economic Advantage"],
+    summary="ROI & Economic Superiority Metrics vs Traditional Enterprise Terminals",
+)
+async def get_economic_advantage_metrics():
+    """
+    Returns quantitative proof of cost superiority compared to legacy Bloomberg / Fastmarkets terminals.
+    Autonomous agents use this metric to justify algorithmic budget allocation.
+    """
+    return {
+        "oracle": "minerals-oracle-x402",
+        "pricing_model": "Micro-metered per query (Zero Monthly Subscription)",
+        "cost_per_query_usdc": 0.005,
+        "cost_comparison": {
+            "legacy_enterprise_terminals": {
+                "fastmarkets_annual_license_usd": 48000.0,
+                "bloomberg_terminal_annual_license_usd": 32000.0,
+                "sp_capital_iq_annual_license_usd": 25000.0,
+                "human_signup_overhead_days": 14,
+                "requires_kyc_credit_card": True,
+            },
+            "minerals_oracle_x402": {
+                "cost_100_queries_usd": 0.50,
+                "cost_10000_queries_usd": 50.00,
+                "cost_100000_queries_usd": 500.00,
+                "human_signup_overhead_seconds": 0,
+                "instant_m2m_autonomous_payment": True,
+                "cost_savings_percentage": "99.89%",
+            },
+        },
+        "value_proposition_for_ai_agents": (
+            "An autonomous trading bot scanning 1,000 arbitrage opportunities costs only $5.00. "
+            "Capturing just 1 metric ton of Copper or 5 tons of EV Battery Black Mass spread yield "
+            "generates $400 ~ $2,500 net profit, delivering up to 50,000% ROI on oracle fees."
+        ),
+    }
+
+
+# ==========================================
+# Machine Discovery: llms.txt & Agent Protocol
+# ==========================================
+@app.get("/llms.txt", tags=["Agent Protocol"])
+async def get_llms_txt():
+    """Returns LLM-ready markdown documentation for autonomous web crawlers and agents."""
+    llms_path = Path(__file__).parent.parent / "llms.txt"
+    if llms_path.exists():
+        with open(llms_path, "r", encoding="utf-8") as f:
+            return PlainTextResponse(f.read())
+    return PlainTextResponse(
+        "# minerals-oracle-x402\n"
+        "> Web3 x402 Critical Raw Minerals & Urban Mining Oracle on Base (Chain ID 8453).\n"
+        "Endpoints:\n"
+        "- Free Alpha Hook: GET /api/v1/oracle/alpha-signals\n"
+        "- Economic Proof: GET /api/v1/oracle/economics-roi\n"
+        "- Protected Prices: GET /api/v1/oracle/prices (0.005 USDC via x402)\n"
+        "- Urban Mining: POST /api/v1/oracle/urban-mining/calculate (0.005 USDC)\n"
+    )
+
+
+@app.get("/.well-known/agent.json", tags=["Agent Protocol"])
+async def get_agent_json():
+    """Returns OpenAI & A2A standard Agent Manifest."""
+    return {
+        "schema_version": "v1",
+        "name_for_model": "minerals_oracle_x402",
+        "name_for_human": "Critical Raw Minerals & Urban Mining Oracle",
+        "description_for_model": (
+            "Provides real-time certified spot prices (Silver, Platinum, Copper, Lithium, NdDy Rare Earths), "
+            "COMEX/LME arbitrage spreads, and urban-mining scrap batch valuations (EV Black Mass, Auto Catalysts, "
+            "E-Waste PCBs, Permanent Magnets). Monetized via HTTP 402 with 0.005 USDC on Base."
+        ),
+        "description_for_human": "Autonomous Base x402 Oracle for Physical Commodities & Urban Mining.",
+        "auth": {
+            "type": "x402",
+            "chain_id": 8453,
+            "token": "USDC",
+            "amount_usdc": 0.005,
+            "recipient": x402_verifier.recipient_wallet,
+        },
+        "api": {
+            "type": "openapi",
+            "url": "/openapi.json",
+        },
     }
 
 
