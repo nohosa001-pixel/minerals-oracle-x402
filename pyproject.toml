@@ -47,8 +47,11 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/nohosa001-pixel/minerals-oracle-x402"
 Repository = "https://github.com/nohosa001-pixel/minerals-oracle-x402"
-Issues = "https://github.com/nohosa001-pixel/minerals-oracle-x402/issues"
+[project.scripts]
+minerals-oracle-x402 = "main:main"
+mcp-server = "main:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["app*"]
+

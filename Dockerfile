@@ -5,46 +5,25 @@ WORKDIR /app
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PORT=8000 \
-    HOST=0.0.0.0 \
-    PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
+    HOST=0.0.0.0
 
-# Install build dependencies and clean up
+# Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install python dependencies globally
+# Install python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Create guaranteed executable wrappers for uvicorn with absolute python3 path and cross-link all binaries
-RUN python3 -c "with open('/usr/local/bin/uvicorn', 'w') as f: f.write('#!/bin/sh\nexec /usr/local/bin/python3 -m uvicorn \"$@\"\n')" && \
-    chmod 755 /usr/local/bin/uvicorn && \
-    cp -f /usr/local/bin/uvicorn /usr/bin/uvicorn && \
-    cp -f /usr/local/bin/uvicorn /bin/uvicorn && \
-    ln -sf /usr/local/bin/python3 /usr/bin/python3 && \
-    ln -sf /usr/local/bin/python3 /usr/bin/python && \
-    ln -sf /usr/local/bin/python3 /bin/python3 && \
-    ln -sf /usr/local/bin/python3 /bin/python && \
-    chmod -R 755 /usr/local/bin /usr/bin /bin
-
-# Copy application files
-COPY app/ ./app/
-COPY .well-known/ ./.well-known/
-COPY mcp_tool_spec.json ./mcp_tool_spec.json
-COPY glama.json ./glama.json
-COPY llms.txt ./llms.txt
-COPY README.md ./README.md
-
-RUN chmod -R 755 /app
+# Copy all application files and install project CLI entrypoints
+COPY . .
+RUN pip install --no-cache-dir -e .
 
 EXPOSE 8000
 EXPOSE 8080
 
-# Healthcheck
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
-
-CMD ["python3", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Default MCP entrypoint: standard stdio JSON-RPC for Glama / Claude / Cursor, or HTTP if specified
+CMD ["python", "main.py"]
