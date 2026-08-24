@@ -53,9 +53,11 @@ Homepage = "https://github.com/nohosa001-pixel/minerals-oracle-x402"
 Repository = "https://github.com/nohosa001-pixel/minerals-oracle-x402"
 [project.scripts]
 minerals-oracle-x402 = "main:main"
-mcp-server = "main:main"
+x402-minerals-agent = "main:main"
+minerals-mcp = "mcp_server:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["app*"]
+
 
