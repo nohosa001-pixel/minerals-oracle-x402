@@ -18,11 +18,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Create guaranteed executable wrapper scripts for uvicorn & python across all standard bin paths
-RUN printf '#!/bin/sh\nexec python3 -m uvicorn "$@"\n' > /usr/local/bin/uvicorn && \
-    chmod +x /usr/local/bin/uvicorn && \
-    cp /usr/local/bin/uvicorn /usr/bin/uvicorn && \
-    cp /usr/local/bin/uvicorn /bin/uvicorn && \
+# Create guaranteed executable wrapper script for uvicorn & python without shell expansion issues
+RUN python3 -c "with open('/usr/local/bin/uvicorn', 'w') as f: f.write('#!/bin/sh\nexec python3 -m uvicorn \"$@\"\n')" && \
+    chmod 755 /usr/local/bin/uvicorn && \
+    cp -f /usr/local/bin/uvicorn /usr/bin/uvicorn && \
+    cp -f /usr/local/bin/uvicorn /bin/uvicorn && \
     ln -sf $(which python3) /usr/bin/python && \
     ln -sf $(which python3) /usr/local/bin/python
 
@@ -33,6 +33,8 @@ COPY mcp_tool_spec.json ./mcp_tool_spec.json
 COPY glama.json ./glama.json
 COPY llms.txt ./llms.txt
 COPY README.md ./README.md
+
+RUN chmod -R 755 /app
 
 EXPOSE 8000
 EXPOSE 8080
