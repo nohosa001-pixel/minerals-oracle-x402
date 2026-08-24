@@ -1,12 +1,17 @@
 FROM python:3.11-slim
 
+# Install Astral uv package manager
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 WORKDIR /app
 
+# Configure virtual environment and universal PATH
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PORT=8000 \
     HOST=0.0.0.0 \
-    PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
+    VIRTUAL_ENV=/app/.venv \
+    PATH="/app/.venv/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -14,29 +19,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Ensure python symlinks exist everywhere before pip installs
-RUN ln -sf $(which python3) /usr/local/bin/python && \
-    ln -sf $(which python3) /usr/bin/python && \
-    ln -sf $(which python3) /usr/bin/python3 && \
-    ln -sf $(which python3) /bin/python && \
-    ln -sf $(which python3) /bin/python3
-
-# Install python dependencies
+# Create virtualenv and install dependencies using uv
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml .
+RUN uv venv /app/.venv && \
+    uv pip install --no-cache -r requirements.txt
 
-# Ensure uvicorn binary has universal shebang and symlinks in all bin directories
-RUN sed -i '1s|^.*$|#!/usr/bin/env python3|' /usr/local/bin/uvicorn && \
-    chmod 755 /usr/local/bin/uvicorn && \
-    ln -sf /usr/local/bin/uvicorn /usr/bin/uvicorn && \
-    ln -sf /usr/local/bin/uvicorn /bin/uvicorn
-
-# Copy all application files and install package
+# Copy all application files and install project in editable mode
 COPY . .
-RUN pip install --no-cache-dir -e .
+RUN uv pip install --no-cache -e .
 
-RUN chmod -R 755 /app /usr/local/bin /usr/bin /bin
+# Symlink all .venv binaries to /usr/local/bin, /usr/bin, and /bin for 100% path coverage
+RUN ln -sf /app/.venv/bin/uvicorn /usr/local/bin/uvicorn && \
+    ln -sf /app/.venv/bin/uvicorn /usr/bin/uvicorn && \
+    ln -sf /app/.venv/bin/uvicorn /bin/uvicorn && \
+    ln -sf /app/.venv/bin/python /usr/local/bin/python && \
+    ln -sf /app/.venv/bin/python /usr/bin/python && \
+    ln -sf /app/.venv/bin/python3 /usr/bin/python3 && \
+    ln -sf /app/.venv/bin/python /bin/python && \
+    ln -sf /app/.venv/bin/python3 /bin/python3 && \
+    chmod -R 755 /app /app/.venv /usr/local/bin /usr/bin /bin
 
 EXPOSE 8000
 EXPOSE 8080
