@@ -6,9 +6,9 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PORT=8000 \
     HOST=0.0.0.0 \
-    PATH="/usr/local/bin:/usr/bin:$PATH"
+    PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
 
-# Install build dependencies and clean up
+# Install system dependencies and clean up
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
@@ -18,10 +18,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Create symlinks in /usr/bin to guarantee execution regardless of PATH overrides
-RUN ln -sf /usr/local/bin/uvicorn /usr/bin/uvicorn && \
-    ln -sf /usr/local/bin/python /usr/bin/python && \
-    ln -sf /usr/local/bin/python3 /usr/bin/python3
+# Create guaranteed executable wrapper scripts for uvicorn & python across all standard bin paths
+RUN printf '#!/bin/sh\nexec python3 -m uvicorn "$@"\n' > /usr/local/bin/uvicorn && \
+    chmod +x /usr/local/bin/uvicorn && \
+    cp /usr/local/bin/uvicorn /usr/bin/uvicorn && \
+    cp /usr/local/bin/uvicorn /bin/uvicorn && \
+    ln -sf $(which python3) /usr/bin/python && \
+    ln -sf $(which python3) /usr/local/bin/python
 
 # Copy application files
 COPY app/ ./app/
