@@ -1,29 +1,27 @@
-# Stage 1: Build & Dependencies
-FROM python:3.11-slim AS builder
-
-WORKDIR /build
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
-
-
-# Stage 2: Final Ultra-Lightweight Production Runtime
-FROM python:3.11-slim AS runner
+FROM python:3.11-slim
 
 WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PATH=/root/.local/bin:$PATH \
     PORT=8000 \
-    HOST=0.0.0.0
+    HOST=0.0.0.0 \
+    PATH="/usr/local/bin:/usr/bin:$PATH"
 
-# Copy installed python wheels from builder
-COPY --from=builder /root/.local /root/.local
+# Install build dependencies and clean up
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install python dependencies globally
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Create symlinks in /usr/bin to guarantee execution regardless of PATH overrides
+RUN ln -sf /usr/local/bin/uvicorn /usr/bin/uvicorn && \
+    ln -sf /usr/local/bin/python /usr/bin/python && \
+    ln -sf /usr/local/bin/python3 /usr/bin/python3
 
 # Copy application files
 COPY app/ ./app/
@@ -33,10 +31,11 @@ COPY glama.json ./glama.json
 COPY llms.txt ./llms.txt
 COPY README.md ./README.md
 
+EXPOSE 8000
 EXPOSE 8080
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
 
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
