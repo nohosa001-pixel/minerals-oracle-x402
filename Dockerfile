@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED=1 \
     HOST=0.0.0.0 \
     PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
 
-# Install system dependencies and clean up
+# Install build dependencies and clean up
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
@@ -16,15 +16,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install python dependencies globally
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Create guaranteed executable wrapper script for uvicorn & python without shell expansion issues
-RUN python3 -c "with open('/usr/local/bin/uvicorn', 'w') as f: f.write('#!/bin/sh\nexec python3 -m uvicorn \"$@\"\n')" && \
-    chmod 755 /usr/local/bin/uvicorn && \
-    cp -f /usr/local/bin/uvicorn /usr/bin/uvicorn && \
-    cp -f /usr/local/bin/uvicorn /bin/uvicorn && \
+# Link uvicorn & python across all standard PATH locations with global execute permissions
+RUN ln -sf /usr/local/bin/uvicorn /usr/bin/uvicorn && \
+    ln -sf /usr/local/bin/uvicorn /bin/uvicorn && \
     ln -sf $(which python3) /usr/bin/python && \
-    ln -sf $(which python3) /usr/local/bin/python
+    ln -sf $(which python3) /usr/local/bin/python && \
+    chmod -R 755 /usr/local/bin /usr/bin /bin
 
 # Copy application files
 COPY app/ ./app/

@@ -1,8 +1,11 @@
 {
-  "$schema": "https://glama.ai/mcp/schema/server.json",
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
   "name": "minerals-oracle-x402",
   "description": "High-performance Web3 x402 critical raw minerals, COMEX/LME arbitrage spreads, and urban-mining scrap yield oracle for autonomous AI agents on Base.",
   "homepage": "https://github.com/nohosa001-pixel/minerals-oracle-x402",
+  "maintainers": [
+    "nohosa001-pixel"
+  ],
   "tools": [
     {
       "name": "get_mineral_prices",
