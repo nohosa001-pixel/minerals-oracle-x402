@@ -1,0 +1,20 @@
+{
+  "$schema": "https://glama.ai/mcp/schema/server.json",
+  "name": "minerals-oracle-x402",
+  "description": "High-performance Web3 x402 critical raw minerals, COMEX/LME arbitrage spreads, and urban-mining scrap yield oracle for autonomous AI agents on Base.",
+  "homepage": "https://github.com/nohosa001-pixel/minerals-oracle-x402",
+  "tools": [
+    {
+      "name": "get_mineral_prices",
+      "description": "Retrieve all certified spot prices (Silver, Platinum, Copper, Lithium, Rare Earths) with unit conversions (USD/oz, USD/kg, USD/mt)."
+    },
+    {
+      "name": "get_arbitrage_spreads",
+      "description": "Calculate locational arbitrage and basis spreads (COMEX vs LME Copper, COMEX vs LBMA Silver, SMM China vs CIF Rotterdam Lithium)."
+    },
+    {
+      "name": "calculate_urban_mining_value",
+      "description": "Calculate theoretical and payable recovery value for recyclable scrap (EV Battery Black Mass, Auto Catalysts, E-Waste PCB, Wind Permanent Magnets)."
+    }
+  ]
+}

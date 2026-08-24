@@ -1,0 +1,65 @@
+{
+  "tools": [
+    {
+      "name": "get_mineral_prices",
+      "description": "Fetch normalized real-time spot prices, bid/ask spreads, and multi-unit conversions for critical physical commodities: Silver (Ag), Platinum (Pt), Copper (Cu), Lithium (Li), and Neodymium/Dysprosium (NdDy). Requires 0.005 USDC payment on Base network via x402.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "get_arbitrage_spreads",
+      "description": "Calculate cross-exchange price spreads and locational arbitrage opportunities between COMEX, LME, SMM, and LPPM benchmarks, factoring in estimated freight and tariffs. Requires 0.005 USDC payment on Base network via x402.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "calculate_urban_mining_value",
+      "description": "Evaluate contained minerals, process recovery efficiencies, and net payable batch value after refining/treatment charges (TC/RC) for urban mining scrap feedstocks (EV Battery Black Mass, Auto Catalysts, E-Waste PCBs, Rare Earth Magnets). Requires 0.005 USDC payment on Base network via x402.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "scrap_category": {
+            "type": "string",
+            "enum": [
+              "EV_BATTERY_BLACK_MASS",
+              "AUTO_CATALYST_CERAMIC",
+              "E_WASTE_HIGH_GRADE_PCB",
+              "WIND_EV_PERMANENT_MAGNETS"
+            ],
+            "description": "Scrap feedstock classification"
+          },
+          "quantity_metric_tons": {
+            "type": "number",
+            "minimum": 0.001,
+            "description": "Total batch weight in metric tons"
+          },
+          "custom_assay_overrides": {
+            "type": "object",
+            "description": "Optional custom assay grades to override standard defaults (e.g. {'Li': 4.2} in % or {'Pt': 2100} in ppm)",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "refining_cost_per_ton_usd": {
+            "type": "number",
+            "description": "Optional custom refining & treatment charge per ton in USD"
+          },
+          "recovery_efficiency_factor": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 1.5,
+            "default": 1.0,
+            "description": "Recovery efficiency multiplier (1.0 = standard benchmark recovery)"
+          }
+        },
+        "required": ["scrap_category", "quantity_metric_tons"]
+      }
+    }
+  ]
+}

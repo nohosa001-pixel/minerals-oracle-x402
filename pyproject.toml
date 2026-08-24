@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "minerals-oracle-x402"
+version = "1.0.0"
+description = "Deterministic Web3 x402 Critical Minerals & Urban Mining Oracle for Autonomous AI Agents on Base Network"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Minerals Oracle Team", email = "developer@minerals-oracle.com" }
+]
+keywords = [
+    "ai-agent",
+    "x402",
+    "mcp",
+    "base-network",
+    "web3",
+    "critical-minerals",
+    "rwa",
+    "urban-mining",
+    "fastapi"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
+]
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn>=0.28.0",
+    "web3>=6.0.0",
+    "eth-account>=0.11.0",
+    "pydantic>=2.6.0",
+    "httpx>=0.27.0",
+    "python-dotenv>=1.0.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/nohosa001-pixel/minerals-oracle-x402"
+Repository = "https://github.com/nohosa001-pixel/minerals-oracle-x402"
+Issues = "https://github.com/nohosa001-pixel/minerals-oracle-x402/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
