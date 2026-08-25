@@ -12,10 +12,42 @@ High-performance deterministic micro-oracle service designed for autonomous trad
 
 - 🌐 **Live Cloud Run Service**: [https://minerals-oracle-x402-7qxtp3324q-du.a.run.app](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app)
 - 🪝 **Free Real-Time Alpha Hook**: [https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/api/v1/oracle/alpha-signals](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/api/v1/oracle/alpha-signals)
+- 🧪 **Sandbox Trial (First 2 Queries Free)**: `GET /api/v1/oracle/prices` (Zero Wallet Signature Required)
 - 📊 **Economics ROI Proof**: [https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/api/v1/oracle/economics-roi](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/api/v1/oracle/economics-roi)
 - 📑 **LLM Agent Manifest**: [https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/llms.txt](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/llms.txt)
 - 📚 **Swagger API Docs**: [https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/docs](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/docs)
 
+---
+
+## ⚡ 1-Click MCP Integration (Claude Desktop & Cursor)
+
+Add to your `claude_desktop_config.json` or `.cursor/mcp.json` to enable instant tool calling across all LLM agents:
+
+```json
+{
+  "mcpServers": {
+    "minerals-oracle-x402": {
+      "command": "uvx",
+      "args": ["minerals-oracle-x402"]
+    }
+  }
+}
+```
+
+> **Zero-Friction Sandbox Trial**: The first 2 queries per agent IP are granted completely free with live element recovery tensors (`recovery_rates_tensor`) and refinery compliance flags (`refinery_compliance_flags`) before requiring x402 micro-settlement (0.005 USDC on Base).
+
+---
+
+## 🎯 Example Query Presets (Default Schemas)
+
+To eliminate input friction, all tools and endpoints provide verified industrial default presets:
+
+| Parameter | Default Preset | Alternative Presets | Description |
+|---|---|---|---|
+| `mineral_type` | `"Neodymium"` | `"Dysprosium"`, `"Lithium"`, `"Copper"`, `"Silver"`, `"Platinum"` | Critical element spot quote benchmark |
+| `scrap_category` | `"E_WASTE_HIGH_GRADE_PCB"` | `"EV_BATTERY_BLACK_MASS"`, `"AUTO_CATALYST_CERAMIC"`, `"WIND_EV_PERMANENT_MAGNETS"` | Feedstock batch matrix |
+| `quantity_metric_tons` | `1.0` | `5.0`, `10.0`, `25.0` | Standard batch weight in metric tons |
+| `target_yield_currency`| `"USDC"` | `"USDC"` | Settlement denomination |
 
 ---
 

@@ -46,7 +46,7 @@ def test_ap2_manifest_and_mcp_spec():
 
 def test_402_challenge_flow():
     """Verify calling protected endpoints without credentials triggers 402 challenge."""
-    resp = client.get("/api/v1/oracle/prices")
+    resp = client.get("/api/v1/oracle/challenge")
     assert resp.status_code == 402
     assert "WWW-Authenticate" in resp.headers
     assert resp.headers["X-Payment-Required"] == "true"
@@ -85,7 +85,7 @@ def test_authenticated_prices_feed():
     agent_wallet = Account.create()
 
     # 2. Initial request -> Get 402 Challenge
-    challenge_resp = client.get("/api/v1/oracle/prices")
+    challenge_resp = client.get("/api/v1/oracle/challenge")
     assert challenge_resp.status_code == 402
     nonce = challenge_resp.json()["payment_challenge"]["nonce"]
 
@@ -114,7 +114,7 @@ def test_single_quote_and_spreads():
     agent_wallet = Account.create()
 
     # Get challenge for single quote
-    chal = client.get("/api/v1/oracle/prices/Cu").json()["payment_challenge"]
+    chal = client.get("/api/v1/oracle/challenge").json()["payment_challenge"]
     auth = create_agent_x402_header(agent_wallet, chal["nonce"])
 
     cu_resp = client.get("/api/v1/oracle/prices/Cu", headers={"Authorization": auth})
@@ -124,7 +124,7 @@ def test_single_quote_and_spreads():
     assert "USD/lb" in cu_data["secondary_prices"]
 
     # Get challenge for spreads
-    chal_spreads = client.get("/api/v1/oracle/spreads").json()["payment_challenge"]
+    chal_spreads = client.get("/api/v1/oracle/challenge").json()["payment_challenge"]
     auth_spreads = create_agent_x402_header(agent_wallet, chal_spreads["nonce"])
 
     spreads_resp = client.get("/api/v1/oracle/spreads", headers={"Authorization": auth_spreads})
@@ -138,10 +138,7 @@ def test_urban_mining_calculations():
     agent_wallet = Account.create()
 
     # 1. Test EV Battery Black Mass (10 metric tons)
-    chal = client.post("/api/v1/oracle/urban-mining/calculate", json={
-        "scrap_category": "EV_BATTERY_BLACK_MASS",
-        "quantity_metric_tons": 10.0,
-    }).json()["payment_challenge"]
+    chal = client.get("/api/v1/oracle/challenge").json()["payment_challenge"]
     auth = create_agent_x402_header(agent_wallet, chal["nonce"])
 
     resp_bm = client.post(
@@ -160,10 +157,7 @@ def test_urban_mining_calculations():
     assert len(bm_data["mineral_breakdown"]) == 4
 
     # 2. Test Auto Catalysts (2.5 metric tons)
-    chal2 = client.post("/api/v1/oracle/urban-mining/calculate", json={
-        "scrap_category": "AUTO_CATALYST_CERAMIC",
-        "quantity_metric_tons": 2.5,
-    }).json()["payment_challenge"]
+    chal2 = client.get("/api/v1/oracle/challenge").json()["payment_challenge"]
     auth2 = create_agent_x402_header(agent_wallet, chal2["nonce"])
 
     resp_cat = client.post(
@@ -186,7 +180,7 @@ def test_mcp_tool_invocation():
     agent_wallet = Account.create()
 
     # Get challenge
-    chal = client.post("/mcp/invoke", json={"name": "get_mineral_prices"}).json()["payment_challenge"]
+    chal = client.get("/api/v1/oracle/challenge").json()["payment_challenge"]
     auth = create_agent_x402_header(agent_wallet, chal["nonce"])
 
     resp = client.post(
@@ -204,7 +198,7 @@ def test_mcp_tool_invocation():
 def test_invalid_signature_rejection():
     """Verify forged or corrupted signatures are rejected with 402."""
     agent_wallet = Account.create()
-    chal = client.get("/api/v1/oracle/prices").json()["payment_challenge"]
+    chal = client.get("/api/v1/oracle/challenge").json()["payment_challenge"]
 
     # Sign wrong text
     bad_msg = encode_defunct(text="wrong-message-content")
@@ -288,6 +282,45 @@ def test_mcp_stdio_jsonrpc_protocol():
     })
     assert call_um["id"] == 5
     assert "net_settlement_value_usd" in call_um["result"]["content"][0]["text"]
+
+
+def test_sandbox_free_trial_and_preset_defaults():
+    """Verify Sandbox Free Trial grants first 2 queries without auth header and includes presets/tensors."""
+    from app.x402_verifier import _FREE_TRIAL_USAGE
+
+    # Reset IP usage for fresh test
+    test_ip = "192.168.100.1"
+    _FREE_TRIAL_USAGE.pop(test_ip, None)
+
+    # 1. First Trial Query (Should return 200 OK with Sandbox Headers)
+    resp1 = client.get("/api/v1/oracle/prices", headers={"X-Forwarded-For": test_ip})
+    assert resp1.status_code == 200
+    assert resp1.headers.get("x-sandbox-trial") == "active"
+    assert resp1.headers.get("x-free-tier-remaining") == "1"
+
+    # 2. Second Trial Query (Preset alias 'Neodymium' & Urban Mining default)
+    resp2 = client.get("/api/v1/oracle/prices/Neodymium", headers={"X-Forwarded-For": test_ip})
+    assert resp2.status_code == 200
+    assert resp2.headers.get("x-free-tier-remaining") == "0"
+    data2 = resp2.json()
+    assert data2["symbol"] == "NdDy"
+
+    # 3. Third Query (Free Trial exhausted -> should return 402 Challenge)
+    resp3 = client.get("/api/v1/oracle/prices", headers={"X-Forwarded-For": test_ip})
+    assert resp3.status_code == 402
+    assert "payment_challenge" in resp3.json()
+
+    # 4. Urban Mining Presets & Recovery Tensor Verification
+    resp_um = client.post(
+        "/api/v1/oracle/urban-mining/calculate",
+        json={"scrap_category": "E_WASTE_HIGH_GRADE_PCB", "quantity_metric_tons": 1.0},
+        headers={"X-Dev-Bypass": "true"}
+    )
+    assert resp_um.status_code == 200
+    um_data = resp_um.json()
+    assert "recovery_rates_tensor" in um_data
+    assert "refinery_compliance_flags" in um_data
+    assert um_data["target_yield_currency"] == "USDC"
 
 
 if __name__ == "__main__":

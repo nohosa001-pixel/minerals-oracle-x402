@@ -565,6 +565,8 @@ class FeedEngine:
         net_settlement = max(0.0, total_gross - total_tc_rc)
         net_per_ton = net_settlement / req.quantity_metric_tons
 
+        recovery_tensor = {item.mineral_symbol: item.recovery_rate_pct for item in items}
+
         raw_digest = f"{req.scrap_category.value}:{req.quantity_metric_tons}:{total_gross}:{net_settlement}:{now_utc}"
         attestation_hash = hashlib.sha256(raw_digest.encode("utf-8")).hexdigest()
 
@@ -573,11 +575,13 @@ class FeedEngine:
             timestamp_utc=now_utc,
             scrap_category=req.scrap_category,
             input_quantity_metric_tons=req.quantity_metric_tons,
+            target_yield_currency=req.target_yield_currency or "USDC",
             mineral_breakdown=items,
             total_gross_payable_usd=round(total_gross, 2),
             total_treatment_and_refining_charges_usd=round(total_tc_rc, 2),
             net_settlement_value_usd=round(net_settlement, 2),
             net_value_per_ton_usd=round(net_per_ton, 2),
+            recovery_rates_tensor=recovery_tensor,
             benchmarks_applied=benchmarks_applied,
             attestation_hash=attestation_hash,
         )

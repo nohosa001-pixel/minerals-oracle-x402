@@ -50,11 +50,12 @@ MCP_SPEC_FILE_PATH = Path(__file__).parent.parent / "mcp_tool_spec.json"
 
 # Dependency for 402 Payment verification
 async def require_x402_payment(request: Request):
-    """Enforces x402 payment authorization before accessing protected oracle endpoints."""
-    is_authorized, reason = x402_verifier.verify_request_payment(request)
+    """Enforces x402 payment authorization or grants Sandbox Free Tier before accessing protected oracle endpoints."""
+    is_authorized, reason, extra_headers = x402_verifier.verify_request_payment(request)
     if not is_authorized:
         return x402_verifier.build_402_response()
     request.state.authorized_payer = reason
+    request.state.extra_headers = extra_headers or {}
     return None
 
 
@@ -238,8 +239,19 @@ async def get_ap2_manifest():
 
 
 # ==========================================
-# Oracle Protected Endpoints (HTTP 402)
+# Oracle 402 Challenge & Protected Endpoints
 # ==========================================
+@app.get(
+    "/api/v1/oracle/challenge",
+    tags=["Oracle Payment"],
+    summary="Get fresh x402 payment challenge nonce and parameters",
+)
+async def get_payment_challenge():
+    """
+    Directly request a fresh HTTP 402 challenge payload for autonomous agent signing.
+    Returns 402 Payment Required with WWW-Authenticate header and JSON challenge body.
+    """
+    return x402_verifier.build_402_response()
 @app.get(
     "/api/v1/oracle/prices",
     response_model=PriceFeedResponse,
@@ -255,7 +267,9 @@ async def get_all_prices(request: Request):
     resp_402 = await require_x402_payment(request)
     if resp_402:
         return resp_402
-    return feed_engine.get_all_quotes()
+    data = feed_engine.get_all_quotes().model_dump()
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    return JSONResponse(content=data, headers=headers)
 
 
 @app.get(
@@ -267,7 +281,11 @@ async def get_all_prices(request: Request):
 )
 async def get_single_price(
     request: Request,
-    symbol: CommoditySymbol = FPath(..., description="Commodity symbol (Ag, Pt, Cu, Li, NdDy)"),
+    symbol: str = FPath(
+        ...,
+        description="Commodity symbol or name (e.g. Neodymium, NdDy, Lithium, Li, Copper, Cu, Silver, Ag, Platinum, Pt)",
+        examples=["Neodymium", "Lithium", "Copper"]
+    ),
 ):
     """
     Returns normalized spot quote and unit conversions for a specific critical mineral symbol.
@@ -275,13 +293,30 @@ async def get_single_price(
     resp_402 = await require_x402_payment(request)
     if resp_402:
         return resp_402
-    try:
-        return feed_engine.get_single_quote(symbol)
-    except KeyError:
+
+    alias_map = {
+        "neodymium": CommoditySymbol.NDDY,
+        "dysprosium": CommoditySymbol.NDDY,
+        "nddy": CommoditySymbol.NDDY,
+        "lithium": CommoditySymbol.LI,
+        "li": CommoditySymbol.LI,
+        "copper": CommoditySymbol.CU,
+        "cu": CommoditySymbol.CU,
+        "silver": CommoditySymbol.AG,
+        "ag": CommoditySymbol.AG,
+        "platinum": CommoditySymbol.PT,
+        "pt": CommoditySymbol.PT,
+    }
+    sym_enum = alias_map.get(symbol.lower())
+    if not sym_enum:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Commodity symbol '{symbol}' not found in active benchmarks.",
+            detail=f"Commodity symbol '{symbol}' not found. Supported: Neodymium (NdDy), Lithium (Li), Copper (Cu), Silver (Ag), Platinum (Pt).",
         )
+
+    data = feed_engine.get_single_quote(sym_enum).model_dump()
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    return JSONResponse(content=data, headers=headers)
 
 
 @app.get(
@@ -302,7 +337,9 @@ async def get_spreads(request: Request):
     resp_402 = await require_x402_payment(request)
     if resp_402:
         return resp_402
-    return feed_engine.get_arbitrage_spreads()
+    data = feed_engine.get_arbitrage_spreads().model_dump()
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    return JSONResponse(content=data, headers=headers)
 
 
 @app.post(
@@ -314,17 +351,18 @@ async def get_spreads(request: Request):
 )
 async def calculate_urban_mining(request: Request, body: UrbanMiningRequest):
     """
-    Evaluates gross payable mineral value and net settlement value after treatment/refining charges (TC/RC)
-    for urban mining scrap feedstocks:
+    Evaluates gross payable mineral value, element-wise recovery tensor, and net settlement value in USDC after TC/RC:
+    - `E_WASTE_HIGH_GRADE_PCB`: Recovers Au, Ag, Cu (Default Benchmark)
     - `EV_BATTERY_BLACK_MASS`: Recovers Li, Ni, Co, Mn
     - `AUTO_CATALYST_CERAMIC`: Recovers Pt, Pd, Rh
-    - `E_WASTE_HIGH_GRADE_PCB`: Recovers Au, Ag, Cu
     - `WIND_EV_PERMANENT_MAGNETS`: Recovers Nd, Dy, Pr
     """
     resp_402 = await require_x402_payment(request)
     if resp_402:
         return resp_402
-    return feed_engine.calculate_urban_mining(body)
+    data = feed_engine.calculate_urban_mining(body).model_dump()
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    return JSONResponse(content=data, headers=headers)
 
 
 # ==========================================

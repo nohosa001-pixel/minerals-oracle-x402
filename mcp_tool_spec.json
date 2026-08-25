@@ -2,16 +2,23 @@
   "tools": [
     {
       "name": "get_mineral_prices",
-      "description": "Fetch normalized real-time spot prices, bid/ask spreads, and multi-unit conversions for critical physical commodities: Silver (Ag), Platinum (Pt), Copper (Cu), Lithium (Li), and Neodymium/Dysprosium (NdDy). Requires 0.005 USDC payment on Base network via x402.",
+      "description": "Fetch normalized real-time spot prices, bid/ask spreads, and multi-unit conversions for critical physical commodities: Neodymium/Dysprosium (NdDy), Lithium (Li), Copper (Cu), Silver (Ag), Platinum (Pt). Free tier sandbox trial available. Requires 0.005 USDC on Base via x402.",
       "inputSchema": {
         "type": "object",
-        "properties": {},
+        "properties": {
+          "mineral_type": {
+            "type": "string",
+            "enum": ["Neodymium", "Lithium", "Dysprosium", "Copper", "Silver", "Platinum", "ALL"],
+            "default": "Neodymium",
+            "description": "Specific critical mineral symbol or name preset (default: 'Neodymium')"
+          }
+        },
         "additionalProperties": false
       }
     },
     {
       "name": "get_arbitrage_spreads",
-      "description": "Calculate cross-exchange price spreads and locational arbitrage opportunities between COMEX, LME, SMM, and LPPM benchmarks, factoring in estimated freight and tariffs. Requires 0.005 USDC payment on Base network via x402.",
+      "description": "Calculate cross-exchange price spreads and locational arbitrage opportunities between COMEX, LME, SMM, and LPPM benchmarks, factoring in freight and tariffs. Free tier sandbox trial available. Requires 0.005 USDC on Base via x402.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -20,28 +27,35 @@
     },
     {
       "name": "calculate_urban_mining_value",
-      "description": "Evaluate contained minerals, process recovery efficiencies, and net payable batch value after refining/treatment charges (TC/RC) for urban mining scrap feedstocks (EV Battery Black Mass, Auto Catalysts, E-Waste PCBs, Rare Earth Magnets). Requires 0.005 USDC payment on Base network via x402.",
+      "description": "Evaluate contained minerals, process recovery efficiencies tensor, and net settlement value (USDC) after refining charges (TC/RC) for urban mining scrap feedstocks (E-Waste PCBs, EV Battery Black Mass, Auto Catalysts, Rare Earth Magnets). Free tier sandbox trial available. Requires 0.005 USDC on Base via x402.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "scrap_category": {
             "type": "string",
             "enum": [
+              "E_WASTE_HIGH_GRADE_PCB",
               "EV_BATTERY_BLACK_MASS",
               "AUTO_CATALYST_CERAMIC",
-              "E_WASTE_HIGH_GRADE_PCB",
               "WIND_EV_PERMANENT_MAGNETS"
             ],
-            "description": "Scrap feedstock classification"
+            "default": "E_WASTE_HIGH_GRADE_PCB",
+            "description": "Feedstock category of the recyclable scrap batch (default: 'E_WASTE_HIGH_GRADE_PCB')"
           },
           "quantity_metric_tons": {
             "type": "number",
             "minimum": 0.001,
-            "description": "Total batch weight in metric tons"
+            "default": 1.0,
+            "description": "Total batch weight in metric tons (default: 1.0)"
+          },
+          "target_yield_currency": {
+            "type": "string",
+            "default": "USDC",
+            "description": "Settlement denomination currency (default: 'USDC')"
           },
           "custom_assay_overrides": {
             "type": "object",
-            "description": "Optional custom assay grades to override standard defaults (e.g. {'Li': 4.2} in % or {'Pt': 2100} in ppm)",
+            "description": "Optional custom assay grades to override standard defaults (e.g. {'Au': 250} in ppm or {'Li': 4.5} in %)",
             "additionalProperties": {
               "type": "number"
             }

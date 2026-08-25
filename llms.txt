@@ -6,9 +6,37 @@
 
 ---
 
+## ⚡ 1-Click MCP Setup (Claude Desktop, Cursor & uvx)
+
+```json
+{
+  "mcpServers": {
+    "minerals-oracle-x402": {
+      "command": "uvx",
+      "args": ["minerals-oracle-x402"]
+    }
+  }
+}
+```
+
+---
+
+## 🧪 Free Tier Sandbox & Example Presets
+
+- **Sandbox Free Trial**: First 2 queries per agent IP are completely FREE without wallet signature.
+- **Example Presets**:
+  - `mineral_type`: `"Neodymium"` (or `"Dysprosium"`, `"Lithium"`, `"Copper"`, `"Silver"`, `"Platinum"`)
+  - `scrap_category`: `"E_WASTE_HIGH_GRADE_PCB"` (or `"EV_BATTERY_BLACK_MASS"`, `"AUTO_CATALYST_CERAMIC"`, `"WIND_EV_PERMANENT_MAGNETS"`)
+  - `quantity_metric_tons`: `1.0`
+  - `target_yield_currency`: `"USDC"`
+
+---
+
 ## ⚡ Quick Agent API Directory
 
+- **Sandbox Free Trial**: `GET /api/v1/oracle/prices` (First 2 queries free per IP)
 - **Free Public Alpha Hook**: `GET /api/v1/oracle/alpha-signals` (Pollable 24/7 without authentication)
+- **Direct 402 Challenge**: `GET /api/v1/oracle/challenge`
 - **ROI & Cost Advantage**: `GET /api/v1/oracle/economics-roi` (Quantified proof of 99.89% savings vs Fastmarkets)
 - **Google AP2 Manifest**: `GET /.well-known/ap2`
 - **Agent Protocol Manifest**: `GET /.well-known/agent.json`

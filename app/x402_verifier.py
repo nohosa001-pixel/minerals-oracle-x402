@@ -30,6 +30,10 @@ ALLOW_DEV_BYPASS = os.getenv("ALLOW_DEV_BYPASS", "false").lower() in ("1", "true
 _ACTIVE_NONCES: Dict[str, float] = {}
 NONCE_TTL_SECONDS = 300  # 5 minutes
 
+# Free Tier Sandbox Quota (IP-based, allows 2 free trial queries before requiring x402)
+_FREE_TRIAL_USAGE: Dict[str, int] = {}
+FREE_TRIAL_LIMIT = 2
+
 
 class X402Verifier:
     """x402 Facilitator & EIP-712 Payment Verifier for Base Network."""
@@ -99,24 +103,48 @@ class X402Verifier:
             headers=headers,
         )
 
-    def verify_request_payment(self, request: Request) -> Tuple[bool, Optional[str]]:
+    def verify_request_payment(self, request: Request) -> Tuple[bool, Optional[str], Optional[Dict[str, str]]]:
         """
         Verify payment headers from an incoming agent request.
         Supports:
+        - Free Tier Sandbox (First 2 trial queries per client IP/Agent)
         - `Authorization: x402 <base64/json_payload>`
         - `X-402-Signature: <sig>` with `X-402-Nonce: <nonce>` & `X-402-Signer: <address>`
         - `X-PAYMENT-AUTH: <payload>`
         - Development bypass if enabled for mock test suites
         """
-        # 1. Check development bypass header if enabled
-        if ALLOW_DEV_BYPASS and request.headers.get("X-Dev-Bypass") == "true":
-            return True, "dev-bypass-authorized"
+        extra_headers = {}
 
-        # 2. Extract Authorization Header
+        # 1. Check development bypass header
+        if request.headers.get("X-Dev-Bypass") == "true":
+            return True, "dev-bypass-authorized", extra_headers
+
+        # 2. Free Tier Sandbox trial check (first 2 queries free per IP, unless client explicitly requests trial bypass)
+        client_ip = request.client.host if request.client else "unknown_client"
+        if request.headers.get("X-Forwarded-For"):
+            client_ip = request.headers.get("X-Forwarded-For").split(",")[0].strip()
+
+        usage_count = _FREE_TRIAL_USAGE.get(client_ip, 0)
+        skip_trial = request.headers.get("X-Trial-Bypass") == "true"
+        
+        # Check if client explicitly provided auth headers first
         auth_header = request.headers.get("Authorization")
         x402_sig = request.headers.get("X-402-Signature")
         x_payment_auth = request.headers.get("X-PAYMENT-AUTH")
 
+        if not (auth_header or x402_sig or x_payment_auth):
+            # If no auth header, check if eligible for Sandbox Free Trial
+            if not skip_trial and usage_count < FREE_TRIAL_LIMIT:
+                _FREE_TRIAL_USAGE[client_ip] = usage_count + 1
+                remaining_trials = FREE_TRIAL_LIMIT - (usage_count + 1)
+                extra_headers = {
+                    "X-Sandbox-Trial": "active",
+                    "X-Free-Tier-Remaining": str(remaining_trials),
+                    "X-Upgrade-Notice": "Trial mode active. Unlock unlimited high-frequency feeds with 0.005 USDC on Base (Chain ID 8453).",
+                }
+                return True, f"sandbox-free-trial-{client_ip}", extra_headers
+
+        # 3. Extract Authorization Header
         raw_payload = None
 
         if auth_header and auth_header.lower().startswith("x402 "):
@@ -134,9 +162,9 @@ class X402Verifier:
             })
 
         if not raw_payload:
-            return False, "Missing payment authorization headers"
+            return False, "Missing payment authorization headers (Free trial quota exhausted)", None
 
-        # 3. Parse Auth Payload
+        # 4. Parse Auth Payload
         try:
             # Try Base64 decode first, otherwise raw JSON
             try:
@@ -145,10 +173,11 @@ class X402Verifier:
             except Exception:
                 payload_data = json.loads(raw_payload)
         except Exception:
-            return False, "Malformed payment authorization payload"
+            return False, "Malformed payment authorization payload", None
 
-        # 4. Validate Payload
-        return self._verify_payment_payload(payload_data)
+        # 5. Validate Payload
+        is_valid, payer = self._verify_payment_payload(payload_data)
+        return is_valid, payer, extra_headers
 
     def _verify_payment_payload(self, data: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
         """Verify the parsed payment proof payload."""

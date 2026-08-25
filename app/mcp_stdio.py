@@ -34,10 +34,17 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
             "tools": [
                 {
                     "name": "get_mineral_prices",
-                    "description": "Retrieve real-time certified spot prices for critical raw minerals (Silver, Platinum, Copper, Lithium, NdDy Rare Earths) with unit conversions (USD/oz, USD/kg, USD/mt).",
+                    "description": "Retrieve real-time certified spot prices and unit conversions for critical raw minerals: Neodymium/Dysprosium (NdDy), Lithium (Li), Copper (Cu), Silver (Ag), Platinum (Pt). Free tier sandbox available.",
                     "inputSchema": {
                         "type": "object",
-                        "properties": {}
+                        "properties": {
+                            "mineral_type": {
+                                "type": "string",
+                                "enum": ["Neodymium", "Lithium", "Dysprosium", "Copper", "Silver", "Platinum", "ALL"],
+                                "default": "Neodymium",
+                                "description": "Specific mineral name or symbol preset (default: 'Neodymium')"
+                            }
+                        }
                     }
                 },
                 {
@@ -50,24 +57,30 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
                 },
                 {
                     "name": "calculate_urban_mining_value",
-                    "description": "Evaluate gross payable mineral value and net settlement value after refining charges (TC/RC) for recyclable scrap (EV Battery Black Mass, Auto Catalysts, E-Waste PCB, Permanent Magnets).",
+                    "description": "Evaluate gross payable mineral value, recovery rates tensor, and net settlement value in USDC after refining charges (TC/RC) for recyclable scrap (E-Waste PCBs, EV Battery Black Mass, Auto Catalysts, Permanent Magnets).",
                     "inputSchema": {
                         "type": "object",
                         "properties": {
                             "scrap_category": {
                                 "type": "string",
                                 "enum": [
+                                    "E_WASTE_HIGH_GRADE_PCB",
                                     "EV_BATTERY_BLACK_MASS",
                                     "AUTO_CATALYST_CERAMIC",
-                                    "E_WASTE_HIGH_GRADE_PCB",
                                     "WIND_EV_PERMANENT_MAGNETS"
                                 ],
-                                "description": "Feedstock category of the recyclable scrap batch"
+                                "default": "E_WASTE_HIGH_GRADE_PCB",
+                                "description": "Feedstock category of the recyclable scrap batch (default: 'E_WASTE_HIGH_GRADE_PCB')"
                             },
                             "quantity_metric_tons": {
                                 "type": "number",
-                                "description": "Total metric tons of feedstock batch to process",
+                                "description": "Total metric tons of feedstock batch to process (default: 1.0)",
                                 "default": 1.0
+                            },
+                            "target_yield_currency": {
+                                "type": "string",
+                                "description": "Settlement currency (default: 'USDC')",
+                                "default": "USDC"
                             },
                             "recovery_efficiency_factor": {
                                 "type": "number",
@@ -85,7 +98,24 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
 
 def handle_tool_call(req_id: Any, name: str, args: Dict[str, Any]) -> Dict[str, Any]:
     if name == "get_mineral_prices":
-        data = feed_engine.get_all_quotes().model_dump()
+        mineral_type = args.get("mineral_type", "ALL") if args else "ALL"
+        alias_map = {
+            "Neodymium": CommoditySymbol.NDDY,
+            "Dysprosium": CommoditySymbol.NDDY,
+            "NdDy": CommoditySymbol.NDDY,
+            "Lithium": CommoditySymbol.LI,
+            "Li": CommoditySymbol.LI,
+            "Copper": CommoditySymbol.CU,
+            "Cu": CommoditySymbol.CU,
+            "Silver": CommoditySymbol.AG,
+            "Ag": CommoditySymbol.AG,
+            "Platinum": CommoditySymbol.PT,
+            "Pt": CommoditySymbol.PT,
+        }
+        if mineral_type in alias_map:
+            data = feed_engine.get_single_quote(alias_map[mineral_type]).model_dump()
+        else:
+            data = feed_engine.get_all_quotes().model_dump()
         return {
             "jsonrpc": "2.0",
             "id": req_id,
@@ -104,6 +134,11 @@ def handle_tool_call(req_id: Any, name: str, args: Dict[str, Any]) -> Dict[str, 
         }
     elif name == "calculate_urban_mining_value":
         try:
+            # Apply defaults if arguments are missing
+            if "scrap_category" not in args:
+                args["scrap_category"] = "E_WASTE_HIGH_GRADE_PCB"
+            if "quantity_metric_tons" not in args:
+                args["quantity_metric_tons"] = 1.0
             req_model = UrbanMiningRequest(**args)
             data = feed_engine.calculate_urban_mining(req_model).model_dump()
             return {

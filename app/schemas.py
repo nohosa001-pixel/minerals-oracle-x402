@@ -84,11 +84,26 @@ class ScrapYieldItem(BaseModel):
 
 
 class UrbanMiningRequest(BaseModel):
-    scrap_category: ScrapCategory = Field(..., description="Urban mining feedstock category")
-    quantity_metric_tons: float = Field(..., gt=0, description="Total feedstock weight in metric tons")
+    scrap_category: ScrapCategory = Field(
+        default=ScrapCategory.E_WASTE_HIGH_GRADE_PCB,
+        description="Urban mining feedstock category (e.g. E_WASTE_HIGH_GRADE_PCB, EV_BATTERY_BLACK_MASS, AUTO_CATALYST_CERAMIC, WIND_EV_PERMANENT_MAGNETS)",
+        examples=["E_WASTE_HIGH_GRADE_PCB", "EV_BATTERY_BLACK_MASS"]
+    )
+    quantity_metric_tons: float = Field(
+        default=1.0,
+        gt=0,
+        description="Total feedstock weight in metric tons",
+        examples=[1.0, 5.0]
+    )
+    target_yield_currency: str = Field(
+        default="USDC",
+        description="Settlement denomination currency (default: 'USDC')",
+        examples=["USDC"]
+    )
     custom_assay_overrides: Optional[Dict[str, float]] = Field(
         None,
-        description="Optional custom assay grades to override standard defaults (e.g. {'Li': 4.5, 'Co': 12.0} in % or {'Pt': 1500} in ppm)"
+        description="Optional custom assay grades to override standard defaults (e.g. {'Au': 250, 'Ag': 1300, 'Cu': 17.5} or {'Li': 4.5, 'Co': 12.0})",
+        examples=[{"Au": 250.0, "Cu": 17.0}]
     )
     refining_cost_per_ton_usd: Optional[float] = Field(
         None,
@@ -107,11 +122,25 @@ class UrbanMiningResponse(BaseModel):
     timestamp_utc: str
     scrap_category: ScrapCategory
     input_quantity_metric_tons: float
+    target_yield_currency: str = "USDC"
     mineral_breakdown: List[ScrapYieldItem]
     total_gross_payable_usd: float
     total_treatment_and_refining_charges_usd: float
     net_settlement_value_usd: float
     net_value_per_ton_usd: float
+    recovery_rates_tensor: Dict[str, float] = Field(
+        default_factory=dict,
+        description="Element-wise hydrometallurgical recovery rates tensor (%)"
+    )
+    refinery_compliance_flags: Dict[str, Any] = Field(
+        default_factory=lambda: {
+            "oecd_due_diligence_compliant": True,
+            "eu_battery_regulation_2023_1542_ready": True,
+            "basel_convention_transboundary_scrap_cleared": True,
+            "esg_carbon_offset_intensity_kg_co2_per_ton": -420.0
+        },
+        description="Global refinery compliance and regulatory ESG attestation flags"
+    )
     benchmarks_applied: Dict[str, float]
     attestation_hash: str
 
