@@ -5,3 +5,5 @@ include glama.json
 include llms.txt
 recursive-include .well-known *
 recursive-include app *
+recursive-include contracts *
+

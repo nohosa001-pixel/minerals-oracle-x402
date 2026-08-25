@@ -1,19 +1,21 @@
 # Critical Raw Minerals & Urban Mining Oracle (`minerals-oracle-x402`)
 
+[![PyPI Version](https://img.shields.io/pypi/v/minerals-oracle-x402.svg?color=blue&style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/minerals-oracle-x402/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/minerals-oracle-x402.svg?style=for-the-badge&color=orange)](https://pypi.org/project/minerals-oracle-x402/)
 [![Glama.ai](https://img.shields.io/badge/Glama.ai-Approved-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](https://glama.ai/mcp/servers/nohosa001-pixel/minerals-oracle-x402)
-[![Cloud Run](https://img.shields.io/badge/Google_Cloud_Run-Live_24%2F7-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app)
+[![Cloud Run](https://img.shields.io/badge/Google_Cloud_Run-Live_24%2F7-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app)
 [![Base Network](https://img.shields.io/badge/Base_USDC-x402_Monetized-0052FF?style=for-the-badge&logo=coinbase&logoColor=white)](https://base.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-green.svg)](https://fastapi.tiangolo.com)
-[![Agent Protocol](https://img.shields.io/badge/Google%20AP2-v0.2.0-orange.svg)](/.well-known/ap2)
-[![MCP](https://img.shields.io/badge/FastMCP-Enabled-black.svg)](mcp_tool_spec.json)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 High-performance deterministic micro-oracle service designed for autonomous trading, supply chain, and RWA (Real World Asset) agents on Base Network. Serves real-time spot pricing, COMEX/LME cross-exchange arbitrage spreads, and urban-mining scrap benchmark yield valuations for critical raw physical commodities.
 
-- 🌐 **Live Cloud Run Service**: [https://minerals-oracle-x402-212942243360.asia-northeast3.run.app](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app)
-- 🪝 **Free Real-Time Alpha Hook**: [https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/api/v1/oracle/alpha-signals](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/api/v1/oracle/alpha-signals)
-- 📊 **Economics ROI Proof**: [https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/api/v1/oracle/economics-roi](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/api/v1/oracle/economics-roi)
-- 📑 **LLM Agent Manifest**: [https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/llms.txt](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/llms.txt)
-- 📚 **Swagger API Docs**: [https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/docs](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/docs)
+- 🌐 **Live Cloud Run Service**: [https://minerals-oracle-x402-7qxtp3324q-du.a.run.app](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app)
+- 🪝 **Free Real-Time Alpha Hook**: [https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/api/v1/oracle/alpha-signals](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/api/v1/oracle/alpha-signals)
+- 📊 **Economics ROI Proof**: [https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/api/v1/oracle/economics-roi](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/api/v1/oracle/economics-roi)
+- 📑 **LLM Agent Manifest**: [https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/llms.txt](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/llms.txt)
+- 📚 **Swagger API Docs**: [https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/docs](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/docs)
+
 
 ---
 
@@ -73,12 +75,34 @@ minerals-oracle-x402/
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start & Installation
 
-### 1. Local Setup
+### Option 1. Run Instantly with `uvx` (No Installation Required)
+
+Autonomous AI Agent clients, Claude Desktop, and Cursor can run the Stdio MCP server instantly via `uvx`:
+
+```bash
+# Run stdio MCP server directly for LLM clients
+uvx minerals-oracle-x402
+```
+
+### Option 2. Install from PyPI
+
+```bash
+pip install minerals-oracle-x402
+
+# Run MCP server (stdio mode)
+minerals-mcp
+
+# Or run FastAPI HTTP Server (Cloud / Web mode)
+minerals-oracle-x402 --http
+```
+
+### Option 3. Local Development Setup
 
 ```bash
 # Clone and enter directory
+git clone https://github.com/nohosa001-pixel/minerals-oracle-x402.git
 cd minerals-oracle-x402
 
 # Create virtual environment
@@ -86,7 +110,7 @@ python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
 # Install dependencies
-pip install -r requirements.txt
+pip install -e .
 
 # Run development server
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -94,15 +118,16 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 Interactive documentation will be available at [http://localhost:8000/docs](http://localhost:8000/docs).
 
-### 2. Running via Docker
+### Option 4. Running via Docker
 
 ```bash
 # Build lightweight container
 docker build -t minerals-oracle-x402 .
 
 # Run container
-docker run -p 8000:8000 minerals-oracle-x402
+docker run -p 8080:8080 minerals-oracle-x402
 ```
+
 
 ---
 
@@ -170,6 +195,19 @@ print(resp.json())
 
 ---
 
+## ⛓️ On-Chain Smart Contract Integration (Base Mainnet)
+
+For DeFi protocols, RWA tokenization platforms, and trade-finance smart contracts on Base (Chain ID `8453`), use [`contracts/MineralsOracleConsumer.sol`](contracts/MineralsOracleConsumer.sol) to verify EIP-712 cryptographic proofs on-chain.
+
+```solidity
+// Example Solidity consumption
+IMineralsOracleConsumer oracle = IMineralsOracleConsumer(ORACLE_CONSUMER_ADDRESS);
+(uint256 cuPriceUsd8Dec, uint256 updatedAt) = oracle.getLatestPrice("Cu");
+// Returns Copper spot price with 8 decimals ($9,650.00 -> 965000000000)
+```
+
+---
+
 ## 🧪 Running Tests
 
 Execute the automated test suite verifying 402 challenge flow, EIP-712 cryptographic verification, scrap calculations, and AP2 endpoints:
@@ -182,3 +220,4 @@ pytest -v tests/test_client.py
 
 ## 📜 License
 MIT License. Built for Autonomous Agent Commerce and Critical Mineral Resilience.
+
