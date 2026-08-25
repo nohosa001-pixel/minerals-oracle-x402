@@ -29,7 +29,7 @@ app = FastAPI(
         "scrap yield analytics (EV Battery Black Mass, Auto Catalysts, E-waste PCBs, Permanent Magnets). "
         "Monetized via HTTP 402 + x402 protocol on Base (0.005 USDC per query)."
     ),
-    version="1.0.0",
+    version="1.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",

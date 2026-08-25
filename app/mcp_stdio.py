@@ -20,7 +20,7 @@ def handle_initialize(req_id: Any) -> Dict[str, Any]:
             },
             "serverInfo": {
                 "name": "minerals-oracle-x402",
-                "version": "1.0.0"
+                "version": "1.1.0"
             }
         }
     }

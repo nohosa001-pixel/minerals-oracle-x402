@@ -253,6 +253,7 @@ def test_mcp_stdio_jsonrpc_protocol():
     init_res = handle_initialize(1)
     assert init_res["id"] == 1
     assert init_res["result"]["serverInfo"]["name"] == "minerals-oracle-x402"
+    assert init_res["result"]["serverInfo"]["version"] == "1.1.0"
     assert init_res["result"]["protocolVersion"] == "2024-11-05"
 
     # 2. Test tools/list

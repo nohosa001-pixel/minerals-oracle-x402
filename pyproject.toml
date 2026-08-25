@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "minerals-oracle-x402"
-version = "1.0.0"
+version = "1.1.0"
 description = "Deterministic Web3 x402 Critical Minerals & Urban Mining Oracle for Autonomous AI Agents on Base Network"
 readme = "README.md"
 requires-python = ">=3.10"

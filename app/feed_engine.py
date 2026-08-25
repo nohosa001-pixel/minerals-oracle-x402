@@ -158,7 +158,7 @@ class FeedEngine:
         }
         return PriceFeedResponse(
             oracle="minerals-oracle-x402",
-            version="1.0.0",
+            version="1.1.0",
             network="Base (Chain ID 8453)",
             generated_at_utc=now_utc,
             quotes=quotes,

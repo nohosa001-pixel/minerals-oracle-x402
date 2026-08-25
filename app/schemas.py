@@ -43,7 +43,7 @@ class MineralQuote(BaseModel):
 
 class PriceFeedResponse(BaseModel):
     oracle: str = "minerals-oracle-x402"
-    version: str = "1.0.0"
+    version: str = "1.1.0"
     network: str = "Base (Chain ID 8453)"
     generated_at_utc: str
     quotes: Dict[str, MineralQuote]
