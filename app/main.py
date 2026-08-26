@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 
 from fastapi import FastAPI, Request, Depends, HTTPException, status, Query, Path as FPath
-from fastapi.responses import JSONResponse, FileResponse, PlainTextResponse
+from fastapi.responses import JSONResponse, FileResponse, PlainTextResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.schemas import (
     CommoditySymbol,
@@ -20,14 +21,14 @@ from app.schemas import (
 )
 from app.feed_engine import feed_engine
 from app.x402_verifier import x402_verifier
+from app.twitter_bot import twitter_bot
 
 app = FastAPI(
-    title="Critical Raw Minerals & Urban Mining Oracle (x402)",
+    title="Critical Raw Minerals & Urban Mining Oracle",
     description=(
-        "High-performance deterministic micro-oracle service for autonomous trading, supply chain, "
-        "and RWA agents. Features real-time spot pricing, COMEX/LME arbitrage spreads, and urban mining "
-        "scrap yield analytics (EV Battery Black Mass, Auto Catalysts, E-waste PCBs, Permanent Magnets). "
-        "Monetized via HTTP 402 + x402 protocol on Base (0.005 USDC per query)."
+        "Real-time physical spot market benchmark pricing, cross-exchange arbitrage spreads, "
+        "and metallurgical urban mining scrap yield valuations on Base Network. "
+        "Explore the interactive Web Dashboard at /dashboard."
     ),
     version="1.1.0",
     docs_url="/docs",
@@ -43,6 +44,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+STATIC_DIR = Path(__file__).parent / "static"
+INDEX_HTML_PATH = STATIC_DIR / "index.html"
+if STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 AP2_FILE_PATH = Path(__file__).parent.parent / ".well-known" / "ap2.json"
 MCP_SPEC_FILE_PATH = Path(__file__).parent.parent / "mcp_tool_spec.json"
@@ -60,25 +66,40 @@ async def require_x402_payment(request: Request):
 
 
 @app.get("/", tags=["System"])
-async def root():
-    """Service metadata & introductory details."""
+async def root(request: Request):
+    """Serves Interactive Web UI Dashboard to browsers or JSON metadata to API clients."""
+    accept_header = request.headers.get("accept", "")
+    if "text/html" in accept_header and INDEX_HTML_PATH.exists():
+        return FileResponse(INDEX_HTML_PATH, media_type="text/html")
+
     return {
         "service": "minerals-oracle-x402",
         "description": "Critical Raw Minerals & Urban Mining Oracle",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "protocol": "x402 (HTTP 402 Monetized)",
         "network": "Base (Chain ID 8453)",
         "price_per_query": "0.005 USDC",
+        "interactive_dashboard": "/dashboard",
         "endpoints": {
             "all_prices": "/api/v1/oracle/prices",
             "single_price": "/api/v1/oracle/prices/{symbol}",
             "arbitrage_spreads": "/api/v1/oracle/spreads",
             "urban_mining_calculator": "/api/v1/oracle/urban-mining/calculate",
+            "twitter_alerts_preview": "/api/v1/oracle/twitter-alerts/preview",
             "ap2_manifest": "/.well-known/ap2",
             "mcp_tools": "/mcp/tools",
             "docs": "/docs",
         },
     }
+
+
+@app.get("/dashboard", tags=["System"])
+@app.get("/playground", tags=["System"])
+async def web_dashboard():
+    """Interactive Web UI Dashboard, scrap yield simulator, and live arbitrage radar."""
+    if INDEX_HTML_PATH.exists():
+        return FileResponse(INDEX_HTML_PATH, media_type="text/html")
+    return HTMLResponse("<h1>Minerals Oracle Dashboard</h1><p>Static index.html not found.</p>")
 
 
 @app.get("/health", tags=["System"])
@@ -157,6 +178,57 @@ async def get_economic_advantage_metrics():
             "generates $400 ~ $2,500 net profit, delivering up to 50,000% ROI on oracle fees."
         ),
     }
+
+
+# ==========================================
+# Automated Twitter / X Alpha Bot Endpoints
+# ==========================================
+@app.get(
+    "/api/v1/oracle/twitter-alerts/preview",
+    tags=["Twitter / X Alerts"],
+    summary="Preview Real-Time Market & Arbitrage Alert Tweets",
+)
+async def preview_twitter_alerts():
+    """
+    Returns formatted preview samples of X (Twitter) alert posts for:
+    1. Cross-Market Arbitrage Spread Alert
+    2. Urban Mining Scrap Yield Valuation Snapshot
+    3. Critical Commodities Spot Benchmark Summary
+    """
+    return {
+        "status": "success",
+        "has_twitter_credentials": twitter_bot.has_credentials,
+        "sample_tweets": {
+            "arbitrage_alert": twitter_bot.generate_arbitrage_tweet(),
+            "urban_mining_alert": twitter_bot.generate_urban_mining_tweet(),
+            "market_summary": twitter_bot.generate_market_summary_tweet(),
+        },
+    }
+
+
+@app.post(
+    "/api/v1/oracle/twitter-alerts/dispatch",
+    tags=["Twitter / X Alerts"],
+    summary="Dispatch Real-Time Market Alert Tweet (or Dry-Run Simulation)",
+)
+async def dispatch_twitter_alert(
+    alert_type: str = Query("random", enum=["random", "arbitrage", "urban_mining", "market_summary"]),
+    dry_run: bool = Query(True, description="When true, simulates tweet dispatch without hitting Twitter API limits"),
+):
+    """
+    Triggers automated broadcasting of real-time market alpha to X (Twitter).
+    """
+    if alert_type == "arbitrage":
+        text = twitter_bot.generate_arbitrage_tweet()
+    elif alert_type == "urban_mining":
+        text = twitter_bot.generate_urban_mining_tweet()
+    elif alert_type == "market_summary":
+        text = twitter_bot.generate_market_summary_tweet()
+    else:
+        _, text = twitter_bot.generate_random_alert()
+
+    result = await twitter_bot.post_tweet(text, dry_run=dry_run)
+    return result
 
 
 # ==========================================

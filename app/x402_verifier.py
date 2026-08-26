@@ -119,7 +119,7 @@ class X402Verifier:
         if request.headers.get("X-Dev-Bypass") == "true":
             return True, "dev-bypass-authorized", extra_headers
 
-        # 2. Free Tier Sandbox trial check (first 2 queries free per IP, unless client explicitly requests trial bypass)
+        # 2. Free Tier Sandbox trial & Web Dashboard interactive check
         client_ip = request.client.host if request.client else "unknown_client"
         if request.headers.get("X-Forwarded-For"):
             client_ip = request.headers.get("X-Forwarded-For").split(",")[0].strip()
@@ -127,6 +127,16 @@ class X402Verifier:
         usage_count = _FREE_TRIAL_USAGE.get(client_ip, 0)
         skip_trial = request.headers.get("X-Trial-Bypass") == "true"
         
+        # Check if request comes from web dashboard UI
+        referer = request.headers.get("referer", "")
+        sec_fetch_site = request.headers.get("sec-fetch-site", "")
+        if ("/dashboard" in referer or "/playground" in referer or sec_fetch_site == "same-origin") and not skip_trial:
+            extra_headers = {
+                "X-Dashboard-Access": "granted",
+                "X-Oracle-Network": "Base-Mainnet-8453",
+            }
+            return True, f"web-dashboard-{client_ip}", extra_headers
+
         # Check if client explicitly provided auth headers first
         auth_header = request.headers.get("Authorization")
         x402_sig = request.headers.get("X-402-Signature")
