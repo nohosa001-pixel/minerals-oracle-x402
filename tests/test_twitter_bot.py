@@ -61,7 +61,8 @@ def test_web_dashboard_endpoints():
     resp_dash = client.get("/dashboard")
     assert resp_dash.status_code == 200
     assert "text/html" in resp_dash.headers["content-type"]
-    assert "도시광산" in resp_dash.text
+    assert "Urban Mining" in resp_dash.text
+    assert "Minerals Oracle" in resp_dash.text
 
     resp_play = client.get("/playground")
     assert resp_play.status_code == 200
