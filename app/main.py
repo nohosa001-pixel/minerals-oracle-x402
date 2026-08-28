@@ -22,6 +22,7 @@ from app.schemas import (
 from app.feed_engine import feed_engine
 from app.x402_verifier import x402_verifier
 from app.twitter_bot import twitter_bot
+from app.telegram_bot import telegram_bot
 
 app = FastAPI(
     title="Critical Raw Minerals & Urban Mining Oracle",
@@ -228,6 +229,59 @@ async def dispatch_twitter_alert(
         _, text = twitter_bot.generate_random_alert()
 
     result = await twitter_bot.post_tweet(text, dry_run=dry_run)
+    return result
+
+
+# ==========================================
+# Automated Telegram Smartphone Alert Endpoints
+# ==========================================
+@app.get(
+    "/api/v1/oracle/telegram-alerts/preview",
+    tags=["Telegram Smartphone Alerts"],
+    summary="Preview Real-Time Telegram Smartphone Push Alerts",
+)
+async def preview_telegram_alerts():
+    """
+    Returns formatted preview samples of Telegram push alerts for:
+    1. Cross-Market Arbitrage Spread Alert
+    2. Critical Minerals Spot Benchmark Summary
+    """
+    quotes = feed_engine.get_all_quotes().quotes
+    spreads = feed_engine.get_arbitrage_spreads().spreads
+    sample_spread = spreads[0].model_dump() if spreads else {}
+
+    return {
+        "status": "success",
+        "has_telegram_credentials": telegram_bot.has_credentials,
+        "sample_alerts": {
+            "arbitrage_alert": telegram_bot.generate_arbitrage_message(sample_spread),
+            "market_summary": telegram_bot.generate_summary_message(quotes),
+        },
+        "setup_guide": "Add TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID to .env to receive live push alerts on smartphone.",
+    }
+
+
+@app.post(
+    "/api/v1/oracle/telegram-alerts/dispatch",
+    tags=["Telegram Smartphone Alerts"],
+    summary="Dispatch Real-Time Push Alert to Telegram (or Dry-Run Simulation)",
+)
+async def dispatch_telegram_alert(
+    alert_type: str = Query("arbitrage", enum=["arbitrage", "market_summary"]),
+    dry_run: bool = Query(True, description="When true, simulates alert dispatch without hitting Telegram API"),
+):
+    """
+    Triggers automated push notification of real-time commodity alpha directly to smartphone Telegram.
+    """
+    if alert_type == "arbitrage":
+        spreads = feed_engine.get_arbitrage_spreads().spreads
+        top_spread = max(spreads, key=lambda s: s.spread_basis_points) if spreads else None
+        text = telegram_bot.generate_arbitrage_message(top_spread.model_dump() if top_spread else {})
+    else:
+        quotes = feed_engine.get_all_quotes().quotes
+        text = telegram_bot.generate_summary_message(quotes)
+
+    result = await telegram_bot.send_message(text, dry_run=dry_run)
     return result
 
 

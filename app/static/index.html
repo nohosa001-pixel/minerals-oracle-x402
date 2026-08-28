@@ -594,7 +594,27 @@
       border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
     }
 
-    /* Arbitrage Radar Cards */
+    /* Flash & Pulse Animations for Real-Time Market Ticks */
+    @keyframes flash-green {
+      0% { background-color: rgba(16, 185, 129, 0.45); transform: scale(1.02); }
+      100% { background-color: transparent; transform: scale(1); }
+    }
+
+    @keyframes flash-red {
+      0% { background-color: rgba(244, 63, 94, 0.45); transform: scale(1.02); }
+      100% { background-color: transparent; transform: scale(1); }
+    }
+
+    .flash-up {
+      animation: flash-green 1s ease-out;
+      color: #34d399 !important;
+    }
+
+    .flash-down {
+      animation: flash-red 1s ease-out;
+      color: #fb7185 !important;
+    }
+
     .radar-list {
       display: flex;
       flex-direction: column;
@@ -609,20 +629,38 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       border-top: 1px solid rgba(255, 255, 255, 0.04);
       border-right: 1px solid rgba(255, 255, 255, 0.04);
       border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      position: relative;
+      overflow: hidden;
     }
 
     .radar-card:hover {
       transform: translateX(4px);
       background: var(--bg-surface-elevated);
+      box-shadow: 0 8px 24px rgba(6, 182, 212, 0.15);
     }
 
     .radar-card.active-opp {
       border-left-color: var(--emerald);
       background: rgba(16, 185, 129, 0.08);
+    }
+
+    .radar-gauge-bg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.08);
+      width: 100%;
+    }
+
+    .radar-gauge-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--emerald));
+      transition: width 0.6s ease;
     }
 
     .radar-info h4 {
@@ -645,9 +683,31 @@
 
     .radar-bps {
       font-family: var(--font-mono);
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       font-weight: 800;
       color: var(--emerald);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.35rem;
+    }
+
+    .radar-delta {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .radar-delta.up {
+      color: var(--emerald);
+      background: rgba(16, 185, 129, 0.15);
+    }
+
+    .radar-delta.down {
+      color: var(--rose);
+      background: rgba(244, 63, 94, 0.15);
     }
 
     .radar-status {
@@ -657,6 +717,19 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
       margin-top: 0.2rem;
+    }
+
+    .stream-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--emerald);
+      background: rgba(16, 185, 129, 0.12);
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
     }
 
     /* Full Width Sections */
@@ -814,7 +887,7 @@
         <a href="#developer" class="nav-link">AI & MCP Hub</a>
         <a href="#playground" class="nav-link">Live Playground</a>
         <a href="/docs" target="_blank" class="nav-link">API Specs</a>
-        <button class="btn-wallet" onclick="simulateWalletConnect()">
+        <button class="btn-wallet" id="btnConnectWallet" onclick="connectWeb3Wallet()">
           <span id="walletBtnText">🔗 Connect Wallet (Base)</span>
         </button>
       </div>
@@ -977,10 +1050,18 @@
     <section class="card" id="radar">
       <div class="card-head">
         <div>
-          <h3 class="card-title">📡 Real-Time Cross-Exchange Arbitrage Radar</h3>
-          <p class="card-desc">Tracking live price discrepancies across COMEX, LME, SMM, and Fastmarkets.</p>
+          <h3 class="card-title">
+            📡 Real-Time Cross-Exchange Arbitrage Radar
+            <span class="stream-indicator">
+              <span class="live-dot" style="width:6px;height:6px;"></span> LIVE 2.5s Stream
+            </span>
+          </h3>
+          <p class="card-desc">Dynamic Basis Spreads & real-time locational arbitrage yields across COMEX, LME, SMM, and Fastmarkets.</p>
         </div>
-        <button class="btn-copy" style="position:static;" onclick="fetchRadarSpreads()">🔄 Refresh</button>
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <span id="radarTickText" style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">Tick: Initializing...</span>
+          <button class="btn-copy" style="position:static;" onclick="fetchRadarSpreads()">🔄 Refresh</button>
+        </div>
       </div>
 
       <div class="radar-list" id="radarContainer">
@@ -1167,6 +1248,20 @@
       });
     }
 
+    // Real-Time High-Frequency State Caches
+    let lastQuotes = {};
+    let lastSpreads = {};
+    let radarTickCount = 0;
+
+    function applyFlashEffect(elementId, isUp) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      el.classList.remove('flash-up', 'flash-down');
+      void el.offsetWidth; // Trigger reflow
+      el.classList.add(isUp ? 'flash-up' : 'flash-down');
+      setTimeout(() => el.classList.remove('flash-up', 'flash-down'), 1200);
+    }
+
     async function fetchLiveTicker() {
       try {
         const res = await fetch('/api/v1/oracle/prices');
@@ -1174,11 +1269,39 @@
         const data = await res.json();
         const quotes = data.quotes;
 
-        if (quotes.Ag) document.getElementById('quoteAg').innerText = `$${quotes.Ag.spot_price_usd.toFixed(2)}/oz`;
-        if (quotes.Pt) document.getElementById('quotePt').innerText = `$${quotes.Pt.spot_price_usd.toFixed(2)}/oz`;
-        if (quotes.Cu) document.getElementById('quoteCu').innerText = `$${quotes.Cu.spot_price_usd.toLocaleString()}/mt`;
-        if (quotes.Li) document.getElementById('quoteLi').innerText = `$${quotes.Li.spot_price_usd.toLocaleString()}/mt`;
-        if (quotes.NdDy) document.getElementById('quoteNdDy').innerText = `$${quotes.NdDy.spot_price_usd.toFixed(2)}/kg`;
+        const pairs = [
+          { key: 'Ag', id: 'quoteAg', changeId: 'changeAg', fmt: (p) => `$${p.spot_price_usd.toFixed(2)}/oz` },
+          { key: 'Pt', id: 'quotePt', changeId: 'changePt', fmt: (p) => `$${p.spot_price_usd.toFixed(2)}/oz` },
+          { key: 'Cu', id: 'quoteCu', changeId: 'changeCu', fmt: (p) => `$${p.spot_price_usd.toLocaleString()}/mt` },
+          { key: 'Li', id: 'quoteLi', changeId: 'changeLi', fmt: (p) => `$${p.spot_price_usd.toLocaleString()}/mt` },
+          { key: 'NdDy', id: 'quoteNdDy', changeId: 'changeNdDy', fmt: (p) => `$${p.spot_price_usd.toFixed(2)}/kg` },
+        ];
+
+        pairs.forEach(({ key, id, changeId, fmt }) => {
+          const q = quotes[key];
+          if (!q) return;
+
+          const el = document.getElementById(id);
+          const chEl = document.getElementById(changeId);
+          const newPrice = q.spot_price_usd;
+          const oldPrice = lastQuotes[key];
+
+          if (el) {
+            el.innerText = fmt(q);
+            if (oldPrice !== undefined && oldPrice !== newPrice) {
+              applyFlashEffect(id, newPrice > oldPrice);
+            }
+          }
+
+          if (chEl && q.change_24h_pct !== undefined) {
+            const isPos = q.change_24h_pct >= 0;
+            chEl.innerText = `${isPos ? '+' : ''}${q.change_24h_pct.toFixed(2)}%`;
+            chEl.style.color = isPos ? 'var(--emerald)' : 'var(--rose)';
+            chEl.style.background = isPos ? 'rgba(16, 185, 129, 0.15)' : 'rgba(244, 63, 94, 0.15)';
+          }
+
+          lastQuotes[key] = newPrice;
+        });
       } catch (e) {
         console.warn('Ticker update error:', e);
       }
@@ -1190,24 +1313,59 @@
         if (!res.ok) return;
         const data = await res.json();
         const container = document.getElementById('radarContainer');
+        const tickLabel = document.getElementById('radarTickText');
+        
+        radarTickCount++;
+        const now = new Date();
+        const timeStr = now.toTimeString().split(' ')[0] + '.' + Math.floor(now.getMilliseconds() / 100);
+        if (tickLabel) {
+          tickLabel.innerHTML = `Tick <strong>#${radarTickCount}</strong> • ${timeStr} UTC`;
+        }
+
         container.innerHTML = '';
 
         data.spreads.forEach(sp => {
+          const prevBps = lastSpreads[sp.symbol];
+          const curBps = sp.spread_basis_points;
+          let deltaHtml = '';
+
+          if (prevBps !== undefined) {
+            const diff = curBps - prevBps;
+            if (Math.abs(diff) >= 0.1) {
+              const isUp = diff > 0;
+              deltaHtml = `<span class="radar-delta ${isUp ? 'up' : 'down'}">${isUp ? '▲ +' : '▼ '}${diff.toFixed(1)} bps</span>`;
+            }
+          }
+
+          // Gauge bar width (scaled up to 800 bps max)
+          const gaugePct = Math.min(100, Math.max(8, (curBps / 800.0) * 100));
+
           const div = document.createElement('div');
           div.className = 'radar-card' + (sp.is_arbitrage_profitable ? ' active-opp' : '');
           div.innerHTML = `
             <div class="radar-info">
-              <h4>${sp.symbol} (${sp.primary_exchange} vs ${sp.secondary_exchange})</h4>
-              <p>Strategy: ${sp.arbitrage_direction} (Net Margin $${sp.net_arbitrage_margin_usd.toFixed(2)})</p>
+              <h4>
+                <span>${sp.symbol}</span>
+                <span style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">(${sp.primary_exchange} vs ${sp.secondary_exchange})</span>
+              </h4>
+              <p>Strategy: <strong style="color:var(--text-main);">${sp.arbitrage_direction}</strong> • Net Margin: <strong style="color:${sp.is_arbitrage_profitable ? 'var(--emerald)' : 'var(--amber)'}; font-family:var(--font-mono);">$${sp.net_arbitrage_margin_usd.toFixed(2)}</strong></p>
             </div>
             <div class="radar-badge">
-              <div class="radar-bps">+${sp.spread_basis_points.toFixed(1)} bps</div>
-              <div class="radar-status" style="color:${sp.is_arbitrage_profitable ? 'var(--emerald)' : 'var(--text-muted)'};">
-                ${sp.is_arbitrage_profitable ? 'Arbitrage Active' : 'Monitoring'}
+              <div class="radar-bps">
+                ${deltaHtml}
+                <span>+${curBps.toFixed(1)} bps</span>
               </div>
+              <div class="radar-status" style="color:${sp.is_arbitrage_profitable ? 'var(--emerald)' : 'var(--text-muted)'};">
+                ${sp.is_arbitrage_profitable ? '⚡ Arbitrage Active' : '⚖️ Balanced'}
+              </div>
+            </div>
+            <div class="radar-gauge-bg">
+              <div class="radar-gauge-fill" style="width: ${gaugePct}%;"></div>
             </div>
           `;
           container.appendChild(div);
+
+          lastSpreads[sp.symbol] = curBps;
         });
       } catch (e) {
         console.warn('Radar fetch error:', e);
@@ -1256,18 +1414,69 @@
       }
     }
 
-    function simulateWalletConnect() {
+    let userWalletAddress = null;
+
+    async function connectWeb3Wallet() {
       const btnText = document.getElementById('walletBtnText');
+      
+      // 1. Check for Web3 Provider (MetaMask, Coinbase Wallet, etc.)
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          btnText.innerText = 'Connecting...';
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          if (accounts && accounts.length > 0) {
+            userWalletAddress = accounts[0];
+            const shortAddr = userWalletAddress.slice(0, 6) + '...' + userWalletAddress.slice(-4);
+            
+            // 2. Ensure connected to Base Mainnet (Chain ID 8453 / 0x2105)
+            try {
+              await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: '0x2105' }],
+              });
+            } catch (switchError) {
+              // 4902 error code indicates chain has not been added to MetaMask
+              if (switchError.code === 4902) {
+                try {
+                  await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [{
+                      chainId: '0x2105',
+                      chainName: 'Base Mainnet',
+                      nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+                      rpcUrls: ['https://mainnet.base.org'],
+                      blockExplorerUrls: ['https://basescan.org']
+                    }],
+                  });
+                } catch (addError) {
+                  console.warn('Failed to add Base network:', addError);
+                }
+              }
+            }
+
+            btnText.innerText = `Connected (${shortAddr})`;
+            alert(`✅ MetaMask Connected Successfully!\n\n• Address: ${userWalletAddress}\n• Network: Base Mainnet (8453)\n• Ready for x402 Micropayments & Arbitrage Execution.`);
+            return;
+          }
+        } catch (err) {
+          console.error('Wallet connection rejected:', err);
+          btnText.innerText = '🔗 Connect Wallet (Base)';
+          alert('Wallet connection request was cancelled or failed.');
+          return;
+        }
+      }
+
+      // Fallback: Simulation mode when no Web3 extension is installed
       btnText.innerText = 'Connected (0x7a2...8453)';
-      alert('Base Network wallet detected!\n(Chain ID: 8453, Balance: 150.00 USDC)');
+      alert('ℹ️ No Web3 browser extension detected (MetaMask/Coinbase).\n\nConnected to Base Mainnet in Sandbox Mode:\n• Address: 0x7a25...8453 (Simulated)\n• Chain: Base (8453)\n• Balance: 150.00 USDC');
     }
 
-    // Initial Load & High-Frequency Streaming
+    // Initial Load & High-Frequency Streaming Loop
     fetchUrbanMiningCalc();
     fetchLiveTicker();
     fetchRadarSpreads();
-    setInterval(fetchLiveTicker, 1500);
-    setInterval(fetchRadarSpreads, 6000);
+    setInterval(fetchLiveTicker, 2000);
+    setInterval(fetchRadarSpreads, 2500);
   </script>
 </body>
 </html>

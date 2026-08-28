@@ -86,7 +86,7 @@ class TwitterAlertBot:
         return auth_header
 
     def generate_arbitrage_tweet(self) -> str:
-        """Generates a clear, professional cross-market arbitrage spread alert tweet."""
+        """Generates a clear, professional cross-market arbitrage spread alert tweet strictly under 280 chars."""
         spreads_data = feed_engine.get_arbitrage_spreads()
         spreads = spreads_data.spreads
         if not spreads:
@@ -96,28 +96,22 @@ class TwitterAlertBot:
         gross_margin = f"${top_spread.net_arbitrage_margin_usd:,.2f}"
 
         lines = [
-            f"📡 [MARKET SPREAD] Cross-Exchange Price Difference Detected",
-            f"",
-            f"📊 Commodity: {top_spread.symbol.value}",
-            f"⚡ Spread: +{top_spread.spread_basis_points:.1f} bps ({(top_spread.spread_basis_points / 100.0):.2f}%)",
-            f"🏛️ Venues: {top_spread.primary_exchange} vs {top_spread.secondary_exchange}",
-            f"📈 Trade Direction: {top_spread.arbitrage_direction}",
-            f"💵 Net Margin: {gross_margin}/MT",
-            f"",
-            f"🖥️ View Live Interactive Market Dashboard:",
-            f"🔗 {LIVE_DASHBOARD_URL}",
-            f"",
-            f"#Commodities #Metals #RawMaterials #Arbitrage #Base #Recycling"
+            f"📡 [MARKET SPREAD] Cross-Venue Arb Detected",
+            f"⚡ {top_spread.symbol.value}: +{top_spread.spread_basis_points:.0f}bps ({(top_spread.spread_basis_points / 100.0):.2f}%)",
+            f"🏛️ {top_spread.primary_exchange} / {top_spread.secondary_exchange}",
+            f"💵 Net: {gross_margin}/MT ({top_spread.arbitrage_direction})",
+            f"📊 dashboard: {LIVE_DASHBOARD_URL}",
+            f"#Commodities #Base #Arbitrage"
         ]
         return "\n".join(lines)
 
     def generate_urban_mining_tweet(self) -> str:
-        """Generates an urban mining scrap recovery yield valuation tweet."""
+        """Generates an urban mining scrap recovery yield valuation tweet strictly under 280 chars."""
         feedstocks = [
             (ScrapCategory.EV_BATTERY_BLACK_MASS, 5.0, "🔋 EV Battery Black Mass"),
             (ScrapCategory.AUTO_CATALYST_CERAMIC, 2.0, "🚗 Auto Catalyst Ceramic"),
             (ScrapCategory.E_WASTE_HIGH_GRADE_PCB, 10.0, "💻 High-Grade E-Waste PCB"),
-            (ScrapCategory.WIND_EV_PERMANENT_MAGNETS, 3.0, "💨 Wind & EV Permanent Magnets"),
+            (ScrapCategory.WIND_EV_PERMANENT_MAGNETS, 3.0, "💨 Wind/EV Magnets"),
         ]
         category, tons, title = random.choice(feedstocks)
         calc_res = feed_engine.calculate_urban_mining(
@@ -128,27 +122,21 @@ class TwitterAlertBot:
             )
         )
 
-        elements_summary = ", ".join([f"{e.mineral_symbol}: {e.payable_weight_kg:,.1f}kg" for e in calc_res.mineral_breakdown[:3]])
-        margin_pct = ((calc_res.net_settlement_value_usd / calc_res.total_gross_payable_usd) * 100) if calc_res.total_gross_payable_usd > 0 else 0
+        elements_summary = ", ".join([f"{e.mineral_symbol}:{e.payable_weight_kg:,.0f}kg" for e in calc_res.mineral_breakdown[:3]])
 
         lines = [
-            f"♻️ [SCRAP YIELD] Urban Mining Recycling Benchmark Valuation",
-            f"",
-            f"📦 Material: {title} ({tons} MT Batch)",
-            f"💎 Gross Recoverable Value: ${calc_res.total_gross_payable_usd:,.2f}",
-            f"⚙️ Smelter TC/RC Charges: ${calc_res.total_treatment_and_refining_charges_usd:,.2f}",
-            f"💵 Net Settlement Value: ${calc_res.net_settlement_value_usd:,.2f} USDC (Margin {margin_pct:.1f}%)",
-            f"🔬 Recoverable Metals: {elements_summary}",
-            f"",
-            f"🖥️ Calculate Your Scrap Batches on Live Dashboard:",
-            f"🔗 {LIVE_DASHBOARD_URL}",
-            f"",
-            f"#UrbanMining #Recycling #CircularEconomy #Metals #Lithium #Platinum"
+            f"♻️ [SCRAP YIELD] Urban Mining Benchmark",
+            f"📦 {title} ({tons:,.0f}MT)",
+            f"💎 Gross: ${calc_res.total_gross_payable_usd:,.0f} | TC/RC: ${calc_res.total_treatment_and_refining_charges_usd:,.0f}",
+            f"💵 Net Settlement Value: ${calc_res.net_settlement_value_usd:,.0f} USDC",
+            f"🔬 {elements_summary}",
+            f"📊 dashboard: {LIVE_DASHBOARD_URL}",
+            f"#UrbanMining #Recycling #Base"
         ]
         return "\n".join(lines)
 
     def generate_market_summary_tweet(self) -> str:
-        """Generates a spot market overview ticker tweet with accurate physical spot prices."""
+        """Generates a spot market overview ticker tweet strictly under 280 chars."""
         quotes_resp = feed_engine.get_all_quotes()
         p_map = quotes_resp.quotes
 
@@ -158,25 +146,19 @@ class TwitterAlertBot:
         li_q = p_map.get(CommoditySymbol.LI)
         nd_q = p_map.get(CommoditySymbol.NDDY)
 
-        ag_str = f"${ag_q.spot_price_usd:.2f}/oz (${ag_q.secondary_prices.get('USD/kg', 1008):,.1f}/kg)" if ag_q else "$31.35/oz"
+        ag_str = f"${ag_q.spot_price_usd:.2f}/oz" if ag_q else "$31.35/oz"
         pt_str = f"${pt_q.spot_price_usd:.2f}/oz" if pt_q else "$968.00/oz"
-        cu_str = f"${cu_q.spot_price_usd:,.0f}/MT (${cu_q.secondary_prices.get('USD/lb', 4.30):.2f}/lb)" if cu_q else "$9,480/MT"
-        li_str = f"${li_q.spot_price_usd:,.0f}/MT (${li_q.secondary_prices.get('USD/kg', 11.45):.2f}/kg)" if li_q else "$11,450/MT"
-        nd_str = f"${nd_q.spot_price_usd:.2f}/kg (${nd_q.secondary_prices.get('USD/mt', 72500):,.0f}/MT)" if nd_q else "$72.50/kg"
+        cu_str = f"${cu_q.spot_price_usd:,.0f}/MT" if cu_q else "$9,480/MT"
+        li_str = f"${li_q.spot_price_usd:,.0f}/MT" if li_q else "$11,450/MT"
+        nd_str = f"${nd_q.spot_price_usd:.2f}/kg" if nd_q else "$72.50/kg"
 
         lines = [
-            f"🌐 [SPOT BENCHMARK] Critical Physical Commodities Live Feeds",
-            f"",
-            f"🥈 Silver (LBMA Ag): {ag_str}",
-            f"⚪ Platinum (LPPM Pt): {pt_str}",
-            f"🥉 Copper (LME Grade A Cu): {cu_str}",
-            f"🔋 Lithium Carbonate (SMM 99.5% Li): {li_str}",
-            f"🧲 Neodymium Magnet (Asian Metal NdPr): {nd_str}",
-            f"",
-            f"🖥️ View Live Interactive Price & Yield Dashboard:",
-            f"🔗 {LIVE_DASHBOARD_URL}",
-            f"",
-            f"#Commodities #Metals #RawMaterials #SupplyChain #Base #DeFi"
+            f"🌐 [SPOT BENCHMARK] Minerals Feeds",
+            f"🥈 Silver: {ag_str} | ⚪ Pt: {pt_str}",
+            f"🥉 Copper: {cu_str} | 🔋 Li: {li_str}",
+            f"🧲 Neodymium (NdDy): {nd_str}",
+            f"📊 dashboard: {LIVE_DASHBOARD_URL}",
+            f"#Commodities #Metals #Base"
         ]
         return "\n".join(lines)
 
