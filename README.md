@@ -4,11 +4,11 @@
 [![PyPI Downloads](https://img.shields.io/pypi/dm/minerals-oracle-x402.svg?style=for-the-badge&color=orange)](https://pypi.org/project/minerals-oracle-x402/)
 [![Glama.ai](https://img.shields.io/badge/Glama.ai-Approved-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](https://glama.ai/mcp/servers/nohosa001-pixel/minerals-oracle-x402)
 [![Cloud Run](https://img.shields.io/badge/Google_Cloud_Run-Live_24%2F7-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/dashboard)
-[![Base Network](https://img.shields.io/badge/Base_USDC-x402_Settlement-0052FF?style=for-the-badge&logo=coinbase&logoColor=white)](https://base.org)
+[![Polygon Network](https://img.shields.io/badge/Polygon_USDC-x402_Settlement-8247E5?style=for-the-badge&logo=polygon&logoColor=white)](https://polygon.technology)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-green.svg)](https://fastapi.tiangolo.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Real-time physical spot market pricing, cross-exchange arbitrage spreads, and metallurgical urban mining scrap recovery yield valuations on Base Network.
+Real-time physical spot market pricing, cross-exchange arbitrage spreads, and metallurgical urban mining scrap recovery yield valuations on Polygon Network.
 
 ---
 
@@ -123,10 +123,10 @@ Open [http://localhost:8000/dashboard](http://localhost:8000/dashboard) to view 
 
 ---
 
-## 💳 x402 Web3 Settlement on Base Network
+## 💳 x402 Web3 Settlement on Polygon Network
 
-The oracle supports automated on-chain micro-settlements (0.005 USDC per query) via HTTP 402 challenge-response on Base (Chain ID `8453`):
-- **Base USDC Token**: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
+The oracle supports automated on-chain micro-settlements (0.005 USDC per query) via HTTP 402 challenge-response on Polygon (Chain ID `137`):
+- **Polygon USDC Token**: `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`
 - **Treasury Recipient**: `0x255F9991233f86B29dB847c8d5b8CB9915e80dCf`
 - **Authentication**: Supports EIP-712/EIP-191 signatures and standard `Authorization: x402 <payload>` headers.
 
@@ -135,10 +135,10 @@ sequenceDiagram
     autonumber
     actor Client as Agent / Client Application
     participant Oracle as Minerals Oracle (x402)
-    participant Base as Base Network (USDC)
+    participant Polygon as Polygon Network (USDC)
 
     Client->>Oracle: GET /api/v1/oracle/prices
-    Oracle-->>Client: HTTP 402 Payment Required<br/>(Nonce, Price: 0.005 USDC, Base Chain ID: 8453)
+    Oracle-->>Client: HTTP 402 Payment Required<br/>(Nonce, Price: 0.005 USDC, Polygon Chain ID: 137)
     Note over Client: Client signs payment challenge<br/>using private key (EIP-712/EIP-191)
     Client->>Oracle: GET /api/v1/oracle/prices<br/>Header: Authorization: x402 <base64_payload>
     Oracle->>Oracle: Verify signature / Facilitator settle

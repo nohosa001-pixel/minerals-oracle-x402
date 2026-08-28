@@ -18,12 +18,12 @@ from app.schemas import PaymentChallenge
 load_dotenv()
 
 # Configuration constants
-BASE_CHAIN_ID = 8453
-USDC_BASE_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+POLYGON_CHAIN_ID = int(os.getenv("POLYGON_CHAIN_ID", os.getenv("CHAIN_ID", "137")))
+USDC_POLYGON_ADDRESS = os.getenv("USDC_TOKEN_ADDRESS", "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359")
 DEFAULT_RECIPIENT_WALLET = os.getenv("ORACLE_TREASURY_WALLET", "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf")
 DEFAULT_PRICE_USDC = "0.005"
 DEFAULT_PRICE_UNITS = "5000"  # 0.005 * 10^6
-FACILITATOR_URL = os.getenv("X402_FACILITATOR_URL", "https://facilitator.base.org/v1/verify")
+FACILITATOR_URL = os.getenv("X402_FACILITATOR_URL", "https://facilitator.polygon.technology/v1/verify")
 ALLOW_DEV_BYPASS = os.getenv("ALLOW_DEV_BYPASS", "false").lower() in ("1", "true", "yes")
 
 # In-memory nonces with TTL
@@ -36,15 +36,15 @@ FREE_TRIAL_LIMIT = 2
 
 
 class X402Verifier:
-    """x402 Facilitator & EIP-712 Payment Verifier for Base Network."""
+    """x402 Facilitator & EIP-712 Payment Verifier for Polygon Network."""
 
     def __init__(
         self,
         recipient_wallet: str = DEFAULT_RECIPIENT_WALLET,
         price_usdc: str = DEFAULT_PRICE_USDC,
         price_units: str = DEFAULT_PRICE_UNITS,
-        chain_id: int = BASE_CHAIN_ID,
-        token_address: str = USDC_BASE_ADDRESS,
+        chain_id: int = POLYGON_CHAIN_ID,
+        token_address: str = USDC_POLYGON_ADDRESS,
     ):
         self.recipient_wallet = recipient_wallet
         self.price_usdc = price_usdc
@@ -62,7 +62,7 @@ class X402Verifier:
 
         return PaymentChallenge(
             x402_version="1.0",
-            network="base",
+            network="polygon",
             chain_id=self.chain_id,
             accepted_token="USDC",
             token_address=self.token_address,
@@ -72,7 +72,7 @@ class X402Verifier:
             facilitator_url=FACILITATOR_URL,
             nonce=nonce,
             expires_at_utc=expires_at_iso,
-            message=f"Payment Required: {self.price_usdc} USDC on Base (Chain ID {self.chain_id}) to access Critical Raw Minerals & Urban Mining Oracle feed.",
+            message=f"Payment Required: {self.price_usdc} USDC on Polygon (Chain ID {self.chain_id}) to access Critical Raw Minerals & Urban Mining Oracle feed.",
         )
 
     def build_402_response(self) -> JSONResponse:
@@ -85,7 +85,7 @@ class X402Verifier:
         headers = {
             "WWW-Authenticate": f'x402 challenge="{challenge_b64}"',
             "X-Payment-Required": "true",
-            "X-Payment-Token": f"Base:{self.token_address}",
+            "X-Payment-Token": f"Polygon:{self.token_address}",
             "X-Payment-Amount": f"{self.price_usdc} USDC",
             "X-Payment-ChainId": str(self.chain_id),
             "X-Payment-Recipient": self.recipient_wallet,
@@ -133,7 +133,7 @@ class X402Verifier:
         if ("/dashboard" in referer or "/playground" in referer or sec_fetch_site == "same-origin") and not skip_trial:
             extra_headers = {
                 "X-Dashboard-Access": "granted",
-                "X-Oracle-Network": "Base-Mainnet-8453",
+                "X-Oracle-Network": "Polygon-Mainnet-137",
             }
             return True, f"web-dashboard-{client_ip}", extra_headers
 
@@ -150,7 +150,7 @@ class X402Verifier:
                 extra_headers = {
                     "X-Sandbox-Trial": "active",
                     "X-Free-Tier-Remaining": str(remaining_trials),
-                    "X-Upgrade-Notice": "Trial mode active. Unlock unlimited high-frequency feeds with 0.005 USDC on Base (Chain ID 8453).",
+                    "X-Upgrade-Notice": "Trial mode active. Unlock unlimited high-frequency feeds with 0.005 USDC on Polygon (Chain ID 137).",
                 }
                 return True, f"sandbox-free-trial-{client_ip}", extra_headers
 
@@ -200,9 +200,9 @@ class X402Verifier:
         signer = data.get("signer")
         tx_hash = data.get("tx_hash")
 
-        # Case A: On-Chain Transaction Hash proof on Base
+        # Case A: On-Chain Transaction Hash proof on Polygon
         if tx_hash and isinstance(tx_hash, str) and tx_hash.startswith("0x"):
-            # In a production environment, query Base RPC to ensure tx is mined and transfers 0.005 USDC to recipient.
+            # In a production environment, query Polygon RPC to ensure tx is mined and transfers 0.005 USDC to recipient.
             # We accept properly structured 66-character tx hashes.
             if len(tx_hash) == 66:
                 return True, f"tx:{tx_hash}"
@@ -213,25 +213,23 @@ class X402Verifier:
             if not self._is_valid_nonce(nonce):
                 return False, "Expired or invalid challenge nonce"
 
-            message_text = f"x402:minerals-oracle-x402:pay:{self.price_usdc}:USDC:Base:{nonce}"
-            try:
-                signable_msg = encode_defunct(text=message_text)
-                recovered_signer = Account.recover_message(signable_msg, signature=signature)
-                if signer and signer.lower() != recovered_signer.lower():
-                    return False, "Signer address does not match signature recovery"
-                
-                # Invalidate nonce to prevent replay attacks
-                _ACTIVE_NONCES.pop(nonce, None)
-                return True, recovered_signer
-            except Exception as e:
-                # Fallback: check if client signed just the nonce
+            message_text_polygon = f"x402:minerals-oracle-x402:pay:{self.price_usdc}:USDC:Polygon:{nonce}"
+            message_text_base = f"x402:minerals-oracle-x402:pay:{self.price_usdc}:USDC:Base:{nonce}"
+
+            for msg_text in [message_text_polygon, message_text_base, nonce]:
                 try:
-                    signable_nonce = encode_defunct(text=nonce)
-                    recovered_signer = Account.recover_message(signable_nonce, signature=signature)
+                    signable_msg = encode_defunct(text=msg_text)
+                    recovered_signer = Account.recover_message(signable_msg, signature=signature)
+                    if signer and signer.lower() != recovered_signer.lower():
+                        continue
+                    
+                    # Invalidate nonce to prevent replay attacks
                     _ACTIVE_NONCES.pop(nonce, None)
                     return True, recovered_signer
                 except Exception:
-                    return False, f"Signature recovery failed: {str(e)}"
+                    continue
+
+            return False, "Signer address does not match signature recovery or invalid signature"
 
         return False, "Incomplete payment proof (requires valid signature or on-chain tx_hash)"
 
@@ -239,8 +237,7 @@ class X402Verifier:
         """Check if nonce exists and has not expired."""
         expiry = _ACTIVE_NONCES.get(nonce)
         if not expiry:
-            # In mock or test mode, nonces with standard length can be permitted if generated recently
-            return len(nonce) >= 16
+            return False
         return time.time() <= expiry
 
     def _cleanup_expired_nonces(self):

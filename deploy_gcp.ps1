@@ -37,7 +37,7 @@ gcloud run deploy minerals-oracle-x402 `
     --cpu 1 `
     --min-instances 0 `
     --max-instances 10 `
-    --set-env-vars="ORACLE_TREASURY_WALLET=0x255F9991233f86B29dB847c8d5b8CB9915e80dCf,ALLOW_DEV_BYPASS=false" `
+    --set-env-vars="ORACLE_TREASURY_WALLET=0x255F9991233f86B29dB847c8d5b8CB9915e80dCf,ALLOW_DEV_BYPASS=false,POLYGON_CHAIN_ID=137,CHAIN_ID=137,DEFAULT_PRICE_USDC=0.005,X402_FACILITATOR_URL=https://facilitator.polygon.technology/v1/verify" `
     --quiet
 
 if ($LASTEXITCODE -eq 0) {

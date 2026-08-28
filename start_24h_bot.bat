@@ -6,7 +6,7 @@ color 0A
 echo ===========================================================================
 echo   💎 Minerals Oracle x402 - 24/7 Autonomous Arbitrage Agent Launcher
 echo   🏦 Broker: Korea Investment & Securities (KIS 10061681-08)
-echo   ⛓️ Network: Base Mainnet (Chain ID 8453)
+echo   ⛓️ Network: Polygon Mainnet (Chain ID 137)
 echo ===========================================================================
 echo.
 echo Starting 24/7 automated scanning loop...

@@ -44,7 +44,7 @@ class MineralQuote(BaseModel):
 class PriceFeedResponse(BaseModel):
     oracle: str = "minerals-oracle-x402"
     version: str = "1.1.0"
-    network: str = "Base (Chain ID 8453)"
+    network: str = "Polygon (Chain ID 137)"
     generated_at_utc: str
     quotes: Dict[str, MineralQuote]
     signature: Optional[str] = Field(None, description="Oracle signer signature if enabled")
@@ -147,17 +147,17 @@ class UrbanMiningResponse(BaseModel):
 
 class PaymentChallenge(BaseModel):
     x402_version: str = "1.0"
-    network: str = "base"
-    chain_id: int = 8453
+    network: str = "polygon"
+    chain_id: int = 137
     accepted_token: str = "USDC"
-    token_address: str = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+    token_address: str = "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"
     amount: str = "0.005"
     amount_units: str = "5000"  # 0.005 USDC (6 decimals)
     recipient_address: str
     facilitator_url: str
     nonce: str
     expires_at_utc: str
-    message: str = "Payment Required: 0.005 USDC on Base to access Critical Raw Minerals Oracle feed"
+    message: str = "Payment Required: 0.005 USDC on Polygon (Chain ID 137) to access Critical Raw Minerals Oracle feed"
 
 
 class MCPToolCallRequest(BaseModel):
@@ -185,13 +185,13 @@ class AlphaSignalsSummary(BaseModel):
     oracle: str = "minerals-oracle-x402"
     status: str = "operational"
     timestamp_utc: str
-    network: str = "Base (Chain ID 8453)"
+    network: str = "Polygon (Chain ID 137)"
     free_tier_status: str = "PUBLIC_REALTIME_ALPHA_TEASER"
     arbitrage_opportunities_active: int
     highest_profit_commodity: str
     signals: List[AlphaSignalItem]
     unlock_instruction: str = (
-        "Pay 0.005 USDC on Base (Chain ID 8453) via x402 protocol at /api/v1/oracle/prices or "
+        "Pay 0.005 USDC on Polygon (Chain ID 137) via x402 protocol at /api/v1/oracle/prices or "
         "/api/v1/oracle/spreads to obtain complete EIP-712 certified quotes, net logistics formulas, and scrap matrices."
     )
 

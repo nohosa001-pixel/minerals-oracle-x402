@@ -26,9 +26,9 @@ interface IMineralsOracleConsumer {
 
 /**
  * @title MineralsOracleConsumer
- * @author Minerals Oracle Team (Base Network)
+ * @author Minerals Oracle Team (Polygon Network)
  * @notice Production-grade Solidity consumer that verifies EIP-712 cryptographic proofs
- *         originating from the minerals-oracle-x402 micro-oracle on Base (Chain ID 8453).
+ *         originating from the minerals-oracle-x402 micro-oracle on Polygon (Chain ID 137).
  */
 contract MineralsOracleConsumer is IMineralsOracleConsumer {
     // EIP-712 Typehashes

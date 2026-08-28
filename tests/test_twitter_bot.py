@@ -10,7 +10,7 @@ def test_twitter_alert_generators():
     """Verify all tweet alert generation methods return properly formatted text."""
     arb_tweet = twitter_bot.generate_arbitrage_tweet()
     assert "[MARKET SPREAD]" in arb_tweet
-    assert "#Base" in arb_tweet
+    assert "#Polygon" in arb_tweet
     assert "dashboard" in arb_tweet
 
     um_tweet = twitter_bot.generate_urban_mining_tweet()

@@ -1,6 +1,6 @@
 # Critical Raw Minerals & Urban Mining Oracle (LLM & Autonomous Agent Standard)
 
-> **The Decentralized Micro-Oracle for Autonomous Trading, RWA, and Circular Economy Agents on Base Network (Chain ID: 8453).**
+> **The Decentralized Micro-Oracle for Autonomous Trading, RWA, and Circular Economy Agents on Polygon Network (Chain ID: 137).**
 > Features real-time spot pricing, COMEX/LME arbitrage spreads, and urban-mining scrap recovery yield formulas.
 > Zero Subscriptions. Machine-to-Machine HTTP 402 Micropayments (0.005 USDC per query).
 
@@ -79,11 +79,11 @@ Payload Structure:
 }
 ```
 
-Or pass on-chain tx hash on Base:
+Or pass on-chain tx hash on Polygon:
 ```json
 {
   "tx_hash": "0x...",
-  "chain_id": 8453
+  "chain_id": 137
 }
 ```
 
@@ -106,7 +106,7 @@ if r.status_code == 402:
     nonce = challenge["nonce"]
     
     # 2. Sign payment challenge
-    msg_text = f"x402:minerals-oracle-x402:pay:0.005:USDC:Base:{nonce}"
+    msg_text = f"x402:minerals-oracle-x402:pay:0.005:USDC:Polygon:{nonce}"
     sig = agent_acct.sign_message(encode_defunct(text=msg_text)).signature.hex()
     
     # 3. Request with x402 authorization

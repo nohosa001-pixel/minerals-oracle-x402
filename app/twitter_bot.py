@@ -95,15 +95,29 @@ class TwitterAlertBot:
         top_spread = max(spreads, key=lambda s: s.spread_basis_points)
         gross_margin = f"${top_spread.net_arbitrage_margin_usd:,.2f}"
 
+        # Clean venue names for concise tweet length
+        p_ex = top_spread.primary_exchange.split("(")[0].strip()
+        s_ex = top_spread.secondary_exchange.split("(")[0].strip()
+
         lines = [
-            f"📡 [MARKET SPREAD] Cross-Venue Arb Detected",
+            f"📡 [MARKET SPREAD] Cross-Venue Arb Alert",
             f"⚡ {top_spread.symbol.value}: +{top_spread.spread_basis_points:.0f}bps ({(top_spread.spread_basis_points / 100.0):.2f}%)",
-            f"🏛️ {top_spread.primary_exchange} / {top_spread.secondary_exchange}",
+            f"🏛️ {p_ex} / {s_ex}",
             f"💵 Net: {gross_margin}/MT ({top_spread.arbitrage_direction})",
             f"📊 dashboard: {LIVE_DASHBOARD_URL}",
-            f"#Commodities #Base #Arbitrage"
+            f"#Commodities #Polygon #Arbitrage"
         ]
-        return "\n".join(lines)
+        tweet = "\n".join(lines)
+        if len(tweet) > 280:
+            # Fallback concise layout
+            tweet = (
+                f"📡 [SPREAD] {top_spread.symbol.value} Arb +{top_spread.spread_basis_points:.0f}bps\n"
+                f"🏛️ {p_ex} vs {s_ex}\n"
+                f"💵 Net Margin: {gross_margin}/MT\n"
+                f"📊 {LIVE_DASHBOARD_URL}\n"
+                f"#Commodities #Polygon #Arbitrage"
+            )
+        return tweet
 
     def generate_urban_mining_tweet(self) -> str:
         """Generates an urban mining scrap recovery yield valuation tweet strictly under 280 chars."""
@@ -131,7 +145,7 @@ class TwitterAlertBot:
             f"💵 Net Settlement Value: ${calc_res.net_settlement_value_usd:,.0f} USDC",
             f"🔬 {elements_summary}",
             f"📊 dashboard: {LIVE_DASHBOARD_URL}",
-            f"#UrbanMining #Recycling #Base"
+            f"#UrbanMining #Recycling #Polygon"
         ]
         return "\n".join(lines)
 
@@ -158,7 +172,7 @@ class TwitterAlertBot:
             f"🥉 Copper: {cu_str} | 🔋 Li: {li_str}",
             f"🧲 Neodymium (NdDy): {nd_str}",
             f"📊 dashboard: {LIVE_DASHBOARD_URL}",
-            f"#Commodities #Metals #Base"
+            f"#Commodities #Metals #Polygon"
         ]
         return "\n".join(lines)
 

@@ -3,7 +3,7 @@
 Autonomous Web3 & On-Chain Arbitrage Trading Agent for Minerals Oracle x402
 - Continuously monitors live basis spreads from Minerals Oracle API
 - Automatically identifies profitable arbitrage windows (Basis points threshold, positive net margin)
-- Executes automated hedging / synthetic execution simulation on Base network
+- Executes automated hedging / synthetic execution simulation on Polygon network
 - Emits real-time execution logs, Tx Hashes, and Cumulative PnL reports
 """
 
@@ -37,8 +37,8 @@ from app.kis_client import kis_client
 # Configuration Parameters
 MIN_SPREAD_BPS = 50.0        # Minimum spread in basis points (0.50%) to trigger execution
 TRADE_SIZE_USD = 50_000.0    # Simulated capital allocation per trade batch ($50,000 USD)
-BASE_CHAIN_ID = 8453         # Base Mainnet
-GAS_FEE_USD = 0.08           # Typical L2 Base transaction gas fee
+POLYGON_CHAIN_ID = 137       # Polygon Mainnet
+GAS_FEE_USD = 0.02           # Typical Polygon PoS transaction gas fee
 ORACLE_API_URL = os.getenv("ORACLE_API_URL", "http://127.0.0.1:8000")
 KIS_OVERSEAS_ACCOUNT = os.getenv("KIS_ACCOUNT_NO", "10061681-08")
 
@@ -68,7 +68,7 @@ class ArbitrageTradingAgent:
         return [sp.model_dump() for sp in spreads_resp.spreads]
 
     def generate_simulated_tx_hash(self, symbol: str, timestamp: str) -> str:
-        """Generates a realistic Base EVM transaction hash."""
+        """Generates a realistic Polygon EVM transaction hash."""
         raw = f"{self.name}:{symbol}:{timestamp}:{time.time()}"
         return "0x" + hashlib.sha256(raw.encode()).hexdigest()
 
@@ -118,7 +118,7 @@ class ArbitrageTradingAgent:
             "kis_account": KIS_OVERSEAS_ACCOUNT,
             "kis_order_id": kis_order.get("order_id"),
             "kis_ticker": kis_order.get("ticker"),
-            "status": "CONFIRMED_BASE_AND_KIS_FUTURES",
+            "status": "CONFIRMED_POLYGON_AND_KIS_FUTURES",
         }
 
         # Update metrics
@@ -167,14 +167,14 @@ class ArbitrageTradingAgent:
                 print(f"     🔥 >>> TARGET OPPORTUNITY DETECTED ({bps:.1f} bps >= {MIN_SPREAD_BPS} bps)")
                 print(f"     ⚡ Executing Atomic Hedge Strategy: {sp['arbitrage_direction']}")
                 
-                # Execute Trade (Base + KIS Overseas Futures)
+                # Execute Trade (Polygon + KIS Overseas Futures)
                 result = self.execute_arbitrage(sp)
                 
                 print(f"     ✅ Order Filled: ${result['allocation_usd']:,.2f} USD ({result['volume_executed']} units)")
                 print(f"     💵 Gross Profit: +${result['gross_profit_usd']:,.2f} | Gas: -${result['gas_fee_usd']:.2f}")
                 print(f"     💎 Net Realized PnL: +${result['net_pnl_usd']:,.2f} USDC")
                 print(f"     🏦 KIS Futures Order: {result['kis_account']} | {result['kis_ticker']} ({result['kis_order_id']})")
-                print(f"     ⛓️ Base Tx Hash: {result['tx_hash'][:18]}...{result['tx_hash'][-10:]}")
+                print(f"     ⛓️ Polygon Tx Hash: {result['tx_hash'][:18]}...{result['tx_hash'][-10:]}")
             else:
                 print(f"     ⚖️ Spread below threshold or non-profitable (Holding position)")
 
@@ -184,8 +184,8 @@ class ArbitrageTradingAgent:
         print(f"  - Opportunities Executed: {opportunities_found} / {len(spreads)}")
         print(f"  - Total Capital Deployed: ${opportunities_found * TRADE_SIZE_USD:,.2f} USD")
         print(f"  - Cumulative Realized Net PnL: +${self.cumulative_net_pnl:,.2f} USDC")
-        print(f"  - Total Gas Cost on Base: ${self.cumulative_gas_spent:,.2f} USD")
-        print(f"  - Oracle Latency: < 2.5ms | Network: Base (Chain ID {BASE_CHAIN_ID})")
+        print(f"  - Total Gas Cost on Polygon: ${self.cumulative_gas_spent:,.2f} USD")
+        print(f"  - Oracle Latency: < 2.5ms | Network: Polygon (Chain ID {POLYGON_CHAIN_ID})")
         print("-"*75 + "\n")
 
 def main():
@@ -196,7 +196,7 @@ def main():
     if is_loop:
         print("\n" + "="*75)
         print("  🚀 [MineralsAlpha 24/7 Continuous Mode Started]")
-        print(f"  • Interval: {interval}s | Broker: 한국투자증권 ({KIS_OVERSEAS_ACCOUNT}) | Base: {BASE_CHAIN_ID}")
+        print(f"  • Interval: {interval}s | Broker: 한국투자증권 ({KIS_OVERSEAS_ACCOUNT}) | Polygon: {POLYGON_CHAIN_ID}")
         print("  • Press Ctrl+C in terminal to stop.")
         print("="*75)
         try:

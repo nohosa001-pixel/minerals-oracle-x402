@@ -41,7 +41,7 @@ class TelegramAlertBot:
             f"💵 <b>Net Margin:</b> <b>+${net_margin:,.2f}/MT</b> (After Freight/Tariff)\n"
             f"⚡ <b>Strategy:</b> <code>{direction}</code>\n\n"
             f"🔗 <a href='https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/dashboard'>Live Market Dashboard</a>\n"
-            f"#MineralsOracle #Arbitrage #Base"
+            f"#MineralsOracle #Arbitrage #Polygon"
         )
 
     def generate_summary_message(self, quotes: Dict[str, Any]) -> str:

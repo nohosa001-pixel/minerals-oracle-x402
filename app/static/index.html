@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Minerals Oracle | Real-Time Physical Commodity & Urban Mining Valuation Oracle</title>
-  <meta name="description" content="Base Network real-time LME/COMEX commodity spot prices, cross-exchange arbitrage spreads, and metallurgical urban mining scrap yield valuation oracle for AI agents and smart contracts.">
+  <meta name="description" content="Polygon Network real-time LME/COMEX commodity spot prices, cross-exchange arbitrage spreads, and metallurgical urban mining scrap yield valuation oracle for AI agents and smart contracts.">
   
   <!-- Modern Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -878,7 +878,7 @@
       <a href="/" class="logo-group">
         <div class="logo-icon">MO</div>
         <div class="logo-text">
-          <h1>Minerals Oracle <span class="badge-network">Base Mainnet</span> <span class="badge-x402">x402</span></h1>
+          <h1>Minerals Oracle <span class="badge-network">Polygon Mainnet</span> <span class="badge-x402">x402</span></h1>
         </div>
       </a>
       <div class="nav-actions">
@@ -888,7 +888,7 @@
         <a href="#playground" class="nav-link">Live Playground</a>
         <a href="/docs" target="_blank" class="nav-link">API Specs</a>
         <button class="btn-wallet" id="btnConnectWallet" onclick="connectWeb3Wallet()">
-          <span id="walletBtnText">🔗 Connect Wallet (Base)</span>
+          <span id="walletBtnText">🔗 Connect Wallet (Polygon)</span>
         </button>
       </div>
     </div>
@@ -938,7 +938,7 @@
     <h2>Global Critical Minerals Spot Feeds & Urban Mining Valuation</h2>
     <p>
       Direct high-frequency COMEX, LME, and Asian spot market data powering autonomous AI agents, 
-      cross-exchange arbitrageurs, and metallurgical scrap recovery settlements on Base Network.
+      cross-exchange arbitrageurs, and metallurgical scrap recovery settlements on Polygon Network.
     </p>
     <div class="hero-cta-group">
       <a href="#calculator" class="btn-cta-primary">🚀 Launch Yield Simulator</a>
@@ -956,7 +956,7 @@
     </div>
     <div class="stat-card">
       <div class="stat-title">Settlement Network</div>
-      <div class="stat-val">Base (8453)</div>
+      <div class="stat-val">Polygon (137)</div>
       <div class="stat-sub">ERC-20 USDC Sub-Cent Finality</div>
     </div>
     <div class="stat-card">
@@ -1080,7 +1080,7 @@
       <div class="card-head">
         <div>
           <h3 class="card-title">⚡ 1-Click AI Agent & Developer Integration Hub</h3>
-          <p class="card-desc">Plug Minerals Oracle directly into Claude Desktop, Cursor, Python SDKs, and Base Smart Contracts.</p>
+          <p class="card-desc">Plug Minerals Oracle directly into Claude Desktop, Cursor, Python SDKs, and Polygon Smart Contracts.</p>
         </div>
         <span class="badge-network">v1.1.0 AP2 / MCP Ready</span>
       </div>
@@ -1090,7 +1090,7 @@
         <button class="tab-item" onclick="switchCodeTab('cursor', this)">⚡ Cursor MCP</button>
         <button class="tab-item" onclick="switchCodeTab('python', this)">🐍 Python SDK</button>
         <button class="tab-item" onclick="switchCodeTab('curl', this)">📜 cURL / Sandbox</button>
-        <button class="tab-item" onclick="switchCodeTab('solidity', this)">⛓️ Base Solidity</button>
+        <button class="tab-item" onclick="switchCodeTab('solidity', this)">⛓️ Polygon Solidity</button>
       </div>
 
       <div class="code-box">
@@ -1141,9 +1141,9 @@
       <a href="/redoc" target="_blank" class="footer-link">ReDoc API</a>
       <a href="/.well-known/ap2" target="_blank" class="footer-link">AP2 Protocol</a>
       <a href="https://pypi.org/project/minerals-oracle-x402/" target="_blank" class="footer-link">PyPI Package</a>
-      <a href="https://basescan.org" target="_blank" class="footer-link">BaseScan Explorer</a>
+      <a href="https://polygonscan.com" target="_blank" class="footer-link">PolygonScan Explorer</a>
     </div>
-    <p>Minerals Oracle x402 • Base Network (Chain ID 8453) • Critical Minerals & Metallurgical Scrap Recovery Infrastructure</p>
+    <p>Minerals Oracle x402 • Polygon Network (Chain ID 137) • Critical Minerals & Metallurgical Scrap Recovery Infrastructure</p>
   </footer>
 
   <script>
@@ -1378,7 +1378,7 @@
       cursor: `{\n  "mcpServers": {\n    "minerals-oracle-x402": {\n      "command": "uvx",\n      "args": ["minerals-oracle-x402"]\n    }\n  }\n}`,
       python: `import httpx\n\n# 1. Fetch Real-Time Physical Spot Market Quotes (Free Sandbox Tier)\nresponse = httpx.get("https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/api/v1/oracle/prices")\nprint("Live Quotes:", response.json())\n\n# 2. Calculate 5 MT EV Battery Scrap Yield & Settlement\nyield_res = httpx.post(\n    "https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/api/v1/oracle/urban-mining/calculate",\n    json={\n        "scrap_category": "EV_BATTERY_BLACK_MASS",\n        "quantity_metric_tons": 5.0,\n        "target_yield_currency": "USDC"\n    }\n)\nprint("Net Settlement USDC:", yield_res.json()["net_settlement_value_usd"])`,
       curl: `# 1. Real-Time Spot Benchmark Quotes (Free Sandbox)\ncurl -s https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/api/v1/oracle/prices\n\n# 2. Autonomous Arbitrage Alpha Signals Hook\ncurl -s https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/api/v1/oracle/alpha-signals`,
-      solidity: `// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\nimport "@openzeppelin/contracts/token/ERC20/IERC20.sol";\n\ncontract MineralsOracleConsumer {\n    address public constant BASE_USDC = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913;\n    address public oracleTreasury;\n    uint256 public constant FEE_PER_QUERY = 5000; // 0.005 USDC (6 decimals)\n\n    constructor(address _treasury) {\n        oracleTreasury = _treasury;\n    }\n}`
+      solidity: `// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\nimport "@openzeppelin/contracts/token/ERC20/IERC20.sol";\n\ncontract MineralsOracleConsumer {\n    address public constant POLYGON_USDC = 0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359;\n    address public oracleTreasury;\n    uint256 public constant FEE_PER_QUERY = 5000; // 0.005 USDC (6 decimals)\n\n    constructor(address _treasury) {\n        oracleTreasury = _treasury;\n    }\n}`
     };
 
     function switchCodeTab(key, btn) {
@@ -1428,11 +1428,11 @@
             userWalletAddress = accounts[0];
             const shortAddr = userWalletAddress.slice(0, 6) + '...' + userWalletAddress.slice(-4);
             
-            // 2. Ensure connected to Base Mainnet (Chain ID 8453 / 0x2105)
+            // 2. Ensure connected to Polygon Mainnet (Chain ID 137 / 0x89)
             try {
               await window.ethereum.request({
                 method: 'wallet_switchEthereumChain',
-                params: [{ chainId: '0x2105' }],
+                params: [{ chainId: '0x89' }],
               });
             } catch (switchError) {
               // 4902 error code indicates chain has not been added to MetaMask
@@ -1441,34 +1441,34 @@
                   await window.ethereum.request({
                     method: 'wallet_addEthereumChain',
                     params: [{
-                      chainId: '0x2105',
-                      chainName: 'Base Mainnet',
-                      nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-                      rpcUrls: ['https://mainnet.base.org'],
-                      blockExplorerUrls: ['https://basescan.org']
+                      chainId: '0x89',
+                      chainName: 'Polygon Mainnet',
+                      nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
+                      rpcUrls: ['https://polygon-rpc.com'],
+                      blockExplorerUrls: ['https://polygonscan.com']
                     }],
                   });
                 } catch (addError) {
-                  console.warn('Failed to add Base network:', addError);
+                  console.warn('Failed to add Polygon network:', addError);
                 }
               }
             }
 
             btnText.innerText = `Connected (${shortAddr})`;
-            alert(`✅ MetaMask Connected Successfully!\n\n• Address: ${userWalletAddress}\n• Network: Base Mainnet (8453)\n• Ready for x402 Micropayments & Arbitrage Execution.`);
+            alert(`✅ MetaMask Connected Successfully!\n\n• Address: ${userWalletAddress}\n• Network: Polygon Mainnet (137)\n• Ready for x402 Micropayments & Arbitrage Execution.`);
             return;
           }
         } catch (err) {
           console.error('Wallet connection rejected:', err);
-          btnText.innerText = '🔗 Connect Wallet (Base)';
+          btnText.innerText = '🔗 Connect Wallet (Polygon)';
           alert('Wallet connection request was cancelled or failed.');
           return;
         }
       }
 
       // Fallback: Simulation mode when no Web3 extension is installed
-      btnText.innerText = 'Connected (0x7a2...8453)';
-      alert('ℹ️ No Web3 browser extension detected (MetaMask/Coinbase).\n\nConnected to Base Mainnet in Sandbox Mode:\n• Address: 0x7a25...8453 (Simulated)\n• Chain: Base (8453)\n• Balance: 150.00 USDC');
+      btnText.innerText = 'Connected (0x7a2...0137)';
+      alert('ℹ️ No Web3 browser extension detected (MetaMask/Coinbase).\n\nConnected to Polygon Mainnet in Sandbox Mode:\n• Address: 0x7a25...0137 (Simulated)\n• Chain: Polygon (137)\n• Balance: 150.00 USDC');
     }
 
     // Initial Load & High-Frequency Streaming Loop

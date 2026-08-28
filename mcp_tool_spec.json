@@ -2,7 +2,7 @@
   "tools": [
     {
       "name": "get_mineral_prices",
-      "description": "Fetch normalized real-time spot prices, bid/ask spreads, and multi-unit conversions for critical physical commodities: Neodymium/Dysprosium (NdDy), Lithium (Li), Copper (Cu), Silver (Ag), Platinum (Pt). Free tier sandbox trial available. Requires 0.005 USDC on Base via x402.",
+      "description": "Fetch normalized real-time spot prices, bid/ask spreads, and multi-unit conversions for critical physical commodities: Neodymium/Dysprosium (NdDy), Lithium (Li), Copper (Cu), Silver (Ag), Platinum (Pt). Free tier sandbox trial available. Requires 0.005 USDC on Polygon via x402.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -18,7 +18,7 @@
     },
     {
       "name": "get_arbitrage_spreads",
-      "description": "Calculate cross-exchange price spreads and locational arbitrage opportunities between COMEX, LME, SMM, and LPPM benchmarks, factoring in freight and tariffs. Free tier sandbox trial available. Requires 0.005 USDC on Base via x402.",
+      "description": "Calculate cross-exchange price spreads and locational arbitrage opportunities between COMEX, LME, SMM, and LPPM benchmarks, factoring in freight and tariffs. Free tier sandbox trial available. Requires 0.005 USDC on Polygon via x402.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -27,7 +27,7 @@
     },
     {
       "name": "calculate_urban_mining_value",
-      "description": "Evaluate contained minerals, process recovery efficiencies tensor, and net settlement value (USDC) after refining charges (TC/RC) for urban mining scrap feedstocks (E-Waste PCBs, EV Battery Black Mass, Auto Catalysts, Rare Earth Magnets). Free tier sandbox trial available. Requires 0.005 USDC on Base via x402.",
+      "description": "Evaluate contained minerals, process recovery efficiencies tensor, and net settlement value (USDC) after refining charges (TC/RC) for urban mining scrap feedstocks (E-Waste PCBs, EV Battery Black Mass, Auto Catalysts, Rare Earth Magnets). Free tier sandbox trial available. Requires 0.005 USDC on Polygon via x402.",
       "inputSchema": {
         "type": "object",
         "properties": {

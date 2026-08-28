@@ -227,7 +227,7 @@ class FeedEngine:
         return PriceFeedResponse(
             oracle="minerals-oracle-x402",
             version="1.1.0",
-            network="Base (Chain ID 8453)",
+            network="Polygon (Chain ID 137)",
             generated_at_utc=now_utc,
             quotes=quotes,
         )
@@ -697,7 +697,7 @@ class FeedEngine:
 
             teaser = (
                 f"🚨 Arbitrage Detected! Spread: +${sp.spread_usd:.2f} ({sp.spread_basis_points} bps). "
-                f"Net Margin: +${sp.net_arbitrage_margin_usd:.2f}/MT. Unlock quote via Base x402."
+                f"Net Margin: +${sp.net_arbitrage_margin_usd:.2f}/MT. Unlock quote via Polygon x402."
                 if is_prof
                 else f"Market balanced. Spread: {sp.spread_basis_points} bps ({sp.primary_exchange} vs {sp.secondary_exchange})."
             )

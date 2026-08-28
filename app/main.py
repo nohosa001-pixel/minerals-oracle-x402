@@ -28,7 +28,7 @@ app = FastAPI(
     title="Critical Raw Minerals & Urban Mining Oracle",
     description=(
         "Real-time physical spot market benchmark pricing, cross-exchange arbitrage spreads, "
-        "and metallurgical urban mining scrap yield valuations on Base Network. "
+        "and metallurgical urban mining scrap yield valuations on Polygon Network. "
         "Explore the interactive Web Dashboard at /dashboard."
     ),
     version="1.1.0",
@@ -78,7 +78,7 @@ async def root(request: Request):
         "description": "Critical Raw Minerals & Urban Mining Oracle",
         "version": "1.1.0",
         "protocol": "x402 (HTTP 402 Monetized)",
-        "network": "Base (Chain ID 8453)",
+        "network": "Polygon (Chain ID 137)",
         "price_per_query": "0.005 USDC",
         "interactive_dashboard": "/dashboard",
         "endpoints": {
@@ -110,8 +110,8 @@ async def health_check():
     return {
         "status": "healthy",
         "oracle": "minerals-oracle-x402",
-        "network": "base-mainnet",
-        "chain_id": 8453,
+        "network": "polygon-mainnet",
+        "chain_id": 137,
         "feed_status": "operational",
         "commodities_tracked": ["Ag", "Pt", "Cu", "Li", "NdDy"],
         "scrap_feedstocks_supported": [
@@ -137,7 +137,7 @@ async def get_public_alpha_signals():
     Public, unauthenticated real-time teaser endpoint.
     Allows autonomous trading agents to poll cross-exchange spreads for FREE,
     alerting them when profitable locational arbitrage margins exist so they can
-    unlock full EIP-712 certified quotes via x402 on Base (0.005 USDC).
+    unlock full EIP-712 certified quotes via x402 on Polygon (0.005 USDC).
     """
     return feed_engine.get_alpha_signals_summary()
 
@@ -297,7 +297,7 @@ async def get_llms_txt():
             return PlainTextResponse(f.read())
     return PlainTextResponse(
         "# minerals-oracle-x402\n"
-        "> Web3 x402 Critical Raw Minerals & Urban Mining Oracle on Base (Chain ID 8453).\n"
+        "> Web3 x402 Critical Raw Minerals & Urban Mining Oracle on Polygon (Chain ID 137).\n"
         "Endpoints:\n"
         "- Free Alpha Hook: GET /api/v1/oracle/alpha-signals\n"
         "- Economic Proof: GET /api/v1/oracle/economics-roi\n"
@@ -316,12 +316,12 @@ async def get_agent_json():
         "description_for_model": (
             "Provides real-time certified spot prices (Silver, Platinum, Copper, Lithium, NdDy Rare Earths), "
             "COMEX/LME arbitrage spreads, and urban-mining scrap batch valuations (EV Black Mass, Auto Catalysts, "
-            "E-Waste PCBs, Permanent Magnets). Monetized via HTTP 402 with 0.005 USDC on Base."
+            "E-Waste PCBs, Permanent Magnets). Monetized via HTTP 402 with 0.005 USDC on Polygon."
         ),
-        "description_for_human": "Autonomous Base x402 Oracle for Physical Commodities & Urban Mining.",
+        "description_for_human": "Autonomous Polygon x402 Oracle for Physical Commodities & Urban Mining.",
         "auth": {
             "type": "x402",
-            "chain_id": 8453,
+            "chain_id": 137,
             "token": "USDC",
             "amount_usdc": 0.005,
             "recipient": x402_verifier.recipient_wallet,
@@ -347,8 +347,8 @@ async def get_ap2_manifest():
         "capabilities": ["oracle:pricing", "oracle:arbitrage", "analytics:urban_mining"],
         "payment": {
             "protocol": "x402",
-            "network": "base",
-            "chain_id": 8453,
+            "network": "polygon",
+            "chain_id": 137,
             "cost_usdc": 0.005,
             "recipient_address": x402_verifier.recipient_wallet,
         }
@@ -359,6 +359,8 @@ async def get_ap2_manifest():
                 manifest = json.load(f)
                 if "payment" in manifest:
                     manifest["payment"]["recipient_address"] = x402_verifier.recipient_wallet
+                    manifest["payment"]["network"] = "polygon"
+                    manifest["payment"]["chain_id"] = 137
         except Exception:
             pass
     return manifest
@@ -383,7 +385,7 @@ async def get_payment_challenge():
     response_model=PriceFeedResponse,
     tags=["Oracle Feed"],
     summary="Get all critical mineral prices",
-    responses={402: {"description": "Payment Required (0.005 USDC on Base)"}},
+    responses={402: {"description": "Payment Required (0.005 USDC on Polygon)"}},
 )
 async def get_all_prices(request: Request):
     """
@@ -403,7 +405,7 @@ async def get_all_prices(request: Request):
     response_model=MineralQuote,
     tags=["Oracle Feed"],
     summary="Get single mineral price quote",
-    responses={402: {"description": "Payment Required (0.005 USDC on Base)"}},
+    responses={402: {"description": "Payment Required (0.005 USDC on Polygon)"}},
 )
 async def get_single_price(
     request: Request,
@@ -450,7 +452,7 @@ async def get_single_price(
     response_model=SpreadsResponse,
     tags=["Oracle Arbitrage"],
     summary="Get cross-exchange arbitrage spreads",
-    responses={402: {"description": "Payment Required (0.005 USDC on Base)"}},
+    responses={402: {"description": "Payment Required (0.005 USDC on Polygon)"}},
 )
 async def get_spreads(request: Request):
     """
@@ -473,7 +475,7 @@ async def get_spreads(request: Request):
     response_model=UrbanMiningResponse,
     tags=["Urban Mining Valuation"],
     summary="Evaluate urban mining scrap batch yield & recoverable value",
-    responses={402: {"description": "Payment Required (0.005 USDC on Base)"}},
+    responses={402: {"description": "Payment Required (0.005 USDC on Polygon)"}},
 )
 async def calculate_urban_mining(request: Request, body: UrbanMiningRequest):
     """

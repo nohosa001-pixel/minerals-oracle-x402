@@ -13,14 +13,14 @@
   "payment": {
     "scheme": "x402",
     "version": "1.0",
-    "network": "base",
-    "chain_id": 8453,
+    "network": "polygon",
+    "chain_id": 137,
     "currency": "USDC",
-    "token_contract": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "token_contract": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
     "cost_per_request_usdc": 0.005,
     "cost_per_request_atomic_units": "5000",
     "recipient_address": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
-    "settlement_facilitator": "https://facilitator.base.org/v1/verify"
+    "settlement_facilitator": "https://facilitator.polygon.technology/v1/verify"
   },
   "capabilities": [
     {

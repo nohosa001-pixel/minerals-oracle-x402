@@ -136,7 +136,7 @@ def menu_x402_challenge():
         pass
 
     challenge = x402_verifier.generate_challenge()
-    print("  Generated Base x402 Challenge Nonce:")
+    print("  Generated Polygon x402 Challenge Nonce:")
     print(json.dumps(challenge.model_dump(), indent=4))
 
 def menu_twitter():

@@ -32,7 +32,7 @@ def test_ap2_manifest_and_mcp_spec():
     ap2_data = resp_ap2.json()
     assert ap2_data["ap2_version"] == "0.2.0"
     assert ap2_data["name"] == "minerals-oracle-x402"
-    assert ap2_data["payment"]["chain_id"] == 8453
+    assert ap2_data["payment"]["chain_id"] == 137
     assert ap2_data["payment"]["recipient_address"] == "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf"
 
     resp_mcp = client.get("/mcp/tools")
@@ -50,14 +50,14 @@ def test_402_challenge_flow():
     assert resp.status_code == 402
     assert "WWW-Authenticate" in resp.headers
     assert resp.headers["X-Payment-Required"] == "true"
-    assert resp.headers["X-Payment-ChainId"] == "8453"
+    assert resp.headers["X-Payment-ChainId"] == "137"
     assert resp.headers["X-Payment-Recipient"] == "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf"
 
     body = resp.json()
     assert body["code"] == 402
     challenge = body["payment_challenge"]
-    assert challenge["network"] == "base"
-    assert challenge["chain_id"] == 8453
+    assert challenge["network"] == "polygon"
+    assert challenge["chain_id"] == 137
     assert challenge["amount"] == "0.005"
     assert challenge["accepted_token"] == "USDC"
     assert challenge["recipient_address"] == "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf"
@@ -66,7 +66,7 @@ def test_402_challenge_flow():
 
 def create_agent_x402_header(agent_account, challenge_nonce: str) -> str:
     """Helper to simulate an autonomous AI agent signing a challenge nonce."""
-    message_text = f"x402:minerals-oracle-x402:pay:0.005:USDC:Base:{challenge_nonce}"
+    message_text = f"x402:minerals-oracle-x402:pay:0.005:USDC:Polygon:{challenge_nonce}"
     signable_msg = encode_defunct(text=message_text)
     signed = agent_account.sign_message(signable_msg)
     
@@ -213,6 +213,41 @@ def test_invalid_signature_rejection():
 
     resp = client.get("/api/v1/oracle/prices", headers={"Authorization": f"x402 {payload_b64}"})
     assert resp.status_code == 402
+
+
+def test_replay_attack_prevention():
+    """Verify challenge nonces cannot be replayed twice."""
+    agent_wallet = Account.create()
+    chal = client.get("/api/v1/oracle/challenge").json()["payment_challenge"]
+    auth = create_agent_x402_header(agent_wallet, chal["nonce"])
+
+    # First request: Success
+    resp1 = client.get("/api/v1/oracle/prices", headers={"Authorization": auth, "X-Trial-Bypass": "true"})
+    assert resp1.status_code == 200
+
+    # Second request (replay with same nonce): Must be 402 Payment Required
+    resp2 = client.get("/api/v1/oracle/prices", headers={"Authorization": auth, "X-Trial-Bypass": "true"})
+    assert resp2.status_code == 402
+
+
+def test_free_tier_quota_and_exhaustion():
+    """Verify sandbox free tier grants 2 trials and requires payment on 3rd query."""
+    test_ip = "192.0.2.123"
+    
+    # 1st query: Free trial (1 remaining)
+    r1 = client.get("/api/v1/oracle/prices", headers={"X-Forwarded-For": test_ip})
+    assert r1.status_code == 200
+    assert r1.headers.get("X-Free-Tier-Remaining") == "1"
+
+    # 2nd query: Free trial (0 remaining)
+    r2 = client.get("/api/v1/oracle/prices", headers={"X-Forwarded-For": test_ip})
+    assert r2.status_code == 200
+    assert r2.headers.get("X-Free-Tier-Remaining") == "0"
+
+    # 3rd query: Quota exhausted -> 402 Payment Required
+    r3 = client.get("/api/v1/oracle/prices", headers={"X-Forwarded-For": test_ip})
+    assert r3.status_code == 402
+    assert "WWW-Authenticate" in r3.headers
 
 
 def test_free_alpha_signals_and_economics():
