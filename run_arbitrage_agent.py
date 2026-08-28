@@ -190,7 +190,23 @@ class ArbitrageTradingAgent:
 
 def main():
     agent = ArbitrageTradingAgent()
-    agent.run_cycle()
+    is_loop = "--loop" in sys.argv
+    interval = 3.0
+
+    if is_loop:
+        print("\n" + "="*75)
+        print("  🚀 [MineralsAlpha 24/7 Continuous Mode Started]")
+        print(f"  • Interval: {interval}s | Broker: 한국투자증권 ({KIS_OVERSEAS_ACCOUNT}) | Base: {BASE_CHAIN_ID}")
+        print("  • Press Ctrl+C in terminal to stop.")
+        print("="*75)
+        try:
+            while True:
+                agent.run_cycle()
+                time.sleep(interval)
+        except KeyboardInterrupt:
+            print("\n  [INFO] 24/7 Arbitrage Agent stopped safely by user.")
+    else:
+        agent.run_cycle()
 
 if __name__ == "__main__":
     main()
