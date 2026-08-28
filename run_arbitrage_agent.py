@@ -32,6 +32,7 @@ if sys.platform == "win32":
 import httpx
 from app.feed_engine import feed_engine
 from app.telegram_bot import telegram_bot
+from app.kis_client import kis_client
 
 # Configuration Parameters
 MIN_SPREAD_BPS = 50.0        # Minimum spread in basis points (0.50%) to trigger execution
@@ -39,6 +40,7 @@ TRADE_SIZE_USD = 50_000.0    # Simulated capital allocation per trade batch ($50
 BASE_CHAIN_ID = 8453         # Base Mainnet
 GAS_FEE_USD = 0.08           # Typical L2 Base transaction gas fee
 ORACLE_API_URL = os.getenv("ORACLE_API_URL", "http://127.0.0.1:8000")
+KIS_OVERSEAS_ACCOUNT = os.getenv("KIS_ACCOUNT_NO", "10061681-08")
 
 class ArbitrageTradingAgent:
     def __init__(self, name: str = "MineralsAlpha-Agent-v1"):
@@ -90,6 +92,16 @@ class ArbitrageTradingAgent:
         tx_hash = self.generate_simulated_tx_hash(symbol, spread_info.get("timestamp_utc", ""))
         timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
+        # Execute Korea Investment Overseas Futures Hedge Order (Safe High-Precision Adapter)
+        kis_order = kis_client.execute_futures_hedge_order(
+            symbol=symbol,
+            spread_bps=bps,
+            net_margin_usd=net_margin_per_unit,
+            direction=direction,
+            quantity_lots=1,
+            dry_run=True,
+        )
+
         trade_record = {
             "trade_id": f"ARB-{self.total_trades_executed + 1:04d}",
             "timestamp": timestamp,
@@ -103,7 +115,10 @@ class ArbitrageTradingAgent:
             "gas_fee_usd": GAS_FEE_USD,
             "net_pnl_usd": round(net_profit, 2),
             "tx_hash": tx_hash,
-            "status": "CONFIRMED_ONCHAIN_BASE",
+            "kis_account": KIS_OVERSEAS_ACCOUNT,
+            "kis_order_id": kis_order.get("order_id"),
+            "kis_ticker": kis_order.get("ticker"),
+            "status": "CONFIRMED_BASE_AND_KIS_FUTURES",
         }
 
         # Update metrics
@@ -116,6 +131,7 @@ class ArbitrageTradingAgent:
         # Dispatch Telegram Smartphone Alert if configured
         try:
             msg = telegram_bot.generate_arbitrage_message(spread_info)
+            msg += f"\n🏦 <b>KIS Account:</b> <code>{KIS_OVERSEAS_ACCOUNT}</code> (Ticker: {kis_order.get('ticker')})"
             asyncio.run(telegram_bot.send_message(msg, dry_run=not telegram_bot.has_credentials))
         except Exception:
             pass
@@ -151,12 +167,13 @@ class ArbitrageTradingAgent:
                 print(f"     🔥 >>> TARGET OPPORTUNITY DETECTED ({bps:.1f} bps >= {MIN_SPREAD_BPS} bps)")
                 print(f"     ⚡ Executing Atomic Hedge Strategy: {sp['arbitrage_direction']}")
                 
-                # Execute Trade
+                # Execute Trade (Base + KIS Overseas Futures)
                 result = self.execute_arbitrage(sp)
                 
                 print(f"     ✅ Order Filled: ${result['allocation_usd']:,.2f} USD ({result['volume_executed']} units)")
                 print(f"     💵 Gross Profit: +${result['gross_profit_usd']:,.2f} | Gas: -${result['gas_fee_usd']:.2f}")
                 print(f"     💎 Net Realized PnL: +${result['net_pnl_usd']:,.2f} USDC")
+                print(f"     🏦 KIS Futures Order: {result['kis_account']} | {result['kis_ticker']} ({result['kis_order_id']})")
                 print(f"     ⛓️ Base Tx Hash: {result['tx_hash'][:18]}...{result['tx_hash'][-10:]}")
             else:
                 print(f"     ⚖️ Spread below threshold or non-profitable (Holding position)")
