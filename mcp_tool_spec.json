@@ -74,6 +74,22 @@
         },
         "required": ["scrap_category", "quantity_metric_tons"]
       }
+    },
+    {
+      "name": "get_onchain_signed_feed",
+      "description": "Generate an EIP-712 cryptographically signed price feed payload and raw ABI calldata (v, r, s) to update or consume price data directly in Solidity smart contracts on Polygon (Chain ID 137 / Amoy). Requires 0.005 USDC on Polygon via x402.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "enum": ["Cu", "Li", "Ag", "Pt", "NdDy"],
+            "default": "Cu",
+            "description": "Commodity symbol to sign (default: 'Cu')"
+          }
+        },
+        "required": ["symbol"]
+      }
     }
   ]
 }

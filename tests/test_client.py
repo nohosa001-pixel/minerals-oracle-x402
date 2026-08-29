@@ -295,11 +295,12 @@ def test_mcp_stdio_jsonrpc_protocol():
     tools_res = handle_tools_list(2)
     assert tools_res["id"] == 2
     tools = tools_res["result"]["tools"]
-    assert len(tools) == 3
+    assert len(tools) == 4
     tool_names = [t["name"] for t in tools]
     assert "get_mineral_prices" in tool_names
     assert "get_arbitrage_spreads" in tool_names
     assert "calculate_urban_mining_value" in tool_names
+    assert "get_onchain_signed_feed" in tool_names
 
     # 3. Test tools/call (prices)
     call_prices = handle_tool_call(3, "get_mineral_prices", {})

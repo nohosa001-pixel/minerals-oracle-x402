@@ -18,6 +18,10 @@
     {
       "name": "calculate_urban_mining_value",
       "description": "Calculate theoretical and payable recovery value for recyclable scrap (EV Battery Black Mass, Auto Catalysts, E-Waste PCB, Wind Permanent Magnets)."
+    },
+    {
+      "name": "get_onchain_signed_feed",
+      "description": "Generate an EIP-712 cryptographically signed price feed payload and raw ABI calldata (v, r, s) for Solidity smart contracts and AggregatorV3 on Polygon."
     }
   ]
 }

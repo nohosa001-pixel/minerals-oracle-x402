@@ -90,6 +90,22 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
                         },
                         "required": ["scrap_category", "quantity_metric_tons"]
                     }
+                },
+                {
+                    "name": "get_onchain_signed_feed",
+                    "description": "Generate an EIP-712 cryptographically signed price feed payload and raw ABI calldata (v, r, s) to update or consume price data directly in Solidity smart contracts on Polygon (Chain ID 137 / Amoy).",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "symbol": {
+                                "type": "string",
+                                "enum": ["Cu", "Li", "Ag", "Pt", "NdDy"],
+                                "default": "Cu",
+                                "description": "Commodity symbol to sign (default: 'Cu')"
+                            }
+                        },
+                        "required": ["symbol"]
+                    }
                 }
             ]
         }
@@ -146,6 +162,36 @@ def handle_tool_call(req_id: Any, name: str, args: Dict[str, Any]) -> Dict[str, 
                 "id": req_id,
                 "result": {
                     "content": [{"type": "text", "text": json.dumps(data, indent=2)}]
+                }
+            }
+        except Exception as e:
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "content": [{"type": "text", "text": f"Error: {str(e)}"}],
+                    "isError": True
+                }
+            }
+    elif name == "get_onchain_signed_feed":
+        try:
+            from app.onchain_signer import onchain_signer
+            symbol = args.get("symbol", "Cu")
+            alias_map = {
+                "Cu": CommoditySymbol.CU, "Copper": CommoditySymbol.CU,
+                "Li": CommoditySymbol.LI, "Lithium": CommoditySymbol.LI,
+                "Ag": CommoditySymbol.AG, "Silver": CommoditySymbol.AG,
+                "Pt": CommoditySymbol.PT, "Platinum": CommoditySymbol.PT,
+                "NdDy": CommoditySymbol.NDDY, "Neodymium": CommoditySymbol.NDDY
+            }
+            sym_enum = alias_map.get(symbol, CommoditySymbol.CU)
+            quote = feed_engine.get_single_quote(sym_enum)
+            signed_payload = onchain_signer.sign_price_feed(sym_enum.value, quote.spot_price_usd)
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "content": [{"type": "text", "text": json.dumps(signed_payload, indent=2)}]
                 }
             }
         except Exception as e:

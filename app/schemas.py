@@ -195,3 +195,38 @@ class AlphaSignalsSummary(BaseModel):
         "/api/v1/oracle/spreads to obtain complete EIP-712 certified quotes, net logistics formulas, and scrap matrices."
     )
 
+
+class PricingTier(str, Enum):
+    LIGHT = "LIGHT"         # $0.001 USDC (Single price / basic ping)
+    STANDARD = "STANDARD"   # $0.005 USDC (Full price feed / arbitrage radar)
+    HEAVY = "HEAVY"         # $0.010 USDC (Hydrometallurgical scrap yield tensor)
+    ONCHAIN = "ONCHAIN"     # $0.020 USDC (EIP-712 smart contract signed calldata)
+
+
+class PaymentReceipt(BaseModel):
+    receipt_id: str = Field(..., description="Unique cryptographic payment receipt ID (e.g. rcpt_...)")
+    payer_address: str = Field(..., description="Agent or user wallet address that authorized the payment")
+    amount_paid_usdc: float = Field(..., description="Amount paid in USDC")
+    pricing_tier: PricingTier = Field(..., description="Service tier consumed")
+    timestamp_utc: str = Field(..., description="ISO 8601 UTC timestamp of execution")
+    oracle_state_digest: str = Field(..., description="Cryptographic SHA-256 digest of the payload provided")
+    oracle_receipt_signature: str = Field(..., description="ECDSA signature proving payment settlement")
+    network: str = "Polygon (Chain ID 137)"
+
+
+class VaultDepositRequest(BaseModel):
+    agent_address: str = Field(..., description="Checksummed Polygon wallet address of the agent")
+    amount_usdc: float = Field(..., gt=0, description="Amount of USDC to deposit (e.g. 10.0, 50.0)")
+    tx_hash: Optional[str] = Field(None, description="Optional on-chain Polygon transaction hash")
+
+
+class VaultBalanceResponse(BaseModel):
+    agent_address: str
+    balance_usdc: float
+    total_deposited_usdc: float
+    total_consumed_usdc: float
+    session_key: str
+    query_count: int
+    last_active_utc: str
+
+
