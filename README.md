@@ -3,18 +3,18 @@
 [![PyPI Version](https://img.shields.io/pypi/v/minerals-oracle-x402.svg?color=blue&style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/minerals-oracle-x402/)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/minerals-oracle-x402.svg?style=for-the-badge&color=orange)](https://pypi.org/project/minerals-oracle-x402/)
 [![Glama.ai](https://img.shields.io/badge/Glama.ai-Approved-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](https://glama.ai/mcp/servers/nohosa001-pixel/minerals-oracle-x402)
-[![Cloud Run](https://img.shields.io/badge/Google_Cloud_Run-Live_24%2F7-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/dashboard)
+[![Cloud Run](https://img.shields.io/badge/Google_Cloud_Run-Live_24%2F7-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/)
 [![Polygon Network](https://img.shields.io/badge/Polygon_USDC-x402_Settlement-8247E5?style=for-the-badge&logo=polygon&logoColor=white)](https://polygon.technology)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-green.svg)](https://fastapi.tiangolo.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Real-time physical spot market pricing, cross-exchange arbitrage spreads, and metallurgical urban mining scrap recovery yield valuations on Polygon Network.
+Real-time physical spot market pricing, cross-exchange arbitrage spreads, and metallurgical urban mining scrap recovery yield valuations on Polygon, Base, and Arbitrum.
 
 ---
 
 ## 🖥️ Interactive Web Dashboard & Simulator (Live)
 
-👉 **[https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/dashboard](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/dashboard)**
+👉 **[https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/)**
 
 Explore the full consumer and enterprise visual interface directly in your browser:
 - 📈 **Real-Time Live Commodity Ticker**: 1.5-second live streaming of COMEX, NYMEX, LME, and SMM market quotes.
