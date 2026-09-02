@@ -19,7 +19,7 @@ import os
 import time
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Dict, Any, Optional, Tuple, Union
+from typing import Dict, Any, Optional, Tuple, Union, List
 
 import httpx
 from dotenv import load_dotenv
