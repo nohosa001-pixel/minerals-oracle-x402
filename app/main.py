@@ -6,7 +6,7 @@ from typing import Dict, Any, Optional
 from pydantic import BaseModel
 
 from fastapi import FastAPI, Request, Depends, HTTPException, status, Query, Path as FPath
-from fastapi.responses import JSONResponse, FileResponse, PlainTextResponse, HTMLResponse
+from fastapi.responses import JSONResponse, FileResponse, PlainTextResponse, HTMLResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -27,11 +27,20 @@ from app.schemas import (
 )
 from app.feed_engine import feed_engine
 from app.x402_verifier import x402_verifier
+from contextlib import asynccontextmanager
 from app.onchain_signer import onchain_signer
 from app.vault_manager import vault_manager
 from app.enterprise_manager import enterprise_manager
 from app.twitter_bot import twitter_bot
 from app.telegram_bot import telegram_bot
+from app.cloud_bot_worker import cloud_bot_worker
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Starts 24/7 autonomous cloud arbitrage worker on server launch."""
+    cloud_bot_worker.start()
+    yield
+    cloud_bot_worker.stop()
 
 app = FastAPI(
     title="Critical Raw Minerals & Urban Mining Oracle",
@@ -40,10 +49,11 @@ app = FastAPI(
         "and metallurgical urban mining scrap yield valuations on Polygon Network. "
         "Explore the interactive Web Dashboard at /dashboard."
     ),
-    version="1.1.0",
+    version="1.2.0",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
+    lifespan=lifespan,
 )
 
 # Enable CORS for all agent clients & web dashboards
@@ -375,6 +385,67 @@ async def get_ap2_manifest():
     return manifest
 
 
+@app.get("/.well-known/ai-plugin.json", tags=["Agent Protocol"])
+async def get_ai_plugin_manifest():
+    """OpenAI / AutoGPT / LangChain Plugin discovery manifest."""
+    return {
+        "schema_version": "v1",
+        "name_for_human": "Minerals Oracle x402",
+        "name_for_model": "minerals_oracle",
+        "description_for_human": "Real-time commodities spot benchmarks, cross-exchange basis spreads, and urban mining yields.",
+        "description_for_model": "Access physical commodity spot prices (Copper, Silver, Lithium, Platinum, Neodymium) and cross-exchange basis spreads. Use ?format=compact to save tokens. Self-serve onboarding via POST /api/v1/agent/onboard.",
+        "auth": {
+            "type": "service_http",
+            "authorization_type": "custom",
+            "custom_auth_header": "X-Agent-Vault-Key",
+        },
+        "api": {
+            "type": "openapi",
+            "url": "/openapi.json"
+        },
+        "logo_url": "https://raw.githubusercontent.com/favicon.ico",
+        "contact_email": "support@minerals-oracle.org",
+        "legal_info_url": "https://minerals-oracle.org/legal"
+    }
+
+
+@app.get("/.well-known/agent.json", tags=["Agent Protocol"])
+async def get_agent_protocol_manifest():
+    """Standard A2A (Agent-to-Agent) discovery manifest."""
+    return {
+        "agent_name": "minerals-oracle-x402",
+        "protocol_version": "1.0.0",
+        "skills": [
+            {
+                "id": "commodity-spot-feed",
+                "endpoint": "/api/v1/oracle/prices",
+                "format_compact_support": True,
+                "cost_tier": "$0.005 USDC"
+            },
+            {
+                "id": "arbitrage-spread-radar",
+                "endpoint": "/api/v1/oracle/spreads",
+                "format_compact_support": True,
+                "cost_tier": "$0.005 USDC"
+            },
+            {
+                "id": "realtime-sse-stream",
+                "endpoint": "/api/v1/oracle/stream",
+                "cost_tier": "Free stream"
+            },
+            {
+                "id": "self-serve-onboarding",
+                "endpoint": "/api/v1/agent/onboard",
+                "free_trial": "10 queries ($0.05 USDC)"
+            }
+        ],
+        "mcp_server": {
+            "entrypoint": "python -m app.mcp_stdio",
+            "transport": "stdio"
+        }
+    }
+
+
 # ==========================================
 # Oracle 402 Challenge & Protected Endpoints
 # ==========================================
@@ -485,6 +556,50 @@ async def get_vault_balance(agent_address: str):
     )
 
 
+class AgentOnboardRequest(BaseModel):
+    agent_name: str
+    agent_address: Optional[str] = None
+    requested_network: Optional[str] = "polygon"
+
+
+@app.post(
+    "/api/v1/agent/onboard",
+    tags=["Agent Protocol"],
+    summary="Self-serve instant onboarding for autonomous AI agents",
+)
+async def onboard_autonomous_agent(body: AgentOnboardRequest):
+    """
+    Zero-friction self-serve onboarding for autonomous AI agents.
+    Instantly provisions an agent vault account pre-funded with 10 free trial queries (0.05 USDC).
+    Returns session key, authorization header instructions, and autonomous USDC recharge guidelines.
+    """
+    acc, session_key = vault_manager.register_agent_onboarding(
+        agent_name=body.agent_name,
+        agent_address=body.agent_address,
+        initial_trial_balance_usdc=0.05,
+    )
+    treasury_wallet = os.getenv("ORACLE_TREASURY_WALLET", "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf")
+    return {
+        "status": "success",
+        "agent_name": body.agent_name,
+        "agent_address": acc.agent_address,
+        "session_key": session_key,
+        "trial_balance_usdc": acc.balance_usdc,
+        "free_queries_remaining": int(acc.balance_usdc // 0.005),
+        "auth_header": {
+            "header_name": "X-Agent-Vault-Key",
+            "header_value": session_key,
+            "curl_example": f"curl -H 'X-Agent-Vault-Key: {session_key}' http://127.0.0.1:8000/api/v1/oracle/prices?format=compact",
+        },
+        "recharge_instructions": {
+            "token": "USDC",
+            "networks": ["Polygon (137)", "Base (8453)", "Arbitrum (42161)"],
+            "deposit_endpoint": "POST /api/v1/vault/deposit",
+            "treasury_address": treasury_wallet,
+        }
+    }
+
+
 # ==========================================
 # Cryptographic Audit Receipt Endpoints
 # ==========================================
@@ -507,12 +622,14 @@ async def get_payment_receipt(receipt_id: str):
 
 @app.get(
     "/api/v1/oracle/prices",
-    response_model=PriceFeedResponse,
     tags=["Oracle Feed"],
     summary="Get all critical mineral prices (Tier 2: Standard $0.005 USDC)",
     responses={402: {"description": "Payment Required (0.005 USDC on Polygon)"}},
 )
-async def get_all_prices(request: Request):
+async def get_all_prices(
+    request: Request,
+    format: Optional[str] = Query(None, description="Output format: 'json' (default) or 'compact' (LLM token-saving text)"),
+):
     """
     Returns normalized, deterministic real-time spot prices for all supported critical commodities:
     - Silver (Ag), Platinum (Pt), Copper (Cu), Lithium (Li), Neodymium/Dysprosium (NdDy).
@@ -520,14 +637,21 @@ async def get_all_prices(request: Request):
     resp_402 = await require_x402_payment(request, tier=PricingTier.STANDARD)
     if resp_402:
         return resp_402
-    data = feed_engine.get_all_quotes().model_dump()
+
     headers = getattr(request.state, "extra_headers", {}) or {}
+    accept = request.headers.get("accept", "")
+    if format == "compact" or "text/plain" in accept:
+        all_q = feed_engine.get_all_quotes().quotes
+        items = [f"{sym}:{q.spot_price_usd:.1f}" for sym, q in all_q.items()]
+        compact_str = f"[CRM-QUOTE] {'|'.join(items)}"
+        return PlainTextResponse(content=compact_str, headers=headers)
+
+    data = feed_engine.get_all_quotes().model_dump()
     return JSONResponse(content=data, headers=headers)
 
 
 @app.get(
     "/api/v1/oracle/prices/{symbol}",
-    response_model=MineralQuote,
     tags=["Oracle Feed"],
     summary="Get single mineral price quote (Tier 1: Light $0.001 USDC)",
     responses={402: {"description": "Payment Required (0.001 USDC on Polygon)"}},
@@ -539,6 +663,7 @@ async def get_single_price(
         description="Commodity symbol or name (e.g. Neodymium, NdDy, Lithium, Li, Copper, Cu, Silver, Ag, Platinum, Pt)",
         examples=["Neodymium", "Lithium", "Copper"]
     ),
+    format: Optional[str] = Query(None, description="Output format: 'json' (default) or 'compact' (LLM token-saving text)"),
 ):
     """
     Returns normalized spot quote and unit conversions for a specific critical mineral symbol (Light Tier).
@@ -567,19 +692,29 @@ async def get_single_price(
             detail=f"Commodity symbol '{symbol}' not found. Supported: Neodymium (NdDy), Lithium (Li), Copper (Cu), Silver (Ag), Platinum (Pt).",
         )
 
-    data = feed_engine.get_single_quote(sym_enum).model_dump()
     headers = getattr(request.state, "extra_headers", {}) or {}
+    accept = request.headers.get("accept", "")
+    if format == "compact" or "text/plain" in accept:
+        q = feed_engine.get_single_quote(sym_enum)
+        sym_name = q.symbol.value if hasattr(q.symbol, "value") else str(q.symbol)
+        unit_str = q.unit.value if hasattr(q.unit, "value") else str(q.unit)
+        compact_str = f"[CRM-QUOTE-{sym_name}] Spot:{q.spot_price_usd:.2f} {unit_str} | 24h:{q.change_24h_pct:+.2f}% | Venue:{q.benchmark_exchange}"
+        return PlainTextResponse(content=compact_str, headers=headers)
+
+    data = feed_engine.get_single_quote(sym_enum).model_dump()
     return JSONResponse(content=data, headers=headers)
 
 
 @app.get(
     "/api/v1/oracle/spreads",
-    response_model=SpreadsResponse,
     tags=["Oracle Arbitrage"],
     summary="Get cross-exchange arbitrage spreads (Tier 2: Standard $0.005 USDC)",
     responses={402: {"description": "Payment Required (0.005 USDC on Polygon)"}},
 )
-async def get_spreads(request: Request):
+async def get_spreads(
+    request: Request,
+    format: Optional[str] = Query(None, description="Output format: 'json' (default) or 'compact' (LLM token-saving text)"),
+):
     """
     Calculates active locational basis spreads across major exchange venues:
     - Copper: COMEX (US) vs LME (UK)
@@ -590,9 +725,62 @@ async def get_spreads(request: Request):
     resp_402 = await require_x402_payment(request, tier=PricingTier.STANDARD)
     if resp_402:
         return resp_402
-    data = feed_engine.get_arbitrage_spreads().model_dump()
+
     headers = getattr(request.state, "extra_headers", {}) or {}
+    accept = request.headers.get("accept", "")
+    if format == "compact" or "text/plain" in accept:
+        spreads_res = feed_engine.get_arbitrage_spreads().spreads
+        items = []
+        for s in spreads_res:
+            raw_sym = s.symbol.value if hasattr(s.symbol, "value") else str(s.symbol)
+            items.append(f"{raw_sym}:{s.primary_exchange}-{s.secondary_exchange}(+{s.spread_basis_points:.0f}bps,+${s.net_arbitrage_margin_usd:.2f})")
+        compact_str = f"[CRM-SPREADS] {' | '.join(items)}"
+        return PlainTextResponse(content=compact_str, headers=headers)
+
+    data = feed_engine.get_arbitrage_spreads().model_dump()
     return JSONResponse(content=data, headers=headers)
+
+
+@app.get(
+    "/api/v1/oracle/stream",
+    tags=["Oracle Streaming"],
+    summary="Real-time Server-Sent Events (SSE) Stream for Autonomous Agents",
+)
+async def stream_oracle_events(
+    request: Request,
+    min_bps: float = Query(30.0, description="Minimum spread basis points to trigger arbitrage alerts"),
+    limit: Optional[int] = Query(None, description="Optional maximum events to emit (useful for testing and short-lived subscriptions)"),
+):
+    """
+    Zero-polling Server-Sent Events (SSE) stream for autonomous AI agents.
+    Emits periodic heartbeats and instant 'arbitrage_alert' events when profitable locational spreads emerge.
+    """
+    import time
+
+    async def event_generator():
+        yield f"event: connected\ndata: {json.dumps({'message': 'Connected to Minerals Oracle x402 Live Stream', 'filter_min_bps': min_bps})}\n\n"
+        iteration = 0
+        while True:
+            if await request.is_disconnected():
+                break
+            if limit is not None and iteration >= limit:
+                break
+            try:
+                iteration += 1
+                spreads = feed_engine.get_arbitrage_spreads().spreads
+                hot_spreads = [sp.model_dump() for sp in spreads if sp.spread_basis_points >= min_bps]
+                if hot_spreads:
+                    yield f"event: arbitrage_alert\ndata: {json.dumps({'count': len(hot_spreads), 'spreads': hot_spreads})}\n\n"
+                elif iteration % 5 == 0:
+                    quotes = feed_engine.get_all_quotes().quotes
+                    summary = {sym: round(q.spot_price_usd, 2) for sym, q in quotes.items()}
+                    yield f"event: heartbeat\ndata: {json.dumps({'timestamp_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'quotes': summary})}\n\n"
+                await asyncio.sleep(1.0)
+            except Exception as e:
+                yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
+                await asyncio.sleep(1.0)
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
 @app.post(
@@ -826,8 +1014,247 @@ async def invoke_mcp_tool(request: Request, tool_call: MCPToolCallRequest):
         )
 
 
+# ==========================================
+# 24/7 Cloud Autonomous Trading Bot Endpoints
+# ==========================================
+@app.get(
+    "/api/v1/bot/status",
+    tags=["24/7 Cloud Trading Bot"],
+    summary="Get 24/7 Cloud Autonomous Arbitrage Bot Status & Cumulative PnL",
+)
+async def get_cloud_bot_status():
+    """
+    Returns real-time operational status, cumulative realized PnL, gas costs,
+    and broker details for the 24/7 cloud worker running independently of user laptop.
+    """
+    return cloud_bot_worker.get_status()
+
+
+@app.get(
+    "/api/v1/bot/history",
+    tags=["24/7 Cloud Trading Bot"],
+    summary="Get Recent Automated Trade Execution History",
+)
+async def get_cloud_bot_history(limit: int = Query(20, ge=1, le=100)):
+    """
+    Returns the most recent automated trade executions recorded by the 24/7 Cloud Worker.
+    """
+    return {
+        "status": "success",
+        "count": len(cloud_bot_worker.trade_history[:limit]),
+        "trades": cloud_bot_worker.trade_history[:limit],
+    }
+
+
+@app.get(
+    "/api/v1/kis/account-balance",
+    tags=["24/7 Cloud Trading Bot"],
+    summary="Get Real-Time Live Korea Investment & Securities (KIS) Account Balance",
+)
+async def get_kis_account_balance():
+    """
+    Queries real-time live cash deposit & total asset evaluation from Korea Investment & Securities OpenAPI.
+    """
+    from app.kis_client import kis_client
+    return kis_client.inquire_realtime_balance()
+
+
+@app.get(
+    "/api/v1/bot/config",
+    tags=["24/7 Cloud Trading Bot"],
+    summary="Get 24/7 Cloud Bot & Overseas Futures Trade Sizing Configuration",
+)
+async def get_cloud_bot_config():
+    """
+    Returns current trade mode (Futures Micro/Standard, ETF, Auto), sizing algorithm,
+    target commodity, capital allocation, and supported contract specifications.
+    """
+    return {
+        "status": "success",
+        "config": cloud_bot_worker.get_config(),
+    }
+
+
+class UpdateBotConfigRequest(BaseModel):
+    trade_mode: Optional[str] = None
+    sizing_mode: Optional[str] = None
+    fixed_lots: Optional[int] = None
+    target_commodity: Optional[str] = None
+    total_capital_usd: Optional[float] = None
+    trade_size_usd: Optional[float] = None
+    margin_buffer_pct: Optional[float] = None
+    max_positions: Optional[int] = None
+    scan_interval_sec: Optional[float] = None
+
+
+@app.post(
+    "/api/v1/bot/config",
+    tags=["24/7 Cloud Trading Bot"],
+    summary="Update 24/7 Cloud Bot Trade Sizing Configuration",
+)
+async def update_cloud_bot_config(body: UpdateBotConfigRequest):
+    """
+    Dynamically reconfigures bot parameters (Trade Mode, Sizing Mode, Lots, Target Asset, Capital).
+    """
+    updates = {k: v for k, v in body.model_dump().items() if v is not None}
+    updated_config = cloud_bot_worker.update_config(updates)
+    return {
+        "status": "success",
+        "updated_parameters": list(updates.keys()),
+        "config": updated_config,
+    }
+
+
+@app.post(
+    "/api/v1/bot/toggle",
+    tags=["24/7 Cloud Trading Bot"],
+    summary="Pause or Resume 24/7 Cloud Worker",
+)
+async def toggle_cloud_bot(enable: bool = Query(..., description="Set true to run, false to pause")):
+    """
+    Dynamically start or pause the 24/7 Cloud background trading worker.
+    """
+    if enable:
+        cloud_bot_worker.is_enabled = True
+        cloud_bot_worker.start()
+    else:
+        cloud_bot_worker.stop()
+        cloud_bot_worker.is_enabled = False
+
+    return {
+        "status": "success",
+        "action": "STARTED" if enable else "PAUSED",
+        "current_status": cloud_bot_worker.get_status(),
+    }
+
+
+@app.post(
+    "/api/v1/bot/reset",
+    tags=["24/7 Cloud Trading Bot"],
+    summary="Reset All 24/7 Cloud Bot Metrics, PnL, and Trade History to 0",
+)
+async def reset_cloud_bot():
+    """
+    Clears all past trade history and resets cumulative PnL metrics and active positions to 0 for a fresh live start.
+    """
+    status_data = cloud_bot_worker.reset_state()
+    return {
+        "status": "success",
+        "message": "All trading metrics, PnL counters, and positions successfully reset to 0.",
+        "current_status": status_data,
+    }
+
+
+@app.get(
+    "/api/v1/ops/telemetry",
+    tags=["A-Grid Operations & Compliance"],
+    summary="Get Consolidated Live Telemetry for agrid-ops-agent",
+)
+async def get_agrid_ops_telemetry():
+    """
+    Returns real-time consolidated financial, accounting, and compliance metrics
+    specifically formatted for ingestion by agrid-ops-agent (Accounting, Finance, Legal).
+    """
+    import csv
+    from datetime import datetime, timezone
+
+    # 1. Load bot state
+    state_file = Path(__file__).parent.parent / "logs" / "bot_state.json"
+    state_data = {}
+    if state_file.exists():
+        try:
+            with open(state_file, "r", encoding="utf-8") as f:
+                state_data = json.load(f)
+        except Exception:
+            pass
+
+    # 2. Get KIS account numbers
+    from app.kis_client import kis_client
+    
+    # 3. Load SLA metrics
+    sla = enterprise_manager.get_sla_metrics()
+
+    return {
+        "status": "success",
+        "service_name": "minerals-oracle-x402",
+        "telemetry_type": "AGRID_OPS_INTEGRATION_V1",
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "finance": {
+            "total_capital_usd": state_data.get("total_capital_usd", float(os.getenv("TOTAL_CAPITAL_USD", "497.65"))),
+            "safe_reserve_vault_usd": state_data.get("safe_reserve_vault_usd", 0.0),
+            "reinvested_capital_usd": state_data.get("reinvested_capital_usd", 0.0),
+            "free_available_usd": state_data.get("total_capital_usd", 497.65) - sum(p.get("margin_usd", 0.0) for p in state_data.get("active_positions", {}).values()),
+            "active_positions_count": len(state_data.get("active_positions", {})),
+            "broker": "한국투자증권 (Korea Investment & Securities)",
+            "stock_account": kis_client.account_no,
+            "futures_account": kis_client.futures_account_no,
+            "is_dry_run": os.getenv("KIS_DRY_RUN", "true").lower() in ("true", "1", "yes"),
+        },
+        "accounting": {
+            "total_trades_executed": state_data.get("total_trades_executed", 0),
+            "cumulative_net_pnl_usd": state_data.get("cumulative_net_pnl", 0.0),
+            "cumulative_gross_profit_usd": state_data.get("cumulative_gross_profit", 0.0),
+            "cumulative_gas_spent_usd": state_data.get("cumulative_gas_spent", 0.0),
+            "x402_price_per_query_usdc": float(os.getenv("DEFAULT_PRICE_USDC", "0.005")),
+            "oracle_treasury_wallet": os.getenv("ORACLE_TREASURY_WALLET", "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf"),
+            "polygon_chain_id": int(os.getenv("POLYGON_CHAIN_ID", "137")),
+        },
+        "compliance_and_sla": {
+            "uptime_percentage": sla.get("uptime_percentage", "99.998%"),
+            "sla_tier": sla.get("sla_tier", "99.99% Tier-4 Financial Grade"),
+            "latency_p50_ms": sla.get("latency_telemetry", {}).get("p50_ms", 0.85),
+            "audit_proof": sla.get("compliance", {}).get("audit_proof", "Cryptographic EIP-712 / SHA-256"),
+        },
+    }
+
+
+@app.get(
+    "/api/v1/ops/journals",
+    tags=["A-Grid Operations & Compliance"],
+    summary="Get Structured Trade & Cash-out Journals for agrid-ops-agent",
+)
+async def get_agrid_ops_journals(limit: int = Query(50, ge=1, le=500)):
+    """
+    Exports recent closed trades and cashout journal entries for A.GRID ledger and tax automation.
+    """
+    import csv
+    log_dir = Path(__file__).parent.parent / "logs"
+    trade_file = log_dir / "trade_journal_master.csv"
+    cashout_file = log_dir / "cashout_journal.csv"
+
+    trades = []
+    if trade_file.exists():
+        try:
+            with open(trade_file, "r", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    trades.append(row)
+        except Exception:
+            pass
+
+    cashouts = []
+    if cashout_file.exists():
+        try:
+            with open(cashout_file, "r", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    cashouts.append(row)
+        except Exception:
+            pass
+
+    return {
+        "status": "success",
+        "trade_count": len(trades[-limit:]),
+        "trades": trades[-limit:],
+        "cashout_count": len(cashouts[-limit:]),
+        "cashouts": cashouts[-limit:],
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
+
     port = int(os.getenv("PORT", "8000"))
     uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)
+
 

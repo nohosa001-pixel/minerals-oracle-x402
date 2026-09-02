@@ -7,9 +7,14 @@ import os
 import time
 import secrets
 import threading
+import hashlib
 from typing import Dict, Any, Optional, Tuple, List
 from pydantic import BaseModel
 from web3 import Web3
+
+
+import json
+from pathlib import Path
 
 
 class AgentVaultAccount(BaseModel):
@@ -32,9 +37,38 @@ class VaultManager:
         self._accounts: Dict[str, AgentVaultAccount] = {}
         # session_key -> agent_address
         self._session_index: Dict[str, str] = {}
+        self._storage_path = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) / "logs" / "vault_accounts.json"
         
-        # Pre-seed a sandbox agent vault for local testing / demo
-        self._seed_demo_account()
+        # Load existing accounts from disk or pre-seed demo account
+        self._load_from_disk()
+        if not self._accounts:
+            self._seed_demo_account()
+
+    def _save_to_disk(self):
+        """Persists vault accounts to disk."""
+        if "PYTEST_CURRENT_TEST" in os.environ:
+            return
+        try:
+            self._storage_path.parent.mkdir(parents=True, exist_ok=True)
+            data = {addr: acc.model_dump() for addr, acc in self._accounts.items()}
+            with open(self._storage_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+        except Exception:
+            pass
+
+    def _load_from_disk(self):
+        """Loads vault accounts from disk."""
+        if "PYTEST_CURRENT_TEST" in os.environ or not self._storage_path.exists():
+            return
+        try:
+            with open(self._storage_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            for addr, acc_dict in data.items():
+                acc = AgentVaultAccount(**acc_dict)
+                self._accounts[addr] = acc
+                self._session_index[acc.session_key] = addr
+        except Exception:
+            pass
 
     def _seed_demo_account(self):
         demo_addr = Web3.to_checksum_address("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
@@ -82,7 +116,47 @@ class VaultManager:
                 self._accounts[chk_addr] = acc
                 self._session_index[session_key] = chk_addr
 
+            self._save_to_disk()
             return acc
+
+    def register_agent_onboarding(
+        self,
+        agent_name: str,
+        agent_address: Optional[str] = None,
+        initial_trial_balance_usdc: float = 0.05,
+    ) -> Tuple[AgentVaultAccount, str]:
+        """
+        Self-serve onboarding for autonomous AI agents.
+        Assigns an agent session key and seeds an initial free trial balance (e.g. 0.05 USDC = 10 Standard queries).
+        """
+        if not agent_address or not agent_address.startswith("0x") or len(agent_address) != 42:
+            agent_address = "0x" + hashlib.sha256(f"{agent_name}_{time.time()}_{secrets.token_hex(8)}".encode()).hexdigest()[:40]
+
+        chk_addr = Web3.to_checksum_address(agent_address)
+        now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        session_key = f"agent_session_{secrets.token_hex(16)}"
+
+        with self._lock:
+            if chk_addr in self._accounts:
+                acc = self._accounts[chk_addr]
+                # If existing, return existing account and session key
+                return acc, acc.session_key
+
+            acc = AgentVaultAccount(
+                agent_address=chk_addr,
+                balance_usdc=round(initial_trial_balance_usdc, 6),
+                total_deposited_usdc=round(initial_trial_balance_usdc, 6),
+                total_consumed_usdc=0.0,
+                session_key=session_key,
+                created_at_utc=now_iso,
+                last_active_utc=now_iso,
+                query_count=0,
+            )
+            self._accounts[chk_addr] = acc
+            self._session_index[session_key] = chk_addr
+            self._save_to_disk()
+
+        return acc, session_key
 
     def get_account_by_address(self, agent_address: str) -> Optional[AgentVaultAccount]:
         """Retrieves vault account by wallet address."""
@@ -125,6 +199,7 @@ class VaultManager:
             acc.total_consumed_usdc = round(acc.total_consumed_usdc + amount_usdc, 6)
             acc.query_count += 1
             acc.last_active_utc = now_iso
+            self._save_to_disk()
 
             return True, acc.agent_address, acc.balance_usdc
 

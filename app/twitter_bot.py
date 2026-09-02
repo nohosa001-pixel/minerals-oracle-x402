@@ -22,10 +22,12 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List, Tuple
 
 # Enable UTF-8 for Windows console output
-if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
+if sys.platform == "win32":
     try:
-        sys.stdout.reconfigure(encoding="utf-8")
-        sys.stderr.reconfigure(encoding="utf-8")
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8")  # type: ignore
+        if hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(encoding="utf-8")  # type: ignore
     except Exception:
         pass
 
@@ -52,15 +54,15 @@ class TwitterAlertBot:
         self.api_secret = os.getenv("TWITTER_API_SECRET", "").strip()
         self.access_token = os.getenv("TWITTER_ACCESS_TOKEN", "").strip()
         self.access_token_secret = os.getenv("TWITTER_ACCESS_SECRET", "").strip()
-        self.bearer_token = os.getenv("TWITTER_BEARER_TOKEN", "").strip()
+        self.enabled = os.getenv("ENABLE_TWITTER_BOT", "false").lower() in ("true", "1", "yes")
         self.has_credentials = bool(
             (self.api_key and self.api_secret and self.access_token and self.access_token_secret)
             or self.bearer_token
-        )
+        ) and self.enabled
 
-    def _generate_oauth1_header(self, method: str, url: str, params: Dict[str, Any] = None) -> str:
+    def _generate_oauth1_header(self, method: str, url: str, params: Optional[Dict[str, Any]] = None) -> str:
         """Generates standard OAuth 1.0a HMAC-SHA1 Authorization header for Twitter API v2."""
-        oauth_params = {
+        oauth_params: Dict[str, str] = {
             "oauth_consumer_key": self.api_key,
             "oauth_nonce": hashlib.sha256(f"{time.time()}_{random.random()}".encode()).hexdigest()[:32],
             "oauth_signature_method": "HMAC-SHA1",
@@ -69,10 +71,11 @@ class TwitterAlertBot:
             "oauth_version": "1.0",
         }
         if params:
-            oauth_params.update(params)
+            for k, v in params.items():
+                oauth_params[str(k)] = str(v)
 
         sorted_params = sorted(oauth_params.items())
-        param_str = "&".join([f"{urllib.parse.quote(k, safe='')}={urllib.parse.quote(str(v), safe='')}" for k, v in sorted_params])
+        param_str = "&".join([f"{urllib.parse.quote(k, safe='')}={urllib.parse.quote(v, safe='')}" for k, v in sorted_params])
         base_signature_str = f"{method.upper()}&{urllib.parse.quote(url, safe='')}&{urllib.parse.quote(param_str, safe='')}"
         signing_key = f"{urllib.parse.quote(self.api_secret, safe='')}&{urllib.parse.quote(self.access_token_secret, safe='')}"
 
@@ -80,7 +83,7 @@ class TwitterAlertBot:
         oauth_params["oauth_signature"] = base64.b64encode(signature).decode()
 
         auth_header = "OAuth " + ", ".join([
-            f'{urllib.parse.quote(k, safe="")}="{urllib.parse.quote(str(v), safe="")}"'
+            f'{urllib.parse.quote(k, safe="")}="{urllib.parse.quote(v, safe="")}"'
             for k, v in sorted(oauth_params.items()) if k.startswith("oauth_")
         ])
         return auth_header
@@ -190,17 +193,23 @@ class TwitterAlertBot:
         """Dispatches tweet to Twitter API v2 or performs dry-run simulation."""
         timestamp = datetime.now(timezone.utc).isoformat()
 
-        if dry_run or not self.has_credentials:
+        if dry_run:
             logger.info("=== [DRY-RUN / SIMULATION TWEET DISPATCH] ===")
             logger.info(f"\n{text}\n")
-            logger.info(f"Length: {len(text)} chars | Credentials configured: {self.has_credentials}")
             return {
                 "status": "simulated",
-                "mode": "dry_run" if dry_run else "no_credentials_fallback",
+                "mode": "dry_run",
                 "tweet_text": text,
                 "length": len(text),
                 "timestamp_utc": timestamp,
-                "message": "Tweet successfully simulated and logged. Set TWITTER_API_KEY & TWITTER_ACCESS_TOKEN for live dispatch."
+                "message": "Tweet successfully simulated and logged.",
+            }
+
+        if not self.enabled or not self.has_credentials:
+            return {
+                "status": "disabled",
+                "message": "Twitter bot is disabled by user policy.",
+                "timestamp_utc": timestamp,
             }
 
         url = "https://api.twitter.com/2/tweets"

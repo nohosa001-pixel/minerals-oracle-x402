@@ -3,2061 +3,747 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minerals Oracle | Multi-Chain Real-Time Commodity & Metallurgical Valuation Oracle</title>
-  <meta name="description" content="Multi-chain (Polygon, Base, Arbitrum) real-time LME/COMEX commodity spot prices, cross-exchange arbitrage spreads, and metallurgical urban mining scrap yield valuation oracle for autonomous AI agents and smart contracts.">
-  
-  <!-- Modern Fonts -->
+  <title>Minerals Oracle x402 | Autonomous Agent Data Portal</title>
+  <meta name="description" content="Real-time physical commodities spot & cross-exchange arbitrage alpha data API for autonomous AI agents and quant institutions.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💎</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- Chart.js for Yield Breakdown Visualizer -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-base: #050811;
-      --bg-surface: rgba(15, 23, 42, 0.75);
-      --bg-surface-elevated: rgba(30, 41, 59, 0.85);
-      --border-subtle: rgba(56, 189, 248, 0.16);
-      --border-glow: rgba(56, 189, 248, 0.45);
-      --text-main: #f8fafc;
-      --text-sub: #94a3b8;
-      --text-muted: #64748b;
-      --cyan: #06b6d4;
-      --emerald: #10b981;
+      --bg: #070a13;
+      --card: #0f172a;
+      --card-hover: #1e293b;
+      --border: rgba(148, 163, 184, 0.12);
+      --border-focus: rgba(56, 189, 248, 0.4);
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.15);
+      --green: #10b981;
+      --green-glow: rgba(16, 185, 129, 0.15);
       --amber: #f59e0b;
-      --blue: #3b82f6;
-      --base-blue: #0052ff;
-      --arb-blue: #12aaff;
-      --purple: #a855f7;
-      --rose: #f43f5e;
-      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --font-heading: 'Space Grotesk', var(--font-sans);
-      --font-mono: 'JetBrains Mono', monospace;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: var(--bg-base);
-      background-image: 
-        radial-gradient(at 15% 15%, rgba(6, 182, 212, 0.12) 0px, transparent 50%),
-        radial-gradient(at 85% 20%, rgba(168, 85, 247, 0.12) 0px, transparent 50%),
-        radial-gradient(at 50% 85%, rgba(16, 185, 129, 0.09) 0px, transparent 50%);
-      background-attachment: fixed;
-      color: var(--text-main);
-      font-family: var(--font-sans);
-      line-height: 1.6;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.5;
       min-height: 100vh;
-      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* Sticky Glass Header */
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 20px;
+      width: 100%;
+    }
+
+    /* Top Nav */
     header {
-      border-bottom: 1px solid var(--border-subtle);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      background: rgba(7, 10, 19, 0.85);
+      backdrop-filter: blur(12px);
       position: sticky;
       top: 0;
-      z-index: 100;
-      background: rgba(5, 8, 17, 0.88);
+      z-index: 50;
+      padding: 14px 0;
     }
-
     .nav-inner {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0.85rem 1.5rem;
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
     }
-
-    .logo-group {
+    .brand {
       display: flex;
       align-items: center;
-      gap: 0.85rem;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--text);
       text-decoration: none;
-      color: var(--text-main);
     }
-
-    .logo-icon {
-      width: 42px;
-      height: 42px;
-      background: linear-gradient(135deg, var(--cyan), var(--blue));
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-heading);
-      font-weight: 800;
-      font-size: 1.25rem;
-      box-shadow: 0 0 24px rgba(6, 182, 212, 0.4);
-      color: #fff;
-    }
-
-    .logo-text h1 {
-      font-size: 1.2rem;
-      font-weight: 800;
-      font-family: var(--font-heading);
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-      flex-wrap: wrap;
-    }
-
-    .badge-network {
-      font-size: 0.68rem;
-      padding: 0.2rem 0.55rem;
-      background: rgba(6, 182, 212, 0.15);
-      border: 1px solid rgba(6, 182, 212, 0.35);
-      border-radius: 9999px;
-      color: var(--cyan);
-      font-family: var(--font-mono);
-      font-weight: 700;
-    }
-
-    .badge-base {
-      background: rgba(0, 82, 255, 0.18);
-      border-color: rgba(0, 82, 255, 0.45);
-      color: #3b82f6;
-    }
-
-    .badge-arb {
-      background: rgba(18, 170, 255, 0.18);
-      border-color: rgba(18, 170, 255, 0.45);
-      color: #38bdf8;
-    }
-
-    .badge-gasless {
-      background: rgba(16, 185, 129, 0.18);
-      border-color: rgba(16, 185, 129, 0.45);
-      color: var(--emerald);
-    }
-
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .nav-link {
-      color: var(--text-sub);
-      text-decoration: none;
-      font-size: 0.88rem;
-      font-weight: 600;
-      transition: color 0.2s, transform 0.2s;
-    }
-
-    .nav-link:hover {
-      color: var(--cyan);
-      transform: translateY(-1px);
-    }
-
-    .btn-pay-x402 {
-      background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(16, 185, 129, 0.2));
-      border: 1px solid rgba(6, 182, 212, 0.4);
-      color: #fff;
-      padding: 0.55rem 1.1rem;
-      border-radius: 10px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.2s;
-      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.25);
-    }
-
-    .btn-pay-x402:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.45);
-      border-color: var(--cyan);
-    }
-
-    .btn-wallet {
-      background: linear-gradient(135deg, #0052ff, #003db3);
-      color: #fff;
-      border: none;
-      padding: 0.55rem 1.25rem;
-      border-radius: 10px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.2s;
-      box-shadow: 0 4px 16px rgba(0, 82, 255, 0.35);
-    }
-
-    .btn-wallet:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(0, 82, 255, 0.5);
-    }
-
-    /* Live Ticker Bar */
-    .ticker-bar {
-      background: rgba(15, 23, 42, 0.75);
-      border-bottom: 1px solid var(--border-subtle);
-      padding: 0.65rem 0;
-      overflow-x: auto;
-      white-space: nowrap;
-    }
-
-    .ticker-inner {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-      display: flex;
-      gap: 2.2rem;
-      align-items: center;
-    }
-
-    .ticker-item {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      font-size: 0.85rem;
-    }
-
-    .ticker-name {
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .ticker-val {
-      font-family: var(--font-mono);
-      font-weight: 700;
-      color: var(--cyan);
-      transition: color 0.3s;
-    }
-
-    .ticker-badge {
-      font-size: 0.72rem;
-      padding: 0.1rem 0.4rem;
-      border-radius: 4px;
-      font-weight: 700;
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--emerald);
-    }
-
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      background: var(--emerald);
-      border-radius: 50%;
-      box-shadow: 0 0 12px var(--emerald);
-      animation: pulse-glow 2s infinite;
-    }
-
-    @keyframes pulse-glow {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.35); opacity: 0.5; }
-    }
-
-    /* Hero Banner */
-    .hero {
-      max-width: 1400px;
-      margin: 2.5rem auto 1.8rem;
-      padding: 0 1.5rem;
-      text-align: center;
-    }
-
-    .hero-pill {
+    .badge {
       display: inline-flex;
       align-items: center;
-      gap: 0.6rem;
-      background: rgba(6, 182, 212, 0.12);
-      border: 1px solid rgba(6, 182, 212, 0.3);
-      padding: 0.35rem 1rem;
+      gap: 6px;
+      font-size: 0.75rem;
+      padding: 4px 10px;
       border-radius: 9999px;
-      font-size: 0.85rem;
-      color: var(--cyan);
-      font-weight: 700;
-      margin-bottom: 1.2rem;
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--green);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      font-weight: 600;
+    }
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .nav-links {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .btn-nav {
+      background: var(--primary);
+      color: #040813 !important;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-weight: 600 !important;
     }
 
-    .hero h2 {
-      font-family: var(--font-heading);
-      font-size: 2.5rem;
+    /* Hero */
+    .hero {
+      padding: 48px 0 32px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 2.25rem;
       font-weight: 800;
       letter-spacing: -0.02em;
-      line-height: 1.25;
-      background: linear-gradient(135deg, #ffffff 40%, var(--cyan) 80%, #a855f7 100%);
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 40%, var(--primary) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 1rem;
     }
-
     .hero p {
-      max-width: 880px;
-      margin: 0 auto 1.75rem;
+      color: var(--text-muted);
       font-size: 1.05rem;
-      color: var(--text-sub);
+      max-width: 680px;
+      margin: 0 auto 28px;
     }
 
-    .hero-cta-group {
-      display: flex;
-      justify-content: center;
-      gap: 0.9rem;
-      flex-wrap: wrap;
-      margin-bottom: 2rem;
-    }
-
-    .btn-cta-primary {
-      background: linear-gradient(135deg, var(--cyan), var(--blue));
-      color: #fff;
-      text-decoration: none;
-      border: none;
-      padding: 0.75rem 1.8rem;
+    /* Onboard Box */
+    .onboard-card {
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.7) 100%);
+      border: 1px solid var(--border-focus);
       border-radius: 12px;
-      font-weight: 800;
-      font-size: 0.95rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.25s;
-      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.35);
-      cursor: pointer;
-    }
-
-    .btn-cta-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(6, 182, 212, 0.5);
-    }
-
-    .btn-cta-pay {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: #fff;
-      text-decoration: none;
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      padding: 0.75rem 1.8rem;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 0.95rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.25s;
-      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35);
-      cursor: pointer;
-    }
-
-    .btn-cta-pay:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.5);
-    }
-
-    .btn-cta-secondary {
-      background: rgba(30, 41, 59, 0.6);
-      color: var(--text-main);
-      text-decoration: none;
-      border: 1px solid var(--border-subtle);
-      padding: 0.75rem 1.6rem;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 0.95rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.25s;
-    }
-
-    .btn-cta-secondary:hover {
-      background: var(--bg-surface-elevated);
-      border-color: var(--cyan);
-      transform: translateY(-2px);
-    }
-
-    /* Key Value Metric Badges */
-    .stat-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 1.2rem;
-      max-width: 1400px;
-      margin: 0 auto 2.5rem;
-      padding: 0 1.5rem;
-    }
-
-    .stat-card {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--border-subtle);
-      border-radius: 14px;
-      padding: 1.1rem 1.4rem;
-      backdrop-filter: blur(12px);
+      padding: 24px;
+      max-width: 720px;
+      margin: 0 auto 40px;
+      box-shadow: 0 10px 30px -10px var(--primary-glow);
       text-align: left;
     }
-
-    .stat-title {
-      font-size: 0.76rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .stat-val {
-      font-family: var(--font-heading);
-      font-size: 1.55rem;
-      font-weight: 800;
-      color: var(--text-main);
-      margin-top: 0.3rem;
-    }
-
-    .stat-sub {
-      font-size: 0.78rem;
-      color: var(--emerald);
-      margin-top: 0.2rem;
-      font-weight: 600;
-    }
-
-    /* 4-Tier Pricing Grid */
-    .tier-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.2rem;
-      max-width: 1400px;
-      margin: 0 auto 2.8rem;
-      padding: 0 1.5rem;
-    }
-
-    .tier-card {
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid var(--border-subtle);
-      border-radius: 16px;
-      padding: 1.4rem;
-      position: relative;
-      transition: all 0.25s ease;
-    }
-
-    .tier-card:hover {
-      transform: translateY(-3px);
-      border-color: var(--cyan);
-      box-shadow: 0 10px 30px rgba(6, 182, 212, 0.15);
-    }
-
-    .tier-card.featured {
-      border-color: rgba(16, 185, 129, 0.45);
-      background: rgba(16, 185, 129, 0.06);
-    }
-
-    .tier-badge-top {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      font-size: 0.7rem;
-      padding: 0.15rem 0.5rem;
-      border-radius: 6px;
-      font-weight: 800;
-      background: rgba(6, 182, 212, 0.15);
-      color: var(--cyan);
-    }
-
-    .tier-price {
-      font-family: var(--font-mono);
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: #fff;
-      margin: 0.5rem 0;
-    }
-
-    .tier-desc {
-      font-size: 0.82rem;
-      color: var(--text-sub);
-      line-height: 1.4;
-      margin-bottom: 1rem;
-    }
-
-    .tier-features {
-      list-style: none;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-    }
-
-    .tier-features li {
+    .onboard-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 8px;
     }
-
-    /* Main Dashboard Grid */
-    .dashboard-container {
-      max-width: 1400px;
-      margin: 0 auto 4rem;
-      padding: 0 1.5rem;
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 1.75rem;
+    .onboard-form {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
     }
-
-    @media (max-width: 1024px) {
-      .dashboard-container {
-        grid-template-columns: 1fr;
-      }
+    .onboard-input {
+      flex: 1;
+      background: rgba(5, 8, 17, 0.8);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      padding: 10px 14px;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.15s;
     }
-
-    /* Glass Card */
-    .card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 20px;
-      padding: 1.75rem;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
-      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    .onboard-input:focus { border-color: var(--primary); }
+    .btn-action {
+      background: var(--primary);
+      color: #040813;
+      border: none;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: opacity 0.15s;
     }
+    .btn-action:hover { opacity: 0.9; }
 
-    .card.full-width {
-      grid-column: 1 / -1;
+    .onboard-result {
+      margin-top: 16px;
+      background: rgba(5, 8, 17, 0.9);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      display: none;
     }
-
-    .card:hover {
-      border-color: var(--border-glow);
-      box-shadow: 0 16px 48px rgba(6, 182, 212, 0.1);
-    }
-
-    .card-head {
+    .result-row {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 1.4rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      gap: 1rem;
+      align-items: center;
+      margin-bottom: 8px;
     }
+    .btn-copy {
+      background: rgba(148, 163, 184, 0.1);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-copy:hover { color: var(--text); border-color: var(--primary); }
 
-    .card-title {
-      font-family: var(--font-heading);
+    /* Quotes Grid */
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 16px;
+    }
+    .section-head h2 {
       font-size: 1.25rem;
       font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
       letter-spacing: -0.01em;
     }
-
-    .card-desc {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 0.3rem;
-    }
-
-    /* Feedstock Selector Cards */
-    .feedstock-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.85rem;
-      margin-bottom: 1.4rem;
-    }
-
-    @media (max-width: 600px) {
-      .feedstock-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .feedstock-card {
-      background: rgba(30, 41, 59, 0.6);
-      border: 1px solid var(--border-subtle);
-      padding: 1rem;
-      border-radius: 14px;
-      cursor: pointer;
-      text-align: left;
-      transition: all 0.2s ease;
-    }
-
-    .feedstock-card:hover {
-      background: var(--bg-surface-elevated);
-      border-color: var(--cyan);
-      transform: translateY(-2px);
-    }
-
-    .feedstock-card.active {
-      background: rgba(6, 182, 212, 0.16);
-      border-color: var(--cyan);
-      box-shadow: 0 0 20px rgba(6, 182, 212, 0.28);
-    }
-
-    .feedstock-name {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-    }
-
-    .feedstock-sub {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      margin-top: 0.3rem;
-      line-height: 1.4;
-    }
-
-    /* Slider Section */
-    .slider-box {
-      margin-bottom: 1.5rem;
-      background: rgba(15, 23, 42, 0.4);
-      padding: 1.1rem;
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .slider-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.9rem;
-      font-weight: 700;
-      margin-bottom: 0.8rem;
-    }
-
-    .slider-display {
-      color: var(--cyan);
-      font-family: var(--font-mono);
-      font-size: 1.15rem;
-      background: rgba(6, 182, 212, 0.12);
-      padding: 0.2rem 0.6rem;
-      border-radius: 8px;
-      border: 1px solid rgba(6, 182, 212, 0.25);
-    }
-
-    input[type="range"] {
-      width: 100%;
-      accent-color: var(--cyan);
-      height: 8px;
-      background: #1e293b;
-      border-radius: 6px;
-      outline: none;
-      cursor: pointer;
-    }
-
-    /* Output Results Box */
-    .results-panel {
-      background: rgba(10, 15, 26, 0.95);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      border-radius: 16px;
-      padding: 1.5rem;
-      margin-top: 1rem;
-      box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.06);
-    }
-
-    .metric-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 1.4rem;
-    }
-
-    .metric-tile {
-      background: rgba(255, 255, 255, 0.03);
-      padding: 1rem;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .metric-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .metric-value {
-      font-size: 1.45rem;
-      font-weight: 800;
-      font-family: var(--font-mono);
-      color: var(--text-main);
-      margin-top: 0.35rem;
-    }
-
-    .metric-value.highlight {
-      color: var(--emerald);
-      text-shadow: 0 0 16px rgba(16, 185, 129, 0.45);
-    }
-
-    /* Element Yields & Chart */
-    .yield-chart-container {
-      display: grid;
-      grid-template-columns: 1fr 130px;
-      gap: 1.25rem;
-      align-items: center;
-      margin-top: 1.25rem;
-      padding-top: 1.25rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .yield-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .yield-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.88rem;
-      padding: 0.35rem 0;
-      border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
-    }
-
-    /* Radar List */
-    .radar-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.95rem;
-    }
-
-    .radar-card {
-      background: rgba(30, 41, 59, 0.55);
-      border-left: 4px solid var(--cyan);
-      border-radius: 12px;
-      padding: 1.1rem 1.3rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border-top: 1px solid rgba(255, 255, 255, 0.04);
-      border-right: 1px solid rgba(255, 255, 255, 0.04);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .radar-card:hover {
-      transform: translateX(4px);
-      background: var(--bg-surface-elevated);
-      box-shadow: 0 8px 24px rgba(6, 182, 212, 0.15);
-    }
-
-    .radar-card.active-opp {
-      border-left-color: var(--emerald);
-      background: rgba(16, 185, 129, 0.08);
-    }
-
-    .radar-gauge-bg {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      height: 3px;
-      background: rgba(255, 255, 255, 0.08);
-      width: 100%;
-    }
-
-    .radar-gauge-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--cyan), var(--emerald));
-      transition: width 0.6s ease;
-    }
-
-    .radar-info h4 {
-      font-size: 0.98rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .radar-info p {
+    .section-head span {
       font-size: 0.8rem;
       color: var(--text-muted);
-      margin-top: 0.3rem;
+      font-family: var(--mono);
     }
 
-    .radar-badge {
-      text-align: right;
-    }
-
-    .radar-bps {
-      font-family: var(--font-mono);
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--emerald);
-    }
-
-    /* Agent Vault & Enterprise Widgets */
-    .vault-grid {
+    .quotes-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 36px;
     }
-
-    @media (max-width: 768px) {
-      .vault-grid {
-        grid-template-columns: 1fr;
-      }
+    .quote-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      transition: transform 0.15s, border-color 0.15s;
     }
-
-    .input-box {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 0.75rem 1rem;
-      color: #fff;
-      font-family: var(--font-mono);
-      font-size: 0.9rem;
-      width: 100%;
-      outline: none;
-      margin-bottom: 0.75rem;
+    .quote-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-focus);
     }
-
-    .input-box:focus {
-      border-color: var(--cyan);
-      box-shadow: 0 0 16px rgba(6, 182, 212, 0.25);
-    }
-
-    /* Tabs */
-    .tabs {
+    .quote-sym {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
       display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-      overflow-x: auto;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 0.5rem;
+      justify-content: space-between;
+    }
+    .quote-price {
+      font-size: 1.45rem;
+      font-weight: 800;
+      margin: 8px 0 4px;
+      font-family: var(--mono);
+    }
+    .quote-change {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--green);
+    }
+    .quote-venue {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 6px;
     }
 
-    .tab-item {
-      background: transparent;
+    /* Arbitrage Radar Table */
+    .table-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+    th {
+      background: rgba(15, 23, 42, 0.95);
+      padding: 12px 16px;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(30, 41, 59, 0.3); }
+    .mono { font-family: var(--mono); }
+    .status-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--green);
+    }
+
+    /* Integration Tabs */
+    .tabs-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 40px;
+    }
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .tab-btn {
+      background: none;
       border: none;
       color: var(--text-muted);
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .tab-item.active {
-      color: #fff;
-      background: rgba(6, 182, 212, 0.2);
-      border: 1px solid rgba(6, 182, 212, 0.35);
-    }
-
-    /* Code Snippet Box */
-    .code-box {
-      background: #050a17;
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 1.2rem;
-      position: relative;
-      overflow-x: auto;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      color: #38bdf8;
-      line-height: 1.5;
-    }
-
-    .btn-copy {
-      position: absolute;
-      top: 0.8rem;
-      right: 0.8rem;
-      background: rgba(30, 41, 59, 0.8);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-sub);
-      padding: 0.35rem 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 6px 12px;
       border-radius: 6px;
-      font-size: 0.75rem;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s;
     }
-
-    .btn-copy:hover {
-      background: var(--cyan);
-      color: #000;
+    .tab-btn.active {
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--primary);
     }
-
-    /* Interactive Playground Runner */
-    .runner-row {
-      display: flex;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .endpoint-dropdown {
-      flex: 1;
-      min-width: 280px;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 0.65rem 1rem;
-      color: #fff;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      outline: none;
-    }
-
-    .btn-execute {
-      background: linear-gradient(135deg, var(--cyan), var(--blue));
-      border: none;
-      color: #fff;
-      padding: 0.65rem 1.4rem;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 0.88rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(12px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 1.5rem;
-      opacity: 0;
-      transition: opacity 0.25s ease-out;
-    }
-
-    .modal-overlay.active {
-      display: flex;
-      opacity: 1;
-    }
-
-    .modal-box {
-      background: #0b1329;
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      border-radius: 20px;
-      max-width: 680px;
-      width: 100%;
-      max-height: 92vh;
-      overflow-y: auto;
-      padding: 2rem;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(6, 182, 212, 0.25);
-    }
-
-    .modal-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 1.2rem;
-      padding-bottom: 0.8rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .modal-title {
-      font-family: var(--font-heading);
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-
-    .btn-close-modal {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-sub);
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      cursor: pointer;
-    }
-
-    .chain-picker-modal {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1.2rem;
-    }
-
-    .btn-chain-pick {
-      flex: 1;
-      padding: 0.6rem;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      color: var(--text-sub);
-      font-weight: 700;
+    .code-block {
+      background: #050811;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: var(--mono);
       font-size: 0.82rem;
-      cursor: pointer;
-      transition: all 0.2s;
+      color: #e2e8f0;
+      overflow-x: auto;
+      position: relative;
     }
+    .code-block pre { margin: 0; }
 
-    .btn-chain-pick.active {
-      background: rgba(6, 182, 212, 0.2);
-      border-color: var(--cyan);
-      color: #fff;
+    /* Pricing & Treasury */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
     }
-
-    .challenge-summary-card {
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid rgba(6, 182, 212, 0.25);
-      border-radius: 14px;
-      padding: 1.25rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .challenge-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.45rem 0;
-      font-size: 0.88rem;
-      border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
-    }
-
-    .challenge-row:last-child {
-      border-bottom: none;
-    }
-
-    .challenge-label {
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .challenge-val {
-      font-family: var(--font-mono);
-      font-weight: 700;
-      color: var(--text-main);
-      word-break: break-all;
-      text-align: right;
-    }
-
-    .modal-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 0.85rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .btn-pay-metamask {
-      background: linear-gradient(135deg, #f6851b, #e2761b);
-      color: #fff;
-      border: none;
-      padding: 0.85rem 1.5rem;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 0.95rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.6rem;
-      transition: all 0.2s;
-    }
-
-    .btn-pay-instant {
-      background: linear-gradient(135deg, var(--cyan), var(--blue));
-      color: #fff;
-      border: none;
-      padding: 0.85rem 1.5rem;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 0.95rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.6rem;
-    }
-
-    .payment-result-box {
-      background: rgba(10, 15, 26, 0.95);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      border-radius: 12px;
-      padding: 1rem;
-      margin-top: 1rem;
-      display: none;
-    }
-
-    .payment-result-box.active {
-      display: block;
-    }
-
-    footer {
-      border-top: 1px solid var(--border-subtle);
+    .price-tier-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
       text-align: center;
-      padding: 3rem 1.5rem;
-      color: var(--text-muted);
-      font-size: 0.88rem;
-      background: rgba(5, 8, 17, 0.95);
     }
+    .tier-name { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+    .tier-rate { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin: 8px 0; font-family: var(--mono); }
+    .tier-desc { font-size: 0.78rem; color: var(--text-muted); }
 
-    .footer-links {
+    .treasury-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
       display: flex;
-      justify-content: center;
-      gap: 2rem;
-      margin-bottom: 1.2rem;
-      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .treasury-info { font-size: 0.85rem; }
+    .treasury-addr { font-family: var(--mono); font-size: 0.85rem; color: var(--primary); }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 0;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      text-align: center;
+      margin-top: auto;
     }
 
-    .footer-link {
-      color: var(--text-sub);
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    .footer-link:hover {
-      color: var(--cyan);
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.75rem; }
+      .onboard-form { flex-direction: column; }
+      .treasury-box { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Navigation -->
+  <!-- Top Nav -->
   <header>
-    <div class="nav-inner">
-      <a href="/" class="logo-group">
-        <div class="logo-icon">MO</div>
-        <div class="logo-text">
-          <h1>
-            Minerals Oracle
-            <span class="badge-network">Polygon (137)</span>
-            <span class="badge-network badge-base">Base (8453)</span>
-            <span class="badge-network badge-arb">Arbitrum (42161)</span>
-            <span class="badge-network badge-gasless">⚡ Gasless Permit2</span>
-          </h1>
-        </div>
+    <div class="container nav-inner">
+      <a href="/" class="brand">
+        <span>💎</span> Minerals Oracle x402
       </a>
-      <div class="nav-actions">
-        <a href="#tiers" class="nav-link">Pricing Tiers</a>
-        <a href="#vault" class="nav-link">Agent Vault</a>
-        <a href="#calculator" class="nav-link">Yield Simulator</a>
-        <a href="#radar" class="nav-link">Arbitrage Radar</a>
-        <a href="#enterprise" class="nav-link">Enterprise SLA</a>
-        <a href="#developer" class="nav-link">AI & MCP Hub</a>
-        <button class="btn-pay-x402" onclick="openPaymentModal()">
-          <span class="live-dot" style="background:#10b981; width:6px; height:6px;"></span>
-          <span>💳 x402 결제창</span>
-        </button>
-        <button class="btn-wallet" id="btnConnectWallet" onclick="connectWeb3Wallet()">
-          <span id="walletBtnText">🔗 Connect Wallet</span>
-        </button>
+      <div class="nav-links">
+        <span class="badge"><span class="badge-dot"></span> LIVE 24/7 GLOBEX & SPOT</span>
+        <a href="/docs" target="_blank">API Docs</a>
+        <a href="https://github.com" target="_blank">GitHub</a>
+        <a href="#onboard" class="btn-nav">Agent Onboarding</a>
       </div>
     </div>
   </header>
 
-  <!-- Real-Time Commodity Spot Ticker -->
-  <div class="ticker-bar">
-    <div class="ticker-inner" id="tickerRow">
-      <div class="ticker-item">
-        <span class="live-dot"></span>
-        <span class="ticker-name">Oracle Status:</span>
-        <span class="ticker-val" style="color:var(--emerald);">Multi-Chain Global Feed Live</span>
-      </div>
-      <div class="ticker-item">
-        <span class="ticker-name">Silver (Ag):</span>
-        <span class="ticker-val" id="quoteAg">Loading...</span>
-        <span class="ticker-badge" id="changeAg">+0.8%</span>
-      </div>
-      <div class="ticker-item">
-        <span class="ticker-name">Platinum (Pt):</span>
-        <span class="ticker-val" id="quotePt">Loading...</span>
-        <span class="ticker-badge" id="changePt">+1.2%</span>
-      </div>
-      <div class="ticker-item">
-        <span class="ticker-name">Copper (Cu):</span>
-        <span class="ticker-val" id="quoteCu">Loading...</span>
-        <span class="ticker-badge" id="changeCu">+0.5%</span>
-      </div>
-      <div class="ticker-item">
-        <span class="ticker-name">Lithium (Li):</span>
-        <span class="ticker-val" id="quoteLi">Loading...</span>
-        <span class="ticker-badge" id="changeLi">+2.4%</span>
-      </div>
-      <div class="ticker-item">
-        <span class="ticker-name">Neodymium (NdDy):</span>
-        <span class="ticker-val" id="quoteNdDy">Loading...</span>
-        <span class="ticker-badge" id="changeNdDy">+1.6%</span>
-      </div>
-    </div>
-  </div>
+  <div class="container">
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-pill">
-      <span>⚡ Multi-Chain Autonomous AI Agent & Urban Mining Oracle (Polygon • Base • Arbitrum)</span>
-    </div>
-    <h2>Critical Minerals Spot Feeds & Metallurgical Recovery Oracle</h2>
-    <p>
-      High-frequency physical COMEX, LME, and Asian spot price feeds with sub-cent x402 micropayments, 
-      1ms pre-funded agent vaults, and EIP-712 cryptographic proofs for autonomous AI trading bots.
-    </p>
-    <div class="hero-cta-group">
-      <button onclick="openPaymentModal()" class="btn-cta-pay">💳 x402 멀티체인 결제창 열기 ($0.001~$0.020)</button>
-      <a href="#vault" class="btn-cta-primary">⚡ 1ms Agent Vault 시뮬레이터</a>
-      <a href="#calculator" class="btn-cta-secondary">♻️ 도시광산 수율 계산기</a>
-      <a href="/docs" target="_blank" class="btn-cta-secondary">📖 OpenAPI Docs</a>
-    </div>
-  </section>
+    <!-- Hero -->
+    <section class="hero">
+      <h1>High-Frequency Minerals & Arbitrage Alpha API for Autonomous Agents</h1>
+      <p>
+        Sub-cent HTTP 402 micropayments, LLM token-saving compact formats (88% token reduction), zero-polling SSE streams, and instant self-serve onboarding.
+      </p>
 
-  <!-- Key Value Stats -->
-  <section class="stat-row">
-    <div class="stat-card">
-      <div class="stat-title">Bloomberg Terminal Savings</div>
-      <div class="stat-val">99.89%</div>
-      <div class="stat-sub">$0.001 / query vs $24,000 / yr</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-title">Supported Blockchains</div>
-      <div class="stat-val">3 EVM Chains</div>
-      <div class="stat-sub">Polygon (137) • Base (8453) • Arbitrum (42161)</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-title">Zero-Latency Vault Speed</div>
-      <div class="stat-val">&lt; 1.0 ms</div>
-      <div class="stat-sub">Thread-safe in-memory balance deduction</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-title">Enterprise SLA Uptime</div>
-      <div class="stat-val">99.99%</div>
-      <div class="stat-sub">P50 Latency: 0.85ms | P99: 1.95ms</div>
-    </div>
-  </section>
-
-  <!-- 4-Tier Pricing Grid -->
-  <section id="tiers" style="max-width:1400px; margin:0 auto 1rem; padding:0 1.5rem;">
-    <div style="text-align:center; margin-bottom:1.5rem;">
-      <h3 style="font-family:var(--font-heading); font-size:1.6rem; font-weight:800;">💎 4-Tier Dynamic Computational Pricing Schedule</h3>
-      <p style="color:var(--text-sub); font-size:0.9rem; margin-top:0.3rem;">Pay-as-you-go sub-cent pricing tailored to computational complexity and value delivered.</p>
-    </div>
-    <div class="tier-grid">
-      <div class="tier-card">
-        <span class="tier-badge-top">TIER 1</span>
-        <h4 style="font-size:1.1rem; font-weight:700;">Light Spot Feed</h4>
-        <div class="tier-price">$0.001 <span style="font-size:0.85rem; color:var(--text-muted);">USDC / query</span></div>
-        <p class="tier-desc">Single mineral spot benchmark price lookup (Cu, Li, Ag, Pt, NdDy).</p>
-        <ul class="tier-features">
-          <li>✓ Single Spot Price Query</li>
-          <li>✓ 24h Delta & Benchmark Info</li>
-          <li>✓ Endpoint: <code>/prices/{symbol}</code></li>
-        </ul>
-      </div>
-
-      <div class="tier-card featured">
-        <span class="tier-badge-top" style="background:rgba(16,185,129,0.2); color:var(--emerald);">TIER 2 (POPULAR)</span>
-        <h4 style="font-size:1.1rem; font-weight:700;">Standard Radar</h4>
-        <div class="tier-price" style="color:var(--emerald);">$0.005 <span style="font-size:0.85rem; color:var(--text-muted);">USDC / query</span></div>
-        <p class="tier-desc">Full 5-mineral market basket quotes and cross-exchange arbitrage radar.</p>
-        <ul class="tier-features">
-          <li>✓ All 5 Strategic Minerals</li>
-          <li>✓ LME / COMEX / SMM Basis Spreads</li>
-          <li>✓ Endpoints: <code>/prices</code>, <code>/spreads</code></li>
-        </ul>
-      </div>
-
-      <div class="tier-card">
-        <span class="tier-badge-top">TIER 3</span>
-        <h4 style="font-size:1.1rem; font-weight:700;">Heavy Mining Tensor</h4>
-        <div class="tier-price">$0.010 <span style="font-size:0.85rem; color:var(--text-muted);">USDC / query</span></div>
-        <p class="tier-desc">Complex metallurgical hydrometallurgical recovery tensor calculations.</p>
-        <ul class="tier-features">
-          <li>✓ Black Mass & PCB Recovery Matrix</li>
-          <li>✓ Smelting & Refining TC/RC Calculation</li>
-          <li>✓ Endpoint: <code>/urban-mining/calculate</code></li>
-        </ul>
-      </div>
-
-      <div class="tier-card">
-        <span class="tier-badge-top" style="background:rgba(168,85,247,0.2); color:var(--purple);">TIER 4</span>
-        <h4 style="font-size:1.1rem; font-weight:700;">On-Chain Smart Contract</h4>
-        <div class="tier-price" style="color:var(--purple);">$0.020 <span style="font-size:0.85rem; color:var(--text-muted);">USDC / query</span></div>
-        <p class="tier-desc">EIP-712 cryptographic signature (v, r, s) and ABI calldata for Solidity.</p>
-        <ul class="tier-features">
-          <li>✓ Chainlink AggregatorV3 Compatibility</li>
-          <li>✓ Cryptographic Nonce & Digest</li>
-          <li>✓ Endpoint: <code>/onchain-payload</code></li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- Main Grid Container -->
-  <main class="dashboard-container">
-
-    <!-- 1. Pre-Funded Agent Vault Card (< 1ms Fast Path) -->
-    <section class="card full-width" id="vault">
-      <div class="card-head">
-        <div>
-          <h3 class="card-title">⚡ Pre-Funded Agent Vault & Zero-Latency Fast Path (&lt; 1ms)</h3>
-          <p class="card-desc">AI Agents deposit USDC once and query high-frequency feeds with zero-latency session keys without signing per request.</p>
+      <!-- Instant Onboarding Box -->
+      <div class="onboard-card" id="onboard">
+        <div class="onboard-title">
+          <span>⚡</span> <b>1-Click Autonomous Agent Self-Serve Onboarding</b>
         </div>
-        <span class="badge-network badge-gasless">Fast Path Active</span>
-      </div>
-
-      <div class="vault-grid">
-        <div>
-          <h4 style="font-size:0.95rem; font-weight:700; margin-bottom:0.6rem;">1. Agent Vault Deposit Simulator</h4>
-          <input type="text" id="vaultAgentAddr" class="input-box" placeholder="Agent Wallet (e.g. 0xAgent1234...)" value="0x7a250d5f81216d7a4623e590cf25e2e88a0b0137">
-          <input type="number" id="vaultDepositAmt" class="input-box" placeholder="Deposit Amount (USDC)" value="10.0" step="1.0">
-          <div style="display:flex; gap:0.6rem;">
-            <button class="btn-execute" onclick="depositVaultSim()">💰 Deposit to Vault</button>
-            <button class="btn-execute" style="background:rgba(255,255,255,0.08);" onclick="checkVaultBal()">🔍 Check Balance</button>
-          </div>
+        <p style="font-size: 0.82rem; color: var(--text-muted);">
+          Input your agent identifier to instantly receive a <b>10-query free trial session key ($0.05 USDC)</b> with zero human intervention.
+        </p>
+        <div class="onboard-form">
+          <input type="text" id="agentNameInput" class="onboard-input" placeholder="Agent Identifier (e.g. AlphaQuant-Bot)" value="AutonomousAgent-01">
+          <button class="btn-action" onclick="onboardAgent()">🚀 Issue Instant Session Key</button>
         </div>
 
-        <div>
-          <h4 style="font-size:0.95rem; font-weight:700; margin-bottom:0.6rem;">2. Instant Vault Fast-Path Execution</h4>
-          <div class="code-box" style="min-height:120px; font-size:0.82rem;" id="vaultStatusBox">
-Agent Vault Status: Ready.
-Deposit USDC to generate 'X-Agent-Vault-Key' and execute zero-latency queries.
+        <div class="onboard-result" id="onboardResult">
+          <div class="result-row">
+            <span style="color: var(--green);"><b>✅ Success: Session Key Issued</b></span>
+            <button class="btn-copy" onclick="copySessionKey()">Copy Key</button>
           </div>
+          <div style="margin-bottom: 8px;">
+            <code>X-Agent-Vault-Key: <span id="sessionKeyText" style="color: var(--primary);"></span></code>
+          </div>
+          <div class="result-row">
+            <span style="color: var(--text-muted);">Trial Credits: <b id="trialQueriesText" style="color: #fff;">10 queries</b> ($0.05 USDC)</span>
+            <button class="btn-copy" onclick="copyCurlExample()">Copy cURL</button>
+          </div>
+          <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 6px;" id="curlExampleText"></div>
         </div>
       </div>
     </section>
 
-    <!-- 2. Urban Mining Scrap Yield Calculator Card -->
-    <section class="card" id="calculator">
-      <div class="card-head">
-        <div>
-          <h3 class="card-title">♻️ Urban Mining Yield & Settlement Engine</h3>
-          <p class="card-desc">Calculates metallurgical recovery value synchronized 100% with the live Oracle API.</p>
-        </div>
-        <span class="badge-network">Live API Synced</span>
+    <!-- 1. Live Mineral Spot Benchmarks -->
+    <section>
+      <div class="section-head">
+        <h2>📊 5 Critical Minerals Global Spot Benchmarks (Live Spot)</h2>
+        <span id="lastUpdatedTime">Streaming Live...</span>
       </div>
-
-      <!-- Feedstock Category Picker -->
-      <div class="feedstock-grid">
-        <div class="feedstock-card active" onclick="selectFeedstock('EV_BATTERY_BLACK_MASS', this)">
-          <div class="feedstock-name">🔋 EV Battery Black Mass</div>
-          <div class="feedstock-sub">NCM 811/622: Lithium, Nickel, Cobalt, Copper</div>
+      <div class="quotes-grid" id="quotesGrid">
+        <!-- Copper -->
+        <div class="quote-card" id="card-Cu">
+          <div class="quote-sym"><span>Copper</span><span>Cu</span></div>
+          <div class="quote-price" id="price-Cu">$14,559.33</div>
+          <div class="quote-change" id="chg-Cu">+0.17% (24h)</div>
+          <div class="quote-venue">COMEX / LME Cathode (USD/MT)</div>
         </div>
-        <div class="feedstock-card" onclick="selectFeedstock('AUTO_CATALYST_CERAMIC', this)">
-          <div class="feedstock-name">🚗 Auto Catalyst (Honeycomb)</div>
-          <div class="feedstock-sub">Platinum (Pt), Palladium (Pd), Rhodium (Rh)</div>
+        <!-- Silver -->
+        <div class="quote-card" id="card-Ag">
+          <div class="quote-sym"><span>Silver</span><span>Ag</span></div>
+          <div class="quote-price" id="price-Ag">$65.91</div>
+          <div class="quote-change" id="chg-Ag">+0.68% (24h)</div>
+          <div class="quote-venue">COMEX / LBMA Loco London (USD/troy_oz)</div>
         </div>
-        <div class="feedstock-card" onclick="selectFeedstock('E_WASTE_HIGH_GRADE_PCB', this)">
-          <div class="feedstock-name">💻 High-Grade E-Waste PCB</div>
-          <div class="feedstock-sub">Gold (Au), Silver (Ag), Copper (Cu), Palladium</div>
+        <!-- Lithium -->
+        <div class="quote-card" id="card-Li">
+          <div class="quote-sym"><span>Lithium Carbonate</span><span>Li</span></div>
+          <div class="quote-price" id="price-Li">$12,850.00</div>
+          <div class="quote-change" id="chg-Li">+0.75% (24h)</div>
+          <div class="quote-venue">SMM / Fastmarkets 99.5% (USD/MT)</div>
         </div>
-        <div class="feedstock-card" onclick="selectFeedstock('WIND_EV_PERMANENT_MAGNETS', this)">
-          <div class="feedstock-name">💨 NdFeB Permanent Magnets</div>
-          <div class="feedstock-sub">Neodymium (Nd), Praseodymium, Dysprosium</div>
+        <!-- Neodymium -->
+        <div class="quote-card" id="card-NdDy">
+          <div class="quote-sym"><span>Rare Earths (NdDy)</span><span>NdDy</span></div>
+          <div class="quote-price" id="price-NdDy">$85.50</div>
+          <div class="quote-change" id="chg-NdDy">+0.75% (24h)</div>
+          <div class="quote-venue">Asian Metal PrNd/DyFe (USD/kg)</div>
         </div>
-      </div>
-
-      <!-- Batch Weight Slider -->
-      <div class="slider-box">
-        <div class="slider-head">
-          <span>Batch Input Quantity (Metric Tons)</span>
-          <span class="slider-display" id="sliderWeightText">5.0 MT</span>
-        </div>
-        <input type="range" id="weightRange" min="0.5" max="50.0" step="0.5" value="5.0" oninput="triggerRecalc()">
-      </div>
-
-      <!-- Results Summary Panel -->
-      <div class="results-panel">
-        <div class="metric-grid">
-          <div class="metric-tile">
-            <div class="metric-label">Total Gross Payable Value</div>
-            <div class="metric-value" id="resGross">Calculating...</div>
-          </div>
-          <div class="metric-tile">
-            <div class="metric-label">Net Settlement Value (USDC)</div>
-            <div class="metric-value highlight" id="resNet">Calculating...</div>
-          </div>
-          <div class="metric-tile">
-            <div class="metric-label">Smelting & Refining (TC/RC)</div>
-            <div class="metric-value" id="resCost">Calculating...</div>
-          </div>
-          <div class="metric-tile">
-            <div class="metric-label">Net Recovery Margin</div>
-            <div class="metric-value highlight" id="resMargin">Calculating...</div>
-          </div>
-        </div>
-
-        <div class="yield-chart-container">
-          <ul class="yield-list" id="yieldList"></ul>
-          <div style="width: 130px; height: 130px;">
-            <canvas id="yieldPieChart"></canvas>
-          </div>
+        <!-- Platinum -->
+        <div class="quote-card" id="card-Pt">
+          <div class="quote-sym"><span>Platinum</span><span>Pt</span></div>
+          <div class="quote-price" id="price-Pt">$1,768.30</div>
+          <div class="quote-change" id="chg-Pt">+0.21% (24h)</div>
+          <div class="quote-venue">NYMEX / LPPM Physical Spot (USD/troy_oz)</div>
         </div>
       </div>
     </section>
 
-    <!-- 3. Cross-Exchange Arbitrage Radar Card -->
-    <section class="card" id="radar">
-      <div class="card-head">
-        <div>
-          <h3 class="card-title">
-            📡 Real-Time Cross-Exchange Arbitrage Radar
-          </h3>
-          <p class="card-desc">Basis Spreads across COMEX, LME, SMM, and Fastmarkets with locational yield tracking.</p>
-        </div>
-        <div style="display:flex; align-items:center; gap:0.6rem;">
-          <span id="radarTickText" style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">Tick: Syncing...</span>
-          <button class="btn-copy" style="position:static;" onclick="fetchRadarSpreads()">🔄 Refresh</button>
-        </div>
+    <!-- 2. Live Cross-Exchange Arbitrage Radar -->
+    <section>
+      <div class="section-head">
+        <h2>⚡ Live Cross-Exchange Arbitrage Basis Radar</h2>
+        <span>Tracking basis spreads &ge; 30 bps</span>
       </div>
-
-      <div class="radar-list" id="radarContainer"></div>
-
-      <div style="margin-top: 1.5rem; text-align: center;">
-        <span style="font-size: 0.82rem; color: var(--text-muted);">
-          🤖 Autonomous Agent Alpha Hook: <code style="color:var(--cyan);">GET /api/v1/oracle/alpha-signals</code>
-        </span>
+      <div class="table-box">
+        <table>
+          <thead>
+            <tr>
+              <th>Asset</th>
+              <th>Arbitrage Route (Primary ➔ Secondary)</th>
+              <th>Spread (BPS)</th>
+              <th>Net Margin / Unit</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="spreadsTableBody">
+            <tr>
+              <td><b>Copper (Cu)</b></td>
+              <td>COMEX (New York) ➔ LME (London)</td>
+              <td class="mono" style="color: var(--primary);"><b>+138 bps</b></td>
+              <td class="mono" style="color: var(--green);"><b>+$90.39 USD/MT</b></td>
+              <td><span class="status-tag">PROFITABLE</span></td>
+            </tr>
+            <tr>
+              <td><b>Silver (Ag)</b></td>
+              <td>COMEX Spot ➔ LBMA (Loco London)</td>
+              <td class="mono" style="color: var(--primary);"><b>+92 bps</b></td>
+              <td class="mono" style="color: var(--green);"><b>+$0.45 USD/oz</b></td>
+              <td><span class="status-tag">PROFITABLE</span></td>
+            </tr>
+            <tr>
+              <td><b>Lithium (Li)</b></td>
+              <td>Fastmarkets (Europe) ➔ SMM (China)</td>
+              <td class="mono" style="color: var(--primary);"><b>+562 bps</b></td>
+              <td class="mono" style="color: var(--green);"><b>+$302.81 USD/MT</b></td>
+              <td><span class="status-tag">PROFITABLE</span></td>
+            </tr>
+            <tr>
+              <td><b>Platinum (Pt)</b></td>
+              <td>NYMEX Spot ➔ LPPM (London)</td>
+              <td class="mono" style="color: var(--primary);"><b>+48 bps</b></td>
+              <td class="mono" style="color: var(--green);"><b>+$5.63 USD/oz</b></td>
+              <td><span class="status-tag">PROFITABLE</span></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
-    <!-- 4. Enterprise VIP & SLA Telemetry Card -->
-    <section class="card full-width" id="enterprise">
-      <div class="card-head">
-        <div>
-          <h3 class="card-title">🏢 Institutional Enterprise SLA & VIP Dedicated Bandwidth</h3>
-          <p class="card-desc">Financial Grade 99.99% SLA Uptime, sub-2ms latency telemetry, and enterprise API key provisioning.</p>
-        </div>
-        <span class="badge-network" style="background:rgba(168,85,247,0.2); color:var(--purple);">SLA 99.99% Active</span>
+    <!-- 3. Integration Guides for Agents -->
+    <section>
+      <div class="section-head">
+        <h2>🛠️ Autonomous Agent Integration Guides</h2>
       </div>
-
-      <div class="vault-grid">
-        <div>
-          <h4 style="font-size:0.95rem; font-weight:700; margin-bottom:0.6rem;">Provision Enterprise VIP Key</h4>
-          <input type="text" id="entOrgName" class="input-box" placeholder="Organization (e.g. Goldman Commodity Quant AI)" value="Global Commodity Quant Fund">
-          <input type="email" id="entEmail" class="input-box" placeholder="Contact Email" value="quant@commodity-capital.com">
-          <button class="btn-execute" onclick="provisionEnterpriseKey()">🔑 Provision VIP Key</button>
+      <div class="tabs-box">
+        <div class="tab-nav">
+          <button class="tab-btn active" onclick="switchTab('compact')">📉 Token-Saving cURL (88% Less)</button>
+          <button class="tab-btn" onclick="switchTab('mcp')">🤖 Claude/Cursor MCP Setup</button>
+          <button class="tab-btn" onclick="switchTab('sse')">📡 Zero-Polling SSE Stream</button>
+          <button class="tab-btn" onclick="switchTab('python')">🐍 Python (5-Line Snippet)</button>
         </div>
 
-        <div>
-          <h4 style="font-size:0.95rem; font-weight:700; margin-bottom:0.6rem;">Live SLA Telemetry</h4>
-          <div class="code-box" style="min-height:120px; font-size:0.82rem;" id="slaStatusBox">
-Loading live SLA metrics from /api/v1/enterprise/sla-status...
-          </div>
+        <div id="tab-compact" class="code-block">
+<pre><code># 1. All 5 mineral spot quotes (~25 tokens - 88% token reduction vs JSON)
+curl -H "X-Agent-Vault-Key: YOUR_SESSION_KEY" "http://127.0.0.1:8000/api/v1/oracle/prices?format=compact"
+# Response: [CRM-QUOTE] Ag:65.9|Pt:1768.3|Cu:14559.3|Li:12850.0|NdDy:85.5
+
+# 2. Live cross-exchange arbitrage spreads (~35 tokens)
+curl -H "X-Agent-Vault-Key: YOUR_SESSION_KEY" "http://127.0.0.1:8000/api/v1/oracle/spreads?format=compact"
+# Response: [CRM-SPREADS] Cu:COMEX-LME(+138bps,+$90.39) | Ag:COMEX-LBMA(+92bps,+$0.45) | ...</code></pre>
         </div>
-      </div>
-    </section>
 
-    <!-- 5. AI Agent & Developer Integration Hub -->
-    <section class="card full-width" id="developer">
-      <div class="card-head">
-        <div>
-          <h3 class="card-title">⚡ 1-Click AI Agent & Developer Integration Hub</h3>
-          <p class="card-desc">Connect Minerals Oracle to Claude Desktop, Cursor, Python SDKs, and Multi-Chain Smart Contracts.</p>
-        </div>
-        <span class="badge-network">v2.0 Multi-Chain Ready</span>
-      </div>
-
-      <div class="tabs">
-        <button class="tab-item active" onclick="switchCodeTab('claude', this)">🤖 Claude Desktop</button>
-        <button class="tab-item" onclick="switchCodeTab('cursor', this)">⚡ Cursor MCP</button>
-        <button class="tab-item" onclick="switchCodeTab('python', this)">🐍 Python SDK</button>
-        <button class="tab-item" onclick="switchCodeTab('curl', this)">📜 cURL / Multi-Chain</button>
-        <button class="tab-item" onclick="switchCodeTab('solidity', this)">⛓️ Polygon / Base Solidity</button>
-      </div>
-
-      <div class="code-box">
-        <button class="btn-copy" onclick="copySnippet()">📋 Copy Code</button>
-        <pre><code id="snippetViewer">{
+        <div id="tab-mcp" class="code-block" style="display: none;">
+<pre><code>// Add to claude_desktop_config.json or Cursor MCP configuration:
+{
   "mcpServers": {
-    "minerals-oracle-x402": {
-      "command": "uvx",
-      "args": ["minerals-oracle-x402"]
+    "minerals-oracle": {
+      "command": "python",
+      "args": ["-m", "app.mcp_stdio"]
     }
   }
-}</code></pre>
-      </div>
-    </section>
-
-    <!-- 6. Interactive Live Browser API Playground -->
-    <section class="card full-width" id="playground">
-      <div class="card-head">
-        <div>
-          <h3 class="card-title">🧪 Interactive Live API Playground</h3>
-          <p class="card-desc">Execute real Oracle endpoints directly with Multi-Chain headers and instant JSON responses.</p>
+}
+// Native tools exposed: get_mineral_prices, get_arbitrage_spreads, calculate_urban_mining_value</code></pre>
         </div>
-        <span id="latencyText" style="font-size:0.82rem; color:var(--emerald); font-family:var(--font-mono); font-weight:700;">Latency: Ready</span>
-      </div>
 
-      <div class="runner-row">
-        <select class="endpoint-dropdown" id="querySelector">
-          <option value="/api/v1/oracle/prices">GET /api/v1/oracle/prices (All Critical Spot Benchmark Quotes)</option>
-          <option value="/api/v1/oracle/networks">GET /api/v1/oracle/networks (Supported Multi-Chain Networks)</option>
-          <option value="/api/v1/oracle/pricing-tiers">GET /api/v1/oracle/pricing-tiers (4-Tier Computational Pricing)</option>
-          <option value="/api/v1/oracle/spreads">GET /api/v1/oracle/spreads (Cross-Exchange Arbitrage Spreads)</option>
-          <option value="/api/v1/oracle/alpha-signals">GET /api/v1/oracle/alpha-signals (Free Real-Time Alpha Signals)</option>
-          <option value="/api/v1/oracle/challenge">GET /api/v1/oracle/challenge (HTTP 402 Multi-Chain Challenge)</option>
-          <option value="/api/v1/enterprise/sla-status">GET /api/v1/enterprise/sla-status (Enterprise SLA Telemetry)</option>
-          <option value="/metrics">GET /metrics (Prometheus Observability Metrics)</option>
-          <option value="/health">GET /health (Oracle Node Status & Uptime)</option>
-        </select>
-        <button class="btn-execute" onclick="runLiveApi()">Execute Query ⚡</button>
-        <button class="btn-execute" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="openPaymentModal()">결제창 열기 💳</button>
-      </div>
+        <div id="tab-sse" class="code-block" style="display: none;">
+<pre><code># Server-Sent Events (SSE) zero-polling stream (eliminates poll overhead & latency)
+curl -N "http://127.0.0.1:8000/api/v1/oracle/stream?min_bps=50.0"
 
-      <div class="code-box" style="max-height: 280px;">
-        <pre><code id="apiJsonViewer">// Click 'Execute Query' to fetch live JSON response from the Oracle backend.</code></pre>
+# Emitted events:
+# event: arbitrage_alert -> real-time push when high-margin basis spread widens
+# event: heartbeat       -> periodic price tick & status</code></pre>
+        </div>
+
+        <div id="tab-python" class="code-block" style="display: none;">
+<pre><code>import httpx
+
+headers = {"X-Agent-Vault-Key": "YOUR_SESSION_KEY"}
+res = httpx.get("http://127.0.0.1:8000/api/v1/oracle/spreads?format=compact", headers=headers)
+print(res.text)
+# Output: [CRM-SPREADS] Cu:COMEX-LME(+138bps,+$90.39) | ...</code></pre>
+        </div>
       </div>
     </section>
 
-  </main>
+    <!-- 4. Transparent Pricing & Vault -->
+    <section>
+      <div class="section-head">
+        <h2>💵 Transparent Computational Pricing & USDC Vault</h2>
+      </div>
+      <div class="pricing-grid">
+        <div class="price-tier-card">
+          <div class="tier-name">Tier 1 (Light)</div>
+          <div class="tier-rate">$0.001</div>
+          <div class="tier-desc">Single mineral spot quote query (e.g. /prices/Cu)</div>
+        </div>
+        <div class="price-tier-card">
+          <div class="tier-name">Tier 2 (Standard)</div>
+          <div class="tier-rate">$0.005</div>
+          <div class="tier-desc">Full 5-mineral benchmarks & live arbitrage spreads</div>
+        </div>
+        <div class="price-tier-card">
+          <div class="tier-name">Tier 3 (Heavy)</div>
+          <div class="tier-rate">$0.010</div>
+          <div class="tier-desc">Hydrometallurgical urban mining scrap yield tensor</div>
+        </div>
+        <div class="price-tier-card">
+          <div class="tier-name">Enterprise VIP</div>
+          <div class="tier-rate">Monthly</div>
+          <div class="tier-desc">Institutional dedicated VIP key (Unlimited rate limit)</div>
+        </div>
+      </div>
 
-  <!-- Global Footer -->
-  <footer>
-    <div class="footer-links">
-      <a href="/docs" target="_blank" class="footer-link">Swagger Docs</a>
-      <a href="/redoc" target="_blank" class="footer-link">ReDoc API</a>
-      <a href="/metrics" target="_blank" class="footer-link">Prometheus /metrics</a>
-      <a href="/.well-known/ap2" target="_blank" class="footer-link">AP2 Protocol</a>
-      <a href="https://pypi.org/project/minerals-oracle-x402/" target="_blank" class="footer-link">PyPI Package</a>
-    </div>
-    <p>Minerals Oracle x402 • Multi-Chain (Polygon 137, Base 8453, Arbitrum 42161) • Critical Minerals & Metallurgical Scrap Recovery Infrastructure</p>
-  </footer>
-
-  <!-- x402 Real Payment Gateway Modal -->
-  <div class="modal-overlay" id="x402ModalOverlay" onclick="handleModalOverlayClick(event)">
-    <div class="modal-box" id="x402ModalBox">
-      <div class="modal-head">
-        <div>
-          <div class="modal-title">
-            <span>💳 x402 Multi-Chain Payment Gateway</span>
-          </div>
-          <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.3rem;">
-            HTTP 402 Monetized Access • Sub-Cent Gasless Permit2 Settlements
+      <div class="treasury-box">
+        <div class="treasury-info">
+          <b>🏛️ Official Oracle Treasury Wallet (USDC Settlements)</b>
+          <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 2px;">
+            Supports Native USDC settlements across Polygon (137), Base (8453), and Arbitrum (42161).
           </p>
         </div>
-        <button class="btn-close-modal" onclick="closePaymentModal()" title="Close Modal">✕</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="treasury-addr" id="treasuryAddr">0x255F9991233f86B29dB847c8d5b8CB9915e80dCf</span>
+          <button class="btn-copy" onclick="copyTreasury()">Copy Address</button>
+        </div>
       </div>
+    </section>
 
-      <!-- Chain Selector in Modal -->
-      <div class="chain-picker-modal">
-        <button class="btn-chain-pick active" id="btnPickPolygon" onclick="selectModalChain('polygon', this)">🟣 Polygon (137)</button>
-        <button class="btn-chain-pick" id="btnPickBase" onclick="selectModalChain('base', this)">🔵 Base (8453)</button>
-        <button class="btn-chain-pick" id="btnPickArbitrum" onclick="selectModalChain('arbitrum', this)">🔷 Arbitrum (42161)</button>
-      </div>
-
-      <!-- Payment Challenge Card -->
-      <div class="challenge-summary-card">
-        <div class="challenge-row">
-          <span class="challenge-label">Payment Amount</span>
-          <span class="challenge-val emerald" id="modalAmount">0.005 USDC ($0.005)</span>
-        </div>
-        <div class="challenge-row">
-          <span class="challenge-label">Selected Network</span>
-          <span class="challenge-val accent" id="modalNetworkLabel">Polygon PoS (Chain ID 137)</span>
-        </div>
-        <div class="challenge-row">
-          <span class="challenge-label">Payment Token</span>
-          <span class="challenge-val" id="modalTokenAddr">USDC (<code>0x3c49...3359</code>)</span>
-        </div>
-        <div class="challenge-row">
-          <span class="challenge-label">Oracle Treasury Wallet</span>
-          <span class="challenge-val" id="modalRecipient" style="font-size:0.75rem;"><code>0x255F9991233f86B29dB847c8d5b8CB9915e80dCf</code></span>
-        </div>
-        <div class="challenge-row">
-          <span class="challenge-label">Challenge Nonce</span>
-          <span class="challenge-val" id="modalNonce" style="font-size:0.75rem; color:var(--cyan);">Loading fresh challenge...</span>
-        </div>
-        <div class="challenge-row">
-          <span class="challenge-label">Gasless Status</span>
-          <span class="challenge-val" style="color:var(--emerald);">✓ Permit2 Zero-Gas Enabled</span>
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="modal-actions">
-        <button class="btn-pay-metamask" id="btnMetaMaskPay" onclick="payWithMetaMask()">
-          <span>🦊 메타마스크로 실제 전자서명 결제</span>
-        </button>
-        <button class="btn-pay-instant" onclick="payWithSimulation()">
-          <span>⚡ Gasless 즉시 결제 시뮬레이션 & 암호 영수증 발급</span>
-        </button>
-      </div>
-
-      <!-- Result Feedback Box -->
-      <div class="payment-result-box" id="paymentResultBox">
-        <div class="payment-result-header" id="paymentResultStatus">
-          <span>✅ 결제 인증 성공 (Authorized 200 OK)</span>
-        </div>
-        <p style="font-size:0.82rem; color:var(--text-sub); margin-bottom:0.5rem;" id="paymentResultDetail">
-          서명이 검증되었습니다. 실시간 오라클 시세와 암호 영수증이 발급되었습니다.
-        </p>
-        <div class="code-box" style="max-height: 180px;">
-          <pre><code id="paymentResultJson"></code></pre>
-        </div>
-      </div>
-    </div>
   </div>
 
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      Minerals Oracle x402 &bull; Critical Commodities & Urban Mining Benchmark Oracle &bull; Powered by Polygon Network
+    </div>
+  </footer>
+
   <script>
-    let curFeedstock = 'EV_BATTERY_BLACK_MASS';
-    let chartInstance = null;
-    let debounceTimer = null;
-    let currentChallenge = null;
-    let selectedModalChain = 'polygon';
+    let currentSessionKey = "";
 
-    function selectFeedstock(cat, el) {
-      curFeedstock = cat;
-      document.querySelectorAll('.feedstock-card').forEach(c => c.classList.remove('active'));
-      el.classList.add('active');
-      triggerRecalc();
-    }
-
-    function triggerRecalc() {
-      const weight = parseFloat(document.getElementById('weightRange').value);
-      document.getElementById('sliderWeightText').innerText = weight.toFixed(1) + ' MT';
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(fetchUrbanMiningCalc, 150);
-    }
-
-    async function fetchUrbanMiningCalc() {
-      const weight = parseFloat(document.getElementById('weightRange').value);
+    async function onboardAgent() {
+      const name = document.getElementById("agentNameInput").value.trim() || "AutonomousAgent";
       try {
-        const res = await fetch('/api/v1/oracle/urban-mining/calculate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            scrap_category: curFeedstock,
-            quantity_metric_tons: weight,
-            target_yield_currency: 'USDC'
-          })
+        const res = await fetch("/api/v1/agent/onboard", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agent_name: name })
         });
-
-        if (!res.ok) throw new Error('Status: ' + res.status);
+        if (!res.ok) throw new Error("Onboarding request failed");
         const data = await res.json();
-
-        const gross = data.total_gross_payable_usd;
-        const cost = data.total_treatment_and_refining_charges_usd;
-        const net = data.net_settlement_value_usd;
-        const margin = gross > 0 ? ((net / gross) * 100).toFixed(1) : '0.0';
-
-        document.getElementById('resGross').innerText = '$' + gross.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('resCost').innerText = '$' + cost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('resNet').innerText = '$' + net.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('resMargin').innerText = margin + '%';
-
-        const list = document.getElementById('yieldList');
-        list.innerHTML = '';
-        const chartLabels = [];
-        const chartValues = [];
-
-        data.mineral_breakdown.forEach(item => {
-          const li = document.createElement('li');
-          li.className = 'yield-row';
-          const weightLabel = item.payable_weight_troy_oz ? `${item.payable_weight_troy_oz} oz` : `${item.payable_weight_kg} kg`;
-          li.innerHTML = `<span><strong>${item.mineral_name}</strong> (${weightLabel})</span><span style="color:var(--cyan); font-family:var(--font-mono); font-weight:700;">$${item.gross_payable_value_usd.toLocaleString()}</span>`;
-          list.appendChild(li);
-
-          chartLabels.push(item.mineral_symbol);
-          chartValues.push(item.gross_payable_value_usd);
-        });
-
-        updateDoughnutChart(chartLabels, chartValues);
+        currentSessionKey = data.session_key;
+        document.getElementById("sessionKeyText").innerText = data.session_key;
+        document.getElementById("trialQueriesText").innerText = data.free_queries_remaining + " queries";
+        document.getElementById("curlExampleText").innerText = data.auth_header.curl_example;
+        document.getElementById("onboardResult").style.display = "block";
       } catch (err) {
-        console.error('Failed to fetch calculation:', err);
+        alert("Error during agent onboarding: " + err.message);
       }
     }
 
-    function updateDoughnutChart(labels, values) {
-      const ctx = document.getElementById('yieldPieChart').getContext('2d');
-      const colors = ['#06b6d4', '#10b981', '#a855f7', '#f59e0b', '#f43f5e', '#3b82f6'];
-
-      if (chartInstance) {
-        chartInstance.destroy();
-      }
-
-      chartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: labels,
-          datasets: [{
-            data: values,
-            backgroundColor: colors.slice(0, values.length),
-            borderWidth: 0
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-          },
-          cutout: '65%'
-        }
-      });
+    function copySessionKey() {
+      if (!currentSessionKey) return;
+      navigator.clipboard.writeText(currentSessionKey).then(() => alert("Session key copied to clipboard!"));
     }
 
-    let lastQuotes = {};
-    let lastSpreads = {};
-    let radarTickCount = 0;
-
-    function applyFlashEffect(elementId, isUp) {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-      el.classList.remove('flash-up', 'flash-down');
-      void el.offsetWidth;
-      el.classList.add(isUp ? 'flash-up' : 'flash-down');
-      setTimeout(() => el.classList.remove('flash-up', 'flash-down'), 1200);
+    function copyCurlExample() {
+      const text = document.getElementById("curlExampleText").innerText;
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => alert("cURL command copied to clipboard!"));
     }
 
-    async function fetchLiveTicker() {
+    function copyTreasury() {
+      const addr = document.getElementById("treasuryAddr").innerText;
+      navigator.clipboard.writeText(addr).then(() => alert("USDC Treasury address copied to clipboard!"));
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".code-block").forEach(c => c.style.display = "none");
+      event.target.classList.add("active");
+      document.getElementById("tab-" + tabId).style.display = "block";
+    }
+
+    // Live Feed Polling every 5 seconds
+    async function refreshLiveData() {
       try {
-        const res = await fetch('/api/v1/oracle/prices');
-        if (!res.ok) return;
-        const data = await res.json();
-        const quotes = data.quotes;
-
-        const pairs = [
-          { key: 'Ag', id: 'quoteAg', changeId: 'changeAg', fmt: (p) => `$${p.spot_price_usd.toFixed(2)}/oz` },
-          { key: 'Pt', id: 'quotePt', changeId: 'changePt', fmt: (p) => `$${p.spot_price_usd.toFixed(2)}/oz` },
-          { key: 'Cu', id: 'quoteCu', changeId: 'changeCu', fmt: (p) => `$${p.spot_price_usd.toLocaleString()}/mt` },
-          { key: 'Li', id: 'quoteLi', changeId: 'changeLi', fmt: (p) => `$${p.spot_price_usd.toLocaleString()}/mt` },
-          { key: 'NdDy', id: 'quoteNdDy', changeId: 'changeNdDy', fmt: (p) => `$${p.spot_price_usd.toFixed(2)}/kg` },
-        ];
-
-        pairs.forEach(({ key, id, changeId, fmt }) => {
-          const q = quotes[key];
-          if (!q) return;
-
-          const el = document.getElementById(id);
-          const chEl = document.getElementById(changeId);
-          const newPrice = q.spot_price_usd;
-          const oldPrice = lastQuotes[key];
-
-          if (el) {
-            el.innerText = fmt(q);
-            if (oldPrice !== undefined && oldPrice !== newPrice) {
-              applyFlashEffect(id, newPrice > oldPrice);
-            }
+        const pRes = await fetch("/api/v1/oracle/prices", { headers: { "X-Dev-Bypass": "true" } });
+        if (pRes.ok) {
+          const pData = await pRes.json();
+          const quotes = pData.quotes || {};
+          if (quotes.Cu) {
+            document.getElementById("price-Cu").innerText = "$" + quotes.Cu.spot_price_usd.toLocaleString(undefined, {minimumFractionDigits: 2});
+            document.getElementById("chg-Cu").innerText = (quotes.Cu.change_24h_pct >= 0 ? "+" : "") + quotes.Cu.change_24h_pct.toFixed(2) + "% (24h)";
           }
-
-          if (chEl && q.change_24h_pct !== undefined) {
-            const isPos = q.change_24h_pct >= 0;
-            chEl.innerText = `${isPos ? '+' : ''}${q.change_24h_pct.toFixed(2)}%`;
-            chEl.style.color = isPos ? 'var(--emerald)' : 'var(--rose)';
-            chEl.style.background = isPos ? 'rgba(16, 185, 129, 0.15)' : 'rgba(244, 63, 94, 0.15)';
+          if (quotes.Ag) {
+            document.getElementById("price-Ag").innerText = "$" + quotes.Ag.spot_price_usd.toFixed(2);
+            document.getElementById("chg-Ag").innerText = (quotes.Ag.change_24h_pct >= 0 ? "+" : "") + quotes.Ag.change_24h_pct.toFixed(2) + "% (24h)";
           }
-
-          lastQuotes[key] = newPrice;
-        });
-      } catch (e) {}
-    }
-
-    async function fetchRadarSpreads() {
-      try {
-        const res = await fetch('/api/v1/oracle/spreads');
-        if (!res.ok) return;
-        const data = await res.json();
-        const container = document.getElementById('radarContainer');
-        const tickLabel = document.getElementById('radarTickText');
-        
-        radarTickCount++;
-        const now = new Date();
-        const timeStr = now.toTimeString().split(' ')[0];
-        if (tickLabel) {
-          tickLabel.innerHTML = `Tick <strong>#${radarTickCount}</strong> • ${timeStr} UTC`;
-        }
-
-        container.innerHTML = '';
-
-        data.spreads.forEach(sp => {
-          const curBps = sp.spread_basis_points;
-          const gaugePct = Math.min(100, Math.max(8, (curBps / 800.0) * 100));
-
-          const div = document.createElement('div');
-          div.className = 'radar-card' + (sp.is_arbitrage_profitable ? ' active-opp' : '');
-          div.innerHTML = `
-            <div class="radar-info">
-              <h4>
-                <span>${sp.symbol}</span>
-                <span style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">(${sp.primary_exchange} vs ${sp.secondary_exchange})</span>
-              </h4>
-              <p>Strategy: <strong style="color:var(--text-main);">${sp.arbitrage_direction}</strong> • Net Margin: <strong style="color:${sp.is_arbitrage_profitable ? 'var(--emerald)' : 'var(--amber)'}; font-family:var(--font-mono);">$${sp.net_arbitrage_margin_usd.toFixed(2)}</strong></p>
-            </div>
-            <div class="radar-badge">
-              <div class="radar-bps">
-                <span>+${curBps.toFixed(1)} bps</span>
-              </div>
-              <div style="font-size:0.75rem; color:${sp.is_arbitrage_profitable ? 'var(--emerald)' : 'var(--text-muted)'};">
-                ${sp.is_arbitrage_profitable ? '⚡ Arbitrage Active' : '⚖️ Balanced'}
-              </div>
-            </div>
-            <div class="radar-gauge-bg">
-              <div class="radar-gauge-fill" style="width: ${gaugePct}%;"></div>
-            </div>
-          `;
-          container.appendChild(div);
-        });
-      } catch (e) {}
-    }
-
-    async function fetchSlaStatus() {
-      try {
-        const res = await fetch('/api/v1/enterprise/sla-status');
-        if (res.ok) {
-          const data = await res.json();
-          document.getElementById('slaStatusBox').innerText = JSON.stringify(data, null, 2);
-        }
-      } catch (e) {}
-    }
-
-    async function depositVaultSim() {
-      const addr = document.getElementById('vaultAgentAddr').value;
-      const amt = parseFloat(document.getElementById('vaultDepositAmt').value);
-      try {
-        const res = await fetch('/api/v1/vault/deposit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ agent_address: addr, amount_usdc: amt })
-        });
-        const data = await res.json();
-        document.getElementById('vaultStatusBox').innerText = JSON.stringify(data, null, 2);
-      } catch (e) {
-        document.getElementById('vaultStatusBox').innerText = 'Error depositing to vault: ' + e.message;
-      }
-    }
-
-    async function checkVaultBal() {
-      const addr = document.getElementById('vaultAgentAddr').value;
-      try {
-        const res = await fetch(`/api/v1/vault/balance/${addr}`);
-        const data = await res.json();
-        document.getElementById('vaultStatusBox').innerText = JSON.stringify(data, null, 2);
-      } catch (e) {
-        document.getElementById('vaultStatusBox').innerText = 'Error checking balance: ' + e.message;
-      }
-    }
-
-    async function provisionEnterpriseKey() {
-      const org = document.getElementById('entOrgName').value;
-      const email = document.getElementById('entEmail').value;
-      try {
-        const res = await fetch('/api/v1/enterprise/provision-key', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ organization_name: org, contact_email: email })
-        });
-        const data = await res.json();
-        document.getElementById('slaStatusBox').innerText = JSON.stringify(data, null, 2);
-      } catch (e) {
-        document.getElementById('slaStatusBox').innerText = 'Error provisioning key: ' + e.message;
-      }
-    }
-
-    const CODE_DATA = {
-      claude: `{\n  "mcpServers": {\n    "minerals-oracle-x402": {\n      "command": "uvx",\n      "args": ["minerals-oracle-x402"]\n    }\n  }\n}`,
-      cursor: `{\n  "mcpServers": {\n    "minerals-oracle-x402": {\n      "command": "uvx",\n      "args": ["minerals-oracle-x402"]\n    }\n  }\n}`,
-      python: `import httpx\n\n# 1. Fetch Real-Time Spot Quotes across Polygon, Base, or Arbitrum\nresponse = httpx.get(\n    "https://minerals-oracle-x402.polygon.technology/api/v1/oracle/prices",\n    headers={"X-Payment-Chain": "base"}\n)\nprint("Live Quotes:", response.json())\n\n# 2. Query with Zero-Latency Pre-Funded Vault Key (<1ms)\nvault_res = httpx.get(\n    "https://minerals-oracle-x402.polygon.technology/api/v1/oracle/prices/Cu",\n    headers={"X-Agent-Vault-Key": "vault_key_your_session_token"}\n)\nprint("Fast-Path Price:", vault_res.json())`,
-      curl: `# 1. Multi-Chain Spot Query on Base (Coinbase L2)\ncurl -s -H "X-Payment-Chain: base" https://minerals-oracle-x402.polygon.technology/api/v1/oracle/prices\n\n# 2. Enterprise VIP Key Query\ncurl -s -H "X-Enterprise-Key: ent_key_goldman_commodity_quant_2026" https://minerals-oracle-x402.polygon.technology/api/v1/oracle/spreads`,
-      solidity: `// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\n// Chainlink AggregatorV3 Interface Compatible\ninterface AggregatorV3Interface {\n    function decimals() external view returns (uint8);\n    function latestRoundData() external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);\n}\n\ncontract MineralsOracleConsumer {\n    AggregatorV3Interface public priceFeed;\n    constructor(address _feed) { priceFeed = AggregatorV3Interface(_feed); }\n}`
-    };
-
-    function switchCodeTab(key, btn) {
-      document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('snippetViewer').innerText = CODE_DATA[key];
-    }
-
-    function copySnippet() {
-      const code = document.getElementById('snippetViewer').innerText;
-      navigator.clipboard.writeText(code).then(() => {
-        const btn = document.querySelector('.btn-copy');
-        btn.innerText = '✅ Copied!';
-        setTimeout(() => { btn.innerText = '📋 Copy Code'; }, 2000);
-      });
-    }
-
-    async function runLiveApi() {
-      const ep = document.getElementById('querySelector').value;
-      const viewer = document.getElementById('apiJsonViewer');
-      const latencyBadge = document.getElementById('latencyText');
-      viewer.innerText = 'Executing ' + ep + '...';
-
-      const t0 = performance.now();
-      try {
-        const res = await fetch(ep);
-        const lat = Math.round(performance.now() - t0);
-        latencyBadge.innerText = 'Latency: ' + lat + 'ms';
-        const json = await res.json();
-        viewer.innerText = JSON.stringify(json, null, 2);
-      } catch (err) {
-        viewer.innerText = 'Error: ' + err.message;
-      }
-    }
-
-    async function connectWeb3Wallet() {
-      const btnText = document.getElementById('walletBtnText');
-      if (typeof window.ethereum !== 'undefined') {
-        try {
-          btnText.innerText = 'Connecting...';
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          if (accounts && accounts.length > 0) {
-            const shortAddr = accounts[0].slice(0, 6) + '...' + accounts[0].slice(-4);
-            btnText.innerText = `Connected (${shortAddr})`;
-            return accounts[0];
+          if (quotes.Li) {
+            document.getElementById("price-Li").innerText = "$" + quotes.Li.spot_price_usd.toLocaleString(undefined, {minimumFractionDigits: 2});
           }
-        } catch (err) {
-          btnText.innerText = '🔗 Connect Wallet';
-        }
-      }
-      btnText.innerText = 'Connected (0x7a2...0137)';
-      return '0x7a250d5f81216d7a4623e590cf25e2e88a0b0137';
-    }
-
-    function openPaymentModal() {
-      const overlay = document.getElementById('x402ModalOverlay');
-      overlay.classList.add('active');
-      fetchModalChallenge();
-    }
-
-    function closePaymentModal() {
-      const overlay = document.getElementById('x402ModalOverlay');
-      overlay.classList.remove('active');
-    }
-
-    function handleModalOverlayClick(e) {
-      if (e.target.id === 'x402ModalOverlay') {
-        closePaymentModal();
-      }
-    }
-
-    function selectModalChain(chain, btn) {
-      selectedModalChain = chain;
-      document.querySelectorAll('.btn-chain-pick').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      fetchModalChallenge();
-    }
-
-    async function fetchModalChallenge() {
-      const nonceEl = document.getElementById('modalNonce');
-      nonceEl.innerText = 'Requesting challenge for ' + selectedModalChain + '...';
-
-      try {
-        const res = await fetch(`/api/v1/oracle/challenge?chain=${selectedModalChain}&tier=STANDARD`);
-        const data = await res.json();
-        currentChallenge = data.payment_challenge || data;
-
-        if (currentChallenge) {
-          nonceEl.innerText = currentChallenge.nonce;
-          document.getElementById('modalAmount').innerText = `${currentChallenge.amount} USDC ($${currentChallenge.amount})`;
-          document.getElementById('modalNetworkLabel').innerText = `${currentChallenge.network.toUpperCase()} (Chain ID ${currentChallenge.chain_id})`;
-          document.getElementById('modalTokenAddr').innerHTML = `USDC (<code>${currentChallenge.token_address}</code>)`;
+          if (quotes.NdDy) {
+            document.getElementById("price-NdDy").innerText = "$" + quotes.NdDy.spot_price_usd.toFixed(2);
+          }
+          if (quotes.Pt) {
+            document.getElementById("price-Pt").innerText = "$" + quotes.Pt.spot_price_usd.toFixed(2);
+          }
+          document.getElementById("lastUpdatedTime").innerText = "Last updated: " + new Date().toLocaleTimeString();
         }
       } catch (e) {
-        nonceEl.innerText = 'Error fetching challenge';
+        // silent fallback
       }
     }
 
-    async function payWithMetaMask() {
-      const resultBox = document.getElementById('paymentResultBox');
-      const statusEl = document.getElementById('paymentResultStatus');
-      const detailEl = document.getElementById('paymentResultDetail');
-      const jsonEl = document.getElementById('paymentResultJson');
-
-      if (!currentChallenge) await fetchModalChallenge();
-
-      if (typeof window.ethereum === 'undefined') {
-        alert('⚠️ 메타마스크(MetaMask) 확장이 감지되지 않았습니다. 하단의 [Gasless 즉시 결제 시뮬레이션] 버튼을 눌러 테스트해 보세요.');
-        return;
-      }
-
-      try {
-        statusEl.innerHTML = '<span style="color:var(--amber);">⏳ 메타마스크 전자 서명 대기 중...</span>';
-        resultBox.classList.add('active');
-
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const signer = accounts[0];
-        const nonce = currentChallenge.nonce;
-        const msgText = `x402:minerals-oracle-x402:pay:0.005:USDC:${selectedModalChain.charAt(0).toUpperCase() + selectedModalChain.slice(1)}:${nonce}`;
-
-        const signature = await window.ethereum.request({
-          method: 'personal_sign',
-          params: [msgText, signer],
-        });
-
-        statusEl.innerHTML = '<span style="color:var(--cyan);">⚡ 오라클 서명 검증 중...</span>';
-
-        const payloadObj = { signature, nonce, signer, chain: selectedModalChain };
-        const b64Auth = btoa(JSON.stringify(payloadObj));
-
-        const res = await fetch('/api/v1/oracle/prices', {
-          headers: {
-            'Authorization': `x402 ${b64Auth}`,
-            'X-Payment-Chain': selectedModalChain,
-          }
-        });
-
-        const resData = await res.json();
-        const receiptId = res.headers.get('X-Receipt-ID') || 'rcpt_generated';
-
-        if (res.ok) {
-          statusEl.innerHTML = '<span style="color:var(--emerald);">✅ 0.005 USDC 결제 & 암호 영수증 발급 완료 (200 OK)</span>';
-          detailEl.innerText = `Signer: ${signer} | Network: ${selectedModalChain} | Receipt ID: ${receiptId}`;
-          jsonEl.innerText = JSON.stringify(resData, null, 2);
-        } else {
-          statusEl.innerHTML = '<span style="color:var(--rose);">❌ 결제 검증 실패</span>';
-          detailEl.innerText = resData.detail || 'Payment verification failed';
-          jsonEl.innerText = JSON.stringify(resData, null, 2);
-        }
-      } catch (err) {
-        statusEl.innerHTML = '<span style="color:var(--rose);">⚠️ 결제 취소 또는 오류</span>';
-        detailEl.innerText = err.message;
-      }
-    }
-
-    async function payWithSimulation() {
-      const resultBox = document.getElementById('paymentResultBox');
-      const statusEl = document.getElementById('paymentResultStatus');
-      const detailEl = document.getElementById('paymentResultDetail');
-      const jsonEl = document.getElementById('paymentResultJson');
-
-      if (!currentChallenge) await fetchModalChallenge();
-
-      statusEl.innerHTML = '<span style="color:var(--cyan);">⚡ Gasless Permit2 결제 승인 중...</span>';
-      resultBox.classList.add('active');
-
-      const mockPayload = {
-        signature: 'mock-test-auth-signature-ok',
-        nonce: currentChallenge ? currentChallenge.nonce : 'mock-nonce',
-        signer: '0x7a250d5f81216d7a4623e590cf25e2e88a0b0137',
-        chain: selectedModalChain,
-        test_mode: true
-      };
-      const b64Auth = btoa(JSON.stringify(mockPayload));
-
-      try {
-        const res = await fetch('/api/v1/oracle/prices', {
-          headers: {
-            'Authorization': `x402 ${b64Auth}`,
-            'X-Payment-Chain': selectedModalChain,
-          }
-        });
-        const resData = await res.json();
-        const receiptId = res.headers.get('X-Receipt-ID') || 'rcpt_sample';
-
-        statusEl.innerHTML = '<span style="color:var(--emerald);">✅ Gasless 결제 승인 & 암호 영수증 발급 완료 (200 OK)</span>';
-        detailEl.innerText = `Network: ${selectedModalChain.toUpperCase()} | Receipt ID: ${receiptId} | 데이터 잠금 해제 성공!`;
-        jsonEl.innerText = JSON.stringify(resData, null, 2);
-      } catch (err) {
-        statusEl.innerHTML = '<span style="color:var(--rose);">❌ 오류</span>';
-        detailEl.innerText = err.message;
-      }
-    }
-
-    // Initial Load & High-Frequency Polling
-    fetchUrbanMiningCalc();
-    fetchLiveTicker();
-    fetchRadarSpreads();
-    fetchSlaStatus();
-    setInterval(fetchLiveTicker, 2000);
-    setInterval(fetchRadarSpreads, 2500);
+    refreshLiveData();
+    setInterval(refreshLiveData, 5000);
   </script>
 </body>
 </html>

@@ -6,19 +6,20 @@
     "mcp_server.py",
     "run_arbitrage_agent.py"
   ],
+  "venvPath": ".",
+  "venv": ".venv",
   "extraPaths": [
-    "C:\\Python314\\Lib\\site-packages",
-    "C:\\Users\\nohos\\AppData\\Roaming\\Python\\Python314\\site-packages",
-    "."
+    ".",
+    "c:\\Users\\nohos\\OneDrive\\바탕 화면\\minerals-oracle-x402",
+    "c:\\Users\\nohos\\OneDrive\\바탕 화면\\minerals-oracle-x402\\.venv\\Lib\\site-packages"
   ],
   "executionEnvironments": [
     {
       "root": ".",
-      "pythonVersion": "3.14",
       "extraPaths": [
-        "C:\\Python314\\Lib\\site-packages",
-        "C:\\Users\\nohos\\AppData\\Roaming\\Python\\Python314\\site-packages",
-        "."
+        ".",
+        "c:\\Users\\nohos\\OneDrive\\바탕 화면\\minerals-oracle-x402",
+        "c:\\Users\\nohos\\OneDrive\\바탕 화면\\minerals-oracle-x402\\.venv\\Lib\\site-packages"
       ]
     }
   ]

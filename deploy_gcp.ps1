@@ -1,9 +1,10 @@
 # ========================================================
 #   minerals-oracle-x402 Google Cloud Run PowerShell Script
+#   (24/7 Always-On Cloud Autonomous Execution)
 # ========================================================
 
 Write-Host "========================================================" -ForegroundColor Cyan
-Write-Host "  minerals-oracle-x402 Cloud Run Deployment" -ForegroundColor Cyan
+Write-Host "  minerals-oracle-x402 24/7 Cloud Deployment" -ForegroundColor Cyan
 Write-Host "========================================================" -ForegroundColor Cyan
 
 # 1. Check gcloud CLI
@@ -26,8 +27,8 @@ Write-Host "Region: asia-northeast3 (Seoul)" -ForegroundColor Green
 Write-Host "`n[1/2] Enabling required GCP APIs (run, cloudbuild, artifactregistry)..." -ForegroundColor Yellow
 gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com --quiet
 
-# 4. Deploy to Cloud Run
-Write-Host "`n[2/2] Deploying container to Cloud Run..." -ForegroundColor Yellow
+# 4. Deploy to Cloud Run with 24/7 Always-On Worker settings
+Write-Host "`n[2/2] Deploying 24/7 container to Cloud Run..." -ForegroundColor Yellow
 gcloud run deploy minerals-oracle-x402 `
     --source . `
     --region asia-northeast3 `
@@ -35,20 +36,21 @@ gcloud run deploy minerals-oracle-x402 `
     --allow-unauthenticated `
     --memory 512Mi `
     --cpu 1 `
-    --min-instances 0 `
+    --min-instances 1 `
+    --no-cpu-throttling `
     --max-instances 10 `
-    --set-env-vars="ORACLE_TREASURY_WALLET=0x255F9991233f86B29dB847c8d5b8CB9915e80dCf,ALLOW_DEV_BYPASS=false,POLYGON_CHAIN_ID=137,CHAIN_ID=137,DEFAULT_PRICE_USDC=0.005,X402_FACILITATOR_URL=https://facilitator.polygon.technology/v1/verify" `
+    --env-vars-file .env.yaml `
     --quiet
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "`n========================================================" -ForegroundColor Green
-    Write-Host "  [SUCCESS] Cloud Run deployment successful!" -ForegroundColor Green
+    Write-Host "  [SUCCESS] 24/7 Cloud deployment successful!" -ForegroundColor Green
     Write-Host "========================================================" -ForegroundColor Green
     $serviceUrl = (gcloud run services describe minerals-oracle-x402 --region asia-northeast3 --format="value(status.url)").Trim()
     Write-Host "Service URL: $serviceUrl" -ForegroundColor Cyan
-    Write-Host "Health Check: $serviceUrl/health" -ForegroundColor Cyan
-    Write-Host "Alpha Signals: $serviceUrl/api/v1/oracle/alpha-signals" -ForegroundColor Cyan
-    Write-Host "AP2 Manifest: $serviceUrl/.well-known/ap2" -ForegroundColor Cyan
+    Write-Host "24/7 Bot Status: $serviceUrl/api/v1/bot/status" -ForegroundColor Cyan
+    Write-Host "Trade History: $serviceUrl/api/v1/bot/history" -ForegroundColor Cyan
+    Write-Host "Web Dashboard: $serviceUrl/dashboard" -ForegroundColor Cyan
 } else {
     Write-Host "`n[ERROR] Deployment failed. Check the logs above." -ForegroundColor Red
 }

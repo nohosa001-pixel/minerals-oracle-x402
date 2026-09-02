@@ -251,22 +251,24 @@ class X402Verifier:
         identifier = vault_key or agent_addr
         if identifier:
             deduct_ok, agent_res, rem_bal = vault_manager.try_deduct(identifier, float_cost)
+            agent_addr_str = agent_res or "unknown_agent"
             if deduct_ok:
-                receipt = self.issue_payment_receipt(agent_res, tier, chain_cfg.chain_name, payload_digest)
+                receipt = self.issue_payment_receipt(agent_addr_str, tier, chain_cfg.chain_name, payload_digest)
                 extra_headers.update({
                     "X-Payment-Method": "Pre-Funded-Vault",
-                    "X-Vault-Agent": agent_res,
+                    "X-Vault-Agent": agent_addr_str,
                     "X-Vault-Balance-Remaining": f"${rem_bal:.4f} USDC",
                     "X-Receipt-ID": receipt.receipt_id,
                 })
-                return True, agent_res, extra_headers
+                return True, agent_addr_str, extra_headers
             else:
-                return False, agent_res, None
+                return False, agent_addr_str, None
 
         # 3. Web Dashboard interactive check
         client_ip = request.client.host if request.client else "unknown_client"
-        if request.headers.get("X-Forwarded-For"):
-            client_ip = request.headers.get("X-Forwarded-For").split(",")[0].strip()
+        xfwd = request.headers.get("X-Forwarded-For")
+        if xfwd:
+            client_ip = xfwd.split(",")[0].strip()
 
         usage_count = _FREE_TRIAL_USAGE.get(client_ip, 0)
         skip_trial = request.headers.get("X-Trial-Bypass") == "true"

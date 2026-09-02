@@ -47,3 +47,10 @@ htmlcov/
 *.swo
 .DS_Store
 Thumbs.db
+
+# Secrets, Caches & Local Logs
+.kis_token_cache.json
+app/.kis_token_cache.json
+*.bak
+logs/
+scratch/
