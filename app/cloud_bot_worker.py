@@ -97,6 +97,14 @@ class CloudArbitrageWorker:
         self.started_at: Optional[str] = None
         self.last_cycle_at: Optional[str] = None
 
+        # Hourly Black-Swan Compounding & Profit Reallocation (1-Hour Auto-Reinvestment)
+        self.compound_interval_sec: float = float(os.getenv("COMPOUND_INTERVAL_SEC", "3600.0"))
+        self.last_compound_time: float = time.time()
+        self.hourly_start_pnl: float = 0.0
+        self.safe_reserve_vault_usd: float = 0.0
+        self.reinvested_capital_usd: float = 0.0
+        self.hour_index: int = 0
+
     def reset_state(self) -> Dict[str, Any]:
         """Resets all cumulative trade counters, PnL metrics, and active positions to 0."""
         self.total_trades_executed = 0
@@ -112,8 +120,78 @@ class CloudArbitrageWorker:
         self.active_positions.clear()
         self.minute_trades_buffer.clear()
         self.last_telegram_digest_time = time.time()
+        self.safe_reserve_vault_usd = 0.0
+        self.reinvested_capital_usd = 0.0
+        self.hourly_start_pnl = 0.0
+        self.last_compound_time = time.time()
+        self.hour_index = 0
         logger.info("CloudArbitrageWorker metrics and positions reset to 0.")
         return self.get_status()
+
+    async def check_hourly_compounding(self):
+        """
+        Executes hourly automated Black-Swan compounding and dynamic capital reallocation.
+        - Every 1 hour (3600s), calculates net profit generated during the hour.
+        - 50% allocated to Ultra-Safe Locked Vault (Black Swan Cushion).
+        - 50% reinvested directly into Working Capital Pool to dynamically scale trade size.
+        - Dispatches Telegram Hourly Compounding Digest Report.
+        """
+        now = time.time()
+        elapsed = now - self.last_compound_time
+        if elapsed >= self.compound_interval_sec:
+            self.hour_index += 1
+            hourly_profit = round(self.cumulative_net_pnl - self.hourly_start_pnl, 2)
+            
+            safe_vault_add = 0.0
+            reinvest_add = 0.0
+            if hourly_profit > 0:
+                # 50% to Ultra-Safe Locked Vault (Black Swan Cushion)
+                safe_vault_add = round(hourly_profit * 0.50, 2)
+                self.safe_reserve_vault_usd = round(self.safe_reserve_vault_usd + safe_vault_add, 2)
+                
+                # 50% Reinvested into Working Capital Pool (up to Sweet Spot Cap)
+                reinvest_add = round(hourly_profit * 0.50, 2)
+                self.total_capital_usd = round(self.total_capital_usd + reinvest_add, 2)
+                self.reinvested_capital_usd = round(self.reinvested_capital_usd + reinvest_add, 2)
+                
+                # Goldilocks Sweet-Spot Capacity Protection:
+                sweet_spot_cap = float(os.getenv("SWEET_SPOT_CAP_USD", "10000.0"))
+                if self.total_capital_usd > sweet_spot_cap:
+                    overflow = round(self.total_capital_usd - sweet_spot_cap, 2)
+                    self.total_capital_usd = sweet_spot_cap
+                    self.safe_reserve_vault_usd = round(self.safe_reserve_vault_usd + overflow, 2)
+                    logger.info(f"🛡️ [SWEET-SPOT CAP REACHED] Overflow of ${overflow:,.2f} USD safely routed to Safe Vault Parking")
+
+                # Dynamic Position Sizing (Scale-up proportionally to capital, capped at MAX_TRADE_SIZE_USD)
+                capital_scale_pct = float(os.getenv("CAPITAL_SCALE_PCT", "10.0"))
+                max_trade_size = float(os.getenv("MAX_TRADE_SIZE_USD", "6000.0"))
+                self.trade_size_usd = min(round(self.total_capital_usd * (capital_scale_pct / 100.0), 2), max_trade_size)
+
+            logger.info(
+                f"[HOURLY COMPOUNDING #{self.hour_index}] Hourly Profit: +${hourly_profit:.2f} | "
+                f"Vault: +${safe_vault_add:.2f} (Total: ${self.safe_reserve_vault_usd:.2f}) | "
+                f"Reinvested: +${reinvest_add:.2f} | New Capital: ${self.total_capital_usd:.2f} | Trade Size: ${self.trade_size_usd:.2f}"
+            )
+
+            report_data = {
+                "hour_index": self.hour_index,
+                "hourly_profit_usd": hourly_profit,
+                "safe_vault_add_usd": safe_vault_add,
+                "safe_vault_total_usd": self.safe_reserve_vault_usd,
+                "reinvested_add_usd": reinvest_add,
+                "total_capital_usd": self.total_capital_usd,
+                "trade_size_usd": self.trade_size_usd,
+                "cumulative_pnl_usd": self.cumulative_net_pnl,
+                "live_session_pnl": self.live_session_pnl,
+            }
+            try:
+                msg = telegram_bot.generate_hourly_compounding_report(report_data, dry_run=self.is_dry_run)
+                await telegram_bot.send_message(msg, dry_run=self.is_dry_run)
+            except Exception as e:
+                logger.warning(f"Hourly compounding Telegram dispatch error: {e}")
+
+            self.hourly_start_pnl = self.cumulative_net_pnl
+            self.last_compound_time = now
 
     async def check_auto_live_switch(self):
         """Automatically flips CloudArbitrageWorker to Live KIS Trading at 22:30 KST."""
@@ -476,6 +554,9 @@ class CloudArbitrageWorker:
         # 0. Check Auto Live Switch at 22:30 KST
         await self.check_auto_live_switch()
 
+        # 0.5. Check Hourly Compounding & Capital Reallocation (1 hour cycle)
+        await self.check_hourly_compounding()
+
         # 1. Check & execute Take-Profit (+0.50%) and Stop-Loss (-1.50%)
         await self.check_position_exits()
 
@@ -515,7 +596,7 @@ class CloudArbitrageWorker:
                         self.minute_trades_buffer,
                         self.cumulative_net_pnl,
                         interval_minutes=int_mins,
-                        safe_vault_total=0.0,
+                        safe_vault_total=self.safe_reserve_vault_usd,
                         total_capital=self.total_capital_usd,
                         dry_run=self.is_dry_run,
                         live_session_pnl=self.live_session_pnl,
@@ -691,6 +772,10 @@ class CloudArbitrageWorker:
                 "cumulative_gas_spent_usd": round(self.cumulative_gas_spent, 4),
                 "cumulative_net_pnl_usdc": round(self.cumulative_net_pnl, 2),
                 "active_positions_count": len(self.active_positions),
+                "safe_reserve_vault_usd": round(self.safe_reserve_vault_usd, 2),
+                "reinvested_capital_usd": round(self.reinvested_capital_usd, 2),
+                "compounding_hour_index": self.hour_index,
+                "next_compounding_in_sec": max(0, int(self.compound_interval_sec - (time.time() - self.last_compound_time))),
             },
             "broker": {
                 "name": "Korea Investment & Securities (한국투자증권)",

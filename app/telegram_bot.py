@@ -253,6 +253,7 @@ class TelegramAlertBot:
         safe_vault_total = report_data.get("safe_vault_total_usd", 0.0)
         reinvested_add = report_data.get("reinvested_add_usd", 0.0)
         total_cap = report_data.get("total_capital_usd", 405.0)
+        trade_size = report_data.get("trade_size_usd", 30.0)
         cum_pnl = float(report_data.get("cumulative_pnl_usd", 0.0) or 0.0)
         raw_live_pnl = report_data.get("live_session_pnl")
         live_pnl = float(raw_live_pnl if raw_live_pnl is not None else cum_pnl)
