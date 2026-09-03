@@ -17,6 +17,8 @@ import json
 import logging
 import os
 import time
+import threading
+import urllib.parse
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Dict, Any, Optional, Tuple, Union, List
@@ -238,6 +240,10 @@ class KoreaInvestmentFuturesClient:
         self.base_url = "https://openapi.koreainvestment.com:9443"
         self._access_token: Optional[str] = None
         self._token_expires_at: float = 0.0
+        self._token_lock = threading.Lock()
+        
+        # Google Cloud Storage (GCS) centralized persistent token bucket
+        self._gcs_bucket = os.getenv("GCS_TOKEN_BUCKET", "minerals-oracle-cache-212942243360").strip()
         
         # Persistent token cache file path (supports both local and container /tmp)
         cache_dir = os.getenv("TOKEN_CACHE_DIR", os.path.dirname(os.path.abspath(__file__)))
@@ -252,33 +258,108 @@ class KoreaInvestmentFuturesClient:
         """Returns SHA256 hash of app_key for cache validation."""
         return hashlib.sha256(f"{self.app_key}:{self.app_secret}".encode()).hexdigest()
 
-    def _load_token_from_cache(self) -> bool:
-        """Attempts to load a valid unexpired token from persistent file cache."""
-        if not os.path.exists(self._cache_file):
+    def _fetch_gcs_metadata_token(self) -> Optional[str]:
+        """Retrieves Google Cloud internal compute metadata OAuth2 token if running on GCP / Cloud Run."""
+        try:
+            url = "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token"
+            headers = {"Metadata-Flavor": "Google"}
+            with httpx.Client(timeout=2.0) as client:
+                res = client.get(url, headers=headers)
+                if res.status_code == 200:
+                    return res.json().get("access_token")
+        except Exception:
+            pass
+        return None
+
+    def _load_token_from_gcs(self) -> Optional[Dict[str, Any]]:
+        """Attempts to load cached KIS token from Google Cloud Storage bucket."""
+        if not self._gcs_bucket:
+            return None
+        gcp_token = self._fetch_gcs_metadata_token()
+        if not gcp_token:
+            return None
+        try:
+            obj_name = urllib.parse.quote(".kis_token_cache.json", safe="")
+            url = f"https://storage.googleapis.com/storage/v1/b/{self._gcs_bucket}/o/{obj_name}?alt=media"
+            headers = {"Authorization": f"Bearer {gcp_token}"}
+            with httpx.Client(timeout=4.0) as client:
+                res = client.get(url, headers=headers)
+                if res.status_code == 200:
+                    data = res.json()
+                    logger.info(f"Retrieved KIS OAuth token cache from GCS bucket: gs://{self._gcs_bucket}/.kis_token_cache.json")
+                    return data
+        except Exception as e:
+            logger.debug(f"Could not load token from GCS: {e}")
+        return None
+
+    def _save_token_to_gcs(self, data: Dict[str, Any]) -> bool:
+        """Saves KIS token cache to Google Cloud Storage bucket for cross-instance persistence."""
+        if not self._gcs_bucket:
+            return False
+        gcp_token = self._fetch_gcs_metadata_token()
+        if not gcp_token:
             return False
         try:
-            with open(self._cache_file, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            
-            # Verify credentials match
-            if data.get("cred_hash") != self._get_credentials_hash():
-                return False
-
-            expires_at = data.get("expires_at", 0.0)
-            now = time.time()
-            # If token is still valid for at least 10 minutes (600s), reuse it
-            if expires_at > now + 600:
-                self._access_token = data.get("access_token")
-                self._token_expires_at = expires_at
-                remaining_hours = (expires_at - now) / 3600.0
-                logger.info(f"Loaded existing valid KIS OAuth token from cache. (Remaining: {remaining_hours:.1f} hours)")
-                return True
+            obj_name = urllib.parse.quote(".kis_token_cache.json", safe="")
+            url = f"https://storage.googleapis.com/upload/storage/v1/b/{self._gcs_bucket}/o?uploadType=media&name={obj_name}"
+            headers = {
+                "Authorization": f"Bearer {gcp_token}",
+                "Content-Type": "application/json; charset=utf-8",
+            }
+            with httpx.Client(timeout=5.0) as client:
+                res = client.post(url, headers=headers, json=data)
+                if res.status_code in (200, 201):
+                    logger.info(f"Persisted KIS OAuth token cache to GCS: gs://{self._gcs_bucket}/.kis_token_cache.json")
+                    return True
         except Exception as e:
-            logger.warning(f"Failed to read KIS token cache file: {e}")
+            logger.warning(f"Failed to upload token cache to GCS: {e}")
+        return False
+
+    def _load_token_from_cache(self) -> bool:
+        """Attempts to load a valid unexpired token from persistent file cache or GCS."""
+        now = time.time()
+        data = None
+
+        # 1. Try local file cache
+        if os.path.exists(self._cache_file):
+            try:
+                with open(self._cache_file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            except Exception as e:
+                logger.warning(f"Failed to read KIS local token cache file: {e}")
+
+        # 2. If no valid local file cache, try GCS persistent cloud bucket
+        if not data or data.get("cred_hash") != self._get_credentials_hash() or data.get("expires_at", 0.0) <= now + 300:
+            gcs_data = self._load_token_from_gcs()
+            if gcs_data and gcs_data.get("cred_hash") == self._get_credentials_hash():
+                data = gcs_data
+                # Mirror GCS token to local file for fast subsequent reads
+                try:
+                    os.makedirs(os.path.dirname(os.path.abspath(self._cache_file)), exist_ok=True)
+                    with open(self._cache_file, "w", encoding="utf-8") as f:
+                        json.dump(data, f, indent=2)
+                except Exception:
+                    pass
+
+        if not data:
+            return False
+
+        if data.get("cred_hash") != self._get_credentials_hash():
+            return False
+
+        expires_at = data.get("expires_at", 0.0)
+        # Accept if token is valid for at least 5 minutes (300s)
+        if expires_at > now + 300:
+            self._access_token = data.get("access_token")
+            self._token_expires_at = expires_at
+            remaining_hours = (expires_at - now) / 3600.0
+            logger.info(f"Loaded existing valid KIS OAuth token from cache. (Remaining: {remaining_hours:.1f} hours)")
+            return True
+
         return False
 
     def _save_token_to_cache(self, token: str, expires_in: int):
-        """Saves newly issued token and expiration to persistent file cache."""
+        """Saves newly issued token and expiration to local file and GCS persistent storage."""
         now = time.time()
         self._access_token = token
         self._token_expires_at = now + expires_in
@@ -287,61 +368,100 @@ class KoreaInvestmentFuturesClient:
             "access_token": token,
             "token_type": "Bearer",
             "expires_at": self._token_expires_at,
+            "issued_at_timestamp": now,
             "issued_at_utc": datetime.now(timezone.utc).isoformat(),
         }
+        # Save locally
         try:
+            os.makedirs(os.path.dirname(os.path.abspath(self._cache_file)), exist_ok=True)
             with open(self._cache_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
-            logger.info(f"Saved KIS OAuth token to cache file: {self._cache_file}")
+            logger.info(f"Saved KIS OAuth token to local cache file: {self._cache_file}")
         except Exception as e:
             logger.warning(f"Failed to write KIS token cache file: {e}")
 
+        # Save to GCS
+        self._save_token_to_gcs(data)
+
     def get_access_token(self) -> str:
         """
-        Retrieves access token adhering to KIS strict '1 token per 24 hours' rule.
-        Uses in-memory and persistent file cache to avoid frequent requests that cause EGW00133 errors.
+        Retrieves access token adhering strictly to KIS '1 token per 24 hours' rule.
+        Uses in-memory, persistent local disk, and Google Cloud Storage (GCS) cache.
+        Enforces a hard rate limit: NEVER issues more than 1 token per 23 hours.
         """
-        now = time.time()
-        # 1. Check in-memory cache (valid if > 10 mins remaining)
-        if self._access_token and now < self._token_expires_at - 600:
-            return self._access_token
-
-        # 2. Check persistent disk file cache
-        if self._load_token_from_cache() and self._access_token:
-            return self._access_token
-
-        if not self.is_configured:
-            return "MOCK_KIS_DEV_TOKEN_SANDBOX"
-
-        # 3. Only request new token from KIS when strictly expired / absent
-        url = f"{self.base_url}/oauth2/tokenP"
-        payload = {
-            "grant_type": "client_credentials",
-            "appkey": self.app_key,
-            "appsecret": self.app_secret,
-        }
-
-        try:
-            logger.info("Requesting fresh KIS OAuth Access Token (once per 24 hours)...")
-            with httpx.Client(timeout=10.0) as client:
-                res = client.post(url, json=payload)
-                if res.status_code == 200:
-                    data = res.json()
-                    access_token = data.get("access_token")
-                    expires_in = int(data.get("expires_in", 86400))  # 24 hours = 86,400s
-                    self._save_token_to_cache(access_token, expires_in)
-                    logger.info("KIS OAuth Access Token issued and cached successfully for 24h.")
-                    return access_token
-                else:
-                    logger.error(f"KIS Token Request Error: {res.status_code} - {res.text}")
-                    if self._access_token:
-                        return self._access_token
-                    return "TOKEN_AUTH_FAILED"
-        except Exception as e:
-            logger.error(f"KIS Token Exception: {e}")
-            if self._access_token:
+        with self._token_lock:
+            now = time.time()
+            # 1. In-memory cache check (valid if > 5 minutes remaining)
+            if self._access_token and now < self._token_expires_at - 300:
                 return self._access_token
-            return "TOKEN_CONN_FAILED"
+
+            # 2. Check persistent disk file or GCS bucket cache
+            if self._load_token_from_cache() and self._access_token:
+                return self._access_token
+
+            # 3. Check environment variable override
+            env_token = os.getenv("KIS_ACCESS_TOKEN", "").strip()
+            if env_token:
+                self._access_token = env_token
+                self._token_expires_at = now + 86400
+                return self._access_token
+
+            if not self.is_configured:
+                return "MOCK_KIS_DEV_TOKEN_SANDBOX"
+
+            # 4. Strict 1-token-per-day enforcement guard:
+            # If we already hold an existing token that has not expired, DO NOT re-request.
+            if self._access_token and now < self._token_expires_at:
+                logger.info("Adhering strictly to KIS 1-token-per-day rule: Token still valid. Reusing current token.")
+                return self._access_token
+
+            # 5. Check if a cache file exists with a recent issuance (<23h ago) even if slightly off
+            if os.path.exists(self._cache_file):
+                try:
+                    with open(self._cache_file, "r", encoding="utf-8") as f:
+                        cached = json.load(f)
+                    issued_ts = cached.get("issued_at_timestamp", 0.0)
+                    cached_token = cached.get("access_token")
+                    if cached_token and (now - issued_ts < 82800):  # 23 hours
+                        logger.warning(
+                            "Adhering strictly to KIS 1-token-per-day rule: Token was already issued "
+                            f"{(now - issued_ts) / 3600:.1f} hours ago (<23h). Reusing cached token to avoid redundant SMS alert."
+                        )
+                        self._access_token = cached_token
+                        self._token_expires_at = cached.get("expires_at", now + 3600)
+                        return self._access_token
+                except Exception:
+                    pass
+
+            # 6. Only request new token from KIS when strictly expired / absent
+            url = f"{self.base_url}/oauth2/tokenP"
+            payload = {
+                "grant_type": "client_credentials",
+                "appkey": self.app_key,
+                "appsecret": self.app_secret,
+            }
+
+            try:
+                logger.info("Requesting fresh KIS OAuth Access Token (strictly once per 24 hours)...")
+                with httpx.Client(timeout=10.0) as client:
+                    res = client.post(url, json=payload)
+                    if res.status_code == 200:
+                        data = res.json()
+                        access_token = data.get("access_token")
+                        expires_in = int(data.get("expires_in", 86400))  # 24 hours = 86,400s
+                        self._save_token_to_cache(access_token, expires_in)
+                        logger.info("KIS OAuth Access Token issued and cached successfully for 24h.")
+                        return access_token
+                    else:
+                        logger.error(f"KIS Token Request Error: {res.status_code} - {res.text}")
+                        if self._access_token:
+                            return self._access_token
+                        return "TOKEN_AUTH_FAILED"
+            except Exception as e:
+                logger.error(f"KIS Token Exception: {e}")
+                if self._access_token:
+                    return self._access_token
+                return "TOKEN_CONN_FAILED"
 
     def calculate_order_sizing(
         self,
