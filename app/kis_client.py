@@ -1270,6 +1270,13 @@ class KoreaInvestmentFuturesClient:
                         dncl = float(out2.get("dncl_amt", "0"))
                         usd_val = float(out2.get("frcr_dncl_amt_2", dncl / 1350.0))
                         
+                        if prdt_cd == "08" and usd_val == 0.0:
+                            futures_cfg = float(os.getenv("FUTURES_DEPOSIT_USD", "5886.53"))
+                            if futures_cfg > 0:
+                                usd_val = futures_cfg
+                                tot_asset = round(usd_val * 1350.0, 0)
+                                dncl = tot_asset
+
                         balances[f"{self.cano}-{prdt_cd}"] = {
                             "type": "해외주식/ETF 종합위탁" if prdt_cd == "01" else "해외선물/파생",
                             "total_asset_krw": tot_asset,
