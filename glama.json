@@ -1,7 +1,7 @@
 {
   "$schema": "https://glama.ai/mcp/schemas/server.json",
   "name": "minerals-oracle-x402",
-  "description": "Deterministic Web3 x402 critical raw minerals, COMEX/LME arbitrage spreads, urban-mining scrap yield oracle, and post-trade performance auditor for autonomous AI agents on Polygon.",
+  "description": "Deterministic Web3 x402 critical raw minerals, COMEX/LME arbitrage spreads, and urban-mining scrap yield oracle for autonomous AI agents on Polygon.",
   "homepage": "https://github.com/nohosa001-pixel/minerals-oracle-x402",
   "maintainers": [
     "nohosa001-pixel"
