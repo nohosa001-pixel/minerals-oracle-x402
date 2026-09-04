@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import time
 from pathlib import Path
 from typing import Dict, Any, Optional
 from pydantic import BaseModel
@@ -34,6 +35,7 @@ from app.enterprise_manager import enterprise_manager
 from app.twitter_bot import twitter_bot
 from app.telegram_bot import telegram_bot
 from app.cloud_bot_worker import cloud_bot_worker
+from app.post_trade_analyst import post_trade_analyst
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -1060,6 +1062,39 @@ async def get_kis_account_balance():
 
 
 @app.get(
+    "/api/v1/trade/audit-summary",
+    tags=["Post-Trade Audit & Learning"],
+    summary="Get Post-Trade Performance Audit Summary & Learning Metrics",
+)
+async def get_trade_audit_summary():
+    """
+    Returns aggregated post-trade audit statistics including win rate, profit factor,
+    4x commission hurdle adherence, slippage analytics, and grade distribution.
+    """
+    return {
+        "status": "success",
+        "summary": post_trade_analyst.get_summary_statistics(),
+    }
+
+
+@app.get(
+    "/api/v1/trade/audit-reports",
+    tags=["Post-Trade Audit & Learning"],
+    summary="Get Recent Post-Trade Evaluation Reports & Critiques",
+)
+async def get_trade_audit_reports(limit: int = Query(20, ge=1, le=100)):
+    """
+    Returns the list of individual post-trade evaluations with execution grades (A/B/C/D/F),
+    slippage data, commission coverage multiples, and actionable learning insights.
+    """
+    return {
+        "status": "success",
+        "count": len(post_trade_analyst.audit_records[:limit]),
+        "reports": post_trade_analyst.audit_records[:limit],
+    }
+
+
+@app.get(
     "/api/v1/bot/config",
     tags=["24/7 Cloud Trading Bot"],
     summary="Get 24/7 Cloud Bot & Overseas Futures Trade Sizing Configuration",
@@ -1142,6 +1177,97 @@ async def reset_cloud_bot():
         "status": "success",
         "message": "All trading metrics, PnL counters, and positions successfully reset to 0.",
         "current_status": status_data,
+    }
+
+
+@app.post(
+    "/api/v1/bot/sync-live-position",
+    tags=["24/7 Cloud Trading Bot"],
+    summary="Synchronize Open Futures Position into Active Tracking Engine",
+)
+async def sync_live_position(
+    symbol: str = Query("Cu", description="Commodity symbol e.g. Cu"),
+    ticker: str = Query("MHGZ26", description="Futures active contract ticker"),
+    qty: int = Query(1, description="Quantity lots"),
+    alloc_usd: float = Query(1320.0, description="Allocated margin in USD"),
+):
+    """
+    Registers an existing broker-filled overseas futures position into the cloud bot's active tracking engine.
+    """
+    from .feed_engine import feed_engine
+    quotes = feed_engine.get_all_quotes().quotes
+    q = quotes.get(symbol)
+    entry_p = q.spot_price_usd if q else 14894.43
+    cloud_bot_worker.active_positions[symbol] = {
+        "ticker": ticker,
+        "is_futures": True,
+        "contract_type": "micro",
+        "entry_price": entry_p,
+        "quantity": qty,
+        "contract_multiplier": 2500.0,
+        "commission_usd": 2.0,
+        "entry_bps": 50.0,
+        "allocation_usd": alloc_usd,
+        "entry_time": time.time(),
+    }
+    import logging
+    logging.info(f"✅ Synchronized active position for {symbol} ({ticker}) into cloud bot tracker.")
+    return {
+        "status": "success",
+        "message": f"Position for {symbol} ({ticker}) synchronized.",
+        "active_positions": cloud_bot_worker.active_positions,
+    }
+
+
+@app.post(
+    "/api/v1/bot/close-position",
+    tags=["24/7 Cloud Trading Bot"],
+    summary="Execute Immediate Live Market Close for a Position",
+)
+async def execute_immediate_close(
+    symbol: str = Query("Cu", description="Commodity symbol to exit"),
+):
+    """
+    Dispatches a real-time live market exit order to CME/NYMEX or stock exchange to close position immediately.
+    """
+    pos = cloud_bot_worker.active_positions.get(symbol)
+    if not pos:
+        return {"status": "error", "message": f"No active position found for {symbol}."}
+
+    is_futures = pos.get("is_futures", True)
+    qty = pos.get("quantity", 1)
+    comm = pos.get("commission_usd", 2.0)
+    c_type = pos.get("contract_type", "micro")
+
+    if is_futures:
+        res = kis_client.execute_futures_hedge_order(
+            symbol=symbol,
+            spread_bps=0.0,
+            net_margin_usd=0.0,
+            direction="Sell (Close Hedge)",
+            quantity_lots=qty,
+            contract_type=c_type,
+            dry_run=False,
+            commission_usd=comm,
+        )
+    else:
+        res = kis_client.execute_overseas_stock_etf_order(
+            symbol=symbol,
+            spread_bps=0.0,
+            net_margin_usd=0.0,
+            direction="Sell (Close Position)",
+            quantity_shares=qty,
+            dry_run=False,
+            commission_usd=comm,
+        )
+
+    if res.get("status") == "ORDER_EXECUTED":
+        cloud_bot_worker.active_positions.pop(symbol, None)
+
+    return {
+        "status": "success",
+        "order_result": res,
+        "remaining_positions": cloud_bot_worker.active_positions,
     }
 
 

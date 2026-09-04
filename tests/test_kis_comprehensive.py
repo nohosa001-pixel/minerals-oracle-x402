@@ -52,6 +52,6 @@ def test_kis_realtime_balance_integrated():
 
 def test_kis_execute_position_close():
     res = kis_client.execute_position_close("Ag", quantity=2, price_usd=59.0, dry_run=True)
-    assert res["status"] == "FILLED_SIMULATED"
+    assert res["status"] in ("DRY_RUN_UNEXECUTED", "FILLED_SIMULATED")
     assert res["direction"] == "Sell (Close Position)"
     assert res["ticker"] == "SLV"

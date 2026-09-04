@@ -34,22 +34,34 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
             "tools": [
                 {
                     "name": "get_mineral_prices",
-                    "description": "Retrieve real-time certified spot prices and unit conversions for critical raw minerals: Neodymium/Dysprosium (NdDy), Lithium (Li), Copper (Cu), Silver (Ag), Platinum (Pt). Free tier sandbox available.",
+                    "description": (
+                        "Retrieve real-time certified spot prices and multi-unit conversions (USD/troy_oz, USD/mt, USD/kg, USD/lb) "
+                        "for critical raw minerals including Copper (Cu), Silver (Ag), Platinum (Pt), Lithium (Li), and Neodymium/Dysprosium (NdDy). "
+                        "Returns a structured JSON object containing timestamp, prices, and unit conversions. "
+                        "Usage Guidelines: Use this tool whenever you need spot benchmark prices or unit conversions for commodities. "
+                        "Do NOT use this tool for locational spread/arbitrage calculations (use get_arbitrage_spreads) or recyclable scrap valuation (use calculate_urban_mining_value)."
+                    ),
                     "inputSchema": {
                         "type": "object",
                         "properties": {
                             "mineral_type": {
                                 "type": "string",
-                                "enum": ["Neodymium", "Lithium", "Dysprosium", "Copper", "Silver", "Platinum", "ALL"],
-                                "default": "Neodymium",
-                                "description": "Specific mineral name or symbol preset (default: 'Neodymium')"
+                                "enum": ["ALL", "Copper", "Silver", "Platinum", "Lithium", "Neodymium", "Dysprosium"],
+                                "default": "ALL",
+                                "description": "Specific mineral name or symbol preset to query, or 'ALL' to retrieve all commodities simultaneously (default: 'ALL')"
                             }
                         }
                     }
                 },
                 {
                     "name": "get_arbitrage_spreads",
-                    "description": "Calculate locational basis spreads and arbitrage yields across major global venues (COMEX vs LME Copper, COMEX vs LBMA Silver, Fastmarkets vs SMM Lithium).",
+                    "description": (
+                        "Calculate real-time locational basis spreads and cross-venue arbitrage yields across major global commodity exchanges "
+                        "(COMEX vs LME Copper, COMEX vs LBMA Silver, SMM China vs Fastmarkets Rotterdam Lithium). "
+                        "Returns a JSON object detailing spot price differences, percentage spreads, basis points (bps), and locational freight parity. "
+                        "Usage Guidelines: Use this tool to evaluate price discrepancies between New York, London, and Asian venues. "
+                        "Do NOT use this tool for raw single-asset spot prices (use get_mineral_prices) or scrap metallurgy (use calculate_urban_mining_value)."
+                    ),
                     "inputSchema": {
                         "type": "object",
                         "properties": {}
@@ -57,7 +69,13 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
                 },
                 {
                     "name": "calculate_urban_mining_value",
-                    "description": "Evaluate gross payable mineral value, recovery rates tensor, and net settlement value in USDC after refining charges (TC/RC) for recyclable scrap (E-Waste PCBs, EV Battery Black Mass, Auto Catalysts, Permanent Magnets).",
+                    "description": (
+                        "Evaluate industrial metallurgical recycling value for physical recyclable scrap batches (EV Battery Black Mass, Auto Catalysts, E-Waste PCBs, Wind Permanent Magnets). "
+                        "Computes assay recovery yields, commercial smelter treatment/refining charges (TC/RC), and payable net settlement value in USDC. "
+                        "Returns a structured JSON payload with gross_payable_value_usdc, treatment_refining_charges_usdc, net_settlement_value_usdc, and element-by-element recovery tensor. "
+                        "Usage Guidelines: Use this tool when evaluating circular economy waste or calculating settlement payouts for physical scrap batches. "
+                        "Do NOT use this tool for financial commodity spot tickers or locational arbitrage."
+                    ),
                     "inputSchema": {
                         "type": "object",
                         "properties": {
@@ -70,21 +88,21 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
                                     "WIND_EV_PERMANENT_MAGNETS"
                                 ],
                                 "default": "E_WASTE_HIGH_GRADE_PCB",
-                                "description": "Feedstock category of the recyclable scrap batch (default: 'E_WASTE_HIGH_GRADE_PCB')"
+                                "description": "Feedstock category of the recyclable scrap batch (e.g. EV Battery Black Mass, Auto Catalysts, PCBs, Magnets)"
                             },
                             "quantity_metric_tons": {
                                 "type": "number",
-                                "description": "Total metric tons of feedstock batch to process (default: 1.0)",
+                                "description": "Total metric tons (MT) of feedstock batch to process (default: 1.0)",
                                 "default": 1.0
                             },
                             "target_yield_currency": {
                                 "type": "string",
-                                "description": "Settlement currency (default: 'USDC')",
+                                "description": "Target settlement currency token for net value calculation (default: 'USDC')",
                                 "default": "USDC"
                             },
                             "recovery_efficiency_factor": {
                                 "type": "number",
-                                "description": "Hydrometallurgical extraction efficiency factor (0.8 ~ 1.1)",
+                                "description": "Hydrometallurgical extraction efficiency multiplier (0.8 to 1.1, default: 1.0 representing standard baseline yield)",
                                 "default": 1.0
                             }
                         },
@@ -93,7 +111,11 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
                 },
                 {
                     "name": "get_onchain_signed_feed",
-                    "description": "Generate an EIP-712 cryptographically signed price feed payload and raw ABI calldata (v, r, s) to update or consume price data directly in Solidity smart contracts on Polygon (Chain ID 137 / Amoy).",
+                    "description": (
+                        "Generate an EIP-712 cryptographically signed price feed payload and raw ABI calldata (v, r, s) to update or consume price data directly in Solidity smart contracts on Polygon (Chain ID 137 / Amoy). "
+                        "Returns a JSON object with certified price, roundId, timestamp, attestation hash, and EIP-712 signature components. "
+                        "Usage Guidelines: Use this tool when a smart contract, DeFi protocol, or on-chain agent requires verifiable cryptographic proof of off-chain mineral prices."
+                    ),
                     "inputSchema": {
                         "type": "object",
                         "properties": {

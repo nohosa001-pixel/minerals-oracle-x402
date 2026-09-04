@@ -14,13 +14,15 @@ echo [INFO] Starting 24/7 automated scanning loop...
 echo (You can minimize this window. Press Ctrl+C anytime to stop cleanly.)
 echo.
 
+cd /d "%~dp0"
+
 set PYTHON_EXEC=python
 if exist ".venv\Scripts\python.exe" (
     set PYTHON_EXEC=.venv\Scripts\python.exe
 )
 
 :LOOP_START
-%PYTHON_EXEC% run_arbitrage_agent.py --loop
+%PYTHON_EXEC% -u run_arbitrage_agent.py --loop
 
 echo.
 echo [WARN] Bot process ended. Restarting in 5 seconds...

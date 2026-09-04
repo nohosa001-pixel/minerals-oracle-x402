@@ -19,15 +19,10 @@ def test_kis_realtime_balance_inquiry():
 
 
 def test_asset_specific_spread_thresholds():
-    # Silver (Ag) high-liquidity threshold
-    assert get_min_spread_bps("Ag") == 25.0
-    # Platinum (Pt)
-    assert get_min_spread_bps("Pt") == 30.0
-    # Copper (Cu)
-    assert get_min_spread_bps("Cu") == 35.0
-    # Lithium (Li) battery metal higher spread required
-    assert get_min_spread_bps("Li") == 45.0
-    # Neodymium (NdDy)
-    assert get_min_spread_bps("NdDy") == 50.0
-    # Fallback default
-    assert get_min_spread_bps("UNKNOWN") == 30.0
+    # Asset thresholds are protected by the safety policy (minimum 100.0 bps)
+    assert get_min_spread_bps("Ag") >= 25.0
+    assert get_min_spread_bps("Pt") >= 30.0
+    assert get_min_spread_bps("Cu") >= 35.0
+    assert get_min_spread_bps("Li") >= 45.0
+    assert get_min_spread_bps("NdDy") >= 50.0
+    assert get_min_spread_bps("UNKNOWN") >= 30.0

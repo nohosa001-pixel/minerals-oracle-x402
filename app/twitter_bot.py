@@ -44,7 +44,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("TwitterBot")
 
-ORACLE_URL = os.getenv("ORACLE_PUBLIC_URL", "https://minerals-oracle-x402-7qxtp3324q-du.a.run.app")
+ORACLE_URL = os.getenv("ORACLE_PUBLIC_URL", "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app")
 LIVE_DASHBOARD_URL = f"{ORACLE_URL}/dashboard"
 
 

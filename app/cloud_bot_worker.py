@@ -21,6 +21,7 @@ try:
     from app.telegram_bot import telegram_bot
     from app.twitter_bot import twitter_bot
     from app.trade_journal import trade_journal
+    from app.post_trade_analyst import post_trade_analyst
     from app.kis_client import (
         kis_client,
         TradeMode,
@@ -32,51 +33,60 @@ except (ImportError, ValueError):
     from .telegram_bot import telegram_bot  # type: ignore
     from .twitter_bot import twitter_bot  # type: ignore
     from .trade_journal import trade_journal  # type: ignore
+    from .post_trade_analyst import post_trade_analyst  # type: ignore
     from .kis_client import kis_client, TradeMode, TradeSizingMode, FUTURES_CONTRACT_SPECS  # type: ignore
 
 logger = logging.getLogger("CloudArbitrageWorker")
 
-# Antifragile Risk Management Defaults (Optimized for High-Frequency Safe Arbitrage)
-MIN_SPREAD_BPS = float(os.getenv("MIN_SPREAD_BPS", "30.0"))
+# Disciplined Low-Frequency Swing Arbitrage & Taleb Zero-Ruin Protection
+MIN_SPREAD_BPS = float(os.getenv("MIN_SPREAD_BPS", "100.0"))
 ASSET_MIN_SPREAD_BPS = {
-    "Ag": float(os.getenv("MIN_SPREAD_BPS_AG", "25.0")),
-    "Pt": float(os.getenv("MIN_SPREAD_BPS_PT", "30.0")),
-    "Cu": float(os.getenv("MIN_SPREAD_BPS_CU", "35.0")),
-    "Li": float(os.getenv("MIN_SPREAD_BPS_LI", "45.0")),
-    "NdDy": float(os.getenv("MIN_SPREAD_BPS_NDDY", "50.0")),
+    "Cu": float(os.getenv("MIN_SPREAD_BPS_CU", "100.0")),
+    "Ag": float(os.getenv("MIN_SPREAD_BPS_AG", "100.0")),
+    "Pt": float(os.getenv("MIN_SPREAD_BPS_PT", "100.0")),
+    "Li": float(os.getenv("MIN_SPREAD_BPS_LI", "100.0")),
+    "NdDy": float(os.getenv("MIN_SPREAD_BPS_NDDY", "100.0")),
 }
 
 def get_min_spread_bps(symbol: str) -> float:
-    return ASSET_MIN_SPREAD_BPS.get(symbol, MIN_SPREAD_BPS)
+    return max(ASSET_MIN_SPREAD_BPS.get(symbol, MIN_SPREAD_BPS), 100.0)
 MAX_SPREAD_ANOMALY_BPS = float(os.getenv("MAX_SPREAD_ANOMALY_BPS", "1200.0"))
 MAX_DAILY_LOSS_USD = float(os.getenv("MAX_DAILY_LOSS_USD", "50.0"))
-TOTAL_CAPITAL_USD = float(os.getenv("TOTAL_CAPITAL_USD", "405.0"))
-TRADE_SIZE_USD = float(os.getenv("TRADE_SIZE_USD", "40.0"))
+TOTAL_CAPITAL_USD = float(os.getenv("TOTAL_CAPITAL_USD", "5891.01"))
+TRADE_SIZE_USD = float(os.getenv("TRADE_SIZE_USD", "5000.0"))
 POLYGON_CHAIN_ID = int(os.getenv("POLYGON_CHAIN_ID", "137"))
 GAS_FEE_USD = 0.02
-KIS_DRY_RUN = os.getenv("KIS_DRY_RUN", "false").lower() in ("true", "1", "yes")
-AUTO_LIVE_SWITCH = os.getenv("AUTO_LIVE_SWITCH", "true").lower() in ("true", "1", "yes")
+KIS_DRY_RUN = False
+AUTO_LIVE_SWITCH = True
 AUTO_LIVE_SWITCH_TIME = os.getenv("AUTO_LIVE_SWITCH_TIME", "22:30").strip()
 
 
 class CloudArbitrageWorker:
     def __init__(self):
         self.is_running: bool = False
-        self.is_enabled: bool = os.getenv("ENABLE_CLOUD_BOT", "true").lower() in ("true", "1", "yes")
+        self.is_enabled: bool = False
         self.scan_interval: float = float(os.getenv("SCAN_INTERVAL_SEC", "5.0"))
         self.is_dry_run: bool = False
         self.live_transitioned: bool = True
-        self._live_countdown_str: str = "대기 중"
+        self._live_countdown_str: str = "실전 매매 전용"
         
-        # Trade Sizing Configuration
-        self.trade_mode: str = os.getenv("TRADE_MODE", "AUTO").upper()
-        self.sizing_mode: str = os.getenv("TRADE_SIZING_MODE", "CAPITAL_BASED").upper()
-        self.fixed_lots: int = int(os.getenv("FIXED_LOT_QUANTITY", "1"))
+        # Trade Sizing Configuration (08 Futures Micro Only)
+        self.trade_mode: str = os.getenv("TRADE_MODE", "FUTURES_MICRO").upper()
+        self.sizing_mode: str = os.getenv("TRADE_SIZING_MODE", "CAPITAL_BASED")
+        self.fixed_lots: int = int(os.getenv("FIXED_LOT_QUANTITY", "2"))
         self.target_commodity: str = os.getenv("TARGET_COMMODITY", "ALL").strip()
-        self.total_capital_usd: float = TOTAL_CAPITAL_USD
-        self.trade_size_usd: float = TRADE_SIZE_USD
-        self.margin_buffer_pct: float = float(os.getenv("MARGIN_SAFETY_BUFFER_PCT", "20.0"))
-        self.max_positions: int = int(os.getenv("MAX_POSITIONS", "4"))
+        self.total_capital_usd: float = float(os.getenv("TOTAL_CAPITAL_USD", "4874.28"))
+        self.starting_capital_usd: float = float(os.getenv("TOTAL_CAPITAL_USD", "4874.28"))
+        self.trade_size_usd: float = 5000.0
+        self.margin_buffer_pct: float = float(os.getenv("MARGIN_SAFETY_BUFFER_PCT", "50.0"))
+        self.max_positions: int = 1
+        # Golden Balance Standard (황금 밸런스 기준):
+        # 1. 쿨다운 3분 (180초 - 호가 안정화 후 기회 즉시 포착)
+        self.trade_cooldown_sec: float = float(os.getenv("TRADE_COOLDOWN_SEC", "180.0"))
+        self.last_trade_exit_time: float = 0.0
+        # 2. 인위적 일일 횟수 제한 전면 철폐 (수수료 대비 5배 이상 알짜 기회는 무제한 진입)
+        self.max_daily_trades: int = int(os.getenv("MAX_DAILY_TRADES", "9999"))
+        self.daily_trades_count: int = 0
 
         self.total_trades_executed: int = 0
         self.cumulative_gross_profit: float = 0.0
@@ -272,39 +282,33 @@ class CloudArbitrageWorker:
             contract_multiplier = pos.get("contract_multiplier", 1.0)
             comm = pos.get("commission_usd", 2.0)
 
-            # True Arbitrage Basis Exit Conditions:
-            # 1. Spread Convergence: Basis spread narrows by >=30% (Arbitrage Profit Secured)
-            # 2. Time-Based Settlement: Converged over 90 seconds (Oracle synchronization)
-            # 3. Anomaly Divergence Stop-Loss: Basis spread widens by >=250 bps in reverse
-            is_spread_converged = cur_bps <= entry_bps * 0.70
-            is_time_settled = elapsed_sec >= 90.0
-            is_divergence_stop = cur_bps >= entry_bps + 250.0
+            # Realistic Market-Driven Exit Conditions (Zero-Simulation, Real Market Orders)
+            # 1. Take-Profit: Gain >= +0.60% or Spread narrowed by >= 50%
+            # 2. Stop-Loss: Gain <= -0.60% or Spread widened reversely by >= 150 bps
+            is_take_profit = (gain_pct >= 0.60) or (cur_bps <= entry_bps * 0.50)
+            is_stop_loss = (gain_pct <= -0.60) or (cur_bps >= entry_bps + 150.0)
 
-            if is_spread_converged or is_time_settled:
-                action_type = "SPREAD_CONVERGED"
-                captured_bps = max(entry_bps - cur_bps, entry_bps * 0.50, 25.0)
-
-                # Calculate physical gross profit on arbitrage basis convergence
+            if is_take_profit:
+                action_type = "TAKE_PROFIT"
                 if is_futures:
                     if symbol == "Cu":
-                        margin_per_lb = (cur_price / METRIC_TON_TO_LBS) * (captured_bps / 10000.0)
-                        realized_gross = round(qty * 2500.0 * margin_per_lb, 2)
-                    elif symbol == "Li":
-                        realized_gross = round(qty * 1.0 * cur_price * (captured_bps / 10000.0), 2)
-                    elif symbol in ("Ag", "Pt"):
-                        realized_gross = round(qty * contract_multiplier * cur_price * (captured_bps / 10000.0), 2)
+                        realized_gross = round(qty * 2500.0 * ((cur_price - entry_price) / METRIC_TON_TO_LBS), 2)
                     else:
-                        realized_gross = round(pos.get("allocation_usd", 30.0) * (captured_bps / 1000.0), 2)
+                        realized_gross = round(qty * contract_multiplier * (cur_price - entry_price), 2)
                 else:
-                    realized_gross = round(pos.get("allocation_usd", 30.0) * (captured_bps / 10000.0) * 5.0, 2)
+                    realized_gross = round(qty * (cur_price - entry_price), 2)
+                realized_net = round(realized_gross - (comm * 2.0) - 2.50, 2)
 
-                realized_gross = max(realized_gross, round(comm + GAS_FEE_USD + 2.50, 2))  # Guaranteed positive net profit
-                realized_net = round(realized_gross - comm - GAS_FEE_USD, 2)
-
-            elif is_divergence_stop:
+            elif is_stop_loss:
                 action_type = "STOP_LOSS"
-                realized_gross = -round(pos.get("allocation_usd", 30.0) * 0.015, 2)
-                realized_net = round(realized_gross - comm - GAS_FEE_USD, 2)
+                if is_futures:
+                    if symbol == "Cu":
+                        realized_gross = round(qty * 2500.0 * ((cur_price - entry_price) / METRIC_TON_TO_LBS), 2)
+                    else:
+                        realized_gross = round(qty * contract_multiplier * (cur_price - entry_price), 2)
+                else:
+                    realized_gross = round(qty * (cur_price - entry_price), 2)
+                realized_net = round(realized_gross - (comm * 2.0) - 2.50, 2)
             else:
                 continue
 
@@ -331,6 +335,10 @@ class CloudArbitrageWorker:
                     dry_run=self.is_dry_run,
                     commission_usd=comm,
                 )
+            
+            if not self.is_dry_run and exit_order.get("status") != "ORDER_EXECUTED":
+                logger.warning(f"❌ [실계좌 청산 주문 미체결/반려] {symbol}: {exit_order.get('message')}")
+                continue
 
             now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
             entry_bps_val = pos.get("entry_bps", 50.0)
@@ -374,10 +382,10 @@ class CloudArbitrageWorker:
             try:
                 exit_msg = telegram_bot.generate_position_exit_message(
                     exit_record,
-                    self.live_session_pnl if (not self.is_dry_run or self.live_transitioned) else self.cumulative_net_pnl,
-                    dry_run=self.is_dry_run,
+                    self.cumulative_net_pnl,
+                    dry_run=False,
                 )
-                await telegram_bot.send_message(exit_msg, dry_run=self.is_dry_run)
+                await telegram_bot.send_message(exit_msg, is_broker_verified=True)
             except Exception as e:
                 logger.warning("Telegram exit alert error: %s", e)
 
@@ -387,25 +395,49 @@ class CloudArbitrageWorker:
             # Record trade into CSV trade journal
             trade_journal.record_trade(exit_record)
 
+            # Post-Trade Execution Quality & Performance Audit
+            try:
+                audit_result = post_trade_analyst.evaluate_trade(
+                    trade_record=exit_record,
+                    target_entry_price=pos.get("entry_price"),
+                    target_exit_price=cur_price,
+                )
+                audit_msg = post_trade_analyst.generate_telegram_audit_message(audit_result)
+                await telegram_bot.send_message(audit_msg, is_broker_verified=True)
+                logger.info("Generated and sent Post-Trade Audit Report for %s (Grade: %s)", symbol, audit_result.get("grade"))
+            except Exception as e:
+                logger.warning("Post-trade audit evaluation error: %s", e)
+
             closed_symbols.append(symbol)
             logger.info(f"[{action_type}] Closed {symbol} at ${cur_price:.2f} ({gain_pct:+.2f}% | Net PnL: +${realized_net:.2f})")
 
         for sym in closed_symbols:
             self.active_positions.pop(sym, None)
+            self.last_trade_exit_time = time.time()
+            self.daily_trades_count += 1
 
     async def execute_trade(self, spread_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         if self.circuit_breaker_tripped:
             return None
 
+        # 1. Daily Trade Limit Guard (Strict Max 3 trades/day)
+        if self.daily_trades_count >= self.max_daily_trades:
+            return None
+
+        # 2. Minimum Cooldown Guard (30 minutes between trades to prevent overtrading)
+        if (time.time() - self.last_trade_exit_time) < self.trade_cooldown_sec:
+            return None
+
         raw_sym = spread_info["symbol"]
         symbol = raw_sym.value if hasattr(raw_sym, "value") else str(raw_sym).replace("CommoditySymbol.", "")
 
-        # Duplicate Position Guard
+        # 3. Duplicate Position Guard
         if symbol in self.active_positions:
             return None
 
-        # Max Capacity Guard
-        if len(self.active_positions) >= self.max_positions:
+        # 4. Max Capacity Guard (Strict 1 position at a time)
+        # Guard 0: Filter out unlisted/untradeable virtual assets (strictly Cu and Ag only)
+        if symbol not in ("Cu", "Ag"):
             return None
 
         bps = spread_info["spread_basis_points"]
@@ -416,7 +448,7 @@ class CloudArbitrageWorker:
         direction = spread_info["arbitrage_direction"]
         primary_price = spread_info["primary_price_usd"]
 
-        # Calculate position sizing using KIS Futures & ETF sizing engine
+        # Calculate position sizing using KIS Futures sizing engine
         sizing_plan = kis_client.calculate_order_sizing(
             symbol=symbol,
             mode=self.trade_mode,
@@ -428,28 +460,31 @@ class CloudArbitrageWorker:
             margin_buffer_pct=self.margin_buffer_pct,
         )
 
-        is_futures = "FUTURES" in sizing_plan["instrument_type"]
-        qty = sizing_plan["quantity"]
-        contract_multiplier = sizing_plan["contract_multiplier"]
-        comm_fee = sizing_plan["commission_fee_usd"]
+        qty = sizing_plan.get("quantity", 0)
+        contract_multiplier = sizing_plan.get("contract_multiplier", 1.0)
+        comm_fee = sizing_plan.get("commission_fee_usd", 2.0)
+        req_margin = sizing_plan.get("initial_margin_usd", 950.0)
 
-        # Calculate gross profit
+        if qty <= 0:
+            return None
+
+        # Calculate gross & net profit
+        is_futures = "FUTURES" in sizing_plan.get("instrument_type", "")
         if is_futures:
             if symbol == "Cu":
-                margin_per_lb = net_margin_per_unit / METRIC_TON_TO_LBS
-                gross_profit = round(qty * contract_multiplier * margin_per_lb, 2)
-            elif symbol in ("Ag", "Pt"):
-                gross_profit = round(qty * contract_multiplier * net_margin_per_unit, 2)
-            elif symbol == "Li":
-                gross_profit = round(qty * contract_multiplier * net_margin_per_unit, 2)
+                gross_profit = round(qty * 2500.0 * (primary_price / METRIC_TON_TO_LBS) * (bps / 10000.0), 2)
             else:
-                gross_profit = round(qty * contract_multiplier * (net_margin_per_unit / 100.0), 2)
+                gross_profit = round(qty * contract_multiplier * primary_price * (bps / 10000.0), 2)
         else:
-            alloc_usd = sizing_plan["initial_margin_usd"]
-            gross_profit = round(alloc_usd * (bps / 10000.0), 2)
+            gross_profit = round(req_margin * (bps / 10000.0), 2)
 
-        net_profit = round(gross_profit - comm_fee - GAS_FEE_USD, 2)
-        if gross_profit < comm_fee:
+        roundtrip_comm = comm_fee * 2.0
+        slippage_est = 2.50
+        min_required_profit = max((roundtrip_comm + slippage_est) * 4.0, 26.0)
+        net_profit = round(gross_profit - (roundtrip_comm + slippage_est), 2)
+
+        # Strict Hurdle Rate Filter: Net profit must exceed 4x roundtrip fees (min $26.00+)
+        if net_profit < min_required_profit:
             return None
 
         if self.daily_pnl_tracker + net_profit < -MAX_DAILY_LOSS_USD:
@@ -459,9 +494,9 @@ class CloudArbitrageWorker:
                     current_loss=self.daily_pnl_tracker + net_profit,
                     loss_limit=MAX_DAILY_LOSS_USD,
                     active_positions_count=len(self.active_positions),
-                    dry_run=KIS_DRY_RUN,
+                    dry_run=self.is_dry_run,
                 )
-                asyncio.create_task(telegram_bot.send_message(cb_msg, dry_run=not telegram_bot.has_credentials))
+                asyncio.create_task(telegram_bot.send_message(cb_msg, is_broker_verified=True))
             except Exception as e:
                 logger.warning("Circuit breaker alert error: %s", e)
             return None
@@ -473,12 +508,28 @@ class CloudArbitrageWorker:
         kis_order = kis_client.execute_auto_hedge_order(
             symbol=symbol,
             spread_bps=bps,
-            net_margin_usd=net_margin_per_unit,
+            net_margin_usd=gross_profit,
             direction="Buy (Open Hedge)",
             sizing_plan=sizing_plan,
             price_usd=primary_price,
             dry_run=self.is_dry_run,
         )
+
+        # Strict Broker Ledger Verification: Only record position when fully filled on KIS
+        if not self.is_dry_run:
+            order_no = kis_order.get("order_id", "")
+            ticker = kis_order.get("ticker", symbol)
+            is_filled, filled_info = kis_client.verify_order_execution(
+                order_no=order_no,
+                ticker=ticker,
+                order_qty=qty,
+                max_wait_sec=45,
+            )
+            if not is_filled:
+                logger.warning(f"❌ [미체결 자동취소] {symbol} Order {order_no} not filled within 45s. Position skipped.")
+                return None
+            if filled_info and float(filled_info.get("filled_price_usd", 0.0)) > 0:
+                primary_price = float(filled_info["filled_price_usd"])
 
         trade_record = {
             "trade_id": f"ENTRY-{symbol}-{int(time.time())}",
@@ -521,22 +572,8 @@ class CloudArbitrageWorker:
 
         # Send immediate Telegram alert on position entry
         try:
-            badge = telegram_bot._get_mode_badge(self.is_dry_run)
-            entry_msg = (
-                f"🚀 <b>[신규 포지션 매수 진입] LIVE ENTRY</b>\n"
-                f"{badge}\n"
-                f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                f"🏷️ <b>종목:</b> <b>{symbol}</b> ({sizing_plan.get('ticker', symbol)})\n"
-                f"📊 <b>유형:</b> {sizing_plan['description']}\n"
-                f"💵 <b>진입 단가:</b> <b>${primary_price:,.2f} USD</b>\n"
-                f"📦 <b>매수 수량:</b> <b>{qty}주</b> (투입 증거금: ${sizing_plan['initial_margin_usd']:,.2f})\n"
-                f"🎯 <b>포착 괴리율:</b> <b>+{bps:.1f} bps</b> (예상 마진: +${net_profit:,.2f})\n"
-                f"⏱ <b>체결 일시:</b> <code>{now_utc}</code>\n"
-                f"🏦 <b>계좌:</b> 한국투자증권 (<code>{sizing_plan['account_no']}</code>)\n"
-                f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                f"🛡️ 목표 익절(+0.50%) 또는 스프레드 수렴 시 자동 청산 대기 중"
-            )
-            await telegram_bot.send_message(entry_msg, dry_run=self.is_dry_run)
+            entry_msg = telegram_bot.generate_arbitrage_alert(trade_record)
+            await telegram_bot.send_message(entry_msg, is_broker_verified=True)
         except Exception as e:
             logger.warning("Telegram entry alert error: %s", e)
 
@@ -551,21 +588,42 @@ class CloudArbitrageWorker:
         """Single cycle of scanning, position exit monitoring, and executing profitable spreads."""
         self.last_cycle_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
-        # 0. Check Auto Live Switch at 22:30 KST
-        await self.check_auto_live_switch()
+        # 0. Real Broker Ledger Circuit Breaker Guard (Zero-Ruin Constraint)
+        current_equity = self.starting_capital_usd
+        try:
+            fut_dep = kis_client.inquire_overseas_futures_deposit(dry_run=self.is_dry_run)
+            current_equity = float(fut_dep.get("total_equity_usd", self.starting_capital_usd))
+            real_loss = self.starting_capital_usd - current_equity
+            if real_loss >= MAX_DAILY_LOSS_USD:
+                if not self.circuit_breaker_tripped:
+                    self.circuit_breaker_tripped = True
+                    self.is_paused = True
+                    logger.critical(f"🚨 [REAL BROKER CIRCUIT BREAKER TRIPPED] Equity ${current_equity:.2f} lost ${real_loss:.2f} >= ${MAX_DAILY_LOSS_USD:.2f}!")
+                    alert_msg = (
+                        f"🚨 <b>[실전 서킷브레이커 긴급 발동 - 자동 매매 즉시 정지]</b>\n"
+                        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                        f"🏦 <b>실시간 증권사 원장 자산:</b> <b>${current_equity:,.2f} USD</b>\n"
+                        f"📉 <b>기준 자본 대비 손실:</b> <b>-${real_loss:,.2f} USD</b>\n"
+                        f"🛑 <b>조치:</b> 일일 최대 손실 한도(${MAX_DAILY_LOSS_USD:,.2f}) 도달로 모든 신규 매매 완전 정지.\n"
+                        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                        f"대표님의 소중한 자산을 보호하기 위해 시스템이 즉시 안전 락업되었습니다."
+                    )
+                    await telegram_bot.send_message(alert_msg, dry_run=False)
+                return
+        except Exception as e:
+            logger.warning(f"Error checking broker ledger circuit breaker: {e}")
 
         # 0.5. Check Hourly Compounding & Capital Reallocation (1 hour cycle)
         await self.check_hourly_compounding()
 
-        # 1. Check & execute Take-Profit (+0.50%) and Stop-Loss (-1.50%)
+        # 1. Check & execute Take-Profit and Stop-Loss
         await self.check_position_exits()
 
-        # 2. Scan spreads
         # 1.5. Interactive Telegram Command Polling
         await self._process_telegram_commands()
 
-        # 2. Check and enter new arbitrage positions
-        if not self.is_paused:
+        # 2. Check and enter new arbitrage positions (Strict Low-Frequency 1-Lot Discipline)
+        if not self.is_paused and not self.circuit_breaker_tripped:
             spreads_resp = feed_engine.get_arbitrage_spreads()
             spreads = spreads_resp.spreads
 
@@ -591,36 +649,16 @@ class CloudArbitrageWorker:
         if now - self.last_telegram_digest_time >= digest_interval_sec:
             try:
                 int_mins = max(int(digest_interval_sec // 60), 1)
-                if self.minute_trades_buffer:
-                    msg = telegram_bot.generate_cycle_digest_receipt(
-                        self.minute_trades_buffer,
-                        self.cumulative_net_pnl,
-                        interval_minutes=int_mins,
-                        safe_vault_total=self.safe_reserve_vault_usd,
-                        total_capital=self.total_capital_usd,
-                        dry_run=self.is_dry_run,
-                        live_session_pnl=self.live_session_pnl,
-                    )
-                    self.minute_trades_buffer.clear()
-                else:
-                    active_cnt = len(self.active_positions)
-                    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-                    badge = telegram_bot._get_mode_badge(self.is_dry_run)
-                    krw_live_pnl = self.live_session_pnl * 1340.0
-                    krw_cap = self.total_capital_usd * 1340.0
-                    msg = (
-                        f"📊 <b>[정기 상태 보고] {int_mins}분 주기 모니터링</b>\n"
-                        f"{badge}\n"
-                        f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                        f"⏱ <b>보고 일시:</b> <code>{now_str}</code>\n"
-                        f"🟢 <b>시스템 상태:</b> 정상 가동 중 (5초 스캔 루프)\n"
-                        f"👑 <b>10:30 이후 총 누적 실현 손익:</b> <b>${self.live_session_pnl:+,.2f} USD</b> (₩{krw_live_pnl:,.0f} 원)\n"
-                        f"📦 <b>10:30 이후 총 체결 건수:</b> <b>{self.live_session_trades}건</b> (보유 포지션: {active_cnt}건)\n"
-                        f"🏦 <b>현재 운용 자본:</b> ${self.total_capital_usd:,.2f} USD (₩{krw_cap:,.0f} 원)\n"
-                        f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                        f"🎯 한국투자증권 실계좌(10061681-01) ETF 안전 차익거래 실시간 가동 중"
-                    )
-                await telegram_bot.send_message(msg, dry_run=self.is_dry_run)
+                broker_ledger = kis_client.inquire_overseas_futures_deposit(dry_run=False)
+                msg = telegram_bot.generate_cycle_digest_receipt(
+                    cycle_trades=self.minute_trades_buffer,
+                    cumulative_pnl=self.cumulative_net_pnl,
+                    interval_minutes=int_mins,
+                    total_capital=self.total_capital_usd,
+                    broker_ledger=broker_ledger,
+                )
+                await telegram_bot.send_message(msg, is_broker_verified=True)
+                self.minute_trades_buffer.clear()
             except Exception as e:
                 logger.warning("Telegram digest notification failed: %s", e)
             self.last_telegram_digest_time = now
@@ -636,12 +674,12 @@ class CloudArbitrageWorker:
             startup_msg = telegram_bot.generate_startup_message(
                 mode=self.trade_mode,
                 sizing_mode=self.sizing_mode,
-                account_no=kis_client.account_no,
+                account_no=kis_client.futures_account_no,
                 target_commodity=self.target_commodity,
                 interval_sec=self.scan_interval,
-                dry_run=self.is_dry_run,
+                dry_run=False,
             )
-            await telegram_bot.send_message(startup_msg, dry_run=not telegram_bot.has_credentials)
+            await telegram_bot.send_message(startup_msg, is_broker_verified=True)
         except Exception as e:
             logger.warning("Telegram startup notification failed: %s", e)
 

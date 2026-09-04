@@ -29,11 +29,11 @@ Explore the full consumer and enterprise visual interface directly in your brows
 
 | Service / Endpoint | Description | URL Link |
 |---|---|---|
-| 🖥️ **Web Dashboard** | Interactive visual UI, scrap yield calculator & charts | [Launch Dashboard](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/dashboard) |
-| 🧪 **API Playground** | Browser-based interactive query sandbox | [Open Playground](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/playground) |
-| 🪝 **Live Market Signals** | Free public cross-exchange arbitrage feed | [`/api/v1/oracle/alpha-signals`](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/api/v1/oracle/alpha-signals) |
-| 📚 **Swagger API Docs** | Full interactive OpenAPI documentation | [View Swagger Docs](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/docs) |
-| 📑 **LLM Agent Manifest** | Machine-readable tool specifications | [`/llms.txt`](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/llms.txt) |
+| 🖥️ **Web Dashboard** | Interactive visual UI, scrap yield calculator & charts | [Launch Dashboard](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/dashboard) |
+| 🧪 **API Playground** | Browser-based interactive query sandbox | [Open Playground](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/playground) |
+| 🪝 **Live Market Signals** | Free public cross-exchange arbitrage feed | [`/api/v1/oracle/alpha-signals`](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/api/v1/oracle/alpha-signals) |
+| 📚 **Swagger API Docs** | Full interactive OpenAPI documentation | [View Swagger Docs](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/docs) |
+| 📑 **LLM Agent Manifest** | Machine-readable tool specifications | [`/llms.txt`](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/llms.txt) |
 
 ---
 

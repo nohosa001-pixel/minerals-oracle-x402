@@ -129,7 +129,7 @@ def test_kis_auto_hedge_order_execution():
         sizing_plan=futures_plan,
         dry_run=True,
     )
-    assert res_f["status"] == "FILLED_SIMULATED"
+    assert res_f["status"] == "DRY_RUN_UNEXECUTED"
     assert "FUTURES" in res_f["instrument_type"]
     assert res_f["ticker"] == "MHG"
 
@@ -143,7 +143,7 @@ def test_kis_auto_hedge_order_execution():
         sizing_plan=etf_plan,
         dry_run=True,
     )
-    assert res_e["status"] == "FILLED_SIMULATED"
+    assert res_e["status"] == "DRY_RUN_UNEXECUTED"
     assert res_e["instrument_type"] == "OVERSEAS_ETF"
     assert res_e["ticker"] == "SLV"
 
