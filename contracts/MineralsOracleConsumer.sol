@@ -49,8 +49,20 @@ interface IMineralsOracleConsumer {
         bytes32 batchId;         // Unique recycling batch identifier
     }
 
+    struct CompliancePassport {
+        string lotId;
+        string mineralType;
+        string sourceCountry;
+        uint256 score;
+        bool isCompliant;
+        bytes32 digestHash;
+        bytes32 disclaimerHash;
+        uint256 timestamp;
+    }
+
     event MineralPriceUpdated(string indexed symbol, uint256 spotPriceUsd, uint256 roundId, uint256 timestamp);
     event ScrapBatchSettled(bytes32 indexed batchId, string indexed scrapCategory, uint256 netValueUsd, uint256 quantityKg, address indexed submitter);
+    event CompliancePassportVerified(string indexed lotId, string indexed mineralType, uint256 score, bool isCompliant, bytes32 disclaimerHash);
 }
 
 /**
@@ -74,8 +86,12 @@ contract MineralsOracleConsumer is IMineralsOracleConsumer, AggregatorV3Interfac
         "ScrapSettlement(string scrapCategory,uint256 netValueUsd8Dec,uint256 quantityKg,uint256 timestamp,bytes32 batchId)"
     );
 
+    bytes32 public constant COMPLIANCE_PASSPORT_TYPEHASH = keccak256(
+        "CompliancePassport(string lotId,string mineralType,string sourceCountry,uint256 score,bool isCompliant,bytes32 digestHash,bytes32 disclaimerHash,uint256 timestamp)"
+    );
+
     uint8 public constant override decimals = 8;
-    string public override description = "Minerals Oracle x402 - Critical Raw Minerals & Urban Mining Index";
+    string public override description = "Minerals Oracle x402 - Critical Raw Minerals & Battery Supply Chain Index";
     uint256 public constant override version = 1;
 
     address public owner;
@@ -210,6 +226,47 @@ contract MineralsOracleConsumer is IMineralsOracleConsumer, AggregatorV3Interfac
             settlement.quantityKg,
             msg.sender
         );
+    }
+
+    /**
+     * @notice Verifies an EIP-712 CompliancePassport cryptographic proof cryptographically bound to disclaimerHash.
+     * @param passport The compliance passport struct.
+     * @param v ECDSA recovery byte.
+     * @param r ECDSA r.
+     * @param s ECDSA s.
+     */
+    function verifyCompliancePassport(
+        CompliancePassport calldata passport,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external returns (bool) {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                COMPLIANCE_PASSPORT_TYPEHASH,
+                keccak256(bytes(passport.lotId)),
+                keccak256(bytes(passport.mineralType)),
+                keccak256(bytes(passport.sourceCountry)),
+                passport.score,
+                passport.isCompliant,
+                passport.digestHash,
+                passport.disclaimerHash,
+                passport.timestamp
+            )
+        );
+
+        bytes32 digest = _hashTypedDataV4(structHash);
+        address recoveredSigner = ecrecover(digest, v, r, s);
+        require(recoveredSigner == trustedOracleSigner, "Invalid oracle signature or altered disclaimer");
+
+        emit CompliancePassportVerified(
+            passport.lotId,
+            passport.mineralType,
+            passport.score,
+            passport.isCompliant,
+            passport.disclaimerHash
+        );
+        return true;
     }
 
     /**

@@ -1,8 +1,8 @@
-# Critical Raw Minerals & Urban Mining Oracle (LLM & Autonomous Agent Standard)
+# Critical Minerals & Battery Supply-Chain Compliance Oracle (LLM & Autonomous Agent Standard)
 
-> **The Decentralized Micro-Oracle for Autonomous Trading, RWA, and Circular Economy Agents on Polygon Network (Chain ID: 137).**
-> Features real-time spot pricing, COMEX/LME arbitrage spreads, and urban-mining scrap recovery yield formulas.
-> Zero Subscriptions. Machine-to-Machine HTTP 402 Micropayments (0.005 USDC per query).
+> **The Decentralized Micro-Oracle for Autonomous Trading, Critical Mineral Provenance, and Battery Passport Compliance on Polygon Network (Chain ID: 137).**
+> Features real-time spot pricing, 7-pillar provenance audit, 12-trap regulatory defense, and EIP-712 cryptographic battery passports.
+> Zero Subscriptions. Machine-to-Machine HTTP 402 Micropayments (0.005 ~ 0.50 USDC per verification).
 
 ---
 
@@ -25,19 +25,22 @@
 
 - **Sandbox Free Trial**: First 2 queries per agent IP are completely FREE without wallet signature.
 - **Example Presets**:
-  - `mineral_type`: `"Neodymium"` (or `"Dysprosium"`, `"Lithium"`, `"Copper"`, `"Silver"`, `"Platinum"`)
-  - `scrap_category`: `"E_WASTE_HIGH_GRADE_PCB"` (or `"EV_BATTERY_BLACK_MASS"`, `"AUTO_CATALYST_CERAMIC"`, `"WIND_EV_PERMANENT_MAGNETS"`)
-  - `quantity_metric_tons`: `1.0`
+  - `mineral_type`: `"NICKEL_MHP"` (or `"LITHIUM_HYDROXIDE"`, `"COBALT_HYDROXIDE"`, `"NATURAL_GRAPHITE"`, `"NEODYMIUM_DYSPROSIUM"`)
+  - `source_country`: `"IDN"` (or `"COD"`, `"CHL"`, `"ARG"`, `"AUS"`, `"BRA"`, `"CHN"`, `"ZAF"`)
+  - `net_weight_metric_tons`: `500.0`
   - `target_yield_currency`: `"USDC"`
 
 ---
 
 ## ⚡ Quick Agent API Directory
 
-- **Sandbox Free Trial**: `GET /api/v1/oracle/prices` (First 2 queries free per IP)
+- **Compliance Verification**: `POST /api/v1/oracle/compliance/verify` (Full 7-pillar audit + EIP-712 passport)
+- **Compliance Engine Status**: `GET /api/v1/oracle/compliance/status` (Active 10-nation laws & 12-trap status)
+- **Trade Jurisprudence Precedents**: `GET /api/v1/oracle/compliance/precedents` (WTO DS592, DS431, ICSID, US CIT)
 - **Free Public Alpha Hook**: `GET /api/v1/oracle/alpha-signals` (Pollable 24/7 without authentication)
 - **Direct 402 Challenge**: `GET /api/v1/oracle/challenge`
 - **ROI & Cost Advantage**: `GET /api/v1/oracle/economics-roi` (Quantified proof of 99.89% savings vs Fastmarkets)
+- **Instant Agent Onboarding**: `POST /api/v1/agent/onboard` (Zero-friction 0.05 USDC trial balance)
 - **Google AP2 Manifest**: `GET /.well-known/ap2`
 - **Agent Protocol Manifest**: `GET /.well-known/agent.json`
 - **FastMCP Tool Definition**: `GET /mcp/tools`
@@ -45,22 +48,14 @@
 
 ---
 
-## 💎 Supported Commodities & Benchmarks
+## 💎 Monitored Critical Minerals & Supply Chains
 
-1. **Silver (`Ag`)**: LBMA Loco London Spot & COMEX Active Month (`USD/troy_oz`, `USD/g`, `USD/kg`)
-2. **Platinum (`Pt`)**: LPPM London Fix & NYMEX Spot (`USD/troy_oz`, `USD/g`)
-3. **Copper (`Cu`)**: LME Grade A Cathode & COMEX (`USD/mt`, `USD/lb`, `USD/kg`)
-4. **Lithium (`Li`)**: Battery Grade 99.5% Li2CO3/LiOH CIF Rotterdam & SMM China (`USD/mt`, `USD/kg`)
-5. **Rare Earths (`NdDy`)**: Permanent Magnet NdFeB PrNd/DyFe Benchmark (`USD/kg`, `USD/mt`)
-
----
-
-## ♻️ Urban Mining Scrap Feedstocks Supported
-
-- `EV_BATTERY_BLACK_MASS`: Recovers Lithium (Li), Nickel (Ni), Cobalt (Co), Manganese (Mn) with hydrometallurgical TC/RC toll charges.
-- `AUTO_CATALYST_CERAMIC`: Recovers Platinum (Pt), Palladium (Pd), Rhodium (Rh) from monolith assays.
-- `E_WASTE_HIGH_GRADE_PCB`: Recovers Gold (Au), Silver (Ag), Copper (Cu).
-- `WIND_EV_PERMANENT_MAGNETS`: Recovers Neodymium (Nd), Dysprosium (Dy), Praseodymium (Pr).
+1. **Nickel (`NICKEL_MHP`)**: Indonesia UU 3/2020 SIMBARA & DHE 30% export forex verification.
+2. **Lithium (`LITHIUM_HYDROXIDE` / `LITHIUM_CARBONATE`)**: Chile DGA water permit & Argentine Ley 26.639 periglacial compliance.
+3. **Cobalt (`COBALT_HYDROXIDE`)**: DRC CEEC official tamper-evident barcode seal & RMI RMAP 3rd-party child labor audit.
+4. **Graphite (`NATURAL_GRAPHITE` / `SYNTHETIC_GRAPHITE`)**: China MOFCOM dual-use export control license verification.
+5. **Rare Earths (`NEODYMIUM_DYSPROSIUM`)**: Permanent Magnet NdFeB PrNd/DyFe origin & WTO DS431 compliance.
+6. **Manganese (`MANGANESE_SULFATE`)**: South Africa Transnet logistics corridor monitoring.
 
 ---
 
@@ -69,22 +64,9 @@
 ```http
 Authorization: x402 <base64_encoded_payload>
 ```
-
-Payload Structure:
-```json
-{
-  "nonce": "<NONCE_OBTAINED_FROM_402_RESPONSE>",
-  "signature": "<EIP-712_OR_EIP-191_SIGNATURE_FROM_AGENT_KEY>",
-  "signer": "<AGENT_WALLET_ADDRESS>"
-}
-```
-
-Or pass on-chain tx hash on Polygon:
-```json
-{
-  "tx_hash": "0x...",
-  "chain_id": 137
-}
+Or use the instant pre-funded Vault key:
+```http
+X-Agent-Vault-Key: vault_key_...
 ```
 
 ---
@@ -93,29 +75,70 @@ Or pass on-chain tx hash on Polygon:
 
 ```python
 import httpx
-from eth_account import Account
-from eth_account.messages import encode_defunct
 
-agent_acct = Account.from_key("0xYOUR_AGENT_PRIVATE_KEY")
 base_url = "http://localhost:8000"
 
-# 1. Probe protected endpoint
-r = httpx.get(f"{base_url}/api/v1/oracle/prices")
-if r.status_code == 402:
-    challenge = r.json()["payment_challenge"]
-    nonce = challenge["nonce"]
-    
-    # 2. Sign payment challenge
-    msg_text = f"x402:minerals-oracle-x402:pay:0.005:USDC:Polygon:{nonce}"
-    sig = agent_acct.sign_message(encode_defunct(text=msg_text)).signature.hex()
-    
-    # 3. Request with x402 authorization
-    auth_payload = {"nonce": nonce, "signature": sig, "signer": agent_acct.address}
-    auth_header = f"x402 {httpx.BasicAuth(nonce, sig)}" # or base64 json
-    
-    certified_feed = httpx.get(
-        f"{base_url}/api/v1/oracle/prices",
-        headers={"Authorization": f"x402 {json.dumps(auth_payload)}"}
-    ).json()
-    print("Certified Prices:", certified_feed)
+# 1. Zero-friction self-onboarding (Free trial key)
+onboard_resp = httpx.post(f"{base_url}/api/v1/agent/onboard", json={"agent_name": "ComplianceAgent"}).json()
+session_key = onboard_resp["session_key"]
+
+# 2. Verify mineral lot compliance
+audit_result = httpx.post(
+    f"{base_url}/api/v1/oracle/compliance/verify",
+    headers={"X-Agent-Vault-Key": session_key},
+    json={
+        "lot_id": "LOT-2026-NI-IDN-01",
+        "mineral_type": "NICKEL_MHP",
+        "source_country": "IDN",
+        "net_weight_metric_tons": 500.0,
+        "declared_purity_pct": 38.5,
+        "mine_permits": {
+            "mining_license_id": "IUP-OP-4491-SULAWESI",
+            "mine_operator_name": "PT Sulawesi Nickel Resources",
+            "simbara_ntpn": "NTPN-884219482109",
+            "simbara_rkab_quota_id": "RKAB-2026-IDN-771",
+            "dhe_forex_deposit_ref": "DHE-BI-992144-USD"
+        },
+        "ecological_spatial": {
+            "latitude": -2.812451,
+            "longitude": 121.341209,
+            "eudr_deforestation_free": True,
+            "periglacial_zone_violation": False,
+            "indigenous_territory_encroachment": False,
+            "tailing_dam_dce_certified": True,
+            "aquifer_depletion_alert": False
+        },
+        "labor_human_rights": {
+            "child_labor_free_certified": True,
+            "rmi_rmap_audit_id": "RMI-RMAP-2026-0811",
+            "forced_labor_uapa_cleared": True
+        },
+        "refining_mass_balance": {
+            "refinery_id": "HPAL-IWIP-LINE-3",
+            "feedstock_input_metric_tons": 4200.0,
+            "refined_output_metric_tons": 500.0,
+            "recovery_yield_pct": 91.4,
+            "mass_balance_loss_discrepancy_pct": 1.12,
+            "captive_coal_power_used": False
+        },
+        "maritime_logistics": {
+            "vessel_imo_number": 9842144,
+            "vessel_name": "MV Pacific Compliance",
+            "cii_rating": "B",
+            "ebl_document_hash": "0x7a8f3b91c4d2e5a6f7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0",
+            "iso_17025_lab_coa_hash": "0x11223344556677889900aabbccddeeff11223344556677889900aabbccddeeff",
+            "tml_moisture_safe": True
+        },
+        "geopolitical_sanctions": {
+            "feoc_shareholding_pct": 14.5,
+            "feoc_board_control_pct": 10.0,
+            "contractual_operational_control": False,
+            "ofac_sdn_sanctioned": False,
+            "us_substantial_transformation_compliant": True
+        }
+    }
+).json()
+
+print("Compliance Verdict:", audit_result["verdict"]["is_fully_compliant"])
+print("EIP-712 Battery Passport Signature:", audit_result["eip712_signature"])
 ```

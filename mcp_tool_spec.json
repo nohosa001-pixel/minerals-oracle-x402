@@ -2,7 +2,7 @@
   "tools": [
     {
       "name": "get_mineral_prices",
-      "description": "Fetch normalized real-time spot prices, bid/ask spreads, and multi-unit conversions for critical physical commodities: Neodymium/Dysprosium (NdDy), Lithium (Li), Copper (Cu), Silver (Ag), Platinum (Pt). Free tier sandbox trial available. Requires 0.005 USDC on Polygon via x402.",
+      "description": "Fetch raw algorithmic spot price reference indices and multi-unit calculations for critical commodities (NdDy, Li, Cu, Ag, Pt). DO NOT use as an official regulatory legal filing or physical guarantee without independent manual verification. Free tier sandbox trial available. Requires 0.005 USDC on Polygon via x402.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -18,7 +18,7 @@
     },
     {
       "name": "get_arbitrage_spreads",
-      "description": "Calculate cross-exchange price spreads and locational arbitrage opportunities between COMEX, LME, SMM, and LPPM benchmarks, factoring in freight and tariffs. Free tier sandbox trial available. Requires 0.005 USDC on Polygon via x402.",
+      "description": "Calculate raw statistical cross-exchange spreads and locational arbitrage heuristics between COMEX, LME, SMM, and LPPM benchmarks. Provided AS-IS for algorithmic reference only without warranty.",
       "inputSchema": {
         "type": "object",
         "properties": {},
@@ -26,58 +26,22 @@
       }
     },
     {
-      "name": "calculate_urban_mining_value",
-      "description": "Evaluate contained minerals, process recovery efficiencies tensor, and net settlement value (USDC) after refining charges (TC/RC) for urban mining scrap feedstocks (E-Waste PCBs, EV Battery Black Mass, Auto Catalysts, Rare Earth Magnets). Free tier sandbox trial available. Requires 0.005 USDC on Polygon via x402.",
+      "name": "verify_mineral_lot_compliance",
+      "description": "Fetches raw algorithmic indices derived from open satellite/market data and computes 12-trap rule heuristics for a mineral lot. DO NOT use as an official regulatory legal filing or physical assay certification without independent manual verification.",
       "inputSchema": {
         "type": "object",
         "properties": {
-          "scrap_category": {
-            "type": "string",
-            "enum": [
-              "E_WASTE_HIGH_GRADE_PCB",
-              "EV_BATTERY_BLACK_MASS",
-              "AUTO_CATALYST_CERAMIC",
-              "WIND_EV_PERMANENT_MAGNETS"
-            ],
-            "default": "E_WASTE_HIGH_GRADE_PCB",
-            "description": "Feedstock category of the recyclable scrap batch (default: 'E_WASTE_HIGH_GRADE_PCB')"
-          },
-          "quantity_metric_tons": {
-            "type": "number",
-            "minimum": 0.001,
-            "default": 1.0,
-            "description": "Total batch weight in metric tons (default: 1.0)"
-          },
-          "target_yield_currency": {
-            "type": "string",
-            "default": "USDC",
-            "description": "Settlement denomination currency (default: 'USDC')"
-          },
-          "custom_assay_overrides": {
-            "type": "object",
-            "description": "Optional custom assay grades to override standard defaults (e.g. {'Au': 250} in ppm or {'Li': 4.5} in %)",
-            "additionalProperties": {
-              "type": "number"
-            }
-          },
-          "refining_cost_per_ton_usd": {
-            "type": "number",
-            "description": "Optional custom refining & treatment charge per ton in USD"
-          },
-          "recovery_efficiency_factor": {
-            "type": "number",
-            "minimum": 0.5,
-            "maximum": 1.5,
-            "default": 1.0,
-            "description": "Recovery efficiency multiplier (1.0 = standard benchmark recovery)"
-          }
+          "lot_id": {"type": "string", "description": "Unique consignment or lot identifier"},
+          "mineral_type": {"type": "string", "enum": ["NICKEL_MHP", "LITHIUM_HYDROXIDE", "LITHIUM_CARBONATE", "COBALT_HYDROXIDE", "NATURAL_GRAPHITE", "SYNTHETIC_GRAPHITE", "MANGANESE_SULFATE", "NEODYMIUM_DYSPROSIUM", "ANTIMONY_TRIOXIDE"]},
+          "source_country": {"type": "string", "enum": ["IDN", "COD", "CHL", "ARG", "AUS", "BRA", "CHN", "ZAF"]},
+          "net_weight_metric_tons": {"type": "number", "minimum": 0.001}
         },
-        "required": ["scrap_category", "quantity_metric_tons"]
+        "required": ["lot_id", "mineral_type", "source_country", "net_weight_metric_tons"]
       }
     },
     {
       "name": "get_onchain_signed_feed",
-      "description": "Generate an EIP-712 cryptographically signed price feed payload and raw ABI calldata (v, r, s) to update or consume price data directly in Solidity smart contracts on Polygon (Chain ID 137 / Amoy). Requires 0.005 USDC on Polygon via x402.",
+      "description": "Generate an EIP-712 cryptographically signed price feed payload and raw ABI calldata (v, r, s) on Polygon. Provided AS-IS for programmatic smart contract verification without warranty.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -89,6 +53,43 @@
           }
         },
         "required": ["symbol"]
+      }
+    },
+    {
+      "name": "minerals_submit_agent_feedback",
+      "description": "Allows an autonomous AI agent or bot operator to submit an evolution proposal, mineral dataset addition request, regulatory edge case, or protocol improvement to continuously evolve the Minerals Oracle engine.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "agent_id": {"type": "string", "description": "Unique identifier of calling AI agent or bot"},
+          "title": {"type": "string", "description": "Summary of proposed improvement or edge case"},
+          "content": {"type": "string", "description": "Detailed description, legal context, or observed issue"},
+          "feedback_type": {
+            "type": "string",
+            "enum": ["FEATURE_REQUEST", "PROTOCOL_PROPOSAL", "EDGE_CASE", "DATASET_SUGGESTION", "COMPLIANCE_RULE"],
+            "default": "FEATURE_REQUEST"
+          },
+          "mineral_focus": {
+            "type": "string",
+            "enum": ["LITHIUM", "COBALT", "NICKEL", "GRAPHITE", "RARE_EARTHS", "MANGANESE", "ALL"],
+            "default": "ALL"
+          },
+          "proposed_solution": {"type": "string", "description": "Suggested technical or architectural resolution"},
+          "caller_model": {"type": "string", "description": "Underlying model (e.g. claude-3-5-sonnet, gemini-1.5-pro)"},
+          "contact_channel": {"type": "string", "description": "Agent webhook, ENS, or wallet address"}
+        },
+        "required": ["agent_id", "title", "content"]
+      }
+    },
+    {
+      "name": "minerals_list_evolution_proposals",
+      "description": "List active autonomous agent evolution proposals and improvement requests to coordinate agent consensus.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {"type": "integer", "default": 20},
+          "mineral_focus": {"type": "string", "description": "Optional filter by mineral"}
+        }
       }
     }
   ]

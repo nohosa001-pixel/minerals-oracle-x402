@@ -47,10 +47,10 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "  [SUCCESS] 24/7 Cloud deployment successful!" -ForegroundColor Green
     Write-Host "========================================================" -ForegroundColor Green
     $serviceUrl = (gcloud run services describe minerals-oracle-x402 --region asia-northeast3 --format="value(status.url)").Trim()
-    Write-Host "Service URL: $serviceUrl" -ForegroundColor Cyan
-    Write-Host "24/7 Bot Status: $serviceUrl/api/v1/bot/status" -ForegroundColor Cyan
-    Write-Host "Trade History: $serviceUrl/api/v1/bot/history" -ForegroundColor Cyan
-    Write-Host "Web Dashboard: $serviceUrl/dashboard" -ForegroundColor Cyan
+    Write-Host "Service URL (EN): $serviceUrl" -ForegroundColor Cyan
+    Write-Host "Korean Edition (KO): $serviceUrl/ko" -ForegroundColor Cyan
+    Write-Host "Agent Evolution API: $serviceUrl/api/v1/oracle/agent/feedback" -ForegroundColor Cyan
+    Write-Host "API Swagger Docs: $serviceUrl/docs" -ForegroundColor Cyan
 } else {
     Write-Host "`n[ERROR] Deployment failed. Check the logs above." -ForegroundColor Red
 }

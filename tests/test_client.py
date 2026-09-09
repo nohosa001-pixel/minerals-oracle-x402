@@ -41,7 +41,7 @@ def test_ap2_manifest_and_mcp_spec():
     assert len(mcp_data["tools"]) >= 3
     tool_names = [t["name"] for t in mcp_data["tools"]]
     assert "get_mineral_prices" in tool_names
-    assert "calculate_urban_mining_value" in tool_names
+    assert "verify_mineral_lot_compliance" in tool_names
 
 
 def test_402_challenge_flow():
@@ -97,20 +97,12 @@ def test_authenticated_prices_feed():
     assert feed_resp.status_code == 200
     data = feed_resp.json()
     assert data["oracle"] == "minerals-oracle-x402"
-    assert "Ag" in data["quotes"]
-    assert "Pt" in data["quotes"]
-    assert "Cu" in data["quotes"]
-    assert "Li" in data["quotes"]
-    assert "NdDy" in data["quotes"]
-
-    ag_quote = data["quotes"]["Ag"]
-    assert ag_quote["spot_price_usd"] > 0
-    assert ag_quote["unit"] == "USD/troy_oz"
-    assert len(ag_quote["attestation_hash"]) == 64
+    assert "monitored_minerals" in data
+    assert "NICKEL_MHP" in data["monitored_minerals"]
 
 
 def test_single_quote_and_spreads():
-    """Verify single commodity quote and cross-exchange arbitrage analytics."""
+    """Verify single mineral compliance and regulatory risk corridors."""
     agent_wallet = Account.create()
 
     # Get challenge for single quote
@@ -120,8 +112,8 @@ def test_single_quote_and_spreads():
     cu_resp = client.get("/api/v1/oracle/prices/Cu", headers={"Authorization": auth})
     assert cu_resp.status_code == 200
     cu_data = cu_resp.json()
-    assert cu_data["symbol"] == "Cu"
-    assert "USD/lb" in cu_data["secondary_prices"]
+    assert cu_data["symbol"] == "CU"
+    assert cu_data["compliance_ready"] is True
 
     # Get challenge for spreads
     chal_spreads = client.get("/api/v1/oracle/challenge").json()["payment_challenge"]
@@ -130,49 +122,17 @@ def test_single_quote_and_spreads():
     spreads_resp = client.get("/api/v1/oracle/spreads", headers={"Authorization": auth_spreads})
     assert spreads_resp.status_code == 200
     spreads_data = spreads_resp.json()
-    assert len(spreads_data["spreads"]) >= 4
+    assert len(spreads_data["regulatory_risk_spreads"]) >= 2
 
 
-def test_urban_mining_calculations():
-    """Verify scrap batch yields for EV Battery Black Mass, Auto Catalysts, E-waste, and Magnets."""
-    agent_wallet = Account.create()
-
-    # 1. Test EV Battery Black Mass (10 metric tons)
-    chal = client.get("/api/v1/oracle/challenge").json()["payment_challenge"]
-    auth = create_agent_x402_header(agent_wallet, chal["nonce"])
-
-    resp_bm = client.post(
-        "/api/v1/oracle/urban-mining/calculate",
-        json={
-            "scrap_category": "EV_BATTERY_BLACK_MASS",
-            "quantity_metric_tons": 10.0,
-            "custom_assay_overrides": {"Li": 4.0, "Ni": 20.0},
-        },
-        headers={"Authorization": auth},
-    )
-    assert resp_bm.status_code == 200
-    bm_data = resp_bm.json()
-    assert bm_data["scrap_category"] == "EV_BATTERY_BLACK_MASS"
-    assert bm_data["net_settlement_value_usd"] > 0
-    assert len(bm_data["mineral_breakdown"]) == 4
-
-    # 2. Test Auto Catalysts (2.5 metric tons)
-    chal2 = client.get("/api/v1/oracle/challenge").json()["payment_challenge"]
-    auth2 = create_agent_x402_header(agent_wallet, chal2["nonce"])
-
-    resp_cat = client.post(
-        "/api/v1/oracle/urban-mining/calculate",
-        json={
-            "scrap_category": "AUTO_CATALYST_CERAMIC",
-            "quantity_metric_tons": 2.5,
-        },
-        headers={"Authorization": auth2},
-    )
-    assert resp_cat.status_code == 200
-    cat_data = resp_cat.json()
-    assert cat_data["net_settlement_value_usd"] > 0
-    symbols = [item["mineral_symbol"] for item in cat_data["mineral_breakdown"]]
-    assert "Pt" in symbols and "Pd" in symbols and "Rh" in symbols
+def test_compliance_status_check():
+    """Verify compliance status endpoint returns active 7-pillars and 12-traps."""
+    resp = client.get("/api/v1/oracle/compliance/status")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "HEALTHY"
+    assert data["pillars_active"] == 7
+    assert data["traps_defended"] == 12
 
 
 def test_mcp_tool_invocation():
@@ -257,8 +217,9 @@ def test_free_alpha_signals_and_economics():
     assert resp_alpha.status_code == 200
     data_alpha = resp_alpha.json()
     assert data_alpha["status"] == "operational"
-    assert len(data_alpha["signals"]) >= 4
-    assert "unlock_instruction" in data_alpha
+    assert len(data_alpha["active_monitored_nations"]) >= 8
+    assert len(data_alpha["active_trade_precedents"]) >= 4
+    assert data_alpha["compliance_rules_loaded"] == 12
 
     # 2. Economics ROI Proof
     resp_roi = client.get("/api/v1/oracle/economics-roi")
@@ -270,7 +231,7 @@ def test_free_alpha_signals_and_economics():
     # 3. llms.txt Machine Discovery
     resp_llms = client.get("/llms.txt")
     assert resp_llms.status_code == 200
-    assert "# Critical Raw Minerals" in resp_llms.text or "# minerals-oracle-x402" in resp_llms.text
+    assert "# Critical Minerals" in resp_llms.text or "# minerals-oracle-x402" in resp_llms.text
 
     # 4. agent.json Manifest
     resp_agent = client.get("/.well-known/agent.json")
@@ -288,41 +249,44 @@ def test_mcp_stdio_jsonrpc_protocol():
     init_res = handle_initialize(1)
     assert init_res["id"] == 1
     assert init_res["result"]["serverInfo"]["name"] == "minerals-oracle-x402"
-    assert init_res["result"]["serverInfo"]["version"] == "1.1.0"
+    assert init_res["result"]["serverInfo"]["version"] == "2.0.0"
     assert init_res["result"]["protocolVersion"] == "2024-11-05"
 
     # 2. Test tools/list
     tools_res = handle_tools_list(2)
     assert tools_res["id"] == 2
     tools = tools_res["result"]["tools"]
-    assert len(tools) == 4
+    assert len(tools) >= 3
     tool_names = [t["name"] for t in tools]
-    assert "get_mineral_prices" in tool_names
-    assert "get_arbitrage_spreads" in tool_names
-    assert "calculate_urban_mining_value" in tool_names
-    assert "get_onchain_signed_feed" in tool_names
+    assert "verify_mineral_lot_compliance" in tool_names
+    assert "list_trade_precedents" in tool_names
+    assert "get_compliance_status" in tool_names
+    assert "minerals_submit_agent_feedback" in tool_names
 
-    # 3. Test tools/call (prices)
-    call_prices = handle_tool_call(3, "get_mineral_prices", {})
-    assert call_prices["id"] == 3
-    assert "Ag" in call_prices["result"]["content"][0]["text"]
+    # 3. Test tools/call (precedents)
+    call_prec = handle_tool_call(3, "list_trade_precedents", {})
+    assert call_prec["id"] == 3
+    assert "WTO_DS592" in call_prec["result"]["content"][0]["text"]
 
-    # 4. Test tools/call (arbitrage)
-    call_arb = handle_tool_call(4, "get_arbitrage_spreads", {})
-    assert call_arb["id"] == 4
-    assert "spreads" in call_arb["result"]["content"][0]["text"]
+    # 4. Test tools/call (compliance status)
+    call_status = handle_tool_call(4, "get_compliance_status", {})
+    assert call_status["id"] == 4
+    assert "ComplianceEngine" in call_status["result"]["content"][0]["text"]
 
-    # 5. Test tools/call (urban mining)
-    call_um = handle_tool_call(5, "calculate_urban_mining_value", {
-        "scrap_category": "EV_BATTERY_BLACK_MASS",
-        "quantity_metric_tons": 5.0
+    # 5. Test tools/call (verify lot compliance)
+    call_verify = handle_tool_call(5, "verify_mineral_lot_compliance", {
+        "lot_id": "LOT-MCP-001",
+        "mineral_type": "NICKEL_MHP",
+        "source_country": "IDN",
+        "net_weight_metric_tons": 100.0,
+        "declared_purity_pct": 99.5
     })
-    assert call_um["id"] == 5
-    assert "net_settlement_value_usd" in call_um["result"]["content"][0]["text"]
+    assert call_verify["id"] == 5
+    assert "COMPLIANT" in call_verify["result"]["content"][0]["text"]
 
 
 def test_sandbox_free_trial_and_preset_defaults():
-    """Verify Sandbox Free Trial grants first 2 queries without auth header and includes presets/tensors."""
+    """Verify Sandbox Free Trial grants first 2 queries without auth header and includes presets."""
     from app.x402_verifier import _FREE_TRIAL_USAGE
 
     # Reset IP usage for fresh test
@@ -335,29 +299,23 @@ def test_sandbox_free_trial_and_preset_defaults():
     assert resp1.headers.get("x-sandbox-trial") == "active"
     assert resp1.headers.get("x-free-tier-remaining") == "1"
 
-    # 2. Second Trial Query (Preset alias 'Neodymium' & Urban Mining default)
+    # 2. Second Trial Query (Preset alias 'Neodymium')
     resp2 = client.get("/api/v1/oracle/prices/Neodymium", headers={"X-Forwarded-For": test_ip})
     assert resp2.status_code == 200
     assert resp2.headers.get("x-free-tier-remaining") == "0"
     data2 = resp2.json()
-    assert data2["symbol"] == "NdDy"
+    assert data2["symbol"] == "NEODYMIUM"
 
     # 3. Third Query (Free Trial exhausted -> should return 402 Challenge)
     resp3 = client.get("/api/v1/oracle/prices", headers={"X-Forwarded-For": test_ip})
     assert resp3.status_code == 402
     assert "payment_challenge" in resp3.json()
 
-    # 4. Urban Mining Presets & Recovery Tensor Verification
-    resp_um = client.post(
-        "/api/v1/oracle/urban-mining/calculate",
-        json={"scrap_category": "E_WASTE_HIGH_GRADE_PCB", "quantity_metric_tons": 1.0},
-        headers={"X-Dev-Bypass": "true"}
-    )
-    assert resp_um.status_code == 200
-    um_data = resp_um.json()
-    assert "recovery_rates_tensor" in um_data
-    assert "refinery_compliance_flags" in um_data
-    assert um_data["target_yield_currency"] == "USDC"
+    # 4. Compliance Precedents Route Verification
+    resp_prec = client.get("/api/v1/oracle/compliance/precedents")
+    assert resp_prec.status_code == 200
+    prec_data = resp_prec.json()
+    assert prec_data["jurisprudence_count"] >= 4
 
 
 if __name__ == "__main__":

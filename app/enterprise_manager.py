@@ -14,7 +14,7 @@ class EnterpriseKeyRecord(BaseModel):
     api_key: str
     organization_name: str
     tier_plan: str = "Enterprise-Platinum-Dedicated"
-    contact_email: str
+    agent_identifier: str = Field("0x0000000000000000000000000000000000000000", description="Agent wallet or cryptographic identifier (Zero PII)")
     created_at_utc: str
     requests_served: int = 0
     is_active: bool = True
@@ -22,7 +22,7 @@ class EnterpriseKeyRecord(BaseModel):
 
 
 class EnterpriseManager:
-    """Thread-safe enterprise key registry and SLA tracking engine."""
+    """Thread-safe enterprise key registry and SLA tracking engine (Zero-PII Stateless)."""
 
     def __init__(self):
         self._lock = threading.Lock()
@@ -40,24 +40,31 @@ class EnterpriseManager:
             api_key=demo_ent_key,
             organization_name="Global Commodity Quant Hedge Fund",
             tier_plan="Institutional-Dedicated-10Gbps",
-            contact_email="quant-trading@institutional-capital.com",
+            agent_identifier="0x71C84107b3a42E2F2Ab4Ba770265EC0c4ce5Cea6",
             created_at_utc=now_iso,
             requests_served=0,
             is_active=True,
             rate_limit_per_minute=120_000,
         )
 
-    def provision_key(self, organization: str, email: str, plan: str = "Enterprise-Dedicated") -> EnterpriseKeyRecord:
-        """Issues a new institutional enterprise key with dedicated rate limits."""
+    def provision_key(
+        self,
+        organization: str,
+        agent_identifier: Optional[str] = None,
+        plan: str = "Enterprise-Dedicated",
+        **kwargs
+    ) -> EnterpriseKeyRecord:
+        """Issues a new institutional enterprise key without collecting any personal data or emails."""
         key = "ent_key_" + secrets.token_hex(16)
         now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        ident = agent_identifier or kwargs.get("email") or ("0x" + secrets.token_hex(20))
 
         with self._lock:
             record = EnterpriseKeyRecord(
                 api_key=key,
                 organization_name=organization,
                 tier_plan=plan,
-                contact_email=email,
+                agent_identifier=ident,
                 created_at_utc=now_iso,
                 requests_served=0,
                 is_active=True,

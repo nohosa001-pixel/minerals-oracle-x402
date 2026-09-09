@@ -140,6 +140,11 @@ class X402Verifier:
             status_code=status.HTTP_402_PAYMENT_REQUIRED,
             content={
                 "status": "error",
+                "meta": {
+                    "license": "AS-IS",
+                    "disclaimer": "This output is an automated algorithmic data reference and does not constitute legal, regulatory, or compliance certification. The user/calling agent assumes all risks regarding real-world application.",
+                    "service_nature": "Stateless Algorithmic Data Vending Machine (Peer-to-Peer M2M)",
+                },
                 "error": "Payment Required",
                 "code": 402,
                 "tier": tier.value,

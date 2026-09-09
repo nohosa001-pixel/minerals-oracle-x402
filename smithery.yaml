@@ -7,7 +7,7 @@ startCommand:
     args: ["-m", "app.mcp_stdio"]
 metadata:
   name: minerals-oracle
-  description: Real-time certified physical commodities spot benchmarks, cross-exchange basis spreads, and urban mining valuation oracle.
+  description: Raw algorithmic critical minerals provenance indices, trade jurisprudence mapping, and battery passport heuristic calculation oracle.
   version: 1.1.0
   tags:
     - commodities

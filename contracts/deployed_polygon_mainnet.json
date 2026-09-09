@@ -1,0 +1,19 @@
+{
+  "network": "Polygon Mainnet",
+  "chainId": 137,
+  "deployer": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
+  "treasury": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
+  "timestamp_utc": "2026-09-08T04:39:21Z",
+  "contracts": {
+    "AgentPaymentVault": {
+      "address": "0xb44Bc2Acdd156cE08b549A00a3102e4B01276654",
+      "usdcToken": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+      "operator": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf"
+    },
+    "MineralsOracleConsumer": {
+      "address": "0x835d01534a5D2e63D52636Fafb1019f889d1E66B",
+      "trustedSigner": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
+      "primarySymbol": "Cu"
+    }
+  }
+}

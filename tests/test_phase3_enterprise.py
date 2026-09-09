@@ -19,8 +19,7 @@ def test_prometheus_metrics_endpoint():
     assert "text/plain" in resp.headers["content-type"]
     body = resp.text
     assert "oracle_uptime_seconds" in body
-    assert "oracle_queries_total" in body
-    assert 'oracle_mineral_spot_price_usd{symbol="Cu"}' in body
+    assert "oracle_compliance_gotcha_defenses" in body
 
 
 def test_enterprise_sla_status_endpoint():

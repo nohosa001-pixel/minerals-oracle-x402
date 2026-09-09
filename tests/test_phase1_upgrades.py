@@ -74,16 +74,16 @@ def test_vault_fast_path_tiered_deduction_and_receipt():
     receipt_id = p_resp.headers.get("X-Receipt-ID")
     assert receipt_id is not None and receipt_id.startswith("rcpt_")
 
-    # 2. Query Urban Mining Calculator (Heavy Tier: $0.010)
-    um_payload = {
-        "scrap_category": "EV_BATTERY_BLACK_MASS",
-        "quantity_metric_tons": 1.0,
+    # 2. Query Heavy Tier Endpoint (Secure Settlement: $0.010)
+    secure_payload = {
+        "mineral_type": "NICKEL_MHP",
+        "net_weight_metric_tons": 500.0,
         "target_yield_currency": "USDC",
     }
-    um_resp = client.post("/api/v1/oracle/urban-mining/calculate", json=um_payload, headers=headers)
-    assert um_resp.status_code == 200
-    assert um_resp.headers["X-Pricing-Tier"] == "HEAVY"
-    assert "9.989" in um_resp.headers["X-Vault-Balance-Remaining"]
+    sec_resp = client.post("/api/v1/oracle/secure-settlement", json=secure_payload, headers=headers)
+    assert sec_resp.status_code == 200
+    assert sec_resp.headers["X-Pricing-Tier"] == "HEAVY"
+    assert "9.989" in sec_resp.headers["X-Vault-Balance-Remaining"]
 
     # 3. Verify Payment Receipt on-chain audit endpoint
     rcpt_resp = client.get(f"/api/v1/oracle/receipts/{receipt_id}")

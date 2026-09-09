@@ -10,5 +10,6 @@ logs/
 scratch/
 *.bak
 .env
+.env.yaml
 .kis_token_cache.json
 app/.kis_token_cache.json

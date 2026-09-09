@@ -159,33 +159,23 @@ def test_api_onchain_settlement_endpoint():
     """Tests POST /api/v1/oracle/onchain-settlement-payload endpoint."""
     headers = {"X-Dev-Bypass": "true"}
     payload = {
-        "scrap_category": "EV_BATTERY_BLACK_MASS",
-        "quantity_metric_tons": 2.5,
-        "target_yield_currency": "USDC",
+        "lot_id": "LOT-2026-NI-IDN-0412",
+        "mineral_type": "NICKEL_MHP",
     }
     resp = client.post("/api/v1/oracle/onchain-settlement-payload", json=payload, headers=headers)
     assert resp.status_code == 200
     data = resp.json()
 
-    assert "settlement" in data
     assert "signature" in data
-    assert "calldata" in data
-    assert data["settlement"]["quantityKg"] == 2500
-    assert data["settlement"]["netValueUsd8Dec"] > 0
+    assert data["status"] == "ONCHAIN_SIGNED"
+    assert data["signature"].startswith("0x")
 
 
 def test_mcp_stdio_onchain_tool():
-    """Tests MCP stdio get_onchain_signed_feed tool."""
+    """Tests MCP stdio compliance tool."""
     tools_resp = handle_tools_list(req_id="test-1")
     tool_names = [t["name"] for t in tools_resp["result"]["tools"]]
-    assert "get_onchain_signed_feed" in tool_names
+    assert "verify_mineral_lot_compliance" in tool_names
+    assert "list_trade_precedents" in tool_names
+    assert "get_compliance_status" in tool_names
 
-    call_resp = handle_tool_call(
-        req_id="test-2",
-        name="get_onchain_signed_feed",
-        args={"symbol": "Li"},
-    )
-    assert "result" in call_resp
-    text_content = call_resp["result"]["content"][0]["text"]
-    assert "spotPriceUsd8Dec" in text_content
-    assert "calldata" in text_content

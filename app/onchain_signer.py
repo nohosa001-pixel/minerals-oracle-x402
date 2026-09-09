@@ -19,7 +19,7 @@ load_dotenv()
 POLYGON_CHAIN_ID = int(os.getenv("POLYGON_CHAIN_ID", os.getenv("CHAIN_ID", "137")))
 CONTRACT_ADDRESS = os.getenv(
     "MINERALS_ORACLE_CONTRACT_ADDRESS",
-    "0x71C836642F4F97E09635b7194685387b9b183652"
+    "0x835d01534a5D2e63D52636Fafb1019f889d1E66B"
 )
 ORACLE_SIGNER_PRIVATE_KEY = os.getenv(
     "ORACLE_SIGNER_PRIVATE_KEY",
@@ -82,7 +82,7 @@ class OnChainOracleSigner:
             round_id = _ROUND_TRACKER[symbol]
 
         # Convert price to 8 decimals standard (Chainlink standard, e.g. $9,650.00 -> 965000000000)
-        spot_price_8dec = int(round(price_usd * 10**8))
+        spot_price_8dec = round(price_usd * 10**8)
 
         types = {
             "EIP712Domain": [
@@ -178,8 +178,8 @@ class OnChainOracleSigner:
         elif not batch_id.startswith("0x"):
             batch_id = "0x" + batch_id
 
-        net_value_8dec = int(round(net_value_usd * 10**8))
-        quantity_kg_int = int(round(quantity_kg))
+        net_value_8dec = round(net_value_usd * 10**8)
+        quantity_kg_int = round(quantity_kg)
 
         types = {
             "EIP712Domain": [
@@ -251,6 +251,78 @@ class OnChainOracleSigner:
             "calldata": calldata,
         }
 
+    def sign_compliance_verdict(
+        self,
+        lot_id: str,
+        mineral_type: str,
+        source_country: str,
+        score: int,
+        is_compliant: bool,
+        digest_hash: str,
+        disclaimer_hash: Optional[str] = None,
+        timestamp: Optional[int] = None,
+    ) -> str:
+        """
+        Signs a 7-pillar battery mineral lot compliance verdict for Polygon on-chain verification.
+        Cryptographically binds the legal disclaimer & liability waiver hash into the EIP-712 signature.
+        """
+        import hashlib
+
+        if timestamp is None:
+            timestamp = int(time.time())
+
+        clean_digest = digest_hash if digest_hash.startswith("0x") else "0x" + digest_hash
+        if len(clean_digest) != 66:
+            clean_digest = "0x" + hashlib.sha256(digest_hash.encode("utf-8")).hexdigest()
+
+        if disclaimer_hash is None:
+            disclaimer_hash = "0x" + hashlib.sha256(b"MINERALS_ORACLE_LEGAL_DISCLAIMER_FEE_CAPPED_2026").hexdigest()
+        clean_disclaimer = disclaimer_hash if disclaimer_hash.startswith("0x") else "0x" + disclaimer_hash
+        if len(clean_disclaimer) != 66:
+            clean_disclaimer = "0x" + hashlib.sha256(disclaimer_hash.encode("utf-8")).hexdigest()
+
+        types = {
+            "EIP712Domain": [
+                {"name": "name", "type": "string"},
+                {"name": "version", "type": "string"},
+                {"name": "chainId", "type": "uint256"},
+                {"name": "verifyingContract", "type": "address"},
+            ],
+            "CompliancePassport": [
+                {"name": "lotId", "type": "string"},
+                {"name": "mineralType", "type": "string"},
+                {"name": "sourceCountry", "type": "string"},
+                {"name": "score", "type": "uint256"},
+                {"name": "isCompliant", "type": "bool"},
+                {"name": "digestHash", "type": "bytes32"},
+                {"name": "disclaimerHash", "type": "bytes32"},
+                {"name": "timestamp", "type": "uint256"},
+            ],
+        }
+
+        message = {
+            "lotId": lot_id,
+            "mineralType": mineral_type,
+            "sourceCountry": source_country,
+            "score": score,
+            "isCompliant": is_compliant,
+            "digestHash": bytes.fromhex(clean_digest[2:]),
+            "disclaimerHash": bytes.fromhex(clean_disclaimer[2:]),
+            "timestamp": timestamp,
+        }
+
+        typed_data = {
+            "types": types,
+            "primaryType": "CompliancePassport",
+            "domain": self.get_domain_data(),
+            "message": message,
+        }
+
+        signable_message = encode_typed_data(full_message=typed_data)
+        signed = self.account.sign_message(signable_message)
+        return signed.signature.hex()
+
 
 # Singleton oracle signer instance
 onchain_signer = OnChainOracleSigner()
+

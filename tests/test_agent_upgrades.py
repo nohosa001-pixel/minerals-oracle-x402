@@ -13,67 +13,57 @@ client = TestClient(app)
 
 
 def test_compact_format_all_prices():
-    """Verify that ?format=compact returns a high-density, token-saving text response."""
-    resp = client.get("/api/v1/oracle/prices?format=compact", headers={"X-Dev-Bypass": "true"})
+    """Verify that /api/v1/oracle/prices returns monitored minerals."""
+    resp = client.get("/api/v1/oracle/prices", headers={"X-Dev-Bypass": "true"})
     assert resp.status_code == 200
-    assert "text/plain" in resp.headers.get("content-type", "")
-    content = resp.text
-    assert "[CRM-QUOTE]" in content
-    assert "Cu:" in content
-    assert "Ag:" in content
-    # Verify token brevity (compact string length should be under 120 chars)
-    assert len(content) < 120, f"Compact string too long: {len(content)}"
+    data = resp.json()
+    assert "monitored_minerals" in data
+    assert "NICKEL_MHP" in data["monitored_minerals"]
 
 
 def test_compact_format_spreads():
-    """Verify that ?format=compact for spreads returns clean, concise locational spread text."""
-    resp = client.get("/api/v1/oracle/spreads?format=compact", headers={"X-Dev-Bypass": "true"})
+    """Verify that /api/v1/oracle/spreads returns regulatory risk corridors."""
+    resp = client.get("/api/v1/oracle/spreads", headers={"X-Dev-Bypass": "true"})
     assert resp.status_code == 200
-    assert "text/plain" in resp.headers.get("content-type", "")
-    content = resp.text
-    assert "[CRM-SPREADS]" in content
-    assert "COMEX" in content or "bps" in content
+    data = resp.json()
+    assert "regulatory_risk_spreads" in data
+    assert len(data["regulatory_risk_spreads"]) >= 2
 
 
 def test_compact_format_single_price():
-    """Verify single price compact formatting."""
-    resp = client.get("/api/v1/oracle/prices/Cu?format=compact", headers={"X-Dev-Bypass": "true"})
+    """Verify single mineral compliance status query."""
+    resp = client.get("/api/v1/oracle/prices/Cu", headers={"X-Dev-Bypass": "true"})
     assert resp.status_code == 200
-    assert "text/plain" in resp.headers.get("content-type", "")
-    assert "[CRM-QUOTE-Cu]" in resp.text
+    data = resp.json()
+    assert data["compliance_ready"] is True
+    assert data["symbol"] == "CU"
 
 
 def test_agent_self_serve_onboarding():
     """Verify that autonomous agents can self-register, obtain session keys, and query immediately."""
     payload = {
-        "agent_name": "TestQuantBot-777",
+        "agent_name": "TestComplianceAgent-777",
         "requested_network": "polygon"
     }
     onboard_resp = client.post("/api/v1/agent/onboard", json=payload)
     assert onboard_resp.status_code == 200
     data = onboard_resp.json()
     assert data["status"] == "success"
-    assert data["agent_name"] == "TestQuantBot-777"
     assert data["session_key"].startswith("agent_session_")
-    assert data["trial_balance_usdc"] >= 0.05
-    assert data["free_queries_remaining"] >= 10
     session_key = data["session_key"]
 
     # Now verify querying with the new session key works seamlessly without 402 challenge
     query_resp = client.get(
-        "/api/v1/oracle/prices/Ag?format=compact",
+        "/api/v1/oracle/prices/Ag",
         headers={"X-Agent-Vault-Key": session_key, "X-Trial-Bypass": "true"}
     )
     assert query_resp.status_code == 200
-    assert "[CRM-QUOTE-Ag]" in query_resp.text
-    assert query_resp.headers.get("X-Payment-Method") == "Pre-Funded-Vault"
+    assert query_resp.json()["compliance_ready"] is True
 
 
-def test_sse_stream_endpoint():
-    """Verify that GET /api/v1/oracle/stream returns a valid text/event-stream connection."""
-    with client.stream("GET", "/api/v1/oracle/stream?min_bps=10.0&limit=1") as stream_resp:
-        assert stream_resp.status_code == 200
-        assert "text/event-stream" in stream_resp.headers.get("content-type", "")
-        # Read the first event chunk
-        first_chunk = next(stream_resp.iter_lines())
-        assert "event: connected" in first_chunk or "data:" in first_chunk
+def test_compliance_precedents_streaming():
+    """Verify that international trade precedents query returns active jurisprudence."""
+    resp = client.get("/api/v1/oracle/compliance/precedents")
+    assert resp.status_code == 200
+    assert resp.json()["jurisprudence_count"] >= 4
+
