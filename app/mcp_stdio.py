@@ -342,6 +342,12 @@ def run_stdio_server():
 
             if method == "initialize":
                 resp = handle_initialize(req_id)
+            elif method == "ping":
+                resp = {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "result": {}
+                }
             elif method == "tools/list":
                 resp = handle_tools_list(req_id)
             elif method == "tools/call":
@@ -375,5 +381,9 @@ def run_stdio_server():
             sys.stdout.flush()
 
 
-if __name__ == "__main__":
+def main():
     run_stdio_server()
+
+
+if __name__ == "__main__":
+    main()
