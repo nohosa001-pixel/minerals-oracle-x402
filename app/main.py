@@ -96,27 +96,24 @@ async def require_x402_payment(request: Request, tier: PricingTier = PricingTier
 
 @app.get("/", tags=["System"])
 async def root(request: Request):
-    """Serves Interactive Web UI Dashboard to browsers or JSON metadata to API clients."""
+    """Serves Interactive Web UI Dashboard (English by default, /ko for Korean) or JSON metadata."""
     accept_header = request.headers.get("accept", "")
     no_cache_headers = {
         "Cache-Control": "no-cache, no-store, must-revalidate",
         "Pragma": "no-cache",
         "Expires": "0",
     }
-    if "text/html" in accept_header:
+    # If a browser requests text/html, serve the HTML dashboard
+    if "text/html" in accept_header or request.query_params.get("ui") == "true":
         query_lang = request.query_params.get("lang", "").lower()
-        accept_lang = request.headers.get("accept-language", "").lower()
-        # Prefer Korean if explicitly requested or if browser prefers Korean over English
-        wants_ko = query_lang == "ko" or (not query_lang and "ko" in accept_lang.split(",")[0])
-        wants_en = query_lang == "en"
-
-        if wants_ko and KO_HTML_PATH.exists():
-            return FileResponse(KO_HTML_PATH, media_type="text/html", headers=no_cache_headers)
+        if query_lang == "ko" and KO_HTML_PATH.exists():
+            return FileResponse(KO_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
         if INDEX_HTML_PATH.exists():
-            return FileResponse(INDEX_HTML_PATH, media_type="text/html", headers=no_cache_headers)
+            return FileResponse(INDEX_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
         if KO_HTML_PATH.exists():
-            return FileResponse(KO_HTML_PATH, media_type="text/html", headers=no_cache_headers)
+            return FileResponse(KO_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
 
+    # API clients, test clients, and curl get JSON service metadata
     return {
         "service": "minerals-oracle-x402",
         "description": "Global Critical Minerals & Battery Supply-Chain Compliance Oracle",
@@ -146,6 +143,7 @@ async def root(request: Request):
 
 @app.get("/dashboard", tags=["System"])
 @app.get("/playground", tags=["System"])
+@app.get("/en", tags=["System"])
 async def web_dashboard(request: Request):
     """Interactive Web UI Dashboard (Global English by default, /ko for Korean)."""
     no_cache_headers = {
@@ -154,9 +152,9 @@ async def web_dashboard(request: Request):
         "Expires": "0",
     }
     if request.query_params.get("lang") == "ko" and KO_HTML_PATH.exists():
-        return FileResponse(KO_HTML_PATH, media_type="text/html", headers=no_cache_headers)
+        return FileResponse(KO_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
     if INDEX_HTML_PATH.exists():
-        return FileResponse(INDEX_HTML_PATH, media_type="text/html", headers=no_cache_headers)
+        return FileResponse(INDEX_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
     return HTMLResponse("<h1>Minerals Oracle Dashboard</h1><p>Static index.html not found.</p>")
 
 
@@ -170,11 +168,11 @@ async def web_dashboard_ko(request: Request):
         "Expires": "0",
     }
     if request.query_params.get("lang") == "en" and INDEX_HTML_PATH.exists():
-        return FileResponse(INDEX_HTML_PATH, media_type="text/html", headers=no_cache_headers)
+        return FileResponse(INDEX_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
     if KO_HTML_PATH.exists():
-        return FileResponse(KO_HTML_PATH, media_type="text/html", headers=no_cache_headers)
+        return FileResponse(KO_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
     if INDEX_HTML_PATH.exists():
-        return FileResponse(INDEX_HTML_PATH, media_type="text/html", headers=no_cache_headers)
+        return FileResponse(INDEX_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
     return HTMLResponse("<h1>Minerals Oracle (한국어)</h1><p>Static ko.html not found.</p>")
 
 
