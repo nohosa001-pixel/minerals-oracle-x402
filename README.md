@@ -1,161 +1,187 @@
-# Critical Raw Minerals & Urban Mining Oracle (`minerals-oracle-x402`)
+# EV Battery Critical Minerals & Provenance Oracle (`minerals-oracle-x402`)
 
 [![PyPI Version](https://img.shields.io/pypi/v/minerals-oracle-x402.svg?color=blue&style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/minerals-oracle-x402/)
-[![PyPI Downloads](https://img.shields.io/pypi/dm/minerals-oracle-x402.svg?style=for-the-badge&color=orange)](https://pypi.org/project/minerals-oracle-x402/)
-[![Glama.ai](https://img.shields.io/badge/Glama.ai-Approved-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](https://glama.ai/mcp/servers/nohosa001-pixel/minerals-oracle-x402)
-[![Cloud Run](https://img.shields.io/badge/Google_Cloud_Run-Live_24%2F7-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/)
+[![Tests](https://img.shields.io/badge/Tests-102%2F102_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
+[![Spec Version](https://img.shields.io/badge/Compliance_Spec-v2.4.0-purple?style=for-the-badge)](GLOBAL_BATTERY_MINERALS_COMPLIANCE_SPEC.md)
+[![FastMCP](https://img.shields.io/badge/FastMCP-Model_Context_Protocol-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](mcp_tool_spec.json)
 [![Polygon Network](https://img.shields.io/badge/Polygon_USDC-x402_Settlement-8247E5?style=for-the-badge&logo=polygon&logoColor=white)](https://polygon.technology)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-green.svg)](https://fastapi.tiangolo.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-Real-time physical spot market pricing, cross-exchange arbitrage spreads, and metallurgical urban mining scrap recovery yield valuations on Polygon, Base, and Arbitrum.
-
----
-
-## 🖥️ Interactive Web Dashboard & Simulator (Live)
-
-👉 **[https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/)**
-
-Explore the full consumer and enterprise visual interface directly in your browser:
-- 📈 **Real-Time Live Commodity Ticker**: 1.5-second live streaming of COMEX, NYMEX, LME, and SMM market quotes.
-- ♻️ **Urban Mining Yield Calculator**: Interactive batch tonnage sliders for EV Battery Black Mass, Auto Catalysts, E-Waste PCBs, and Permanent Magnets.
-- 📊 **Dynamic Metallurgical Breakdown**: Instant visual Doughnut chart and element-by-element recovery payouts ($\text{Li}, \text{Ni}, \text{Co}, \text{Cu}, \text{Au}, \text{Ag}, \text{Pt}, \text{Pd}, \text{Rh}, \text{Nd}, \text{Pr}, \text{Dy}$).
-- 📡 **Cross-Exchange Arbitrage Radar**: Real-time monitoring of profitable basis spreads between New York, London, and Asian venues.
-- 🧪 **Interactive API Playground**: Test all oracle endpoints directly with zero setup.
+> **Autonomous Machine-to-Machine (M2M) Compliance & On-Chain Battery Passport Oracle for Critical Minerals (Lithium, Nickel, Cobalt).**  
+> Verifies real-world mining extraction, stoichiometric mass balances, US IRA Section 30D 50% FTA value thresholds, strict Foreign Entity of Concern (FEOC) taint propagation, EU Battery Regulation (2023/1542) carbon footprint, and issues cryptographic Merkle Root EIP-712 master attestations on Polygon.
 
 ---
 
-## 🌐 Live Service Links & Resources
+## 🖥️ Live Web Observatories & Dashboards
 
-| Service / Endpoint | Description | URL Link |
-|---|---|---|
-| 🖥️ **Web Dashboard** | Interactive visual UI, scrap yield calculator & charts | [Launch Dashboard](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/dashboard) |
-| 🧪 **API Playground** | Browser-based interactive query sandbox | [Open Playground](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/playground) |
-| 🪝 **Live Market Signals** | Free public cross-exchange arbitrage feed | [`/api/v1/oracle/alpha-signals`](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/api/v1/oracle/alpha-signals) |
-| 📚 **Swagger API Docs** | Full interactive OpenAPI documentation | [View Swagger Docs](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/docs) |
-| 📑 **LLM Agent Manifest** | Machine-readable tool specifications | [`/llms.txt`](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/llms.txt) |
+* 🇰🇷 **한국어 전용 노드 & 컴플라이언스 관측기**: [http://localhost:8000/ko](http://localhost:8000/ko) (또는 [Cloud Run Live](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/ko))
+* 🌐 **Global English Dashboard & Simulator**: [http://localhost:8000/](http://localhost:8000/) (또는 [Cloud Run Live](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/))
+* 📚 **Interactive Swagger OpenAPI Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+* 📑 **LLM Agent Manifest**: [`/llms.txt`](llms.txt)
 
 ---
 
-## ⚡ 1-Click MCP Integration (Claude Desktop & Cursor)
+## ⚡ Key Architectural Capabilities (v2.4.0)
 
-Connect to Claude Desktop, Cursor, Gemini, or any Model Context Protocol client instantly:
+### 1. Composite EV Battery Master Passport Orchestrator (`app/composite_battery_pipeline.py`)
+Synthesizes the 3 primary battery critical minerals into a unified cell/pack compliance attestation:
+* **Cathode Chemistries**: **NCM 811** (80% Ni, 10% Co, 10% Mn), **NCM 622**, **NCM 523**.
+* **US IRA 30D Critical Minerals $3,750 Tax Credit Formula**:
+  $$\text{Procurement Value} = (\text{Li Tons} \times \$18,500) + (\text{Ni Tons} \times \$17,000) + (\text{Co Tons} \times \$32,000)$$
+  $$\text{FTA Qualifying Ratio} = \frac{\text{Value}_{\text{AUS (FTA)}}}{\text{Value}_{\text{Total}}} \times 100\% \ge 50.0\%$$
+* **Strict Zero-Tolerance FEOC Taint Propagation**: If **any** mineral component carries $\ge 25\%$ covered nation (China/Russia/Iran/North Korea) equity or operational control, the entire battery pack is disqualified (`FLAG_COMPOSITE_FEOC_TAINT`).
+* **EU Battery Regulation (2023/1542) & CBAM Scope 1-3 Carbon Footprint**:
+  * Captive coal power smelting in Indonesian HPAL triggers `FLAG_EU_BATTERY_CBAM_SURCHARGE` (+26.5 kg CO₂e/kWh penalty).
+* **Cryptographic Merkle Tree & Polygon EIP-712 Master Signature**:
+  $$\text{Merkle Root} = \text{0x} + \text{SHA256}(\text{Leaf}_{\text{Li}} + \text{Leaf}_{\text{Ni}} + \text{Leaf}_{\text{Co}})$$
+  Signs typed structured data binding `battery_pack_id`, `chemistry`, `merkle_root`, composite score, and legal disclaimer terms.
+
+---
+
+### 2. Dedicated Provenance Pipelines for Core Minerals
+
+```mermaid
+flowchart TD
+    subgraph Mining["1. Global Extraction & Geofencing"]
+        Li["🇦🇺 Australia (Greenbushes / Pilgangoora)<br/>WA MINEDEX GIS Geofencing"]
+        Ni["🇮🇩 Indonesia (IMIP Morowali / IWIP)<br/>Sulawesi/Halmahera Geofencing"]
+        Co["🇨🇩 DRC (Kamoto KCC / Tenke / Mutanda)<br/>Katanga Copperbelt Geofencing"]
+    end
+
+    subgraph Processing["2. Stoichiometric Mass Balance & Traps"]
+        LiProc["Spodumene to LiOH (7.5:1 Yield)<br/>Anti-Transshipment Geofencing"]
+        NiProc["Limonite to MHP (31.34:1 Yield)<br/>ESDM SIMBARA NTPN Tax Clear<br/>EU CBAM Coal Smelting Audit"]
+        CoProc["Heterogenite to Hydroxide (23.53:1 Yield)<br/>CEEC Barcode Seal Verification<br/>ILO 138/182 Zero Child Labor Audit"]
+    end
+
+    subgraph Composite["3. Composite Battery Orchestrator"]
+        Master["NCM 811 Pack Synthesis<br/>IRA FTA Value Ratio (>= 50%)<br/>FEOC Taint Propagation (< 25%)<br/>EU Cradle-to-Gate Carbon Footprint"]
+    end
+
+    subgraph Attestation["4. Cryptographic Proof & Settlement"]
+        Merkle["Merkle Tree Synthesis<br/>sha256(Leaf_Li + Leaf_Ni + Leaf_Co)"]
+        Onchain["Polygon EIP-712 Master Signature<br/>x402 0.10 USDC Gasless Settlement"]
+    end
+
+    Li --> LiProc --> Master
+    Ni --> NiProc --> Master
+    Co --> CoProc --> Master
+    Master --> Merkle --> Onchain
+```
+
+#### 🇦🇺 Australian Spodumene Lithium Pipeline (`app/lithium_pipeline.py`)
+* **GIS Geofencing**: Validates WA DMIRS MINEDEX tenement boundaries (e.g. Greenbushes `M01/03`, Pilgangoora `M45/1256`).
+* **Stoichiometric Mass Balance**: Enforces strict theoretical yield ratio ($7.5 \pm 0.8\text{t}$ Spodumene concentrate $\rightarrow$ $1.0\text{t}$ Battery-Grade LiOH·H₂O).
+* **Defenses**: Defends against Trap 13 (Chinese transshipment relabeling) and Trap 14 (non-linear recovery exaggeration).
+
+#### 🇮🇩 Indonesian Nickel MHP Pipeline (`app/nickel_pipeline.py`)
+* **Concession Geofencing**: Monitors Central Sulawesi (IMIP Morowali) and North Maluku (IWIP Weda Bay) mining polygons.
+* **Fiscal Verification**: Validates Ministry of Energy (ESDM) SIMBARA NTPN tax receipt codes and Bank Indonesia 30% forex export deposits (DHE BI).
+* **EU CBAM & Carbon Duty**: Detects captive coal power plant usage and flags European Carbon Border Adjustment liabilities.
+
+#### 🇨🇩 DRC Cobalt Hydroxide Pipeline (`app/cobalt_pipeline.py`)
+* **Artisanal Segregation (Trap 1)**: Blocks uncertified artisanal mining (ASM) co-mingling via Entreprise Générale du Cobalt (EGC) custody validation.
+* **CEEC Security Seals**: Cryptographically authenticates Centre d'Expertise (CEEC) tamper-proof barcode export seals.
+* **ILO Human Rights Diligence**: Enforces mandatory independent audits for ILO Convention 138 (Minimum Age) and 182 (Worst Forms of Child Labor).
+
+---
+
+### 3. Interactive Web Observatory & Verification Simulator
+
+The built-in browser UI ([`app/static/ko.html`](app/static/ko.html) and [`app/static/index.html`](app/static/index.html)) provides a live 4-tab compliance cockpit:
+
+| Tab | Key Features |
+| :--- | :--- |
+| 🔋 **NCM 811 Composite Master Passport** | Real-time IRA 30D eligibility, FTA value progress bar, EU Battery Passport approval status, Carbon Footprint gauge, on-chain Merkle Root & EIP-712 JSON terminal |
+| 🇦🇺 **Australian Lithium Observatory** | Hard-rock mine selection (Greenbushes, Pilgangoora, Mt Marion), ore feed vs LiOH yield calculation |
+| 🇮🇩 **Indonesian Nickel MHP Observatory** | IMIP/IWIP concession verification, ESDM SIMBARA tax receipt verification, captive coal power toggle |
+| 🇨🇩 **DRC Cobalt Hydroxide Observatory** | Kamoto KCC/Tenke concession check, CEEC barcode verification, ILO 138/182 child labor audit toggle |
+
+#### One-Click Real-World Scenario Presets
+* **✅ Clean Baseline (`clean`)**: Australia Greenbushes + Indonesia Clean IMIP + DRC Kamoto KCC $\rightarrow$ IRA Eligible ($3,750), EU Passport Approved, Low Carbon (51.5 kg CO₂e/kWh).
+* **⚠️ FEOC Taint Trap (`feoc`)**: Injects 80% Chinese state ownership into DRC Cobalt $\rightarrow$ Entire battery pack disqualified under FEOC 25% threshold.
+* **⚠️ Captive Coal CBAM Trap (`cbam`)**: Injects captive coal power smelting in Indonesia $\rightarrow$ EU CBAM carbon tariff liabilities triggered.
+* **❌ Child Labor Trap (`child`)**: Injects uncertified artisanal pit ore in DRC $\rightarrow$ EU Battery Passport immediate rejection.
+
+---
+
+## 🤖 Model Context Protocol (FastMCP) Tools
+
+Integrates natively with Claude Desktop, Cursor, Gemini, and autonomous AI agents:
 
 ```json
 {
   "mcpServers": {
     "minerals-oracle-x402": {
-      "command": "uvx",
-      "args": ["minerals-oracle-x402"]
+      "command": "python",
+      "args": ["-m", "app.mcp_stdio"],
+      "env": {
+        "ORACLE_API_KEY": "YOUR_AGENT_KEY"
+      }
     }
   }
 }
 ```
 
----
-
-## 📦 Core Services & Capabilities
-
-### 1. Real-Time Critical Commodities Price Feeds
-Direct live market quotes and normalized multi-unit conversions:
-- **Silver (`Ag`)**: COMEX & LBMA spot in `USD/troy_oz`, `USD/g`, `USD/kg`.
-- **Platinum (`Pt`)**: NYMEX & LPPM spot in `USD/troy_oz`, `USD/g`.
-- **Copper (`Cu`)**: COMEX High Grade & LME Grade A Cathode in `USD/mt`, `USD/lb`, `USD/kg`.
-- **Lithium Carbonate (`Li`)**: SMM & Fastmarkets 99.5% Battery Grade in `USD/mt`, `USD/kg`.
-- **Rare Earth Magnets (`NdDy`)**: Asian Metal PrNd/DyFe composite in `USD/kg`, `USD/mt`.
-
-### 2. Urban Mining & Circular Economy Valuation Engine
-Industrial metallurgy assay benchmarks and commercial smelter treatment/refining charges (TC/RC):
-- **`EV_BATTERY_BLACK_MASS`**: Hydrometallurgical extraction of $\text{Li}$, $\text{Ni}$, $\text{Co}$, and $\text{Cu}$ with recovery rates (88.5% ~ 98.0%) and $1,850/MT TC/RC.
-- **`AUTO_CATALYST_CERAMIC`**: Spent catalytic converter PGM recovery ($\text{Pt}$, $\text{Pd}$, $\text{Rh}$) with plasma smelting charges ($3,200/MT).
-- **`E_WASTE_HIGH_GRADE_PCB`**: Precious and base metal recovery ($\text{Au}$, $\text{Ag}$, $\text{Cu}$, $\text{Pd}$) from high-grade circuit boards with $1,250/MT refining fees.
-- **`WIND_EV_PERMANENT_MAGNETS`**: NdFeB permanent magnet scrap recycling for separated oxides ($\text{Nd}$, $\text{Pr}$, $\text{Dy}$) with $2,400/MT separation fees.
-
-### 3. Cross-Exchange Locational Arbitrage Radar
-Live spread tracking across major trading hubs:
-- **Copper**: COMEX (New York) vs. LME (London Warehouse) with freight and import tariffs.
-- **Silver**: COMEX Spot (NY Vault) vs. LBMA (Loco London).
-- **Lithium**: SMM (China Domestic) vs. Fastmarkets (CIF Rotterdam).
-- **Platinum**: NYMEX Spot (NY) vs. LPPM (London).
+### Supported MCP Tools:
+1. `verify_composite_battery_passport`: Evaluates end-to-end NCM EV battery packs and generates Master Merkle EIP-712 attestations.
+2. `verify_lithium_origin`: Verifies Australian hard-rock spodumene extraction and conversion.
+3. `verify_nickel_origin`: Verifies Indonesian laterite limonite HPAL MHP provenance and SIMBARA tax clearance.
+4. `verify_cobalt_origin`: Verifies DRC Katanga heterogenite cobalt hydroxide provenance, CEEC seals, and child labor audits.
+5. `verify_mineral_compliance`: Legacy 7-pillar compliance audit engine for individual mineral lots.
+6. `minerals_submit_agent_feedback`: Zero-fee protocol feedback submission for autonomous agent evolution.
 
 ---
 
-## 🚀 Quick Start & Installation
+## 💳 Autonomous x402 Web3 Settlement on Polygon
 
-### Option 1. Run Instantly with `uvx` (No Installation Required)
+All M2M API invocations support micro-payments in USDC on Polygon (Chain ID `137`):
 
+* **Composite Battery Master Verification**: 0.10 USDC (`PricingTier.STANDARD`)
+* **Dedicated Mineral Lot Verification**: 0.05 USDC (`PricingTier.LIGHT`)
+* **Polygon USDC Address**: `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`
+* **Treasury Recipient**: `0x255F9991233f86B29dB847c8d5b8CB9915e80dCf`
+* **Agent Vault Fast-Path**: Zero-latency verification via pre-funded `X-Agent-Vault-Key` headers.
+
+---
+
+## 🚀 Quick Start & Local Execution
+
+### 1. Clone & Install Dependencies
 ```bash
-# Run stdio MCP server directly for LLM clients
-uvx minerals-oracle-x402
-```
-
-### Option 2. Install from PyPI
-
-```bash
-pip install minerals-oracle-x402
-
-# Run MCP server (stdio mode)
-minerals-mcp
-
-# Or run FastAPI HTTP Server (Cloud / Web mode)
-minerals-oracle-x402 --http
-```
-
-### Option 3. Local Development Setup
-
-```bash
-# Clone repository
 git clone https://github.com/nohosa001-pixel/minerals-oracle-x402.git
 cd minerals-oracle-x402
 
-# Create virtual environment
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+# Windows:
+.venv\Scripts\activate
+# Linux/macOS:
+source .venv/bin/activate
 
-# Install dependencies
 pip install -e .
-
-# Run development server
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-Open [http://localhost:8000/dashboard](http://localhost:8000/dashboard) to view the live dashboard locally.
-
----
-
-## 💳 x402 Web3 Settlement on Polygon Network
-
-The oracle supports automated on-chain micro-settlements (0.005 USDC per query) via HTTP 402 challenge-response on Polygon (Chain ID `137`):
-- **Polygon USDC Token**: `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`
-- **Treasury Recipient**: `0x255F9991233f86B29dB847c8d5b8CB9915e80dCf`
-- **Authentication**: Supports EIP-712/EIP-191 signatures and standard `Authorization: x402 <payload>` headers.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Client as Agent / Client Application
-    participant Oracle as Minerals Oracle (x402)
-    participant Polygon as Polygon Network (USDC)
-
-    Client->>Oracle: GET /api/v1/oracle/prices
-    Oracle-->>Client: HTTP 402 Payment Required<br/>(Nonce, Price: 0.005 USDC, Polygon Chain ID: 137)
-    Note over Client: Client signs payment challenge<br/>using private key (EIP-712/EIP-191)
-    Client->>Oracle: GET /api/v1/oracle/prices<br/>Header: Authorization: x402 <base64_payload>
-    Oracle->>Oracle: Verify signature / Facilitator settle
-    Oracle-->>Client: HTTP 200 OK<br/>Certified Oracle Feeds & Attestation Hashes
-```
-
----
-
-## 🧪 Running Automated Tests
-
-Run the full test suite verifying price feeds, urban mining calculations, 402 challenge flows, and web dashboard endpoints:
-
+### 2. Run Tests (102 Automated Tests)
 ```bash
-pytest -v
+# Run with -s flag on Windows
+pytest -s tests/
 ```
+
+### 3. Launch Local Server & Web Observatory
+```bash
+uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+Navigate to:
+* **Korean Core Node**: [http://localhost:8000/ko](http://localhost:8000/ko)
+* **Global English Node**: [http://localhost:8000/](http://localhost:8000/)
+* **API Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
-## 📜 License
-MIT License. Built for Transparent Commodity Pricing, Circular Economy Recycling, and Web3 Infrastructure.
+## 📜 Full Technical Specifications
+For full mathematical formulations, threshold constants, legal citations, and EIP-712 type declarations, consult the [Global Battery Minerals Compliance Specification v2.4.0](GLOBAL_BATTERY_MINERALS_COMPLIANCE_SPEC.md).
+
+---
+
+## 📄 License
+MIT License. Copyright (c) 2026 Minerals Oracle x402 Project Contributors.
