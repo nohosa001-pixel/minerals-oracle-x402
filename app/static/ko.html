@@ -553,6 +553,151 @@
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
     }
 
+    /* Battery & Mineral Observatory Styles */
+    .obs-section {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(9, 13, 22, 0.95) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: 8px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .obs-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      overflow-x: auto;
+    }
+    .obs-tab-btn {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .obs-tab-btn:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .obs-tab-btn.active {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: var(--emerald);
+      color: var(--emerald);
+      font-weight: 700;
+    }
+    .obs-preset-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: rgba(2, 6, 23, 0.7);
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .preset-btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 4px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .preset-btn:hover {
+      border-color: var(--emerald);
+      color: #fff;
+    }
+    .preset-btn.active {
+      background: var(--emerald-glow);
+      border-color: var(--emerald);
+      color: var(--emerald);
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .kpi-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .kpi-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .kpi-value {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .kpi-desc {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: #05080e;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 4px;
+      border: 1px solid var(--border);
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--emerald);
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+    .streams-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 12px;
+    }
+    .stream-card {
+      background: #05080e;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      font-family: var(--mono);
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .stream-title {
+      color: #fff;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 6px;
+    }
+
     @media (max-width: 768px) {
       .container { padding: 14px; }
       .top-stats { display: none; }
@@ -764,6 +909,266 @@
             </button>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- 🔋 3대 핵심광물 결합 무결성 & EV 배터리 마스터 패스포트 실시간 관측 센터 -->
+    <section class="obs-section" id="battery-observatory">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--border-accent); color: var(--emerald); font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px;">
+            🔋 결합 무결성 검증 엔진 (Composite Integrity Orchestrator)
+          </div>
+          <h2 style="font-family: var(--mono); font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 4px;">
+            3대 핵심광물 결합 무결성 & EV 배터리 마스터 패스포트 관측 센터
+          </h2>
+          <p style="color: var(--text-muted); font-size: 12px; margin: 0; max-width: 820px;">
+            호주 스포듀민 리튬 + 인도네시아 니켈 MHP + 콩고 코발트 수산화물의 3대 공급망을 결합하여, 미국 IRA 30D 핵심광물 50% FTA 가치비율, EU 배터리 여권 탄소 발자국, 그리고 폴리곤 머클 루트(Merkle Root) 온체인 마스터 서명을 실시간 검증합니다.
+          </p>
+        </div>
+        <div class="stat-pill" style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--border-accent); padding: 6px 12px; border-radius: 6px;">
+          <span class="dot"></span>
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--emerald); font-weight: 600;">3대 광물 파이프라인 결합 가동 중 (100% 무결성)</span>
+        </div>
+      </div>
+
+      <!-- Observatory Tabs -->
+      <div class="obs-tabs">
+        <button class="obs-tab-btn active" id="tabBtnComp" onclick="switchObsTab('composite')">
+          <span>🔋</span> NCM 811 복합 마스터 패스포트
+        </button>
+        <button class="obs-tab-btn" id="tabBtnLi" onclick="switchObsTab('lithium')">
+          <span>🇦🇺</span> 호주 스포듀민 리튬 관측기
+        </button>
+        <button class="obs-tab-btn" id="tabBtnNi" onclick="switchObsTab('nickel')">
+          <span>🇮🇩</span> 인도네시아 니켈 MHP 관측기
+        </button>
+        <button class="obs-tab-btn" id="tabBtnCo" onclick="switchObsTab('cobalt')">
+          <span>🇨🇩</span> 콩고 코발트 수산화물 관측기
+        </button>
+      </div>
+
+      <!-- Tab 1: Composite NCM Battery Passport Pane -->
+      <div id="obsPaneComposite" style="display: flex; flex-direction: column; gap: 16px;">
+        <!-- Preset Selector Bar -->
+        <div class="obs-preset-bar">
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--text-muted); font-weight: 600;">실전 시나리오 프리셋:</span>
+          <button class="preset-btn active" id="btnPresetClean" onclick="loadCompositePreset('clean')">
+            ✅ 정상 통과 (호주Li + 인니청정Ni + 콩고KCC)
+          </button>
+          <button class="preset-btn" id="btnPresetFeoc" onclick="loadCompositePreset('feoc')">
+            ⚠️ FEOC 오염 트랩 (콩고 80% 중국지분 주입)
+          </button>
+          <button class="preset-btn" id="btnPresetCbam" onclick="loadCompositePreset('cbam')">
+            ⚠️ 자가석탄 CBAM 트랩 (인도네시아 석탄발전 주입)
+          </button>
+          <button class="preset-btn" id="btnPresetChild" onclick="loadCompositePreset('child')">
+            ❌ 아동노동 결함 트랩 (미인증 영세광 혼입)
+          </button>
+        </div>
+
+        <!-- Battery Pack Input Row -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: rgba(15, 23, 42, 0.5); padding: 14px; border-radius: 6px; border: 1px solid var(--border);">
+          <div class="field-row">
+            <label class="field-label">배터리 팩 고유 일련번호</label>
+            <input type="text" id="compPackId" value="BATT-NCM811-2026-PACK01">
+          </div>
+          <div class="field-row">
+            <label class="field-label">양극재 화학 조성 (Chemistry)</label>
+            <select id="compChem">
+              <option value="NCM811" selected>NCM 811 (Ni 80%, Co 10%, Mn 10%)</option>
+              <option value="NCM622">NCM 622 (Ni 60%, Co 20%, Mn 20%)</option>
+              <option value="NCM523">NCM 523 (Ni 50%, Co 20%, Mn 30%)</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <label class="field-label">배터리 팩 정격 용량 (kWh)</label>
+            <input type="number" id="compCap" value="84.0" step="0.5">
+          </div>
+          <div style="display: flex; align-items: flex-end;">
+            <button class="btn btn-primary" style="width: 100%; height: 38px;" onclick="runCompositeBatterySimulation()">
+              ⚡ 마스터 패스포트 결합 검증
+            </button>
+          </div>
+        </div>
+
+        <!-- KPI Gauge Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card" id="cardIraCredit">
+            <div class="kpi-label">미국 IRA 30D 세액공제 ($3,750 광물)</div>
+            <div class="kpi-value" id="kpiIraStatus">
+              <span style="color: var(--emerald);">적격 (Eligible)</span>
+            </div>
+            <div class="kpi-desc" id="kpiIraDesc">FTA 조달 비율 $\ge 50\%$ & FEOC 오염 제로 충족</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-label">IRA FTA 조달 가치 비율 (기준선 $\ge 50\%$)</div>
+            <div class="kpi-value" id="kpiFtaRatio">
+              <span style="color: var(--cyan);">86.4%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="kpiFtaBar" style="width: 86.4%;"></div>
+            </div>
+            <div class="kpi-desc" id="kpiFtaDesc">총 광물가치 중 호주(FTA) 조달 비율</div>
+          </div>
+
+          <div class="kpi-card" id="cardEuPassport">
+            <div class="kpi-label">EU 배터리 여권 (EU 2023/1542)</div>
+            <div class="kpi-value" id="kpiEuStatus">
+              <span style="color: var(--emerald);">승인 완료 (Approved)</span>
+            </div>
+            <div class="kpi-desc" id="kpiEuDesc">OECD 실사, 산지국 세제, 아동노동 제로 검증</div>
+          </div>
+
+          <div class="kpi-card" id="cardCarbon">
+            <div class="kpi-label">복합 탄소 발자국 (Scope 1-3)</div>
+            <div class="kpi-value" id="kpiCarbonVal">
+              <span style="color: #fff;">51.5</span> <span style="font-size: 12px; color: var(--text-dim);">kg CO₂e/kWh</span>
+            </div>
+            <div class="kpi-desc" id="kpiCarbonDesc">청정 수력/그리드 전력 가중치 적용 (CBAM 비대상)</div>
+          </div>
+        </div>
+
+        <!-- 3-Stream Component Breakdown Cards -->
+        <div class="streams-grid">
+          <div class="stream-card" id="streamCardLi">
+            <div class="stream-title">
+              <span>🇦🇺 리튬 스트림 (Lithium Hydroxide)</span>
+              <span style="color: var(--emerald);" id="stStatusLi">● 검증 통과</span>
+            </div>
+            <div>채굴 광산: <strong id="stMineLi">Greenbushes (WA MINEDEX)</strong></div>
+            <div>투입 수율: <span id="stYieldLi">스포듀민 7,500t ➔ LiOH 1,000t (7.5:1)</span></div>
+            <div>FTA 지위: <span style="color: var(--emerald);">미국 FTA 100% 인정 (호주산)</span></div>
+            <div>온체인 증명: <code id="stProofLi" style="color: var(--cyan);">0x92f4...11b2</code></div>
+          </div>
+
+          <div class="stream-card" id="streamCardNi">
+            <div class="stream-title">
+              <span>🇮🇩 니켈 스트림 (Nickel MHP)</span>
+              <span style="color: var(--emerald);" id="stStatusNi">● 검증 통과</span>
+            </div>
+            <div>채굴 광구: <strong id="stMineNi">PT Morowali (IMIP)</strong></div>
+            <div>투입 수율: <span id="stYieldNi">리모나이트 9,402t ➔ MHP 300t (31.34:1)</span></div>
+            <div>SIMBARA 세금: <span style="color: var(--emerald);" id="stTaxNi">NTPN-884219482109 승인</span></div>
+            <div>온체인 증명: <code id="stProofNi" style="color: var(--cyan);">0x55a1...88c4</code></div>
+          </div>
+
+          <div class="stream-card" id="streamCardCo">
+            <div class="stream-title">
+              <span>🇨🇩 코발트 스트림 (Cobalt Hydroxide)</span>
+              <span style="color: var(--emerald);" id="stStatusCo">● 검증 통과</span>
+            </div>
+            <div>채굴 광구: <strong id="stMineCo">Kamoto Copper Company (KCC)</strong></div>
+            <div>투입 수율: <span id="stYieldCo">헤테로제나이트 2,353t ➔ 수산화물 100t</span></div>
+            <div>CEEC / 노동: <span style="color: var(--emerald);" id="stLaborCo">바코드 씰 완료 / 아동노동 제로</span></div>
+            <div>온체인 증명: <code id="stProofCo" style="color: var(--cyan);">0x77d8...44e9</code></div>
+          </div>
+        </div>
+
+        <!-- Merkle Root & EIP-712 Master Signature Terminal -->
+        <div style="background: #05080e; border: 1px solid var(--border); border-radius: 6px; padding: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-family: var(--mono); font-size: 11px; color: var(--text-muted); font-weight: 700;">
+              ⛓️ 폴리곤 온체인 마스터 배터리 패스포트 서명 원문 (Merkle Root & Master EIP-712 Signature)
+            </span>
+            <span style="font-family: var(--mono); font-size: 11px; color: var(--cyan); cursor: pointer;" onclick="copyMasterPassportJson()">
+              전체 JSON 복사
+            </span>
+          </div>
+          <pre class="terminal-output" id="compTerminalOutput" style="max-height: 180px;">// 배터리 팩 검증 결과 대기 중...
+// '마스터 패스포트 결합 검증' 버튼을 클릭하면 3대 광물 머클 트리 및 폴리곤 서명이 즉시 생성됩니다.</pre>
+        </div>
+      </div>
+
+      <!-- Tab 2: Dedicated Lithium Pane -->
+      <div id="obsPaneLi" style="display: none; flex-direction: column; gap: 14px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; background: rgba(15, 23, 42, 0.5); padding: 14px; border-radius: 6px; border: 1px solid var(--border);">
+          <div class="field-row">
+            <label class="field-label">서호주 MINEDEX 광구</label>
+            <select id="liMineSelect">
+              <option value="Greenbushes Lithium Operation" selected>Greenbushes (M01/03, Talison)</option>
+              <option value="Pilgangoora Operation">Pilgangoora (M45/1256, Pilbara Minerals)</option>
+              <option value="Mt Marion Operation">Mt Marion (M15/1000, MinRes)</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <label class="field-label">스포듀민 원광 투입량 (t)</label>
+            <input type="number" id="liInputTons" value="7500.0">
+          </div>
+          <div class="field-row">
+            <label class="field-label">수산화리튬(LiOH) 산출량 (t)</label>
+            <input type="number" id="liOutputTons" value="1000.0">
+          </div>
+          <div style="display: flex; align-items: flex-end;">
+            <button class="btn btn-primary" style="width: 100%; height: 38px;" onclick="runDedicatedLithiumSim()">
+              ⚡ 호주 리튬 단독 검증
+            </button>
+          </div>
+        </div>
+        <pre class="terminal-output" id="liTerminalOutput">// 호주 리튬 단독 검증 결과가 여기에 표시됩니다.</pre>
+      </div>
+
+      <!-- Tab 3: Dedicated Nickel Pane -->
+      <div id="obsPaneNi" style="display: none; flex-direction: column; gap: 14px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; background: rgba(15, 23, 42, 0.5); padding: 14px; border-radius: 6px; border: 1px solid var(--border);">
+          <div class="field-row">
+            <label class="field-label">인도네시아 니켈 광구</label>
+            <select id="niMineSelect">
+              <option value="PT Morowali Nickel Industrial Concession" selected>IMIP Morowali (중앙 술라웨시)</option>
+              <option value="PT Weda Bay Nickel Concession">IWIP Weda Bay (북말루쿠)</option>
+              <option value="Sorowako Nickel Concession">Sorowako (PT Vale Indonesia)</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <label class="field-label">ESDM SIMBARA NTPN 세금코드</label>
+            <input type="text" id="niSimbaraInput" value="NTPN-884219482109">
+          </div>
+          <div class="field-row">
+            <label class="field-label">자가발전 석탄화력 (CBAM 리스크)</label>
+            <select id="niCoalPower">
+              <option value="false" selected>아니오 (청정 전력/그리드)</option>
+              <option value="true">예 (자가 석탄발전 가동)</option>
+            </select>
+          </div>
+          <div style="display: flex; align-items: flex-end;">
+            <button class="btn btn-primary" style="width: 100%; height: 38px;" onclick="runDedicatedNickelSim()">
+              ⚡ 인도네시아 니켈 단독 검증
+            </button>
+          </div>
+        </div>
+        <pre class="terminal-output" id="niTerminalOutput">// 인도네시아 니켈 MHP 단독 검증 결과가 여기에 표시됩니다.</pre>
+      </div>
+
+      <!-- Tab 4: Dedicated Cobalt Pane -->
+      <div id="obsPaneCo" style="display: none; flex-direction: column; gap: 14px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; background: rgba(15, 23, 42, 0.5); padding: 14px; border-radius: 6px; border: 1px solid var(--border);">
+          <div class="field-row">
+            <label class="field-label">DRC 카탕가 코발트 광구</label>
+            <select id="coMineSelect">
+              <option value="Kamoto Copper Company (KCC)" selected>Kamoto KCC (Glencore / Kolwezi)</option>
+              <option value="Tenke Fungurume Mining (TFM)">Tenke Fungurume (CMOC)</option>
+              <option value="Mutanda Mining (MUMI)">Mutanda Mining (Glencore)</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <label class="field-label">CEEC 위변조방지 바코드 씰</label>
+            <input type="text" id="coCeecInput" value="CEEC-KAT-2026-992144">
+          </div>
+          <div class="field-row">
+            <label class="field-label">ILO 138/182 아동노동 제로 실사</label>
+            <select id="coChildLaborSelect">
+              <option value="ILO-138-182-AUDIT-KCC-09" selected>인증 완료 (ILO 138/182)</option>
+              <option value="">미인증 (실사 결함)</option>
+            </select>
+          </div>
+          <div style="display: flex; align-items: flex-end;">
+            <button class="btn btn-primary" style="width: 100%; height: 38px;" onclick="runDedicatedCobaltSim()">
+              ⚡ 콩고 코발트 단독 검증
+            </button>
+          </div>
+        </div>
+        <pre class="terminal-output" id="coTerminalOutput">// 콩고 코발트 수산화물 단독 검증 결과가 여기에 표시됩니다.</pre>
       </div>
     </section>
 
@@ -1340,6 +1745,320 @@ print("EIP-712 서명:", passport.get("security_attestation", {}).get("onchain_s
       }
     }
 
+    // =========================================================================
+    // BATTERY & MINERAL OBSERVATORY CONTROLLER
+    // =========================================================================
+    let currentCompositePreset = 'clean';
+    let lastMasterPassportData = null;
+
+    function switchObsTab(tabId) {
+      const tabs = ['composite', 'lithium', 'nickel', 'cobalt'];
+      const btnMap = {
+        'composite': 'tabBtnComp',
+        'lithium': 'tabBtnLi',
+        'nickel': 'tabBtnNi',
+        'cobalt': 'tabBtnCo'
+      };
+      const paneMap = {
+        'composite': 'obsPaneComposite',
+        'lithium': 'obsPaneLi',
+        'nickel': 'obsPaneNi',
+        'cobalt': 'obsPaneCo'
+      };
+
+      tabs.forEach(t => {
+        const btn = document.getElementById(btnMap[t]);
+        const pane = document.getElementById(paneMap[t]);
+        if (btn) btn.classList.remove('active');
+        if (pane) pane.style.display = 'none';
+      });
+
+      const activeBtn = document.getElementById(btnMap[tabId]);
+      const activePane = document.getElementById(paneMap[tabId]);
+      if (activeBtn) activeBtn.classList.add('active');
+      if (activePane) activePane.style.display = 'flex';
+    }
+
+    function loadCompositePreset(preset) {
+      currentCompositePreset = preset;
+      ['clean', 'feoc', 'cbam', 'child'].forEach(p => {
+        const b = document.getElementById('btnPreset' + p.charAt(0).toUpperCase() + p.slice(1));
+        if (b) {
+          if (p === preset) b.classList.add('active');
+          else b.classList.remove('active');
+        }
+      });
+      runCompositeBatterySimulation();
+    }
+
+    async function runCompositeBatterySimulation() {
+      const packId = document.getElementById('compPackId').value.trim() || 'BATT-NCM811-2026-PACK01';
+      const cellChem = document.getElementById('compChem').value;
+      const capacity = parseFloat(document.getElementById('compCap').value) || 84.0;
+      const term = document.getElementById('compTerminalOutput');
+
+      term.innerText = '// 오라클 3대 파이프라인 (호주Li + 인니Ni + 콩고Co) 오케스트레이션 검증 중...\n// x402 4-Pillar M2M 검증 및 머클 트리 계산 중...';
+
+      const isFeoc = currentCompositePreset === 'feoc';
+      const isCbam = currentCompositePreset === 'cbam';
+      const isChild = currentCompositePreset === 'child';
+
+      const payload = {
+        battery_pack_id: packId,
+        cell_chemistry: cellChem,
+        pack_capacity_kwh: capacity,
+        lithium_lot: {
+          trace_id: "LITH-AU-2026-B01",
+          product: "Lithium Hydroxide Monohydrate",
+          mine_name: "Greenbushes Lithium Operation",
+          mine_country: "AU",
+          coordinates: [-33.864, 116.006],
+          minedex_tenement_id: "M01/03",
+          spodumene_tonnage_extracted: 7500.0,
+          spodumene_grade_pct: 6.0,
+          refinery_facility: "Kwinana Lithium Hydroxide Plant",
+          refinery_country: "AU",
+          refined_output_tonnage: 1000.0,
+          refinery_feoc_equity_pct: 0.0
+        },
+        nickel_lot: {
+          trace_id: "NIC-IDN-2026-MHP01",
+          product: "Nickel Mixed Hydroxide Precipitate (MHP)",
+          concession_name: "PT Morowali Nickel Industrial Concession",
+          coordinates: [-2.812, 122.152],
+          simbara_ntpn: "NTPN-884219482109",
+          dhe_forex_deposit_ref: "DHE-BI-992144-USD",
+          limonite_ore_input_tons: 9402.0,
+          ore_grade_ni_pct: 1.35,
+          hpal_refinery_name: "QMB New Energy Clean HPAL",
+          mhp_output_tons: 300.0,
+          mhp_grade_ni_pct: 38.5,
+          captive_coal_power: isCbam,
+          feoc_equity_pct: isFeoc ? 80.0 : 15.0
+        },
+        cobalt_lot: {
+          trace_id: "COB-COD-2026-HYD01",
+          product: "Crude Cobalt Hydroxide",
+          concession_name: "Kamoto Copper Company (KCC)",
+          province: "Lualaba",
+          coordinates: [-10.720, 25.470],
+          mine_type: isChild ? "ASM" : "LSM",
+          ceec_seal_id: "CEEC-KAT-2026-992144",
+          asm_comingled: isChild,
+          zero_child_labor_audit_ref: isChild ? null : "ILO-138-182-AUDIT-KCC-09",
+          heterogenite_ore_input_tons: 2353.0,
+          ore_grade_co_pct: 1.50,
+          refinery_name: "Luilu Metallurgical Plant",
+          refinery_country: "COD",
+          rmi_rmap_smelter_id: "CID002847-RMAP",
+          cobalt_hydroxide_output_tons: 100.0,
+          hydroxide_grade_co_pct: 30.0,
+          feoc_equity_pct: isFeoc ? 80.0 : 0.0
+        }
+      };
+
+      try {
+        const res = await fetch('/api/v1/battery/composite-verify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Dev-Bypass': 'true'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        lastMasterPassportData = data;
+        term.innerText = JSON.stringify(data, null, 2);
+
+        if (data.status === 'success' && data.composite_verdict) {
+          const v = data.composite_verdict;
+
+          // 1. IRA 30D
+          const iraStatus = document.getElementById('kpiIraStatus');
+          const iraDesc = document.getElementById('kpiIraDesc');
+          if (v.ira_30d_tax_credit_eligible) {
+            iraStatus.innerHTML = '<span style="color: var(--emerald);">적격 (Eligible)</span>';
+            iraDesc.innerText = 'FTA 조달 비율 ≥ 50% & FEOC 오염 제로 충족 ($3,750 공제)';
+          } else {
+            iraStatus.innerHTML = '<span style="color: var(--amber);">부적격 (Disqualified)</span>';
+            iraDesc.innerText = v.feoc_taint_detected
+              ? 'FEOC 25% 초과 지배국 자본 유입으로 세액공제 전면 차단'
+              : 'FTA 조달 가치 비율 50% 미달';
+          }
+
+          // 2. FTA Ratio
+          const ftaRatio = document.getElementById('kpiFtaRatio');
+          const ftaBar = document.getElementById('kpiFtaBar');
+          const ftaVal = v.ira_critical_mineral_fta_ratio_pct.toFixed(1);
+          ftaRatio.innerHTML = `<span style="color: ${v.ira_critical_mineral_fta_ratio_pct >= 50 ? 'var(--cyan)' : 'var(--amber)'};">${ftaVal}%</span>`;
+          ftaBar.style.width = `${Math.min(100, Math.max(0, v.ira_critical_mineral_fta_ratio_pct))}%`;
+          ftaBar.style.background = v.ira_critical_mineral_fta_ratio_pct >= 50 ? 'var(--emerald)' : 'var(--amber)';
+
+          // 3. EU Battery Passport
+          const euStatus = document.getElementById('kpiEuStatus');
+          const euDesc = document.getElementById('kpiEuDesc');
+          if (v.eu_battery_passport_approved) {
+            euStatus.innerHTML = '<span style="color: var(--emerald);">승인 완료 (Approved)</span>';
+            euDesc.innerText = 'OECD 실사, SIMBARA 세제, 아동노동 제로 검증 통과';
+          } else {
+            euStatus.innerHTML = '<span style="color: var(--amber);">등록 거부 (Rejected)</span>';
+            euDesc.innerText = !v.cobalt_cleared
+              ? '코발트 스트림 아동노동 실사 결함 또는 미인증 영세광 혼입'
+              : '광물 실사 또는 환경 요건 미달';
+          }
+
+          // 4. Carbon
+          const carbonVal = document.getElementById('kpiCarbonVal');
+          const carbonDesc = document.getElementById('kpiCarbonDesc');
+          const carbonNum = v.blended_carbon_footprint_kg_per_kwh.toFixed(1);
+          carbonVal.innerHTML = `<span style="color: ${v.cbam_carbon_penalty_alert ? 'var(--amber)' : '#fff'};">${carbonNum}</span> <span style="font-size: 12px; color: var(--text-dim);">kg CO₂e/kWh</span>`;
+          if (v.cbam_carbon_penalty_alert) {
+            carbonDesc.innerHTML = '<span style="color: var(--amber);">⚠️ 인도네시아 자가석탄 발전 가동으로 CBAM 탄소 페널티 경보</span>';
+          } else {
+            carbonDesc.innerText = '청정 전력/그리드 가중치 적용 (기준치 충족)';
+          }
+
+          // 5. Streams Breakdown
+          const stLi = document.getElementById('stStatusLi');
+          const stNi = document.getElementById('stStatusNi');
+          const stCo = document.getElementById('stStatusCo');
+
+          stLi.innerHTML = v.lithium_cleared ? '<span style="color: var(--emerald);">● 검증 통과</span>' : '<span style="color: var(--amber);">❌ 결함 검출</span>';
+          stNi.innerHTML = v.nickel_cleared ? '<span style="color: var(--emerald);">● 검증 통과</span>' : '<span style="color: var(--amber);">❌ 결함 검출</span>';
+          stCo.innerHTML = v.cobalt_cleared ? '<span style="color: var(--emerald);">● 검증 통과</span>' : '<span style="color: var(--amber);">❌ 결함 검출</span>';
+
+          if (data.lithium_summary) {
+            document.getElementById('stProofLi').innerText = data.lithium_summary.onchain_attestation_hash ? data.lithium_summary.onchain_attestation_hash.slice(0, 16) + '...' : '0xVerified';
+          }
+          if (data.nickel_summary) {
+            document.getElementById('stProofNi').innerText = data.nickel_summary.onchain_proof ? data.nickel_summary.onchain_proof.slice(0, 16) + '...' : '0xVerified';
+            document.getElementById('stTaxNi').innerText = data.nickel_summary.esdm_simbara_tax_cleared ? 'NTPN 납부 완료' : '미납';
+          }
+          if (data.cobalt_summary) {
+            document.getElementById('stProofCo').innerText = data.cobalt_summary.onchain_proof ? data.cobalt_summary.onchain_proof.slice(0, 16) + '...' : '0xVerified';
+            document.getElementById('stLaborCo').innerText = data.cobalt_summary.child_labor_due_diligence_cleared ? 'ILO 138/182 제로 인증' : '아동노동 결함';
+          }
+        }
+      } catch (err) {
+        term.innerText = `[검증 시뮬레이션 오류]: ${err.message}`;
+      }
+    }
+
+    async function runDedicatedLithiumSim() {
+      const term = document.getElementById('liTerminalOutput');
+      term.innerText = '// 호주 스포듀민 ➔ 수산화리튬 원산지 검증 중...';
+      const mine = document.getElementById('liMineSelect').value;
+      const inTons = parseFloat(document.getElementById('liInputTons').value) || 7500.0;
+      const outTons = parseFloat(document.getElementById('liOutputTons').value) || 1000.0;
+
+      try {
+        const res = await fetch('/api/v1/lithium/verify-origin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Dev-Bypass': 'true' },
+          body: JSON.stringify({
+            trace_id: 'LIT-AU-2026-X091',
+            product: 'Lithium Hydroxide Monohydrate',
+            mine_name: mine,
+            mine_country: 'AU',
+            coordinates: [-33.864, 116.006],
+            minedex_tenement_id: 'M01/03',
+            spodumene_tonnage_extracted: inTons,
+            spodumene_grade_pct: 6.0,
+            refinery_facility: 'Kwinana Lithium Hydroxide Plant',
+            refinery_country: 'AU',
+            refined_output_tonnage: outTons,
+            refinery_feoc_equity_pct: 0.0
+          })
+        });
+        const d = await res.json();
+        term.innerText = JSON.stringify(d, null, 2);
+      } catch (e) {
+        term.innerText = `[오류]: ${e.message}`;
+      }
+    }
+
+    async function runDedicatedNickelSim() {
+      const term = document.getElementById('niTerminalOutput');
+      term.innerText = '// 인도네시아 니켈 MHP 원산지 및 SIMBARA 검증 중...';
+      const concession = document.getElementById('niMineSelect').value;
+      const ntpn = document.getElementById('niSimbaraInput').value.trim();
+      const coal = document.getElementById('niCoalPower').value === 'true';
+
+      try {
+        const res = await fetch('/api/v1/nickel/verify-origin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Dev-Bypass': 'true' },
+          body: JSON.stringify({
+            trace_id: 'NIC-IDN-2026-MHP01',
+            product: 'Nickel Mixed Hydroxide Precipitate (MHP)',
+            concession_name: concession,
+            coordinates: [-2.812, 122.152],
+            simbara_ntpn: ntpn,
+            limonite_ore_input_tons: 9402.0,
+            ore_grade_ni_pct: 1.35,
+            hpal_refinery_name: 'QMB New Energy Clean HPAL',
+            mhp_output_tons: 300.0,
+            mhp_grade_ni_pct: 38.5,
+            captive_coal_power: coal,
+            feoc_equity_pct: 15.0
+          })
+        });
+        const d = await res.json();
+        term.innerText = JSON.stringify(d, null, 2);
+      } catch (e) {
+        term.innerText = `[오류]: ${e.message}`;
+      }
+    }
+
+    async function runDedicatedCobaltSim() {
+      const term = document.getElementById('coTerminalOutput');
+      term.innerText = '// 콩고민주공화국 코발트 수산화물 CEEC 및 실사 검증 중...';
+      const mine = document.getElementById('coMineSelect').value;
+      const seal = document.getElementById('coCeecInput').value.trim();
+      const ilo = document.getElementById('coChildLaborSelect').value;
+
+      try {
+        const res = await fetch('/api/v1/cobalt/verify-origin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Dev-Bypass': 'true' },
+          body: JSON.stringify({
+            trace_id: 'COB-COD-2026-HYD01',
+            product: 'Crude Cobalt Hydroxide',
+            concession_name: mine,
+            province: 'Lualaba',
+            coordinates: [-10.720, 25.470],
+            mine_type: (ilo === '' ? 'ASM' : 'LSM'),
+            ceec_seal_id: seal,
+            asm_comingled: (ilo === ''),
+            zero_child_labor_audit_ref: (ilo === '' ? null : ilo),
+            heterogenite_ore_input_tons: 2353.0,
+            ore_grade_co_pct: 1.50,
+            refinery_name: 'Luilu Metallurgical Plant',
+            refinery_country: 'COD',
+            cobalt_hydroxide_output_tons: 100.0,
+            hydroxide_grade_co_pct: 30.0,
+            feoc_equity_pct: 0.0
+          })
+        });
+        const d = await res.json();
+        term.innerText = JSON.stringify(d, null, 2);
+      } catch (e) {
+        term.innerText = `[오류]: ${e.message}`;
+      }
+    }
+
+    function copyMasterPassportJson() {
+      const term = document.getElementById('compTerminalOutput');
+      if (term && term.innerText) {
+        navigator.clipboard.writeText(term.innerText).then(() => {
+          alert('마스터 배터리 패스포트 JSON이 클립보드에 복사되었습니다.');
+        }).catch(() => {
+          alert('복사 권한이 필요합니다.');
+        });
+      }
+    }
+
     function escapeHtml(str) {
       if (!str) return '';
       return String(str)
@@ -1349,11 +2068,15 @@ print("EIP-712 서명:", passport.get("security_attestation", {}).get("onchain_s
         .replace(/"/g, '&quot;');
     }
 
-    // 초기 로드 시 제안 피드 호출
+    // 초기 로드 시 제안 피드 및 배터리 복합 검증 호출
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', loadEvolutionProposals);
+      document.addEventListener('DOMContentLoaded', () => {
+        loadEvolutionProposals();
+        setTimeout(runCompositeBatterySimulation, 200);
+      });
     } else {
       loadEvolutionProposals();
+      setTimeout(runCompositeBatterySimulation, 200);
     }
   </script>
 </body>

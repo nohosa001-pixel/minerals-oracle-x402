@@ -54,6 +54,117 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
                     }
                 },
                 {
+                    "name": "verify_lithium_origin",
+                    "description": (
+                        "Verifies Australian hard-rock Spodumene to Lithium Hydroxide supply-chain provenance. "
+                        "Evaluates WA MINEDEX GIS geofencing (Greenbushes, Pilgangoora, Mt Marion), "
+                        "stoichiometric mass balance (SC6.0 to LiOH <= 2.5% loss), and US IRA Section 30D FEOC 25% clean origin."
+                    ),
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "trace_id": {"type": "string", "description": "Traceability lot ID (e.g., LIT-AU-2026-X091)"},
+                            "product": {"type": "string", "default": "Lithium Hydroxide Monohydrate"},
+                            "mine_name": {"type": "string", "description": "Hard-rock mine name (e.g. Greenbushes, Pilgangoora)"},
+                            "mine_country": {"type": "string", "default": "AU"},
+                            "coordinates": {"type": "array", "items": {"type": "number"}, "description": "[Lat, Lon] centroid"},
+                            "minedex_tenement_id": {"type": "string", "description": "WA MINEDEX permit ID (optional)"},
+                            "spodumene_tonnage_extracted": {"type": "number", "description": "Gross spodumene input in metric tons"},
+                            "spodumene_grade_pct": {"type": "number", "default": 6.0, "description": "Li2O grade % (default 6.0%)"},
+                            "refinery_facility": {"type": "string", "description": "Refining facility name (e.g. Kwinana Plant)"},
+                            "refinery_country": {"type": "string", "default": "AU", "description": "Refinery country code (AU, US, CHN)"},
+                            "refined_output_tonnage": {"type": "number", "description": "Finished product output in metric tons"},
+                            "refinery_feoc_equity_pct": {"type": "number", "default": 0.0, "description": "Covered nation equity % (cap < 25%)"}
+                        },
+                        "required": ["trace_id", "mine_name", "coordinates", "spodumene_tonnage_extracted", "refinery_facility", "refined_output_tonnage"]
+                    }
+                },
+                {
+                    "name": "verify_nickel_origin",
+                    "description": (
+                        "Verifies Indonesian laterite Limonite-to-Nickel MHP supply-chain provenance. "
+                        "Evaluates Sulawesi/Halmahera concession geofencing (IMIP Morowali, IWIP Weda Bay), "
+                        "SIMBARA NTPN & DHE BI tax validation, HPAL stoichiometric mass balance (~31t Limonite to 1t MHP <= 2.5% loss), "
+                        "Captive Coal EU CBAM screening, and US IRA 30D FEOC 25% compliance."
+                    ),
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "trace_id": {"type": "string", "description": "Traceability batch ID (e.g. NIC-IDN-2026-MHP01)"},
+                            "product": {"type": "string", "default": "Nickel Mixed Hydroxide Precipitate (MHP)"},
+                            "concession_name": {"type": "string", "description": "Concession name (e.g. Morowali Concession, Weda Bay)"},
+                            "coordinates": {"type": "array", "items": {"type": "number"}, "description": "[Lat, Lon] centroid"},
+                            "simbara_ntpn": {"type": "string", "description": "Indonesia ESDM SIMBARA NTPN tax receipt code"},
+                            "dhe_forex_deposit_ref": {"type": "string", "description": "Bank Indonesia 30% retention receipt (optional)"},
+                            "limonite_ore_input_tons": {"type": "number", "description": "Gross limonite ore input in metric tons"},
+                            "ore_grade_ni_pct": {"type": "number", "default": 1.35, "description": "Limonite ore Ni % (default 1.35%)"},
+                            "hpal_refinery_name": {"type": "string", "description": "HPAL refinery name (e.g. QMB New Energy)"},
+                            "mhp_output_tons": {"type": "number", "description": "Refined MHP output in metric tons"},
+                            "mhp_grade_ni_pct": {"type": "number", "default": 38.5, "description": "MHP Ni % (default 38.5%)"},
+                            "captive_coal_power": {"type": "boolean", "default": False, "description": "True if refinery runs on captive coal"},
+                            "feoc_equity_pct": {"type": "number", "default": 0.0, "description": "Covered nation equity % (cap < 25%)"}
+                        },
+                        "required": ["trace_id", "concession_name", "coordinates", "simbara_ntpn", "limonite_ore_input_tons", "hpal_refinery_name", "mhp_output_tons"]
+                    }
+                },
+                {
+                    "name": "verify_cobalt_origin",
+                    "description": (
+                        "Verifies DRC Katanga heterogenite-to-cobalt hydroxide supply-chain provenance. "
+                        "Evaluates Katanga Copperbelt concession geofencing (Tenke Fungurume, Kamoto KCC, Mutanda, Metalkol), "
+                        "CEEC tamper-proof barcode seal, ASM co-mingling segregation & EGC custody (Trap 1), "
+                        "ILO 138/182 zero child labor due diligence, RMI RMAP smelter certification, "
+                        "stoichiometric mass balance (~23.5t ore to 1t hydroxide <= 2.5% loss), and US IRA FEOC 25% screening."
+                    ),
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "trace_id": {"type": "string", "description": "Traceability batch ID (e.g. COB-COD-2026-HYD01)"},
+                            "product": {"type": "string", "default": "Crude Cobalt Hydroxide"},
+                            "concession_name": {"type": "string", "description": "Concession name (e.g. Kamoto Copper Company, Tenke Fungurume)"},
+                            "province": {"type": "string", "default": "Lualaba"},
+                            "coordinates": {"type": "array", "items": {"type": "number"}, "description": "[Lat, Lon] centroid"},
+                            "mine_type": {"type": "string", "default": "LSM", "description": "LSM or ASM"},
+                            "ceec_seal_id": {"type": "string", "description": "DRC CEEC barcode export seal ID"},
+                            "egc_custody_ref": {"type": "string", "description": "EGC artisanal custody receipt (optional)"},
+                            "asm_comingled": {"type": "boolean", "default": False, "description": "True if uncertified ASM ore co-mingled"},
+                            "zero_child_labor_audit_ref": {"type": "string", "description": "ILO 138/182 zero child labor audit reference"},
+                            "heterogenite_ore_input_tons": {"type": "number", "description": "Gross heterogenite ore input in metric tons"},
+                            "ore_grade_co_pct": {"type": "number", "default": 1.50, "description": "Ore Co % (default 1.50%)"},
+                            "refinery_name": {"type": "string", "description": "Refinery name (e.g. Luilu Metallurgical Plant)"},
+                            "refinery_country": {"type": "string", "default": "COD", "description": "Refinery country code"},
+                            "rmi_rmap_smelter_id": {"type": "string", "description": "RMI RMAP audited smelter ID (optional)"},
+                            "cobalt_hydroxide_output_tons": {"type": "number", "description": "Refined crude hydroxide output in metric tons"},
+                            "hydroxide_grade_co_pct": {"type": "number", "default": 30.0, "description": "Hydroxide Co % (default 30.0%)"},
+                            "feoc_equity_pct": {"type": "number", "default": 0.0, "description": "Covered nation equity % (cap < 25%)"}
+                        },
+                        "required": ["trace_id", "concession_name", "coordinates", "ceec_seal_id", "heterogenite_ore_input_tons", "refinery_name", "cobalt_hydroxide_output_tons"]
+                    }
+                },
+                {
+                    "name": "verify_composite_battery_passport",
+                    "description": (
+                        "Evaluates end-to-end composite EV battery pack compliance and issues a Master Passport on Polygon. "
+                        "Orchestrates Australian Lithium, Indonesian Nickel, and DRC Cobalt streams; "
+                        "computes US IRA Section 30D critical mineral 50% FTA value-added ratio; "
+                        "enforces zero FEOC taint across all component streams; "
+                        "audits EU Battery Regulation 2023/1542 blended carbon footprint and CSDDD due diligence; "
+                        "and binds all proofs into a cryptographic Merkle Root EIP-712 Master Signature."
+                    ),
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "battery_pack_id": {"type": "string", "description": "Unique battery pack serial (e.g. BATT-NCM811-2026-PACK01)"},
+                            "cell_chemistry": {"type": "string", "default": "NCM811", "description": "Cathode chemistry (NCM811, NCM622, NCM523)"},
+                            "pack_capacity_kwh": {"type": "number", "default": 84.0, "description": "Pack capacity in kWh"},
+                            "lithium_lot": {"type": "object", "description": "LithiumOriginVerifyRequest payload"},
+                            "nickel_lot": {"type": "object", "description": "NickelOriginVerifyRequest payload"},
+                            "cobalt_lot": {"type": "object", "description": "CobaltOriginVerifyRequest payload"}
+                        },
+                        "required": ["battery_pack_id", "lithium_lot", "nickel_lot", "cobalt_lot"]
+                    }
+                },
+                {
                     "name": "list_trade_precedents",
                     "description": (
                         "Query international trade jurisprudence precedents embedded in the oracle: "
@@ -214,6 +325,78 @@ def handle_tool_call(req_id: Any, name: str, arguments: Dict[str, Any]) -> Dict[
                         {
                             "type": "text",
                             "text": json.dumps(passport.model_dump(), indent=2)
+                        }
+                    ]
+                }
+            }
+
+        elif name == "verify_lithium_origin":
+            from app.lithium_pipeline import lithium_pipeline
+            from app.schemas import LithiumOriginVerifyRequest
+            req_model = LithiumOriginVerifyRequest(**arguments)
+            lithium_res = lithium_pipeline.evaluate_lithium_lot(req_model)
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": json.dumps(lithium_res.model_dump(), indent=2, ensure_ascii=False)
+                        }
+                    ]
+                }
+            }
+
+        elif name == "verify_nickel_origin":
+            from app.nickel_pipeline import nickel_pipeline
+            from app.schemas import NickelOriginVerifyRequest
+            req_model = NickelOriginVerifyRequest(**arguments)
+            nickel_res = nickel_pipeline.evaluate_nickel_lot(req_model)
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": json.dumps(nickel_res.model_dump(), indent=2, ensure_ascii=False)
+                        }
+                    ]
+                }
+            }
+
+        elif name == "verify_cobalt_origin":
+            from app.cobalt_pipeline import cobalt_pipeline
+            from app.schemas import CobaltOriginVerifyRequest
+            req_model = CobaltOriginVerifyRequest(**arguments)
+            cobalt_res = cobalt_pipeline.evaluate_cobalt_lot(req_model)
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": json.dumps(cobalt_res.model_dump(), indent=2, ensure_ascii=False)
+                        }
+                    ]
+                }
+            }
+
+        elif name == "verify_composite_battery_passport":
+            from app.composite_battery_pipeline import composite_battery_pipeline
+            from app.schemas import CompositeBatteryVerifyRequest
+            req_model = CompositeBatteryVerifyRequest(**arguments)
+            composite_res = composite_battery_pipeline.evaluate_battery_pack(req_model)
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": json.dumps(composite_res.model_dump(), indent=2, ensure_ascii=False)
                         }
                     ]
                 }

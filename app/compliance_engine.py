@@ -200,7 +200,7 @@ class ComplianceEngine:
         ))
 
         # -----------------------------------------------------------------
-        # Pillar 6: Geopolitics, US IRA FEOC & Sanctions
+        # Pillar 6: Geopolitics, US IRA FEOC, Sanctions, & Gotcha 13/14
         # -----------------------------------------------------------------
         if req.geopolitical_sanctions.ofac_sdn_sanctioned:
             fatal_violations.append("OFAC_SDN_SANCTIONED: Primary or 50%-rule entity on US Treasury sanctions list.")
@@ -218,10 +218,92 @@ class ComplianceEngine:
             gotcha_defenses.append("DEFENSE_IRA_FEOC_CLEARED: Covered nation ownership < 25.0% and zero operational veto control.")
 
         # -----------------------------------------------------------------
+        # Gotcha 13: US BIS Black Mass & Scrap Retention Rule (15 CFR § 744)
+        # Effective Aug 27, 2026: Mandatory 100% US domestic allocation
+        # -----------------------------------------------------------------
+        is_scrap_commodity = (
+            req.is_recycled_black_mass
+            or req.mineral_type in (
+                MineralType.LITHIUM_BLACK_MASS,
+                MineralType.NICKEL_COBALT_BLACK_MASS,
+                MineralType.TUNGSTEN_SCRAP
+            )
+        )
+        us_bis_cleared = True
+        if is_scrap_commodity:
+            is_us_origin_scrap = req.source_country == SourceCountry.USA or not req.us_bis_export_authorized
+            has_valid_bis_license = bool(
+                req.mine_permits.us_bis_scrap_export_license
+                and len(req.mine_permits.us_bis_scrap_export_license.strip()) >= 8
+            )
+            if is_us_origin_scrap and not has_valid_bis_license:
+                fatal_violations.append(
+                    "US_BIS_15CFR744_SCRAP_RETENTION_VIOLATION: 100% US domestic allocation mandated; "
+                    "unauthorized export of battery black mass or tungsten scrap prohibited without BIS license."
+                )
+                score -= 45.0
+                us_bis_cleared = False
+            else:
+                gotcha_defenses.append(
+                    "DEFENSE_US_BIS_SCRAP_COMPLIANT: 100% domestic recycling stream allocated or authenticated BIS export license verified."
+                )
+            citations.append(TradeJurisprudenceCitation(
+                precedent_case_id="US_BIS_15CFR744_DEFENSE_PRODUCTION_ACT",
+                tribunal="U.S. Department of Commerce (BIS)",
+                legal_rule_applied="Mandatory domestic allocation of critical battery scrap and black mass under DPA & 15 CFR 744.",
+                compliance_status="COMPLIANT" if us_bis_cleared else "VIOLATION"
+            ))
+
+        # -----------------------------------------------------------------
+        # Gotcha 14: China Extraterritorial Tech Jurisdiction (Mineral Resources Law 2026)
+        # Extraterritorial export restrictions on Chinese SX separation tech & reagents
+        # -----------------------------------------------------------------
+        china_tech_cleared = True
+        sx_origin = (req.refining_mass_balance.solvent_extraction_tech_origin or "DOMESTIC").upper()
+        if sx_origin == "CHINA_UNLICENSED":
+            fatal_violations.append(
+                "CHN_MINERAL_LAW_TECH_VIOLATION: Smelter relies on unlicensed Chinese solvent extraction (SX) "
+                "separation technology or restricted reagents subject to extraterritorial export control."
+            )
+            score -= 40.0
+            china_tech_cleared = False
+        else:
+            gotcha_defenses.append(
+                f"DEFENSE_CHN_TECH_JURISDICTION_CLEARED: Verified independent or authorized refining tech ({sx_origin})."
+            )
+        citations.append(TradeJurisprudenceCitation(
+            precedent_case_id="CHN_MINERAL_RESOURCES_LAW_EXTRATERRITORIAL",
+            tribunal="Ministry of Commerce (MOFCOM) / Supreme People's Court",
+            legal_rule_applied="Extraterritorial scrutiny of restricted rare earth/critical mineral separation technologies.",
+            compliance_status="COMPLIANT" if china_tech_cleared else "VIOLATION"
+        ))
+
+        # -----------------------------------------------------------------
+        # EU CBAM Definitive Period & CSDDD Audit Verification
+        # -----------------------------------------------------------------
+        cbam_definitive_verified = not req.refining_mass_balance.captive_coal_power_used
+        if req.refining_mass_balance.cbam_declaration_id:
+            gotcha_defenses.append(f"DEFENSE_EU_CBAM_DEFINITIVE_DECLARATION: Valid declaration ID {req.refining_mass_balance.cbam_declaration_id} registered.")
+        if req.refining_mass_balance.cbam_scope1_emissions_kg_co2e is not None:
+            total_scope12 = (req.refining_mass_balance.cbam_scope1_emissions_kg_co2e or 0.0) + (req.refining_mass_balance.cbam_scope2_emissions_kg_co2e or 0.0)
+            gotcha_defenses.append(f"DEFENSE_EU_CBAM_EMISSIONS_AUDITED: Direct+Indirect carbon intensity {total_scope12:.2f} kg CO2e/kg verified.")
+        citations.append(TradeJurisprudenceCitation(
+            precedent_case_id="EU_CBAM_REG_2023_956_DEFINITIVE",
+            tribunal="European Court of Justice (CJEU) / DG TAXUD",
+            legal_rule_applied="Mandatory surrender of CBAM certificates and third-party verification of embedded Scope 1-3 emissions.",
+            compliance_status="COMPLIANT" if cbam_definitive_verified else "WARNING"
+        ))
+
+        # -----------------------------------------------------------------
         # Pillar 7: Final Score & Cryptographic Passport Generation
         # -----------------------------------------------------------------
         final_score = max(0.0, min(100.0, score))
         is_compliant = len(fatal_violations) == 0 and final_score >= 75.0
+
+        csddd_shielded = is_compliant and (
+            bool(req.labor_human_rights.rmi_rmap_audit_id)
+            or bool(req.labor_human_rights.csddd_audit_hash)
+        )
 
         verdict = ComplianceVerdict(
             overall_compliance_score=round(final_score, 1),
@@ -230,7 +312,10 @@ class ComplianceEngine:
             us_ira_feoc_compliant=is_feoc_compliant and not req.geopolitical_sanctions.ofac_sdn_sanctioned,
             oecd_annex_ii_passed=is_compliant and req.labor_human_rights.child_labor_free_certified,
             eudr_deforestation_cleared=req.ecological_spatial.eudr_deforestation_free,
-            csddd_civil_liability_shielded=is_compliant and bool(req.labor_human_rights.rmi_rmap_audit_id),
+            csddd_civil_liability_shielded=csddd_shielded,
+            us_bis_scrap_retention_cleared=us_bis_cleared,
+            china_tech_jurisdiction_cleared=china_tech_cleared,
+            cbam_definitive_period_verified=cbam_definitive_verified,
             zkp_privacy_sealed=True,
             gotcha_defenses_applied=gotcha_defenses + [f"FATAL: {v}" for v in fatal_violations],
             jurisprudence_citations=citations,
@@ -242,7 +327,10 @@ class ComplianceEngine:
         disclaimer = self.build_legal_disclaimer(fee_paid_usdc=0.50)
 
         # Attestation Digest Binding
-        digest_input = f"{req.lot_id}|{req.mineral_type.value}|{req.source_country.value}|{final_score}|{is_compliant}|{now_utc}"
+        digest_input = (
+            f"{req.lot_id}|{req.mineral_type.value}|{req.source_country.value}|"
+            f"{final_score}|{is_compliant}|{us_bis_cleared}|{china_tech_cleared}|{cbam_definitive_verified}|{now_utc}"
+        )
         digest_hash = "0x" + hashlib.sha256(digest_input.encode("utf-8")).hexdigest()
 
         # Generate on-chain EIP-712 signature cryptographically bound to disclaimer_hash

@@ -91,6 +91,72 @@
           "mineral_focus": {"type": "string", "description": "Optional filter by mineral"}
         }
       }
+    },
+    {
+      "name": "verify_lithium_origin",
+      "description": "Verify Australian Spodumene-to-Lithium Hydroxide Supply-Chain Provenance (WA MINEDEX GIS Geofencing, 7.5:1 mass balance, US IRA FEOC 25% screening, Polygon EIP-712 proof).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "trace_id": {"type": "string"},
+          "mine_name": {"type": "string"},
+          "coordinates": {"type": "array", "items": {"type": "number"}},
+          "spodumene_tonnage_extracted": {"type": "number"},
+          "refinery_facility": {"type": "string"},
+          "refined_output_tonnage": {"type": "number"}
+        },
+        "required": ["trace_id", "mine_name", "coordinates", "spodumene_tonnage_extracted", "refinery_facility", "refined_output_tonnage"]
+      }
+    },
+    {
+      "name": "verify_nickel_origin",
+      "description": "Verify Indonesian Laterite Limonite-to-Nickel MHP Supply-Chain Provenance (Sulawesi/Halmahera geofencing, SIMBARA NTPN, HPAL 31.34:1 mass balance, Captive Coal CBAM, IRA FEOC, Polygon EIP-712 proof).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "trace_id": {"type": "string"},
+          "concession_name": {"type": "string"},
+          "coordinates": {"type": "array", "items": {"type": "number"}},
+          "simbara_ntpn": {"type": "string"},
+          "limonite_ore_input_tons": {"type": "number"},
+          "hpal_refinery_name": {"type": "string"},
+          "mhp_output_tons": {"type": "number"}
+        },
+        "required": ["trace_id", "concession_name", "coordinates", "simbara_ntpn", "limonite_ore_input_tons", "hpal_refinery_name", "mhp_output_tons"]
+      }
+    },
+    {
+      "name": "verify_cobalt_origin",
+      "description": "Verify DRC Katanga Heterogenite-to-Cobalt Hydroxide Supply-Chain Provenance (Katanga Copperbelt geofencing, CEEC barcode seals, ASM segregation & EGC custody, ILO zero child labor, 23.53:1 mass balance, IRA FEOC, Polygon EIP-712 proof).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "trace_id": {"type": "string"},
+          "concession_name": {"type": "string"},
+          "coordinates": {"type": "array", "items": {"type": "number"}},
+          "ceec_seal_id": {"type": "string"},
+          "heterogenite_ore_input_tons": {"type": "number"},
+          "refinery_name": {"type": "string"},
+          "cobalt_hydroxide_output_tons": {"type": "number"}
+        },
+        "required": ["trace_id", "concession_name", "coordinates", "ceec_seal_id", "heterogenite_ore_input_tons", "refinery_name", "cobalt_hydroxide_output_tons"]
+      }
+    },
+    {
+      "name": "verify_composite_battery_passport",
+      "description": "Evaluates end-to-end composite EV battery pack compliance and issues a Master Passport on Polygon (Lithium + Nickel + Cobalt, US IRA 50% FTA value ratio, zero FEOC taint, EU 2023/1542 carbon footprint, Merkle Root EIP-712 signature).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "battery_pack_id": {"type": "string"},
+          "cell_chemistry": {"type": "string", "default": "NCM811"},
+          "pack_capacity_kwh": {"type": "number", "default": 84.0},
+          "lithium_lot": {"type": "object"},
+          "nickel_lot": {"type": "object"},
+          "cobalt_lot": {"type": "object"}
+        },
+        "required": ["battery_pack_id", "lithium_lot", "nickel_lot", "cobalt_lot"]
+      }
     }
   ]
 }

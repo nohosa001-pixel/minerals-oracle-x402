@@ -32,8 +32,20 @@ from app.schemas import (
     AgentFeedbackVoteRequest,
     AgentFeedbackResponse,
     AgentFeedbackListResponse,
+    LithiumOriginVerifyRequest,
+    LithiumOriginVerifyResponse,
+    NickelOriginVerifyRequest,
+    NickelOriginVerifyResponse,
+    CobaltOriginVerifyRequest,
+    CobaltOriginVerifyResponse,
+    CompositeBatteryVerifyRequest,
+    CompositeBatteryVerifyResponse,
 )
 from app.compliance_engine import compliance_engine
+from app.lithium_pipeline import lithium_pipeline
+from app.nickel_pipeline import nickel_pipeline
+from app.cobalt_pipeline import cobalt_pipeline
+from app.composite_battery_pipeline import composite_battery_pipeline
 
 STANDARD_DISCLAIMER_META = ResponseMeta().model_dump()
 from app.x402_verifier import x402_verifier
@@ -125,6 +137,10 @@ async def root(request: Request):
         "korean_core_edition": "/ko",
         "endpoints": {
             "compliance_verify": "/api/v1/oracle/compliance/verify",
+            "lithium_origin_verify": "/api/v1/lithium/verify-origin",
+            "nickel_origin_verify": "/api/v1/nickel/verify-origin",
+            "cobalt_origin_verify": "/api/v1/cobalt/verify-origin",
+            "composite_battery_verify": "/api/v1/battery/composite-verify",
             "compliance_status": "/api/v1/oracle/compliance/status",
             "trade_precedents": "/api/v1/oracle/compliance/precedents",
             "alpha_signals": "/api/v1/oracle/alpha-signals",
@@ -635,6 +651,121 @@ async def verify_mineral_lot_compliance(
     headers = getattr(request.state, "extra_headers", {}) or {}
     passport = compliance_engine.evaluate_lot(body)
     return JSONResponse(content=passport.model_dump(), headers=headers)
+
+
+@app.post(
+    "/api/v1/lithium/verify-origin",
+    response_model=LithiumOriginVerifyResponse,
+    tags=["Compliance Oracle"],
+    summary="Verify Australian Spodumene-to-Lithium Hydroxide Supply-Chain Provenance (x402 Verified)",
+    responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
+)
+async def verify_lithium_origin(
+    request: Request,
+    body: LithiumOriginVerifyRequest,
+):
+    """
+    Dedicated Australian Hard-Rock Spodumene-to-Lithium Hydroxide Provenance Pipeline:
+    - 1. WA MINEDEX GIS Geofencing (Greenbushes, Pilgangoora, Mt Marion, Kathleen Valley)
+    - 2. Satellite Evidence (Sentinel-2 NDVI & Sentinel-1 SAR radar backscatter pit verification)
+    - 3. Stoichiometric Mass Balance: SC6.0 (Li2O 6%) to LiOH·H2O (loss discrepancy <= 2.5%)
+    - 4. US IRA Section 30D FEOC 25% screening (rejects Chinese smelters & >=25% covered equity)
+    - 5. EIP-712 Typed Structured Data On-Chain Signature & Merkle Root issuance
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = lithium_pipeline.evaluate_lithium_lot(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+@app.post(
+    "/api/v1/nickel/verify-origin",
+    response_model=NickelOriginVerifyResponse,
+    tags=["Compliance Oracle"],
+    summary="Verify Indonesian Laterite-to-Nickel MHP Supply-Chain Provenance (x402 Verified)",
+    responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
+)
+async def verify_nickel_origin(
+    request: Request,
+    body: NickelOriginVerifyRequest,
+):
+    """
+    Dedicated Indonesian Laterite Limonite Ore-to-Nickel MHP Provenance Pipeline:
+    - 1. Sulawesi/Halmahera GIS Geofencing (IMIP Morowali, IWIP Weda Bay, Sorowako, Pomalaa, Obi)
+    - 2. Statutory Indonesian Permits (SIMBARA NTPN ESDM tax receipt & Bank Indonesia DHE 30%)
+    - 3. HPAL Metallurgical Stoichiometry (Limonite 1.35% Ni to MHP 38.5% Ni, loss discrepancy <= 2.5%)
+    - 4. Captive Coal Power Screening (EU CBAM and Battery Regulation carbon threshold defense)
+    - 5. US IRA Section 30D FEOC 25% screening & WTO DS592 domestic processing certification
+    - 6. EIP-712 Typed Structured Data On-Chain Signature issuance
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = nickel_pipeline.evaluate_nickel_lot(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+@app.post(
+    "/api/v1/cobalt/verify-origin",
+    response_model=CobaltOriginVerifyResponse,
+    tags=["Compliance Oracle"],
+    summary="Verify DRC Katanga-to-Cobalt Hydroxide Supply-Chain Provenance (x402 Verified)",
+    responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
+)
+async def verify_cobalt_origin(
+    request: Request,
+    body: CobaltOriginVerifyRequest,
+):
+    """
+    Dedicated DRC Katanga Heterogenite Ore-to-Cobalt Hydroxide Provenance Pipeline:
+    - 1. Katanga Copperbelt GIS Geofencing (Tenke Fungurume, Kamoto KCC, Mutanda, Metalkol RTR, Kisanfu)
+    - 2. DRC Mining Code (Loi n° 18/001) CEEC Tamper-Proof Barcode Seal Authentication
+    - 3. ASM Co-mingling Defense & EGC Custody Verification (Gotcha Trap 1 Defense)
+    - 4. ILO 138/182 Zero Child Labor Certification & RMI RMAP Active Smelter Auditing
+    - 5. Heterogenite Stoichiometric Mass Balance (Co 1.5% to Hydroxide 30%, loss discrepancy <= 2.5%)
+    - 6. US IRA Section 30D FEOC 25% screening & Polygon EIP-712 On-Chain Signature issuance
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = cobalt_pipeline.evaluate_cobalt_lot(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+@app.post(
+    "/api/v1/battery/composite-verify",
+    response_model=CompositeBatteryVerifyResponse,
+    tags=["Compliance Oracle"],
+    summary="Verify Composite EV Battery Pack Multi-Mineral Provenance & Issue Master Passport (x402 Verified)",
+    responses={402: {"description": "Payment Required (0.10 USDC on Polygon)"}},
+)
+async def verify_composite_battery(
+    request: Request,
+    body: CompositeBatteryVerifyRequest,
+):
+    """
+    Deterministic Composite Battery Supply-Chain Integrity & Master Passport Engine:
+    - 1. Multi-Stream Orchestration (Australian Lithium + Indonesian Nickel + DRC Cobalt)
+    - 2. US IRA Section 30D Critical Mineral 50% FTA Value Ratio Strict Computation
+    - 3. Foreign Entity of Concern (FEOC) Taint Analysis (< 25% covered nation equity across all streams)
+    - 4. EU Battery Regulation (2023/1542) Blended Scope 1-3 Carbon Footprint & CSDDD Due Diligence
+    - 5. Cryptographic Merkle Root Generation (sha256(Leaf_Li + Leaf_Ni + Leaf_Co))
+    - 6. Master Polygon EIP-712 Typed Structured Data Signature issuance
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.STANDARD)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = composite_battery_pipeline.evaluate_battery_pack(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
 
 
 @app.get(
@@ -1174,6 +1305,38 @@ async def invoke_mcp_tool(request: Request, tool_call: MCPToolCallRequest):
             return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2)}])
         except Exception as e:
             return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying lot: {str(e)}"}], isError=True)
+
+    elif name == "verify_lithium_origin":
+        try:
+            req_model = LithiumOriginVerifyRequest(**args)
+            data = lithium_pipeline.evaluate_lithium_lot(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying lithium origin: {str(e)}"}], isError=True)
+
+    elif name == "verify_nickel_origin":
+        try:
+            req_model = NickelOriginVerifyRequest(**args)
+            data = nickel_pipeline.evaluate_nickel_lot(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying nickel origin: {str(e)}"}], isError=True)
+
+    elif name == "verify_cobalt_origin":
+        try:
+            req_model = CobaltOriginVerifyRequest(**args)
+            data = cobalt_pipeline.evaluate_cobalt_lot(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying cobalt origin: {str(e)}"}], isError=True)
+
+    elif name == "verify_composite_battery_passport":
+        try:
+            req_model = CompositeBatteryVerifyRequest(**args)
+            data = composite_battery_pipeline.evaluate_battery_pack(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying composite battery: {str(e)}"}], isError=True)
 
     elif name == "list_trade_precedents":
         data = await list_trade_precedents()

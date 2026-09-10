@@ -17,6 +17,9 @@ class MineralType(str, Enum):
     MANGANESE_SULFATE = "MANGANESE_SULFATE"             # High Purity Sulfate (South Africa/Gabon)
     NEODYMIUM_DYSPROSIUM = "NEODYMIUM_DYSPROSIUM"       # Rare Earth Permanent Magnet Metals (Australia/China)
     ANTIMONY_TRIOXIDE = "ANTIMONY_TRIOXIDE"             # Flame Retardant & Electro-additive (China/Bolivia)
+    LITHIUM_BLACK_MASS = "LITHIUM_BLACK_MASS"           # Shredded battery black mass containing lithium (US BIS regulated)
+    NICKEL_COBALT_BLACK_MASS = "NICKEL_COBALT_BLACK_MASS" # Recycled Ni/Co black mass (US BIS export restricted)
+    TUNGSTEN_SCRAP = "TUNGSTEN_SCRAP"                   # Recycled tungsten scrap (US BIS export restricted)
 
 
 class SourceCountry(str, Enum):
@@ -28,6 +31,7 @@ class SourceCountry(str, Enum):
     BRA = "BRA"   # Brazil
     CHN = "CHN"   # China
     ZAF = "ZAF"   # South Africa
+    USA = "USA"   # United States of America
 
 
 class MaritimeCIIRating(str, Enum):
@@ -56,6 +60,8 @@ class MinePermitsRecord(BaseModel):
     argentina_concession_id: Optional[str] = Field(None, description="Argentina Provincial mining concession registry ID")
     brazil_anm_license_id: Optional[str] = Field(None, description="Brazil ANM mining registry license ID")
     china_dual_use_license_no: Optional[str] = Field(None, description="China MOFCOM dual-use export license (Graphite/Antimony)")
+    us_bis_scrap_export_license: Optional[str] = Field(None, description="US BIS 15 CFR 744 special export license for black mass / tungsten scrap")
+    china_extraterritorial_tech_clearance: Optional[str] = Field(None, description="China MOFCOM approval for extraterritorial SX refining tech utilization")
 
 
 # Pillar 2: Ecological, Spatial & Geological Integrity
@@ -76,6 +82,7 @@ class LaborHumanRightsRecord(BaseModel):
     ilua_registration_id: Optional[str] = Field(None, description="Australia Native Title Act ILUA registration number")
     forced_labor_uapa_cleared: bool = Field(True, description="Verified absence of Xinjiang UFLPA or forced labor ties")
     independent_third_party_auditor: str = Field("SGS / Bureau Veritas / RCS Global", description="Third-party audit body")
+    csddd_audit_hash: Optional[str] = Field(None, description="EU CSDDD supply chain human rights and environmental audit SHA-256 hash")
 
 
 # Pillar 4: Refining & Mass Balance Math
@@ -90,6 +97,11 @@ class RefiningMassBalanceRecord(BaseModel):
         description="OECD Annex II mass balance loss discrepancy percentage (Must be <= 2.0%)"
     )
     captive_coal_power_used: bool = Field(False, description="True if refined with captive coal power (EU CBAM risk)")
+    cbam_scope1_emissions_kg_co2e: Optional[float] = Field(None, description="Direct Scope 1 emissions in kg CO2e per kg mineral")
+    cbam_scope2_emissions_kg_co2e: Optional[float] = Field(None, description="Indirect Scope 2 electricity emissions in kg CO2e per kg mineral")
+    cbam_scope3_emissions_kg_co2e: Optional[float] = Field(None, description="Upstream/downstream Scope 3 emissions in kg CO2e per kg mineral")
+    cbam_declaration_id: Optional[str] = Field(None, description="EU CBAM Definitive Period registry declaration reference")
+    solvent_extraction_tech_origin: Optional[str] = Field("DOMESTIC", description="Origin of SX technology: DOMESTIC, WESTERN, CHINA_LICENSED, CHINA_UNLICENSED")
 
 
 # Pillar 5: Maritime Logistics & Scope 3 Carbon
@@ -165,6 +177,8 @@ class MineralLotProvenanceRequest(BaseModel):
     refining_mass_balance: RefiningMassBalanceRecord
     maritime_logistics: MaritimeLogisticsRecord
     geopolitical_sanctions: GeopoliticalSanctionsRecord
+    is_recycled_black_mass: bool = Field(False, description="True if cargo batch originates from shredded battery black mass or secondary scrap")
+    us_bis_export_authorized: bool = Field(True, description="True if authorized under US BIS 15 CFR 744 scrap retention rules")
     commercial_price_usd_per_ton: Optional[float] = Field(
         None,
         description="Confidential purchase price per ton (will be ZKP blinded on-chain)"
@@ -183,8 +197,11 @@ class ComplianceVerdict(BaseModel):
     oecd_annex_ii_passed: bool = Field(..., description="Passed OECD Due Diligence Guidance 12 red flags & 2% mass balance")
     eudr_deforestation_cleared: bool = Field(..., description="Compliant with EUDR Regulation 2023/1115")
     csddd_civil_liability_shielded: bool = Field(..., description="Compliant with EU CSDDD Tier-2/3 traceability standards")
+    us_bis_scrap_retention_cleared: bool = Field(True, description="Compliant with US BIS 15 CFR 744 battery scrap retention mandate (Trap 13)")
+    china_tech_jurisdiction_cleared: bool = Field(True, description="Compliant with China Extraterritorial SX refining tech rules (Trap 14)")
+    cbam_definitive_period_verified: bool = Field(True, description="Verified under EU CBAM Definitive Period Scope 1-3 rules")
     zkp_privacy_sealed: bool = Field(True, description="Commercial pricing & supplier contracts blinded via ZKP")
-    gotcha_defenses_applied: List[str] = Field(default_factory=list, description="List of 12-trap defense rules applied")
+    gotcha_defenses_applied: List[str] = Field(default_factory=list, description="List of 14-trap defense rules applied")
     jurisprudence_citations: List[TradeJurisprudenceCitation] = Field(default_factory=list)
 
 
@@ -396,3 +413,243 @@ class AgentFeedbackListResponse(BaseModel):
     total_proposals: int
     items: List[Dict[str, Any]]
     meta: Dict[str, Any]
+
+
+# =====================================================================
+# 6. DEDICATED LITHIUM SPODUMENE ORIGIN PROVENANCE SCHEMAS
+# =====================================================================
+
+class LithiumOriginVerifyRequest(BaseModel):
+    trace_id: str = Field(..., description="Unique traceability ID (e.g. LIT-AU-2026-X091)")
+    product: str = Field("Lithium Hydroxide Monohydrate", description="Refined product form: Lithium Hydroxide, Lithium Carbonate, Spodumene Concentrate")
+    mine_name: str = Field(..., description="Name of hard-rock mine (e.g. Greenbushes Lithium Mine, Pilgangoora)")
+    mine_country: str = Field("AU", description="ISO alpha-2 country of extraction (AU default)")
+    coordinates: List[float] = Field(..., min_length=2, max_length=2, description="[Latitude, Longitude] of extraction centroid")
+    minedex_tenement_id: Optional[str] = Field(None, description="Western Australia DMIRS MINEDEX tenement ID (e.g., M01/03)")
+    spodumene_tonnage_extracted: float = Field(..., gt=0, description="Gross run-of-mine or SC6 spodumene input in metric tons")
+    spodumene_grade_pct: float = Field(6.0, ge=1.0, le=10.0, description="Spodumene Li2O concentrate grade percentage (standard 6.0%)")
+    refinery_facility: str = Field(..., description="Name of refining or chemical conversion plant")
+    refinery_country: str = Field("AU", description="ISO alpha-2 country of the refinery plant (e.g. AU, US, CHN)")
+    refined_output_tonnage: float = Field(..., gt=0, description="Finished lithium product output in metric tons")
+    refinery_feoc_equity_pct: float = Field(0.0, ge=0.0, le=100.0, description="Covered nation entity equity/voting share in refinery")
+    satellite_vegetation_index: Optional[float] = Field(None, description="Sentinel-2 NDVI for the extraction boundary (typically < 0.2 in active pit)")
+    sar_backscatter_db: Optional[float] = Field(None, description="Sentinel-1 SAR C-band backscatter in dB")
+    agent_address: Optional[str] = Field(None, description="Calling agent Polygon wallet address for receipt generation")
+
+
+class ExtractionOriginEvidence(BaseModel):
+    mine_name: str
+    country: str
+    minedex_tenement_id: str
+    coordinates: List[float]
+    geofence_distance_km: float
+    geofence_passed: bool
+    satellite_evidence: Dict[str, Any]
+
+
+class MassBalanceAuditEvidence(BaseModel):
+    spodumene_input_metric_tons: float
+    refined_output_metric_tons: float
+    theoretical_required_spodumene_tons: float
+    discrepancy_pct: float
+    is_stoichiometrically_sound: bool
+
+
+class LithiumAuditVerdict(BaseModel):
+    ira_compliant: bool = Field(..., description="Eligible for US IRA 30D $7,500 clean vehicle credit")
+    crma_origin_eligible: bool = Field(..., description="Eligible for EU Critical Raw Materials Act & Battery Passport")
+    feoc_risk_detected: bool = Field(..., description="True if refined in China or >=25% covered nation equity")
+    confidence_score: float = Field(..., ge=0.0, le=100.0, description="Algorithmic confidence rating (0-100)")
+    defenses_applied: List[str] = Field(default_factory=list)
+
+
+class LithiumOriginVerifyResponse(BaseModel):
+    status: str = "success"
+    meta: ResponseMeta = Field(default_factory=ResponseMeta)
+    trace_id: str
+    product: str
+    extraction_origin: ExtractionOriginEvidence
+    processing_route: List[Dict[str, Any]]
+    mass_balance_audit: MassBalanceAuditEvidence
+    audit_verdict: LithiumAuditVerdict
+    onchain_proof: str
+    timestamp: str
+
+
+# =====================================================================
+# 7. DEDICATED INDONESIAN NICKEL MHP PROVENANCE SCHEMAS
+# =====================================================================
+
+class NickelOriginVerifyRequest(BaseModel):
+    trace_id: str = Field(..., description="Unique traceability batch identifier (e.g. NIC-IDN-2026-MHP01)")
+    product: str = Field("Nickel Mixed Hydroxide Precipitate (MHP)", description="Beneficiated intermediate product form (MHP or Ferronickel)")
+    concession_name: str = Field(..., description="Mining concession / IUP name (e.g. Morowali Concession, Weda Bay, Sorowako)")
+    coordinates: List[float] = Field(..., min_length=2, max_length=2, description="[Latitude, Longitude] of extraction centroid")
+    simbara_ntpn: str = Field(..., description="Indonesia Ministry of Energy (ESDM) SIMBARA/e-PNBP payment code (NTPN)")
+    dhe_forex_deposit_ref: Optional[str] = Field(None, description="Bank Indonesia 30% export forex deposit receipt reference (DHE BI)")
+    limonite_ore_input_tons: float = Field(..., gt=0, description="Gross wet/dry laterite limonite ore input in metric tons")
+    ore_grade_ni_pct: float = Field(1.35, ge=0.5, le=3.0, description="Limonite ore nickel content % (standard 1.2% ~ 1.5%)")
+    hpal_refinery_name: str = Field(..., description="High Pressure Acid Leach (HPAL) facility name (e.g. QMB New Energy, Huayue)")
+    mhp_output_tons: float = Field(..., gt=0, description="Refined MHP product yield in metric tons")
+    mhp_grade_ni_pct: float = Field(38.5, ge=30.0, le=45.0, description="MHP nickel metal content % (standard ~38% ~ 40%)")
+    captive_coal_power: bool = Field(False, description="True if HPAL plant runs on dedicated captive coal-fired power (EU CBAM risk)")
+    feoc_equity_pct: float = Field(0.0, ge=0.0, le=100.0, description="Covered nation entity equity/voting share in smelter JV")
+    agent_address: Optional[str] = Field(None, description="Calling agent Polygon wallet address for receipt generation")
+
+
+class NickelConcessionEvidence(BaseModel):
+    concession_name: str
+    region: str
+    coordinates: List[float]
+    geofence_distance_km: float
+    geofence_passed: bool
+    simbara_ntpn_verified: bool
+    dhe_forex_verified: bool
+
+
+class HPALMassBalanceEvidence(BaseModel):
+    limonite_input_tons: float
+    mhp_output_tons: float
+    theoretical_required_ore_tons: float
+    discrepancy_pct: float
+    is_stoichiometrically_sound: bool
+    hpal_recovery_yield_pct: float
+
+
+class NickelAuditVerdict(BaseModel):
+    simbara_export_cleared: bool = Field(..., description="Inaportnet export clearance legally cleared via SIMBARA NTPN")
+    wto_ds592_compliant: bool = Field(..., description="Beneficiated MHP compliant with WTO DS592 domestic processing rules")
+    cbam_carbon_ready: bool = Field(..., description="Free of captive coal power; eligible for EU Battery Regulation")
+    ira_feoc_compliant: bool = Field(..., description="Covered nation equity < 25.0%; eligible for US IRA 30D credit")
+    confidence_score: float = Field(..., ge=0.0, le=100.0, description="Algorithmic confidence rating (0-100)")
+    defenses_applied: List[str] = Field(default_factory=list)
+
+
+class NickelOriginVerifyResponse(BaseModel):
+    status: str = "success"
+    meta: ResponseMeta = Field(default_factory=ResponseMeta)
+    trace_id: str
+    product: str
+    extraction_concession: NickelConcessionEvidence
+    refining_facility: Dict[str, Any]
+    hpal_mass_balance: HPALMassBalanceEvidence
+    audit_verdict: NickelAuditVerdict
+    onchain_proof: str
+    timestamp: str
+
+
+# =====================================================================
+# 8. DEDICATED DRC COBALT HYDROXIDE PROVENANCE SCHEMAS
+# =====================================================================
+
+class CobaltOriginVerifyRequest(BaseModel):
+    trace_id: str = Field(..., description="Unique traceability batch identifier (e.g. COB-COD-2026-HYD01)")
+    product: str = Field("Crude Cobalt Hydroxide", description="Beneficiated intermediate product form")
+    concession_name: str = Field(..., description="Mining concession name (e.g. Tenke Fungurume, Kamoto Copper Company, Mutanda Mining)")
+    province: str = Field("Lualaba", description="DRC Province (e.g. Lualaba, Haut-Katanga)")
+    coordinates: List[float] = Field(..., min_length=2, max_length=2, description="[Latitude, Longitude] centroid of extraction pit")
+    mine_type: str = Field("LSM", description="Extraction scale: Large-Scale Mining ('LSM') or Artisanal & Small-scale ('ASM')")
+    ceec_seal_id: str = Field(..., description="DRC CEEC (Centre d'Expertise) tamper-proof barcode seal / export certificate")
+    egc_custody_ref: Optional[str] = Field(None, description="Entreprise Générale du Cobalt (EGC) custody reference if ASM involvement")
+    asm_comingled: bool = Field(False, description="True if uncertified artisanal ore was co-mingled into industrial lot (Trap 1 risk)")
+    zero_child_labor_audit_ref: Optional[str] = Field(None, description="Independent ILO 138/182 zero child labor verification certificate hash/ID")
+    heterogenite_ore_input_tons: float = Field(..., gt=0, description="Gross heterogenite/copper-cobalt ore input in metric tons")
+    ore_grade_co_pct: float = Field(1.50, ge=0.2, le=10.0, description="Cobalt grade in run-of-mine ore % (standard 1.0% ~ 2.5%)")
+    refinery_name: str = Field(..., description="Refinery / hydrometallurgical leaching plant name")
+    refinery_country: str = Field("COD", description="Country of primary refining (e.g. COD, FIN, CHN)")
+    rmi_rmap_smelter_id: Optional[str] = Field(None, description="Responsible Minerals Initiative (RMI) RMAP audited smelter ID")
+    cobalt_hydroxide_output_tons: float = Field(..., gt=0, description="Refined crude cobalt hydroxide output in metric tons")
+    hydroxide_grade_co_pct: float = Field(30.0, ge=15.0, le=45.0, description="Cobalt metal content % in hydroxide (standard ~30.0%)")
+    feoc_equity_pct: float = Field(0.0, ge=0.0, le=100.0, description="Covered nation entity equity/voting share in operator (cap < 25%)")
+    agent_address: Optional[str] = Field(None, description="Calling agent Polygon wallet address for receipt generation")
+
+
+class CobaltConcessionEvidence(BaseModel):
+    concession_name: str
+    province: str
+    coordinates: List[float]
+    geofence_distance_km: float
+    geofence_passed: bool
+    mine_type: str
+    ceec_seal_verified: bool
+    egc_custody_verified: bool
+    child_labor_audit_verified: bool
+
+
+class CobaltMassBalanceEvidence(BaseModel):
+    heterogenite_input_tons: float
+    hydroxide_output_tons: float
+    theoretical_required_ore_tons: float
+    discrepancy_pct: float
+    is_stoichiometrically_sound: bool
+    hydrometallurgical_recovery_pct: float
+
+
+class CobaltAuditVerdict(BaseModel):
+    ceec_export_cleared: bool = Field(..., description="Cleared under DRC Mining Code Loi n° 18/001 via CEEC tamper-proof seal")
+    asm_segregated: bool = Field(..., description="Free of uncontrolled artisanal co-mingling; compliant with OECD Annex II Red Flags")
+    rmi_rmap_certified: bool = Field(..., description="Smelter holds active RMI Responsible Minerals Assurance Process certification")
+    child_labor_free: bool = Field(..., description="Certified zero child labor under ILO Conventions 138 & 182")
+    ira_feoc_compliant: bool = Field(..., description="Covered nation equity < 25.0%; eligible for US IRA 30D tax credit")
+    confidence_score: float = Field(..., ge=0.0, le=100.0, description="Algorithmic confidence rating (0-100)")
+    defenses_applied: List[str] = Field(default_factory=list)
+
+
+class CobaltOriginVerifyResponse(BaseModel):
+    status: str = "success"
+    meta: ResponseMeta = Field(default_factory=ResponseMeta)
+    trace_id: str
+    product: str
+    extraction_concession: CobaltConcessionEvidence
+    refining_facility: Dict[str, Any]
+    mass_balance_audit: CobaltMassBalanceEvidence
+    audit_verdict: CobaltAuditVerdict
+    onchain_proof: str
+    timestamp: str
+
+
+# =====================================================================
+# 9. COMPOSITE BATTERY PASSPORT & MULTI-MINERAL INTEGRITY SCHEMAS
+# =====================================================================
+
+class CompositeBatteryVerifyRequest(BaseModel):
+    battery_pack_id: str = Field(..., description="Unique EV battery pack or cell batch serial (e.g. BATT-NCM811-2026-PACK01)")
+    cell_chemistry: str = Field("NCM811", description="Cathode active material chemistry (e.g. NCM811, NCM622, NCM523)")
+    pack_capacity_kwh: float = Field(84.0, gt=0, description="Gross battery pack capacity in kilowatt-hours (kWh)")
+    lithium_lot: LithiumOriginVerifyRequest = Field(..., description="Australian Spodumene Lithium Hydroxide lot data")
+    nickel_lot: NickelOriginVerifyRequest = Field(..., description="Indonesian Nickel MHP lot data")
+    cobalt_lot: CobaltOriginVerifyRequest = Field(..., description="DRC Katanga Cobalt Hydroxide lot data")
+    agent_address: Optional[str] = Field(None, description="Requesting OEM/tier-1 buyer Polygon wallet address")
+
+
+class CompositeBatteryAuditVerdict(BaseModel):
+    ira_30d_tax_credit_eligible: bool = Field(..., description="Eligible for US IRA Section 30D $7,500 clean vehicle credit ($3,750 mineral portion)")
+    ira_critical_mineral_fta_ratio_pct: float = Field(..., ge=0.0, le=100.0, description="Calculated % of critical mineral procurement value originating from US FTA partner countries (threshold >= 50%)")
+    eu_battery_passport_approved: bool = Field(..., description="Eligible for EU Battery Regulation 2023/1542 mandatory passport registration")
+    blended_carbon_footprint_kg_per_kwh: float = Field(..., ge=0.0, description="Blended cradle-to-gate Scope 1-3 carbon footprint (kg CO2e / kWh)")
+    composite_confidence_score: float = Field(..., ge=0.0, le=100.0, description="Composite algorithmic confidence rating (0-100)")
+    lithium_cleared: bool
+    nickel_cleared: bool
+    cobalt_cleared: bool
+    feoc_taint_detected: bool = Field(..., description="True if any component mineral carries >=25% covered nation equity/control")
+    cbam_carbon_penalty_alert: bool = Field(..., description="True if any processing step (e.g. nickel captive coal) incurs EU CBAM carbon tariff liabilities")
+    composite_defenses_applied: List[str] = Field(default_factory=list)
+
+
+class CompositeBatteryVerifyResponse(BaseModel):
+    status: str = "success"
+    meta: ResponseMeta = Field(default_factory=ResponseMeta)
+    battery_pack_id: str
+    cell_chemistry: str
+    pack_capacity_kwh: float
+    merkle_root: str
+    lithium_summary: Dict[str, Any]
+    nickel_summary: Dict[str, Any]
+    cobalt_summary: Dict[str, Any]
+    composite_verdict: CompositeBatteryAuditVerdict
+    master_onchain_proof: str
+    timestamp: str
+
+
+
+

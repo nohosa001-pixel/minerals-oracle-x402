@@ -34,8 +34,11 @@
 
 ## ⚡ Quick Agent API Directory
 
-- **Compliance Verification**: `POST /api/v1/oracle/compliance/verify` (Full 7-pillar audit + EIP-712 passport)
-- **Compliance Engine Status**: `GET /api/v1/oracle/compliance/status` (Active 10-nation laws & 12-trap status)
+- **General Compliance Verification**: `POST /api/v1/oracle/compliance/verify` (Full 7-pillar audit + EIP-712 passport)
+- **Australian Lithium Provenance**: `POST /api/v1/lithium/verify-origin` (WA MINEDEX, 7.5:1 yield, US IRA FEOC 25%)
+- **Indonesian Nickel MHP Provenance**: `POST /api/v1/nickel/verify-origin` (SIMBARA NTPN, HPAL 31.34:1 yield, CBAM)
+- **DRC Cobalt Hydroxide Provenance**: `POST /api/v1/cobalt/verify-origin` (CEEC barcode seals, EGC ASM segregation, ILO child labor)
+- **Compliance Engine Status**: `GET /api/v1/oracle/compliance/status` (Active 10-nation laws & 14-trap status)
 - **Trade Jurisprudence Precedents**: `GET /api/v1/oracle/compliance/precedents` (WTO DS592, DS431, ICSID, US CIT)
 - **Free Public Alpha Hook**: `GET /api/v1/oracle/alpha-signals` (Pollable 24/7 without authentication)
 - **Direct 402 Challenge**: `GET /api/v1/oracle/challenge`
