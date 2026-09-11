@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
 from pydantic import BaseModel, Field
 
 
@@ -12,6 +12,10 @@ class MineralType(str, Enum):
     LITHIUM_HYDROXIDE = "LITHIUM_HYDROXIDE"             # Battery Grade Hydroxide (Chile/Australia)
     LITHIUM_CARBONATE = "LITHIUM_CARBONATE"             # Battery Grade Carbonate (Chile/Argentina)
     COBALT_HYDROXIDE = "COBALT_HYDROXIDE"               # Crude Cobalt Hydroxide (DRC)
+    COPPER_CATHODE = "COPPER_CATHODE"                   # LME Grade A Electrolytic Copper Cathode 99.99% (Chile/Peru)
+    COPPER_CONCENTRATE = "COPPER_CONCENTRATE"           # Flotation Copper Concentrate 26-30% Cu (Chile/Peru)
+    SILVER_DORE = "SILVER_DORE"                         # Unrefined Silver Doré Bar (Mexico/Peru)
+    SILVER_POWDER_SOLAR_PV = "SILVER_POWDER_SOLAR_PV"   # High-Purity 99.99% TOPCon Solar PV Silver Paste (Mexico/Peru)
     NATURAL_GRAPHITE = "NATURAL_GRAPHITE"               # Spherical Coated Natural Graphite (Mozambique/China)
     SYNTHETIC_GRAPHITE = "SYNTHETIC_GRAPHITE"           # Synthetic Anode Graphite (China)
     MANGANESE_SULFATE = "MANGANESE_SULFATE"             # High Purity Sulfate (South Africa/Gabon)
@@ -32,6 +36,8 @@ class SourceCountry(str, Enum):
     CHN = "CHN"   # China
     ZAF = "ZAF"   # South Africa
     USA = "USA"   # United States of America
+    MEX = "MEX"   # Mexico (World #1 Silver Producer)
+    PER = "PER"   # Peru (Top Copper & Silver Producer)
 
 
 class MaritimeCIIRating(str, Enum):
@@ -62,6 +68,9 @@ class MinePermitsRecord(BaseModel):
     china_dual_use_license_no: Optional[str] = Field(None, description="China MOFCOM dual-use export license (Graphite/Antimony)")
     us_bis_scrap_export_license: Optional[str] = Field(None, description="US BIS 15 CFR 744 special export license for black mass / tungsten scrap")
     china_extraterritorial_tech_clearance: Optional[str] = Field(None, description="China MOFCOM approval for extraterritorial SX refining tech utilization")
+    chile_cochilco_export_id: Optional[str] = Field(None, description="Chile COCHILCO copper export registration & quota clearance")
+    mexico_se_mining_concession: Optional[str] = Field(None, description="Mexico Secretaría de Economía mining concession title ID")
+    peru_ingemmet_concession_id: Optional[str] = Field(None, description="Peru INGEMMET public mining registry concession ID")
 
 
 # Pillar 2: Ecological, Spatial & Geological Integrity
@@ -102,6 +111,13 @@ class RefiningMassBalanceRecord(BaseModel):
     cbam_scope3_emissions_kg_co2e: Optional[float] = Field(None, description="Upstream/downstream Scope 3 emissions in kg CO2e per kg mineral")
     cbam_declaration_id: Optional[str] = Field(None, description="EU CBAM Definitive Period registry declaration reference")
     solvent_extraction_tech_origin: Optional[str] = Field("DOMESTIC", description="Origin of SX technology: DOMESTIC, WESTERN, CHINA_LICENSED, CHINA_UNLICENSED")
+    chinese_tech_dependency_pct: float = Field(0.0, ge=0.0, le=100.0, description="Percentage dependency on Chinese proprietary SX/smelting technology/catalysts")
+    mofcom_extraterritorial_clearance_id: Optional[str] = Field(None, description="China MOFCOM dual-use extraterritorial technology export authorization ID")
+    substitute_western_tech_certified: bool = Field(False, description="Certified availability and operational deployment of non-Chinese Western alternative SX/refining technology")
+    sulfuric_acid_input_metric_tons: Optional[float] = Field(None, description="Sulfuric acid (H2SO4) input in metric tons for copper leach/smelting")
+    sulfuric_acid_discrepancy_pct: Optional[float] = Field(None, description="Discrepancy % from stoichiometric sulfuric acid requirement (max allowable 5.0%)")
+    hvdc_grade_copper_certified: Optional[bool] = Field(None, description="True if copper cathode meets ASTM B115 Grade 1 (99.9935% Cu) for HVDC cables")
+    solar_pv_topcon_silver_certified: Optional[bool] = Field(None, description="True if silver powder/paste meets 99.99% purity for N-type TOPCon solar PV cells")
 
 
 # Pillar 5: Maritime Logistics & Scope 3 Carbon
@@ -199,9 +215,14 @@ class ComplianceVerdict(BaseModel):
     csddd_civil_liability_shielded: bool = Field(..., description="Compliant with EU CSDDD Tier-2/3 traceability standards")
     us_bis_scrap_retention_cleared: bool = Field(True, description="Compliant with US BIS 15 CFR 744 battery scrap retention mandate (Trap 13)")
     china_tech_jurisdiction_cleared: bool = Field(True, description="Compliant with China Extraterritorial SX refining tech rules (Trap 14)")
+    china_tech_licensing_cleared: bool = Field(True, description="Compliant with China Extraterritorial Tech Licensing Jurisdiction (Trap 15)")
     cbam_definitive_period_verified: bool = Field(True, description="Verified under EU CBAM Definitive Period Scope 1-3 rules")
+    downstream_cbam_scope3_cleared: bool = Field(True, description="Compliant with EU CBAM 2028 downstream finished/machinery product rules")
+    csddd_due_diligence_verified: bool = Field(True, description="Compliant with EU CSDDD human rights and environmental due diligence audit")
+    copper_hvdc_certified: Optional[bool] = Field(None, description="Certified for AI Data Center & HVDC Power Grid infrastructure")
+    silver_solar_pv_cleared: Optional[bool] = Field(None, description="Certified for N-type TOPCon high-efficiency solar PV cells")
     zkp_privacy_sealed: bool = Field(True, description="Commercial pricing & supplier contracts blinded via ZKP")
-    gotcha_defenses_applied: List[str] = Field(default_factory=list, description="List of 14-trap defense rules applied")
+    gotcha_defenses_applied: List[str] = Field(default_factory=list, description="List of 16-trap defense rules applied")
     jurisprudence_citations: List[TradeJurisprudenceCitation] = Field(default_factory=list)
 
 
@@ -649,6 +670,91 @@ class CompositeBatteryVerifyResponse(BaseModel):
     composite_verdict: CompositeBatteryAuditVerdict
     master_onchain_proof: str
     timestamp: str
+
+
+# =====================================================================
+# 8. COPPER (HVDC & AI DATA CENTER GRID) SCHEMAS
+# =====================================================================
+
+class CopperOriginVerifyRequest(BaseModel):
+    lot_id: str = Field(..., description="Unique enterprise copper lot identifier")
+    mine_concession_name: str = Field("CHUQUICAMATA", description="Canonical mine concession: CHUQUICAMATA, EL_TENIENTE, ANDINA, ESCONDIDA, LOS_PELAMBRES, CERRO_VERDE")
+    extraction_coordinates: Tuple[float, float] = Field(..., description="(lat, lon) centroid coordinates")
+    source_country: SourceCountry = Field(SourceCountry.CHL, description="Country of extraction")
+    feedstock_concentrate_tons: float = Field(..., gt=0, description="Copper flotation concentrate feed in metric tons")
+    concentrate_grade_cu_pct: float = Field(28.0, ge=10.0, le=45.0, description="Copper concentrate assay grade % (default 28.0% Cu)")
+    sulfuric_acid_input_tons: float = Field(..., gt=0, description="Actual sulfuric acid (H2SO4) consumed in metric tons")
+    refined_copper_cathode_tons: float = Field(..., gt=0, description="Refined Grade A copper cathode output in metric tons")
+    copper_cathode_purity_pct: float = Field(99.9935, ge=99.0, le=100.0, description="Cathode assay purity % (ASTM B115 Grade 1 requires 99.9935%)")
+    cochilco_export_clearance_id: Optional[str] = Field(None, description="Chile COCHILCO export quota and registration ID")
+    hvdc_cable_spec_compliant: bool = Field(True, description="True if certified for AI Data Center HVDC power grid transmission")
+    feoc_shareholding_pct: float = Field(0.0, ge=0.0, le=100.0, description="Covered nation equity shareholding %")
+    agent_address: Optional[str] = Field(None, description="Buyer agent Polygon wallet address")
+
+
+class CopperAuditVerdict(BaseModel):
+    geofence_verified: bool
+    stoichiometric_mass_balance_passed: bool
+    sulfuric_acid_ratio_passed: bool
+    cochilco_cleared: bool
+    hvdc_grid_certified: bool
+    feoc_cleared: bool
+    confidence_score: float = Field(..., ge=0.0, le=100.0)
+    defenses_applied: List[str] = Field(default_factory=list)
+
+
+class CopperOriginVerifyResponse(BaseModel):
+    status: str = "success"
+    meta: ResponseMeta = Field(default_factory=ResponseMeta)
+    lot_id: str
+    extraction_origin: Dict[str, Any]
+    mass_balance_audit: Dict[str, Any]
+    verdict: CopperAuditVerdict
+    onchain_proof: str
+    timestamp: str
+
+
+# =====================================================================
+# 9. SILVER (N-TYPE TOPCON SOLAR PV PASTE) SCHEMAS
+# =====================================================================
+
+class SilverOriginVerifyRequest(BaseModel):
+    lot_id: str = Field(..., description="Unique enterprise silver batch identifier")
+    mine_concession_name: str = Field("TERRONERA", description="Canonical mine concession: TERRONERA, FRESNILLO, ANTAMINA, UCHUCCHACUA, LOS_PELAMBRES")
+    extraction_coordinates: Tuple[float, float] = Field(..., description="(lat, lon) centroid coordinates")
+    source_country: SourceCountry = Field(SourceCountry.MEX, description="Country of extraction")
+    feedstock_dore_or_ore_kg: float = Field(..., gt=0, description="Unrefined Doré bullion or high-grade ore input in kg")
+    feedstock_silver_grade_pct: float = Field(75.0, ge=10.0, le=98.0, description="Doré bullion silver content % (default 75.0% Ag)")
+    refined_solar_powder_kg: float = Field(..., gt=0, description="Finished electrolytic silver powder/paste yield in kg")
+    refined_purity_pct: float = Field(99.99, ge=95.0, le=100.0, description="Refined silver assay purity % (Solar PV paste requires >= 99.99%)")
+    lbma_good_delivery_ref: Optional[str] = Field(None, description="LBMA Good Delivery ref or accredited refiner license ID")
+    conflict_free_asm_verified: bool = Field(True, description="Verified free from illegal artisanal laundering or cartel supply")
+    topcon_pv_grade_compliant: bool = Field(True, description="Certified for N-type TOPCon / HJT solar cell metallization paste")
+    feoc_shareholding_pct: float = Field(0.0, ge=0.0, le=100.0, description="Covered nation equity shareholding %")
+    agent_address: Optional[str] = Field(None, description="Buyer agent Polygon wallet address")
+
+
+class SilverAuditVerdict(BaseModel):
+    geofence_verified: bool
+    refining_mass_balance_passed: bool
+    topcon_solar_pv_certified: bool
+    conflict_free_asm_passed: bool
+    lbma_cleared: bool
+    feoc_cleared: bool
+    confidence_score: float = Field(..., ge=0.0, le=100.0)
+    defenses_applied: List[str] = Field(default_factory=list)
+
+
+class SilverOriginVerifyResponse(BaseModel):
+    status: str = "success"
+    meta: ResponseMeta = Field(default_factory=ResponseMeta)
+    lot_id: str
+    extraction_origin: Dict[str, Any]
+    mass_balance_audit: Dict[str, Any]
+    verdict: SilverAuditVerdict
+    onchain_proof: str
+    timestamp: str
+
 
 
 

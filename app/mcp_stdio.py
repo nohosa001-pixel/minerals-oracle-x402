@@ -165,6 +165,60 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
                     }
                 },
                 {
+                    "name": "verify_copper_origin",
+                    "description": (
+                        "Verifies South American Copper-to-Cathode supply-chain provenance. "
+                        "Evaluates Codelco/Escondida/Cerro Verde GIS geofencing (Chuquicamata, El Teniente, Andina), "
+                        "stoichiometric flotation-to-cathode mass balance (loss discrepancy <= 2.0%), "
+                        "sulfuric acid (H2SO4) deficit screening (variance <= 5.0%), Chilean COCHILCO export clearance, "
+                        "and AI Data Center / HVDC Power Grid specifications (ASTM B115 Grade 1, 99.9935% Cu)."
+                    ),
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "lot_id": {"type": "string", "description": "Unique lot ID (e.g. COP-CHL-2026-LOT01)"},
+                            "mine_concession_name": {"type": "string", "default": "CHUQUICAMATA", "description": "Mine concession name"},
+                            "extraction_coordinates": {"type": "array", "items": {"type": "number"}, "description": "[Lat, Lon] centroid"},
+                            "feedstock_concentrate_tons": {"type": "number", "description": "Flotation concentrate input in metric tons"},
+                            "concentrate_grade_cu_pct": {"type": "number", "default": 28.0, "description": "Cu concentrate grade %"},
+                            "sulfuric_acid_input_tons": {"type": "number", "description": "Actual H2SO4 consumed in metric tons"},
+                            "refined_copper_cathode_tons": {"type": "number", "description": "Cathode output in metric tons"},
+                            "copper_cathode_purity_pct": {"type": "number", "default": 99.9935, "description": "Assay purity % (Grade 1 >= 99.9935%)"},
+                            "cochilco_export_clearance_id": {"type": "string", "description": "Chilean COCHILCO clearance ID"},
+                            "hvdc_cable_spec_compliant": {"type": "boolean", "default": True, "description": "HVDC grid compliance"},
+                            "feoc_shareholding_pct": {"type": "number", "default": 0.0, "description": "Covered nation equity % (cap < 25%)"}
+                        },
+                        "required": ["lot_id", "extraction_coordinates", "feedstock_concentrate_tons", "sulfuric_acid_input_tons", "refined_copper_cathode_tons"]
+                    }
+                },
+                {
+                    "name": "verify_silver_origin",
+                    "description": (
+                        "Verifies Mexican & Global Silver supply-chain provenance. "
+                        "Evaluates Terronera/Fresnillo/Antamina GIS geofencing, "
+                        "Moebius/Thum electrolytic mass balance (loss discrepancy <= 2.0%), "
+                        "N-Type TOPCon High-Efficiency Solar PV paste assay purity (>= 99.99% Ag), "
+                        "anti-cartel conflict ASM screening, and LBMA Good Delivery audit."
+                    ),
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "lot_id": {"type": "string", "description": "Unique silver batch ID (e.g. SIL-MEX-2026-PV01)"},
+                            "mine_concession_name": {"type": "string", "default": "TERRONERA", "description": "Mine concession name"},
+                            "extraction_coordinates": {"type": "array", "items": {"type": "number"}, "description": "[Lat, Lon] centroid"},
+                            "feedstock_dore_or_ore_kg": {"type": "number", "description": "Gross Doré bullion or ore input in kg"},
+                            "feedstock_silver_grade_pct": {"type": "number", "default": 75.0, "description": "Doré silver content %"},
+                            "refined_solar_powder_kg": {"type": "number", "description": "Finished refined silver powder/paste yield in kg"},
+                            "refined_purity_pct": {"type": "number", "default": 99.99, "description": "Assay purity % (Solar PV requires >= 99.99%)"},
+                            "lbma_good_delivery_ref": {"type": "string", "description": "LBMA accreditation ref (optional)"},
+                            "conflict_free_asm_verified": {"type": "boolean", "default": True, "description": "Free from cartel/ASM taint"},
+                            "topcon_pv_grade_compliant": {"type": "boolean", "default": True, "description": "N-type TOPCon solar grade compliance"},
+                            "feoc_shareholding_pct": {"type": "number", "default": 0.0, "description": "Covered nation equity % (cap < 25%)"}
+                        },
+                        "required": ["lot_id", "extraction_coordinates", "feedstock_dore_or_ore_kg", "refined_solar_powder_kg"]
+                    }
+                },
+                {
                     "name": "list_trade_precedents",
                     "description": (
                         "Query international trade jurisprudence precedents embedded in the oracle: "
@@ -397,6 +451,42 @@ def handle_tool_call(req_id: Any, name: str, arguments: Dict[str, Any]) -> Dict[
                         {
                             "type": "text",
                             "text": json.dumps(composite_res.model_dump(), indent=2, ensure_ascii=False)
+                        }
+                    ]
+                }
+            }
+
+        elif name == "verify_copper_origin":
+            from app.copper_pipeline import copper_pipeline
+            from app.schemas import CopperOriginVerifyRequest
+            req_model = CopperOriginVerifyRequest(**arguments)
+            copper_res = copper_pipeline.verify_origin(req_model)
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": json.dumps(copper_res.model_dump(), indent=2, ensure_ascii=False)
+                        }
+                    ]
+                }
+            }
+
+        elif name == "verify_silver_origin":
+            from app.silver_pipeline import silver_pipeline
+            from app.schemas import SilverOriginVerifyRequest
+            req_model = SilverOriginVerifyRequest(**arguments)
+            silver_res = silver_pipeline.verify_origin(req_model)
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": json.dumps(silver_res.model_dump(), indent=2, ensure_ascii=False)
                         }
                     ]
                 }

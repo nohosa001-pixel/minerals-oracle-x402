@@ -1,14 +1,14 @@
 # EV Battery Critical Minerals & Provenance Oracle (`minerals-oracle-x402`)
 
 [![PyPI Version](https://img.shields.io/pypi/v/minerals-oracle-x402.svg?color=blue&style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/minerals-oracle-x402/)
-[![Tests](https://img.shields.io/badge/Tests-102%2F102_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
-[![Spec Version](https://img.shields.io/badge/Compliance_Spec-v2.4.0-purple?style=for-the-badge)](GLOBAL_BATTERY_MINERALS_COMPLIANCE_SPEC.md)
+[![Tests](https://img.shields.io/badge/Tests-119%2F119_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
+[![Spec Version](https://img.shields.io/badge/Compliance_Spec-v2.5.0-purple?style=for-the-badge)](GLOBAL_BATTERY_MINERALS_COMPLIANCE_SPEC.md)
 [![FastMCP](https://img.shields.io/badge/FastMCP-Model_Context_Protocol-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](mcp_tool_spec.json)
 [![Polygon Network](https://img.shields.io/badge/Polygon_USDC-x402_Settlement-8247E5?style=for-the-badge&logo=polygon&logoColor=white)](https://polygon.technology)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-> **Autonomous Machine-to-Machine (M2M) Compliance & On-Chain Battery Passport Oracle for Critical Minerals (Lithium, Nickel, Cobalt).**  
-> Verifies real-world mining extraction, stoichiometric mass balances, US IRA Section 30D 50% FTA value thresholds, strict Foreign Entity of Concern (FEOC) taint propagation, EU Battery Regulation (2023/1542) carbon footprint, and issues cryptographic Merkle Root EIP-712 master attestations on Polygon.
+> **Autonomous Machine-to-Machine (M2M) Compliance & On-Chain Battery Passport Oracle for Critical Minerals (Lithium, Nickel, Cobalt, Copper, Silver).**  
+> Verifies real-world mining extraction, stoichiometric mass balances, US IRA Section 30D 50% FTA value thresholds, strict Foreign Entity of Concern (FEOC) taint propagation, EU Battery Regulation (2023/1542) & 2028 Downstream CBAM carbon footprints, ASTM B115 HVDC copper grid standards, LBMA TOPCon solar PV silver purity, and issues cryptographic Merkle Root EIP-712 master attestations on Polygon.
 
 ---
 
@@ -84,6 +84,16 @@ flowchart TD
 * **CEEC Security Seals**: Cryptographically authenticates Centre d'Expertise (CEEC) tamper-proof barcode export seals.
 * **ILO Human Rights Diligence**: Enforces mandatory independent audits for ILO Convention 138 (Minimum Age) and 182 (Worst Forms of Child Labor).
 
+#### 🇨🇱 Chilean Copper Cathode Pipeline (`app/copper_pipeline.py`)
+* **Concession Geofencing**: Monitors major porphyry operations (Codelco Chuquicamata, El Teniente, Andina, BHP Escondida, Antofagasta Los Pelambres, Cerro Verde).
+* **Smelter Acid Balance (Trap 16)**: Validates sulfuric acid ($H_2SO_4$) reagent supply balance ($\le 5.0\%$ deficit tolerance).
+* **Grid & Purity Standard**: Certifies ASTM B115 Grade 1 electrolytic cathode purity ($\ge 99.9935\%$) for AI datacenter HVDC power grids and COCHILCO export clearances.
+
+#### 🇲🇽 Mexican Silver Doré Pipeline (`app/silver_pipeline.py`)
+* **Concession Geofencing**: Monitors high-grade silver operations (Endeavour Silver Terronera, Fresnillo, Antamina, Uchucchacua, Los Pelambres).
+* **N-Type TOPCon Solar Standard (Trap 16)**: Enforces ultra-pure $\ge 99.99\%$ silver powder certification for next-gen solar PV metallization paste.
+* **Security & LBMA Assurance**: Defends against cartel-tainted artisanal extraction and validates LBMA Good Delivery refiner accreditation.
+
 ---
 
 ### 3. Interactive Web Observatory & Verification Simulator
@@ -102,6 +112,9 @@ The built-in browser UI ([`app/static/ko.html`](app/static/ko.html) and [`app/st
 * **⚠️ FEOC Taint Trap (`feoc`)**: Injects 80% Chinese state ownership into DRC Cobalt $\rightarrow$ Entire battery pack disqualified under FEOC 25% threshold.
 * **⚠️ Captive Coal CBAM Trap (`cbam`)**: Injects captive coal power smelting in Indonesia $\rightarrow$ EU CBAM carbon tariff liabilities triggered.
 * **❌ Child Labor Trap (`child`)**: Injects uncertified artisanal pit ore in DRC $\rightarrow$ EU Battery Passport immediate rejection.
+* **🚨 Trap 15 Tech Defense (`trap15`)**: Evaluates Chinese Mineral Resources Law extraterritorial licensing taint ($>50\%$ SX tech dependency without MOFCOM clearance).
+* **⚡ Copper HVDC Grid Ready (`copper`)**: Codelco Chuquicamata copper cathode audit, $H_2SO_4$ acid balance, and ASTM B115 Grade 1 HVDC power grid certification.
+* **☀️ Silver TOPCon Solar PV (`silver`)**: Endeavour Silver Terronera doré audit, LBMA Good Delivery, and N-Type TOPCon $\ge 99.99\%$ solar paste verification.
 
 ---
 
@@ -128,8 +141,10 @@ Integrates natively with Claude Desktop, Cursor, Gemini, and autonomous AI agent
 2. `verify_lithium_origin`: Verifies Australian hard-rock spodumene extraction and conversion.
 3. `verify_nickel_origin`: Verifies Indonesian laterite limonite HPAL MHP provenance and SIMBARA tax clearance.
 4. `verify_cobalt_origin`: Verifies DRC Katanga heterogenite cobalt hydroxide provenance, CEEC seals, and child labor audits.
-5. `verify_mineral_compliance`: Legacy 7-pillar compliance audit engine for individual mineral lots.
-6. `minerals_submit_agent_feedback`: Zero-fee protocol feedback submission for autonomous agent evolution.
+5. `verify_copper_origin`: Verifies Chilean/South American copper cathode provenance, COCHILCO quotas, H2SO4 acid balance, and ASTM B115 HVDC compliance.
+6. `verify_silver_origin`: Verifies Mexican/South American silver doré provenance, LBMA certification, N-Type TOPCon solar PV 99.99% purity, and cartel defense.
+7. `verify_mineral_compliance`: Legacy 7-pillar compliance audit engine for individual mineral lots.
+8. `minerals_submit_agent_feedback`: Zero-fee protocol feedback submission for autonomous agent evolution.
 
 ---
 

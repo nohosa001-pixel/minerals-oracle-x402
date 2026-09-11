@@ -157,6 +157,48 @@
         },
         "required": ["battery_pack_id", "lithium_lot", "nickel_lot", "cobalt_lot"]
       }
+    },
+    {
+      "name": "verify_copper_origin",
+      "description": "Verify South American Copper-to-Cathode supply-chain provenance (Codelco/Escondida/Cerro Verde geofencing, flotation-to-cathode mass balance <= 2.0%, H2SO4 deficit screening, COCHILCO quota, ASTM B115 Grade 1 HVDC grid certification, Polygon EIP-712 proof).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "lot_id": {"type": "string"},
+          "mine_concession_name": {"type": "string", "default": "CHUQUICAMATA"},
+          "extraction_coordinates": {"type": "array", "items": {"type": "number"}},
+          "feedstock_concentrate_tons": {"type": "number"},
+          "concentrate_grade_cu_pct": {"type": "number", "default": 28.0},
+          "sulfuric_acid_input_tons": {"type": "number"},
+          "refined_copper_cathode_tons": {"type": "number"},
+          "copper_cathode_purity_pct": {"type": "number", "default": 99.9935},
+          "cochilco_export_clearance_id": {"type": "string"},
+          "hvdc_cable_spec_compliant": {"type": "boolean", "default": true},
+          "feoc_shareholding_pct": {"type": "number", "default": 0.0}
+        },
+        "required": ["lot_id", "extraction_coordinates", "feedstock_concentrate_tons", "sulfuric_acid_input_tons", "refined_copper_cathode_tons"]
+      }
+    },
+    {
+      "name": "verify_silver_origin",
+      "description": "Verify Mexican & Global Silver supply-chain provenance (Terronera/Fresnillo/Antamina geofencing, Moebius/Thum electrolytic mass balance <= 2.0%, N-Type TOPCon solar PV paste purity >= 99.99% Ag, anti-cartel conflict ASM defense, LBMA audit, Polygon EIP-712 proof).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "lot_id": {"type": "string"},
+          "mine_concession_name": {"type": "string", "default": "TERRONERA"},
+          "extraction_coordinates": {"type": "array", "items": {"type": "number"}},
+          "feedstock_dore_or_ore_kg": {"type": "number"},
+          "feedstock_silver_grade_pct": {"type": "number", "default": 75.0},
+          "refined_solar_powder_kg": {"type": "number"},
+          "refined_purity_pct": {"type": "number", "default": 99.99},
+          "lbma_good_delivery_ref": {"type": "string"},
+          "conflict_free_asm_verified": {"type": "boolean", "default": true},
+          "topcon_pv_grade_compliant": {"type": "boolean", "default": true},
+          "feoc_shareholding_pct": {"type": "number", "default": 0.0}
+        },
+        "required": ["lot_id", "extraction_coordinates", "feedstock_dore_or_ore_kg", "refined_solar_powder_kg"]
+      }
     }
   ]
 }

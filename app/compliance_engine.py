@@ -279,7 +279,64 @@ class ComplianceEngine:
         ))
 
         # -----------------------------------------------------------------
-        # EU CBAM Definitive Period & CSDDD Audit Verification
+        # Gotcha 15: China Extraterritorial Tech Licensing Jurisdiction (Nov 2026 Grace Period Expiry)
+        # Deep screening of proprietary Chinese SX/refining IP dependency (> 50%)
+        # -----------------------------------------------------------------
+        china_tech_licensing_cleared = True
+        tech_dep_pct = getattr(req.refining_mass_balance, "chinese_tech_dependency_pct", 0.0) or 0.0
+        mofcom_clearance = getattr(req.refining_mass_balance, "mofcom_extraterritorial_clearance_id", None)
+        substitute_tech = getattr(req.refining_mass_balance, "substitute_western_tech_certified", False)
+
+        if tech_dep_pct > 50.0 and not mofcom_clearance and not substitute_tech:
+            fatal_violations.append(
+                f"CHN_TECH_LICENSING_TAINT_VIOLATION: Smelter carries {tech_dep_pct:.1f}% Chinese proprietary "
+                f"refining/SX tech dependency without MOFCOM extraterritorial clearance or certified Western alternative."
+            )
+            score -= 35.0
+            china_tech_licensing_cleared = False
+        else:
+            gotcha_defenses.append(
+                f"DEFENSE_CHN_TECH_LICENSING_CLEARED: Technology dependency ({tech_dep_pct:.1f}%) authorized "
+                f"or mitigated by independent Western/domestic IP."
+            )
+        citations.append(TradeJurisprudenceCitation(
+            precedent_case_id="CHN_MOFCOM_2026_EXTRATERRITORIAL_TECH_ORDER",
+            tribunal="Ministry of Commerce (MOFCOM) / Department of Foreign Trade",
+            legal_rule_applied="Extraterritorial export restrictions on critical mineral processing technology licenses post-Nov 2026.",
+            compliance_status="COMPLIANT" if china_tech_licensing_cleared else "VIOLATION"
+        ))
+
+        # -----------------------------------------------------------------
+        # Gotcha 16: Copper Sulfuric Acid Deficit & Silver TOPCon ASM Laundering
+        # -----------------------------------------------------------------
+        copper_hvdc_certified = None
+        if req.mineral_type in (MineralType.COPPER_CATHODE, MineralType.COPPER_CONCENTRATE):
+            h2so4_disc = getattr(req.refining_mass_balance, "sulfuric_acid_discrepancy_pct", None)
+            if h2so4_disc is not None and h2so4_disc > 5.0:
+                fatal_violations.append(
+                    f"COPPER_H2SO4_SUPPLY_DEFICIT: Sulfuric acid variance {h2so4_disc:.1f}% exceeds 5.0% threshold "
+                    f"(Codelco/South America smelter supply bottleneck)."
+                )
+                score -= 30.0
+                copper_hvdc_certified = False
+            else:
+                copper_hvdc_certified = getattr(req.refining_mass_balance, "hvdc_grade_copper_certified", True)
+                gotcha_defenses.append("DEFENSE_COPPER_H2SO4_SUPPLY_VERIFIED: Metallurgical reagent balance & smelter capacity cleared.")
+
+        silver_solar_pv_cleared = None
+        if req.mineral_type in (MineralType.SILVER_DORE, MineralType.SILVER_POWDER_SOLAR_PV):
+            if req.mineral_type == MineralType.SILVER_POWDER_SOLAR_PV and req.declared_purity_pct < 99.99:
+                fatal_violations.append(
+                    f"SILVER_TOPCON_PURITY_REJECTED: Solar PV metallization paste requires >= 99.99% Ag (declared {req.declared_purity_pct:.2f}%)."
+                )
+                score -= 35.0
+                silver_solar_pv_cleared = False
+            else:
+                silver_solar_pv_cleared = True
+                gotcha_defenses.append("DEFENSE_SILVER_TOPCON_PV_GRADE_VERIFIED: Certified N-type solar metallization grade (99.99%+ Ag).")
+
+        # -----------------------------------------------------------------
+        # EU CBAM Definitive Period & 2028 Downstream 180-Product Scope 3
         # -----------------------------------------------------------------
         cbam_definitive_verified = not req.refining_mass_balance.captive_coal_power_used
         if req.refining_mass_balance.cbam_declaration_id:
@@ -287,6 +344,14 @@ class ComplianceEngine:
         if req.refining_mass_balance.cbam_scope1_emissions_kg_co2e is not None:
             total_scope12 = (req.refining_mass_balance.cbam_scope1_emissions_kg_co2e or 0.0) + (req.refining_mass_balance.cbam_scope2_emissions_kg_co2e or 0.0)
             gotcha_defenses.append(f"DEFENSE_EU_CBAM_EMISSIONS_AUDITED: Direct+Indirect carbon intensity {total_scope12:.2f} kg CO2e/kg verified.")
+        
+        downstream_cbam_cleared = True
+        if req.refining_mass_balance.cbam_scope3_emissions_kg_co2e and req.refining_mass_balance.cbam_scope3_emissions_kg_co2e > 50.0:
+            score -= 10.0
+            gotcha_defenses.append("WARNING_EU_CBAM_DOWNSTREAM_SCOPE3_HIGH: Scope 3 intensity exceeds 2028 downstream threshold.")
+        else:
+            gotcha_defenses.append("DEFENSE_EU_CBAM_2028_DOWNSTREAM_ALIGNED: Finished goods and component Scope 3 emissions verified.")
+
         citations.append(TradeJurisprudenceCitation(
             precedent_case_id="EU_CBAM_REG_2023_956_DEFINITIVE",
             tribunal="European Court of Justice (CJEU) / DG TAXUD",
@@ -315,7 +380,12 @@ class ComplianceEngine:
             csddd_civil_liability_shielded=csddd_shielded,
             us_bis_scrap_retention_cleared=us_bis_cleared,
             china_tech_jurisdiction_cleared=china_tech_cleared,
+            china_tech_licensing_cleared=china_tech_licensing_cleared,
             cbam_definitive_period_verified=cbam_definitive_verified,
+            downstream_cbam_scope3_cleared=downstream_cbam_cleared,
+            csddd_due_diligence_verified=csddd_shielded,
+            copper_hvdc_certified=copper_hvdc_certified,
+            silver_solar_pv_cleared=silver_solar_pv_cleared,
             zkp_privacy_sealed=True,
             gotcha_defenses_applied=gotcha_defenses + [f"FATAL: {v}" for v in fatal_violations],
             jurisprudence_citations=citations,

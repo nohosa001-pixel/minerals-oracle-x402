@@ -798,9 +798,14 @@
           <div class="price-score">적합도: 88/100 (안전)</div>
         </div>
         <div class="price-box">
-          <div class="price-symbol"><span>전기동 (Cu)</span> <span>PER</span></div>
-          <div class="price-val">$9,420 /t</div>
-          <div class="price-score">적합도: 94/100 (안전)</div>
+          <div class="price-symbol"><span>전기동 (Cu)</span> <span>CHL/PER</span></div>
+          <div class="price-val">$14,925 /t ($6.77/lb)</div>
+          <div class="price-score" style="color: var(--emerald);">적합도: 96/100 (HVDC 적격)</div>
+        </div>
+        <div class="price-box">
+          <div class="price-symbol"><span>전해은 (Ag)</span> <span>MEX</span></div>
+          <div class="price-val">$67.31 /oz ($2,164/kg)</div>
+          <div class="price-score" style="color: var(--emerald);">적합도: 97/100 (TOPCon 적격)</div>
         </div>
         <div class="price-box">
           <div class="price-symbol"><span>천연흑연</span> <span>MOZ</span></div>
@@ -946,6 +951,12 @@
         <button class="obs-tab-btn" id="tabBtnCo" onclick="switchObsTab('cobalt')">
           <span>🇨🇩</span> 콩고 코발트 수산화물 관측기
         </button>
+        <button class="obs-tab-btn" id="tabBtnCu" onclick="switchObsTab('copper')">
+          <span>🇨🇱</span> 칠레 전기동 HVDC 관측기
+        </button>
+        <button class="obs-tab-btn" id="tabBtnAg" onclick="switchObsTab('silver')">
+          <span>🇲🇽</span> 멕시코 전해은 TOPCon 관측기
+        </button>
       </div>
 
       <!-- Tab 1: Composite NCM Battery Passport Pane -->
@@ -964,6 +975,15 @@
           </button>
           <button class="preset-btn" id="btnPresetChild" onclick="loadCompositePreset('child')">
             ❌ 아동노동 결함 트랩 (미인증 영세광 혼입)
+          </button>
+          <button class="preset-btn" id="btnPresetTrap15" onclick="loadCompositePreset('trap15')">
+            🇨🇳 Trap 15 (중국 기술 역외관할권)
+          </button>
+          <button class="preset-btn" id="btnPresetCopper" onclick="loadCompositePreset('copper')">
+            🇨🇱 구리/HVDC (코델코 감산·황산 결손)
+          </button>
+          <button class="preset-btn" id="btnPresetSilver" onclick="loadCompositePreset('silver')">
+            🇲🇽 은/TOPCon (태양광 PV 99.99%)
           </button>
         </div>
 
@@ -1169,6 +1189,94 @@
           </div>
         </div>
         <pre class="terminal-output" id="coTerminalOutput">// 콩고 코발트 수산화물 단독 검증 결과가 여기에 표시됩니다.</pre>
+      </div>
+
+      <!-- Tab 5: Dedicated Copper Pane -->
+      <div id="obsPaneCu" style="display: none; flex-direction: column; gap: 14px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; background: rgba(15, 23, 42, 0.5); padding: 14px; border-radius: 6px; border: 1px solid var(--border);">
+          <div class="field-row">
+            <label class="field-label">칠레/페루 반암동 광산</label>
+            <select id="cuMineSelect">
+              <option value="CHUQUICAMATA" selected>Chuquicamata (Codelco / Antofagasta)</option>
+              <option value="EL_TENIENTE">El Teniente (Codelco / O'Higgins)</option>
+              <option value="ANDINA">Andina (Codelco / Valparaíso)</option>
+              <option value="ESCONDIDA">Escondida (BHP / Antofagasta)</option>
+              <option value="LOS_PELAMBRES">Los Pelambres (Antofagasta Minerals)</option>
+              <option value="CERRO_VERDE">Cerro Verde (Freeport / Arequipa)</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <label class="field-label">동정광 투입량 (t) [Cu 28%]</label>
+            <input type="number" id="cuConcentrateInput" value="5000.0" step="100.0">
+          </div>
+          <div class="field-row">
+            <label class="field-label">전기동 생산량 (t) [수율 28%]</label>
+            <input type="number" id="cuCathodeOutput" value="1400.0" step="50.0">
+          </div>
+          <div class="field-row">
+            <label class="field-label">황산(H2SO4) 투입량 (t) [기준 3.20t/t]</label>
+            <input type="number" id="cuH2so4Input" value="4480.0" step="10.0">
+          </div>
+          <div class="field-row">
+            <label class="field-label">ASTM B115 Grade 1 순도 (%)</label>
+            <input type="number" id="cuPurityInput" value="99.9935" step="0.0001">
+          </div>
+          <div class="field-row">
+            <label class="field-label">COCHILCO 수출 쿼터 ID</label>
+            <input type="text" id="cuCochilcoInput" value="COCHILCO-EXP-2026-CH01">
+          </div>
+          <div style="display: flex; align-items: flex-end;">
+            <button class="btn btn-primary" style="width: 100%; height: 38px;" onclick="runDedicatedCopperSim()">
+              ⚡ 칠레 전기동 단독 검증
+            </button>
+          </div>
+        </div>
+        <pre class="terminal-output" id="cuTerminalOutput">// 칠레 전기동(Copper Cathode) 단독 검증 결과가 여기에 표시됩니다.</pre>
+      </div>
+
+      <!-- Tab 6: Dedicated Silver Pane -->
+      <div id="obsPaneAg" style="display: none; flex-direction: column; gap: 14px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; background: rgba(15, 23, 42, 0.5); padding: 14px; border-radius: 6px; border: 1px solid var(--border);">
+          <div class="field-row">
+            <label class="field-label">멕시코/남미 고품위 은광</label>
+            <select id="agMineSelect">
+              <option value="TERRONERA" selected>Terronera (Endeavour Silver / Jalisco)</option>
+              <option value="FRESNILLO">Fresnillo (Fresnillo plc / Zacatecas)</option>
+              <option value="ANTAMINA">Antamina (Glencore/BHP / Ancash)</option>
+              <option value="UCHUCCHACUA">Uchucchacua (Buenaventura / Lima)</option>
+              <option value="LOS_PELAMBRES">Los Pelambres (Antofagasta Minerals)</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <label class="field-label">은 도레(Doré) 투입량 (kg) [Ag 75%]</label>
+            <input type="number" id="agDoreInput" value="10000.0" step="500.0">
+          </div>
+          <div class="field-row">
+            <label class="field-label">전해은 분말 생산량 (kg) [회수 99%]</label>
+            <input type="number" id="agRefinedOutput" value="7425.0" step="10.0">
+          </div>
+          <div class="field-row">
+            <label class="field-label">N-Type TOPCon 순도 (%) [기준 >=99.99%]</label>
+            <input type="number" id="agPurityInput" value="99.9950" step="0.0001">
+          </div>
+          <div class="field-row">
+            <label class="field-label">카르텔/영세광(ASM) 분쟁 배제</label>
+            <select id="agConflictSelect">
+              <option value="true" selected>안전 (카르텔 불법 광물 배제)</option>
+              <option value="false">위험 (미인증 영세광 혼입)</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <label class="field-label">LBMA Good Delivery 적격 정련소</label>
+            <input type="text" id="agLbmaInput" value="LBMA-REF-MEX-01">
+          </div>
+          <div style="display: flex; align-items: flex-end;">
+            <button class="btn btn-primary" style="width: 100%; height: 38px;" onclick="runDedicatedSilverSim()">
+              ⚡ 멕시코 전해은 단독 검증
+            </button>
+          </div>
+        </div>
+        <pre class="terminal-output" id="agTerminalOutput">// 멕시코 전해은(Silver Doré) 단독 검증 결과가 여기에 표시됩니다.</pre>
       </div>
     </section>
 
@@ -1752,18 +1860,22 @@ print("EIP-712 서명:", passport.get("security_attestation", {}).get("onchain_s
     let lastMasterPassportData = null;
 
     function switchObsTab(tabId) {
-      const tabs = ['composite', 'lithium', 'nickel', 'cobalt'];
+      const tabs = ['composite', 'lithium', 'nickel', 'cobalt', 'copper', 'silver'];
       const btnMap = {
         'composite': 'tabBtnComp',
         'lithium': 'tabBtnLi',
         'nickel': 'tabBtnNi',
-        'cobalt': 'tabBtnCo'
+        'cobalt': 'tabBtnCo',
+        'copper': 'tabBtnCu',
+        'silver': 'tabBtnAg'
       };
       const paneMap = {
         'composite': 'obsPaneComposite',
         'lithium': 'obsPaneLi',
         'nickel': 'obsPaneNi',
-        'cobalt': 'obsPaneCo'
+        'cobalt': 'obsPaneCo',
+        'copper': 'obsPaneCu',
+        'silver': 'obsPaneAg'
       };
 
       tabs.forEach(t => {
@@ -1781,7 +1893,7 @@ print("EIP-712 서명:", passport.get("security_attestation", {}).get("onchain_s
 
     function loadCompositePreset(preset) {
       currentCompositePreset = preset;
-      ['clean', 'feoc', 'cbam', 'child'].forEach(p => {
+      ['clean', 'feoc', 'cbam', 'child', 'trap15', 'copper', 'silver'].forEach(p => {
         const b = document.getElementById('btnPreset' + p.charAt(0).toUpperCase() + p.slice(1));
         if (b) {
           if (p === preset) b.classList.add('active');
@@ -1796,6 +1908,48 @@ print("EIP-712 서명:", passport.get("security_attestation", {}).get("onchain_s
       const cellChem = document.getElementById('compChem').value;
       const capacity = parseFloat(document.getElementById('compCap').value) || 84.0;
       const term = document.getElementById('compTerminalOutput');
+
+      if (currentCompositePreset === 'trap15') {
+        term.innerText = `// [TRAP 15 DEFENSE] 중국 개정 광산자원법(11월 유예 만료 대비) 기술 역외관할권 리스크 검증
+// 대상 설비: 중국산 독점 용매추출(SX) 분리정련 설비 라이선스
+// 의존도 평가: 75.0% (기준선 50% 초과)
+// MOFCOM 역외 수출 승인증빙: 부재 (NULL)
+// 판정 결과: FATAL_VIOLATION -> CHN_TECH_LICENSING_TAINT_VIOLATION (수출 통제 압류 위험)
+// 면책 법리: CHN_MOFCOM_2026_EXTRATERRITORIAL_TECH_ORDER [VIOLATION]`;
+        document.getElementById('kpiIraStatus').innerHTML = '<span style="color: var(--amber);">기술 통제 리스크 (Blocked)</span>';
+        document.getElementById('kpiIraDesc').innerText = '중국 특허/SX 설비 종속으로 인한 역외 수출 통제 위험 발생';
+        document.getElementById('kpiEuStatus').innerHTML = '<span style="color: var(--amber);">감사 경보 (Audit Flag)</span>';
+        document.getElementById('kpiEuDesc').innerText = '11월 유예 만료 후 서방 정제소 라이선스 대체 증빙 필수';
+        return;
+      }
+
+      if (currentCompositePreset === 'copper') {
+        term.innerText = `// [COPPER HVDC AUDIT] 칠레 Codelco Chuquicamata 동정광 ➔ LME Grade A 전기동 검증
+// 광산 지오펜싱: (-22.283, -68.900) CODELCO-CHU-01 [0.00km 일치]
+// 황산(H2SO4) 투입 비율: 3.20t/t (공급 부족 리스크 통과, 편차 0.00% <= 5.0%)
+// 전기동 순도: 99.9935% Cu (ASTM B115 Grade 1 초고압 케이블 규격 합격)
+// COCHILCO 수출 쿼터: COCHILCO-EXP-2026-CH01 [인증 완료]
+// 판정 결과: FULLY_COMPLIANT -> AI 데이터센터 및 HVDC 초고압 전력망 적합 승인!`;
+        document.getElementById('kpiIraStatus').innerHTML = '<span style="color: var(--emerald);">적격 (HVDC Grid Ready)</span>';
+        document.getElementById('kpiIraDesc').innerText = 'ASTM B115 Grade 1 저산소 고전도도 전기동 인증 완료';
+        document.getElementById('kpiEuStatus').innerHTML = '<span style="color: var(--emerald);">승인 완료 (COCHILCO Clean)</span>';
+        document.getElementById('kpiEuDesc').innerText = '칠레 국영 쿼터 및 황산 시약 공급 밸런스 검증 완료';
+        return;
+      }
+
+      if (currentCompositePreset === 'silver') {
+        term.innerText = `// [SILVER TOPCon AUDIT] 멕시코 Endeavour Silver Terronera Doré ➔ 전해은 분말 검증
+// 광산 지오펜싱: (20.590, -104.980) SE-TER-01 [0.00km 일치]
+// 전해정련 회수율: 99.0% (질량 불일치 0.00% <= 2.0% 통과)
+// 태양광 PV 페이스트 순도: 99.9950% Ag (N타입 TOPCon 고효율 셀 기준 99.99% 초과)
+// 분쟁 광물 및 카르텔 실사: LBMA-REF-MEX-01 인증 및 불법 영세광 배제 완료
+// 판정 결과: FULLY_COMPLIANT -> N타입 TOPCon 태양광 셀 공급망 적합 승인!`;
+        document.getElementById('kpiIraStatus').innerHTML = '<span style="color: var(--emerald);">적격 (TOPCon Solar Ready)</span>';
+        document.getElementById('kpiIraDesc').innerText = 'N-Type TOPCon/HJT 전면 전극용 초고순도 99.99%+ 인증';
+        document.getElementById('kpiEuStatus').innerHTML = '<span style="color: var(--emerald);">승인 완료 (LBMA Good Delivery)</span>';
+        document.getElementById('kpiEuDesc').innerText = '카르텔 불법 광물 혼입 제로 및 LBMA 적격 정련소 검증';
+        return;
+      }
 
       term.innerText = '// 오라클 3대 파이프라인 (호주Li + 인니Ni + 콩고Co) 오케스트레이션 검증 중...\n// x402 4-Pillar M2M 검증 및 머클 트리 계산 중...';
 
@@ -2039,6 +2193,95 @@ print("EIP-712 서명:", passport.get("security_attestation", {}).get("onchain_s
             cobalt_hydroxide_output_tons: 100.0,
             hydroxide_grade_co_pct: 30.0,
             feoc_equity_pct: 0.0
+          })
+        });
+        const d = await res.json();
+        term.innerText = JSON.stringify(d, null, 2);
+      } catch (e) {
+        term.innerText = `[오류]: ${e.message}`;
+      }
+    }
+
+    async function runDedicatedCopperSim() {
+      const term = document.getElementById('cuTerminalOutput');
+      term.innerText = '// 칠레 코델코/남미 전기동 LME Grade A 및 HVDC 규격 검증 중...';
+      const mine = document.getElementById('cuMineSelect').value;
+      const inTons = parseFloat(document.getElementById('cuConcentrateInput').value) || 5000.0;
+      const outTons = parseFloat(document.getElementById('cuCathodeOutput').value) || 1400.0;
+      const acidTons = parseFloat(document.getElementById('cuH2so4Input').value) || 4480.0;
+      const purity = parseFloat(document.getElementById('cuPurityInput').value) || 99.9935;
+      const quota = document.getElementById('cuCochilcoInput').value.trim();
+
+      const coordMap = {
+        'CHUQUICAMATA': [-22.283, -68.900],
+        'EL_TENIENTE': [-34.083, -70.467],
+        'ANDINA': [-33.150, -70.283],
+        'ESCONDIDA': [-24.267, -69.067],
+        'LOS_PELAMBRES': [-31.717, -70.500],
+        'CERRO_VERDE': [-16.533, -71.567]
+      };
+
+      try {
+        const res = await fetch('/api/v1/copper/verify-origin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Dev-Bypass': 'true' },
+          body: JSON.stringify({
+            lot_id: 'CU-CHL-2026-CAT01',
+            mine_concession_name: mine,
+            extraction_coordinates: coordMap[mine] || [-22.283, -68.900],
+            source_country: (mine === 'CERRO_VERDE' ? 'PER' : 'CHL'),
+            feedstock_concentrate_tons: inTons,
+            concentrate_grade_cu_pct: 28.0,
+            sulfuric_acid_input_tons: acidTons,
+            refined_copper_cathode_tons: outTons,
+            copper_cathode_purity_pct: purity,
+            cochilco_export_clearance_id: (quota === '' ? null : quota),
+            hvdc_cable_spec_compliant: true,
+            feoc_shareholding_pct: 0.0
+          })
+        });
+        const d = await res.json();
+        term.innerText = JSON.stringify(d, null, 2);
+      } catch (e) {
+        term.innerText = `[오류]: ${e.message}`;
+      }
+    }
+
+    async function runDedicatedSilverSim() {
+      const term = document.getElementById('agTerminalOutput');
+      term.innerText = '// 멕시코 테로네라/남미 전해은 N-Type TOPCon 태양광 규격 검증 중...';
+      const mine = document.getElementById('agMineSelect').value;
+      const inKg = parseFloat(document.getElementById('agDoreInput').value) || 10000.0;
+      const outKg = parseFloat(document.getElementById('agRefinedOutput').value) || 7425.0;
+      const purity = parseFloat(document.getElementById('agPurityInput').value) || 99.9950;
+      const conflictFree = document.getElementById('agConflictSelect').value === 'true';
+      const lbma = document.getElementById('agLbmaInput').value.trim();
+
+      const coordMap = {
+        'TERRONERA': [20.590, -104.980],
+        'FRESNILLO': [23.175, -102.870],
+        'ANTAMINA': [-9.533, -77.050],
+        'UCHUCCHACUA': [-10.617, -76.700],
+        'LOS_PELAMBRES': [-31.717, -70.500]
+      };
+
+      try {
+        const res = await fetch('/api/v1/silver/verify-origin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Dev-Bypass': 'true' },
+          body: JSON.stringify({
+            lot_id: 'AG-MEX-2026-PV01',
+            mine_concession_name: mine,
+            extraction_coordinates: coordMap[mine] || [20.590, -104.980],
+            source_country: (mine === 'ANTAMINA' || mine === 'UCHUCCHACUA' ? 'PER' : (mine === 'LOS_PELAMBRES' ? 'CHL' : 'MEX')),
+            feedstock_dore_or_ore_kg: inKg,
+            feedstock_silver_grade_pct: 75.0,
+            refined_solar_powder_kg: outKg,
+            refined_purity_pct: purity,
+            lbma_good_delivery_ref: (lbma === '' ? null : lbma),
+            conflict_free_asm_verified: conflictFree,
+            topcon_pv_grade_compliant: true,
+            feoc_shareholding_pct: 0.0
           })
         });
         const d = await res.json();

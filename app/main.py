@@ -40,11 +40,17 @@ from app.schemas import (
     CobaltOriginVerifyResponse,
     CompositeBatteryVerifyRequest,
     CompositeBatteryVerifyResponse,
+    CopperOriginVerifyRequest,
+    CopperOriginVerifyResponse,
+    SilverOriginVerifyRequest,
+    SilverOriginVerifyResponse,
 )
 from app.compliance_engine import compliance_engine
 from app.lithium_pipeline import lithium_pipeline
 from app.nickel_pipeline import nickel_pipeline
 from app.cobalt_pipeline import cobalt_pipeline
+from app.copper_pipeline import copper_pipeline
+from app.silver_pipeline import silver_pipeline
 from app.composite_battery_pipeline import composite_battery_pipeline
 
 STANDARD_DISCLAIMER_META = ResponseMeta().model_dump()
@@ -766,6 +772,76 @@ async def verify_composite_battery(
     headers = getattr(request.state, "extra_headers", {}) or {}
     result = composite_battery_pipeline.evaluate_battery_pack(body)
     return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+@app.post(
+    "/api/v1/copper/verify-origin",
+    response_model=CopperOriginVerifyResponse,
+    tags=["Compliance Oracle"],
+    summary="Verify South American Copper-to-Cathode Provenance & HVDC Grid Certification (x402 Verified)",
+    responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
+)
+@app.post(
+    "/api/v1/oracle/verify/copper",
+    response_model=CopperOriginVerifyResponse,
+    tags=["Compliance Oracle"],
+    include_in_schema=False,
+)
+async def verify_copper_origin(
+    request: Request,
+    body: CopperOriginVerifyRequest,
+):
+    """
+    Dedicated Chilean/South American Copper Cathode Provenance Pipeline:
+    - 1. Codelco/Escondida/Cerro Verde GIS Geofencing (Chuquicamata, El Teniente, Andina, Los Pelambres)
+    - 2. Flotation-to-Cathode Stoichiometric Mass Balance (loss discrepancy <= 2.0%)
+    - 3. Sulfuric Acid (H2SO4) Smelter Deficit Defense (reagent variance <= 5.0%)
+    - 4. Chilean COCHILCO Export Quota & Clearance Verification
+    - 5. AI Data Center & HVDC Power Grid Specification Certification (ASTM B115 Grade 1, 99.9935%)
+    - 6. EIP-712 Typed Structured Data On-Chain Signature issuance
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = copper_pipeline.verify_origin(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+@app.post(
+    "/api/v1/silver/verify-origin",
+    response_model=SilverOriginVerifyResponse,
+    tags=["Compliance Oracle"],
+    summary="Verify Mexican & Global Silver Provenance & N-Type TOPCon Solar PV Purity (x402 Verified)",
+    responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
+)
+@app.post(
+    "/api/v1/oracle/verify/silver",
+    response_model=SilverOriginVerifyResponse,
+    tags=["Compliance Oracle"],
+    include_in_schema=False,
+)
+async def verify_silver_origin(
+    request: Request,
+    body: SilverOriginVerifyRequest,
+):
+    """
+    Dedicated Mexican & Global Silver-to-Solar PV Metallization Provenance Pipeline:
+    - 1. Terronera/Fresnillo/Antamina GIS Geofencing (Jalisco, Zacatecas, Ancash)
+    - 2. Moebius/Thum Electrolytic Mass Balance (Doré to Pure Silver, loss discrepancy <= 2.0%)
+    - 3. N-Type TOPCon High-Efficiency Solar PV Paste Assay Purity Certification (>= 99.99% Ag)
+    - 4. Anti-Cartel Conflict ASM Screening & LBMA Good Delivery Audit
+    - 5. US IRA Section 30D FEOC 25% screening & Polygon EIP-712 On-Chain Signature issuance
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = silver_pipeline.verify_origin(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
 
 
 @app.get(
