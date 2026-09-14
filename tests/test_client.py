@@ -40,7 +40,7 @@ def test_ap2_manifest_and_mcp_spec():
     mcp_data = resp_mcp.json()
     assert len(mcp_data["tools"]) >= 3
     tool_names = [t["name"] for t in mcp_data["tools"]]
-    assert "get_mineral_prices" in tool_names
+    assert "verify_composite_battery_passport" in tool_names
     assert "verify_mineral_lot_compliance" in tool_names
 
 
@@ -248,7 +248,7 @@ def test_mcp_stdio_jsonrpc_protocol():
     # 1. Test initialize
     init_res = handle_initialize(1)
     assert init_res["id"] == 1
-    assert init_res["result"]["serverInfo"]["name"] == "minerals-oracle-x402"
+    assert init_res["result"]["serverInfo"]["name"] == "battery-passport-oracle"
     assert init_res["result"]["serverInfo"]["version"] == "2.0.0"
     assert init_res["result"]["protocolVersion"] == "2024-11-05"
 

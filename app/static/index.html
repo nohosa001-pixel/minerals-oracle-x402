@@ -1378,24 +1378,36 @@
     <!-- On-Chain Smart Contracts & Machine Specs -->
     <section class="panel">
       <div class="panel-header">
-        <div class="panel-title"><span>⛓️</span> Smart Contracts & Agent Tool Specs</div>
-        <span class="panel-badge">Polygon Mainnet (137)</span>
+        <div class="panel-title"><span>⛓️</span> Smart Contracts & Multi-Chain Machine Specs</div>
+        <div style="display: flex; gap: 6px;">
+          <button id="chainBtnPolygon" class="tab-btn active" style="padding: 4px 10px; font-size: 0.75rem;" onclick="switchContractChain('polygon')">Polygon (137)</button>
+          <button id="chainBtnBase" class="tab-btn" style="padding: 4px 10px; font-size: 0.75rem;" onclick="switchContractChain('base')">Base (8453)</button>
+          <button id="chainBtnArbitrum" class="tab-btn" style="padding: 4px 10px; font-size: 0.75rem;" onclick="switchContractChain('arbitrum')">Arbitrum (42161)</button>
+        </div>
       </div>
 
       <div class="specs-grid">
         <div class="spec-item">
-          <div class="spec-title">MineralsOracleConsumer.sol (Polygon Mainnet Verified)</div>
+          <div class="spec-title" id="consumerTitle">MineralsOracleConsumer.sol (Polygon Mainnet Verified)</div>
           <div class="spec-val">
-            <a href="https://polygonscan.com/address/0x835d01534a5D2e63D52636Fafb1019f889d1E66B" target="_blank" style="color: var(--cyan); text-decoration: none;">0x835d01534a5D2e63D52636Fafb1019f889d1E66B</a>
-            <span class="copy-icon" onclick="copyText('0x835d01534a5D2e63D52636Fafb1019f889d1E66B')">Copy</span>
+            <a id="consumerAddressLink" href="https://polygonscan.com/address/0x835d01534a5D2e63D52636Fafb1019f889d1E66B" target="_blank" style="color: var(--cyan); text-decoration: none;">0x835d01534a5D2e63D52636Fafb1019f889d1E66B</a>
+            <span class="copy-icon" id="consumerCopyBtn" onclick="copyText('0x835d01534a5D2e63D52636Fafb1019f889d1E66B')">Copy</span>
           </div>
         </div>
 
         <div class="spec-item">
-          <div class="spec-title">AgentPaymentVault.sol (Micro-USDC Pre-funded Vault)</div>
+          <div class="spec-title" id="vaultTitle">AgentPaymentVault.sol (Micro-USDC Pre-funded Vault)</div>
           <div class="spec-val">
-            <a href="https://polygonscan.com/address/0xb44Bc2Acdd156cE08b549A00a3102e4B01276654" target="_blank" style="color: var(--cyan); text-decoration: none;">0xb44Bc2Acdd156cE08b549A00a3102e4B01276654</a>
-            <span class="copy-icon" onclick="copyText('0xb44Bc2Acdd156cE08b549A00a3102e4B01276654')">Copy</span>
+            <a id="vaultAddressLink" href="https://polygonscan.com/address/0xb44Bc2Acdd156cE08b549A00a3102e4B01276654" target="_blank" style="color: var(--cyan); text-decoration: none;">0xb44Bc2Acdd156cE08b549A00a3102e4B01276654</a>
+            <span class="copy-icon" id="vaultCopyBtn" onclick="copyText('0xb44Bc2Acdd156cE08b549A00a3102e4B01276654')">Copy</span>
+          </div>
+        </div>
+
+        <div class="spec-item">
+          <div class="spec-title" id="usdcTitle">Native USDC Token Contract</div>
+          <div class="spec-val">
+            <a id="usdcAddressLink" href="https://polygonscan.com/address/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359" target="_blank" style="color: var(--cyan); text-decoration: none;">0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359</a>
+            <span class="copy-icon" id="usdcCopyBtn" onclick="copyText('0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359')">Copy</span>
           </div>
         </div>
 
@@ -2323,6 +2335,73 @@ print("EIP-712 Signature:", passport.get("security_attestation", {}).get("onchai
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
+    }
+
+    const MULTICHAIN_SPECS = {
+      polygon: {
+        consumerTitle: 'MineralsOracleConsumer.sol (Polygon Mainnet Verified)',
+        vaultTitle: 'AgentPaymentVault.sol (Micro-USDC Pre-funded Vault)',
+        usdcTitle: 'Native USDC Token (Polygon 137)',
+        consumer: '0x835d01534a5D2e63D52636Fafb1019f889d1E66B',
+        consumerUrl: 'https://polygonscan.com/address/0x835d01534a5D2e63D52636Fafb1019f889d1E66B',
+        vault: '0xb44Bc2Acdd156cE08b549A00a3102e4B01276654',
+        vaultUrl: 'https://polygonscan.com/address/0xb44Bc2Acdd156cE08b549A00a3102e4B01276654',
+        usdc: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359',
+        usdcUrl: 'https://polygonscan.com/address/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359'
+      },
+      base: {
+        consumerTitle: 'MineralsOracleConsumer.sol (Base L2 Verified)',
+        vaultTitle: 'AgentPaymentVault.sol (Base Micro-USDC Vault)',
+        usdcTitle: 'Native USDC Token (Base 8453)',
+        consumer: '0x71e98d1a11516eB70b5A344d5c9f5B345aA5e381',
+        consumerUrl: 'https://basescan.org/address/0x71e98d1a11516eB70b5A344d5c9f5B345aA5e381',
+        vault: '0x3841D3B82e5b7E22d718b958B5c4543b59367F47',
+        vaultUrl: 'https://basescan.org/address/0x3841D3B82e5b7E22d718b958B5c4543b59367F47',
+        usdc: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+        usdcUrl: 'https://basescan.org/address/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
+      },
+      arbitrum: {
+        consumerTitle: 'MineralsOracleConsumer.sol (Arbitrum One Verified)',
+        vaultTitle: 'AgentPaymentVault.sol (Arbitrum Micro-USDC Vault)',
+        usdcTitle: 'Native USDC Token (Arbitrum 42161)',
+        consumer: '0x52467d3eB40A837C392C62B01Ac583A89b6574c8',
+        consumerUrl: 'https://arbiscan.io/address/0x52467d3eB40A837C392C62B01Ac583A89b6574c8',
+        vault: '0x19a0a4c28C913b5a790518dD9B1855F11F153282',
+        vaultUrl: 'https://arbiscan.io/address/0x19a0a4c28C913b5a790518dD9B1855F11F153282',
+        usdc: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+        usdcUrl: 'https://arbiscan.io/address/0xaf88d065e77c8cC2239327C5EDb3A432268e5831'
+      }
+    };
+
+    function switchContractChain(chain) {
+      ['polygon', 'base', 'arbitrum'].forEach(c => {
+        const btn = document.getElementById(`chainBtn${c.charAt(0).toUpperCase() + c.slice(1)}`);
+        if (btn) {
+          if (c === chain) btn.classList.add('active');
+          else btn.classList.remove('active');
+        }
+      });
+
+      const s = MULTICHAIN_SPECS[chain];
+      if (!s) return;
+
+      document.getElementById('consumerTitle').innerText = s.consumerTitle;
+      const cLink = document.getElementById('consumerAddressLink');
+      cLink.innerText = s.consumer;
+      cLink.href = s.consumerUrl;
+      document.getElementById('consumerCopyBtn').setAttribute('onclick', `copyText('${s.consumer}')`);
+
+      document.getElementById('vaultTitle').innerText = s.vaultTitle;
+      const vLink = document.getElementById('vaultAddressLink');
+      vLink.innerText = s.vault;
+      vLink.href = s.vaultUrl;
+      document.getElementById('vaultCopyBtn').setAttribute('onclick', `copyText('${s.vault}')`);
+
+      document.getElementById('usdcTitle').innerText = s.usdcTitle;
+      const uLink = document.getElementById('usdcAddressLink');
+      uLink.innerText = s.usdc;
+      uLink.href = s.usdcUrl;
+      document.getElementById('usdcCopyBtn').setAttribute('onclick', `copyText('${s.usdc}')`);
     }
 
     // Initialize proposals on page load & trigger initial simulation

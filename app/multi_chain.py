@@ -22,11 +22,13 @@ class ChainConfig(BaseModel):
     rpc_url: str
     explorer_url: str
     permit2_address: str = "0x000000000022D473030F116dDEE9F6B43aC78BA3"  # Universal Permit2 address
+    payment_vault_address: str = "0xb44Bc2Acdd156cE08b549A00a3102e4B01276654"
+    oracle_consumer_address: str = "0x835d01534a5D2e63D52636Fafb1019f889d1E66B"
     is_gasless_supported: bool = True
     speed_ms: int
 
 
-# Canonical USDC & Permit2 addresses across supported EVM networks
+# Canonical USDC, Permit2, and deployed contract addresses across supported EVM networks
 CHAIN_REGISTRY: Dict[str, ChainConfig] = {
     SupportedChain.POLYGON.value: ChainConfig(
         chain_name="polygon",
@@ -36,6 +38,8 @@ CHAIN_REGISTRY: Dict[str, ChainConfig] = {
         rpc_url="https://polygon-rpc.com",
         explorer_url="https://polygonscan.com",
         permit2_address="0x000000000022D473030F116dDEE9F6B43aC78BA3",
+        payment_vault_address="0xb44Bc2Acdd156cE08b549A00a3102e4B01276654",
+        oracle_consumer_address="0x835d01534a5D2e63D52636Fafb1019f889d1E66B",
         is_gasless_supported=True,
         speed_ms=1800,
     ),
@@ -47,6 +51,8 @@ CHAIN_REGISTRY: Dict[str, ChainConfig] = {
         rpc_url="https://mainnet.base.org",
         explorer_url="https://basescan.org",
         permit2_address="0x000000000022D473030F116dDEE9F6B43aC78BA3",
+        payment_vault_address="0x3841d3b82e5b7e22d718b958B5c4543b59367F47",
+        oracle_consumer_address="0x71e98d1a11516EB70b5A344D5C9f5B345aA5e381",
         is_gasless_supported=True,
         speed_ms=1200,
     ),
@@ -58,6 +64,8 @@ CHAIN_REGISTRY: Dict[str, ChainConfig] = {
         rpc_url="https://arb1.arbitrum.io/rpc",
         explorer_url="https://arbiscan.io",
         permit2_address="0x000000000022D473030F116dDEE9F6B43aC78BA3",
+        payment_vault_address="0x19a0A4c28c913B5a790518dD9B1855f11f153282",
+        oracle_consumer_address="0x52467D3EB40a837C392C62b01Ac583a89b6574C8",
         is_gasless_supported=True,
         speed_ms=950,
     ),

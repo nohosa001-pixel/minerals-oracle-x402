@@ -112,6 +112,89 @@ class EnterpriseManager:
             }
         }
 
+    def evaluate_batch(self, req: Any) -> Any:
+        """
+        Executes high-throughput batch audit across multi-tier supplier network.
+        Evaluates 16 regulatory traps and generates actionable remediation guidance.
+        """
+        from app.compliance_engine import compliance_engine
+        from app.schemas import SupplyChainBatchResponse, SupplyChainBatchItemResult, ComplianceVerdict
+        import hashlib
+
+        now_utc = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        batch_id = "BATCH-" + hashlib.sha256((req.batch_title + req.enterprise_api_key + now_utc).encode("utf-8")).hexdigest()[:12].upper()
+
+        total = len(req.tier_suppliers)
+        passed_count = 0
+        failed_count = 0
+        scores: List[float] = []
+        item_results: List[SupplyChainBatchItemResult] = []
+        risk_flags: List[Dict[str, Any]] = []
+        remediation: List[str] = []
+
+        for supplier_lot in req.tier_suppliers:
+            passport = compliance_engine.evaluate_lot(supplier_lot)
+            is_compliant = passport.verdict.is_fully_compliant
+            score = passport.verdict.overall_compliance_score
+            scores.append(score)
+
+            violations: List[str] = []
+            if not is_compliant:
+                failed_count += 1
+                # Extract violation hints from attestation
+                for citation in passport.verdict.jurisprudence_citations:
+                    if citation.compliance_status != "COMPLIANT":
+                        violations.append(f"{citation.precedent_case_id}: {citation.legal_rule_applied}")
+                if not violations:
+                    violations.append("Statutory or ESG Gotcha Trap Triggered")
+
+                risk_flags.append({
+                    "lot_id": supplier_lot.lot_id,
+                    "supplier_name": getattr(supplier_lot.mine_permits, "mine_operator_name", "Unknown Supplier"),
+                    "mineral_type": supplier_lot.mineral_type.value if hasattr(supplier_lot.mineral_type, "value") else str(supplier_lot.mineral_type),
+                    "violations": violations,
+                })
+            else:
+                passed_count += 1
+
+            item_results.append(SupplyChainBatchItemResult(
+                lot_id=supplier_lot.lot_id,
+                supplier_name=getattr(supplier_lot.mine_permits, "mine_operator_name", "Supplier"),
+                mineral_type=supplier_lot.mineral_type,
+                source_country=supplier_lot.source_country,
+                verdict=passport.verdict,
+                compliance_score=score,
+                violations=violations,
+                passport_id=passport.attestation_digest,
+            ))
+
+        compliance_rate = round((passed_count / total) * 100.0, 2) if total > 0 else 0.0
+        composite_score = round(sum(scores) / total, 2) if total > 0 else 0.0
+
+        # Generate intelligent remediation guidance
+        if failed_count > 0:
+            remediation.append(f"Immediate supplier remediation required for {failed_count} non-compliant tier lots.")
+            remediation.append("Action: Enforce mandatory Scope 1/2 MRV and OECD Annex II mass balance verification (<2.0% loss).")
+            remediation.append("Action: Check US IRA 30D FEOC covered entity shareholding threshold (<25.0%).")
+            remediation.append("Action: Verify US BIS 15 CFR § 744 scrap retention rules for battery black mass / tungsten.")
+        else:
+            remediation.append("All supply chain tier suppliers cleared 16-trap regulatory checks with 100% cryptographic EIP-712 proofs.")
+
+        return SupplyChainBatchResponse(
+            batch_id=batch_id,
+            batch_title=req.batch_title,
+            total_audited=total,
+            passed_count=passed_count,
+            failed_count=failed_count,
+            batch_compliance_rate_pct=compliance_rate,
+            composite_supply_chain_score=composite_score,
+            critical_risk_flags=risk_flags,
+            remediation_guidance=remediation,
+            results=item_results,
+            processed_at_utc=now_utc,
+        )
+
 
 # Singleton enterprise manager instance
 enterprise_manager = EnterpriseManager()
+

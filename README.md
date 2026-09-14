@@ -24,7 +24,9 @@
 ## ⚡ Key Architectural Capabilities (v2.4.0)
 
 ### 1. Composite EV Battery Master Passport Orchestrator (`app/composite_battery_pipeline.py`)
+
 Synthesizes the 3 primary battery critical minerals into a unified cell/pack compliance attestation:
+
 * **Cathode Chemistries**: **NCM 811** (80% Ni, 10% Co, 10% Mn), **NCM 622**, **NCM 523**.
 * **US IRA 30D Critical Minerals $3,750 Tax Credit Formula**:
   $$\text{Procurement Value} = (\text{Li Tons} \times \$18,500) + (\text{Ni Tons} \times \$17,000) + (\text{Co Tons} \times \$32,000)$$
@@ -70,26 +72,31 @@ flowchart TD
 ```
 
 #### 🇦🇺 Australian Spodumene Lithium Pipeline (`app/lithium_pipeline.py`)
+
 * **GIS Geofencing**: Validates WA DMIRS MINEDEX tenement boundaries (e.g. Greenbushes `M01/03`, Pilgangoora `M45/1256`).
 * **Stoichiometric Mass Balance**: Enforces strict theoretical yield ratio ($7.5 \pm 0.8\text{t}$ Spodumene concentrate $\rightarrow$ $1.0\text{t}$ Battery-Grade LiOH·H₂O).
 * **Defenses**: Defends against Trap 13 (Chinese transshipment relabeling) and Trap 14 (non-linear recovery exaggeration).
 
 #### 🇮🇩 Indonesian Nickel MHP Pipeline (`app/nickel_pipeline.py`)
+
 * **Concession Geofencing**: Monitors Central Sulawesi (IMIP Morowali) and North Maluku (IWIP Weda Bay) mining polygons.
 * **Fiscal Verification**: Validates Ministry of Energy (ESDM) SIMBARA NTPN tax receipt codes and Bank Indonesia 30% forex export deposits (DHE BI).
 * **EU CBAM & Carbon Duty**: Detects captive coal power plant usage and flags European Carbon Border Adjustment liabilities.
 
 #### 🇨🇩 DRC Cobalt Hydroxide Pipeline (`app/cobalt_pipeline.py`)
+
 * **Artisanal Segregation (Trap 1)**: Blocks uncertified artisanal mining (ASM) co-mingling via Entreprise Générale du Cobalt (EGC) custody validation.
 * **CEEC Security Seals**: Cryptographically authenticates Centre d'Expertise (CEEC) tamper-proof barcode export seals.
 * **ILO Human Rights Diligence**: Enforces mandatory independent audits for ILO Convention 138 (Minimum Age) and 182 (Worst Forms of Child Labor).
 
 #### 🇨🇱 Chilean Copper Cathode Pipeline (`app/copper_pipeline.py`)
+
 * **Concession Geofencing**: Monitors major porphyry operations (Codelco Chuquicamata, El Teniente, Andina, BHP Escondida, Antofagasta Los Pelambres, Cerro Verde).
 * **Smelter Acid Balance (Trap 16)**: Validates sulfuric acid ($H_2SO_4$) reagent supply balance ($\le 5.0\%$ deficit tolerance).
 * **Grid & Purity Standard**: Certifies ASTM B115 Grade 1 electrolytic cathode purity ($\ge 99.9935\%$) for AI datacenter HVDC power grids and COCHILCO export clearances.
 
 #### 🇲🇽 Mexican Silver Doré Pipeline (`app/silver_pipeline.py`)
+
 * **Concession Geofencing**: Monitors high-grade silver operations (Endeavour Silver Terronera, Fresnillo, Antamina, Uchucchacua, Los Pelambres).
 * **N-Type TOPCon Solar Standard (Trap 16)**: Enforces ultra-pure $\ge 99.99\%$ silver powder certification for next-gen solar PV metallization paste.
 * **Security & LBMA Assurance**: Defends against cartel-tainted artisanal extraction and validates LBMA Good Delivery refiner accreditation.
@@ -108,6 +115,7 @@ The built-in browser UI ([`app/static/ko.html`](app/static/ko.html) and [`app/st
 | 🇨🇩 **DRC Cobalt Hydroxide Observatory** | Kamoto KCC/Tenke concession check, CEEC barcode verification, ILO 138/182 child labor audit toggle |
 
 #### One-Click Real-World Scenario Presets
+
 * **✅ Clean Baseline (`clean`)**: Australia Greenbushes + Indonesia Clean IMIP + DRC Kamoto KCC $\rightarrow$ IRA Eligible ($3,750), EU Passport Approved, Low Carbon (51.5 kg CO₂e/kWh).
 * **⚠️ FEOC Taint Trap (`feoc`)**: Injects 80% Chinese state ownership into DRC Cobalt $\rightarrow$ Entire battery pack disqualified under FEOC 25% threshold.
 * **⚠️ Captive Coal CBAM Trap (`cbam`)**: Injects captive coal power smelting in Indonesia $\rightarrow$ EU CBAM carbon tariff liabilities triggered.
@@ -136,7 +144,8 @@ Integrates natively with Claude Desktop, Cursor, Gemini, and autonomous AI agent
 }
 ```
 
-### Supported MCP Tools:
+### Supported MCP Tools
+
 1. `verify_composite_battery_passport`: Evaluates end-to-end NCM EV battery packs and generates Master Merkle EIP-712 attestations.
 2. `verify_lithium_origin`: Verifies Australian hard-rock spodumene extraction and conversion.
 3. `verify_nickel_origin`: Verifies Indonesian laterite limonite HPAL MHP provenance and SIMBARA tax clearance.
@@ -163,6 +172,7 @@ All M2M API invocations support micro-payments in USDC on Polygon (Chain ID `137
 ## 🚀 Quick Start & Local Execution
 
 ### 1. Clone & Install Dependencies
+
 ```bash
 git clone https://github.com/nohosa001-pixel/minerals-oracle-x402.git
 cd minerals-oracle-x402
@@ -177,16 +187,20 @@ pip install -e .
 ```
 
 ### 2. Run Tests (102 Automated Tests)
+
 ```bash
 # Run with -s flag on Windows
 pytest -s tests/
 ```
 
 ### 3. Launch Local Server & Web Observatory
+
 ```bash
 uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
+
 Navigate to:
+
 * **Korean Core Node**: [http://localhost:8000/ko](http://localhost:8000/ko)
 * **Global English Node**: [http://localhost:8000/](http://localhost:8000/)
 * **API Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
@@ -194,9 +208,11 @@ Navigate to:
 ---
 
 ## 📜 Full Technical Specifications
+
 For full mathematical formulations, threshold constants, legal citations, and EIP-712 type declarations, consult the [Global Battery Minerals Compliance Specification v2.4.0](GLOBAL_BATTERY_MINERALS_COMPLIANCE_SPEC.md).
 
 ---
 
 ## 📄 License
+
 MIT License. Copyright (c) 2026 Minerals Oracle x402 Project Contributors.

@@ -756,6 +756,88 @@ class SilverOriginVerifyResponse(BaseModel):
     timestamp: str
 
 
+# =====================================================================
+# 10. SME LIGHTWEIGHT & SUPPLY CHAIN BATCH COMPLIANCE SCHEMAS
+# =====================================================================
+
+class SMELightweightInput(BaseModel):
+    supplier_name: str = Field(..., description="Corporate or trade name of the SME supplier")
+    business_registration_no: Optional[str] = Field(None, description="Tax or corporate registration identifier")
+    mineral_type: MineralType = Field(MineralType.COPPER_CATHODE, description="Mineral or alloy type processed")
+    source_country: SourceCountry = Field(SourceCountry.CHL, description="Declared country of raw material origin")
+    feedstock_input_ton: float = Field(..., gt=0.0, description="Raw feedstock or unrefined ingot input in metric tons")
+    refined_output_ton: float = Field(..., gt=0.0, description="Finished processed product output in metric tons")
+    scrap_recycled_ratio_pct: float = Field(0.0, ge=0.0, le=100.0, description="Percentage of secondary recycled scrap utilized")
+    monthly_electricity_kwh: float = Field(..., ge=0.0, description="Monthly grid electricity consumption from utility invoice (kWh)")
+    grid_region: str = Field("KR_GRID", description="Grid emission region: KR_GRID, US_GRID, EU_GRID, CL_GRID")
+    purity_pct: float = Field(99.99, ge=80.0, le=100.0, description="Finished product assay purity percentage")
+
+
+class SMELightweightResponse(BaseModel):
+    status: str = "success"
+    meta: ResponseMeta = Field(default_factory=ResponseMeta)
+    sme_verification_id: str
+    supplier_name: str
+    mineral_type: MineralType
+    scope_1_direct_co2_ton: float
+    scope_2_indirect_co2_ton: float
+    total_embedded_carbon_ton: float
+    carbon_intensity_ton_co2_per_ton: float
+    mass_balance_loss_pct: float
+    mass_balance_compliant: bool
+    cbam_ready: bool
+    verdict: str
+    attestation_hash: str
+    timestamp_utc: str
+
+
+class SupplyChainBatchItemResult(BaseModel):
+    lot_id: str
+    supplier_name: str
+    mineral_type: MineralType
+    source_country: SourceCountry
+    verdict: ComplianceVerdict
+    compliance_score: float
+    violations: List[str] = Field(default_factory=list)
+    passport_id: Optional[str] = None
+
+
+class SupplyChainBatchRequest(BaseModel):
+    enterprise_api_key: str = Field(..., description="Enterprise VIP or institutional API key")
+    batch_title: str = Field("Tier-Supplier Global Compliance Batch", description="Audit batch run description")
+    tier_suppliers: List[MineralLotProvenanceRequest] = Field(..., min_length=1, description="List of lot verification requests across the supply network")
+
+
+class SupplyChainBatchResponse(BaseModel):
+    status: str = "success"
+    meta: ResponseMeta = Field(default_factory=ResponseMeta)
+    batch_id: str
+    batch_title: str
+    total_audited: int
+    passed_count: int
+    failed_count: int
+    batch_compliance_rate_pct: float
+    composite_supply_chain_score: float
+    critical_risk_flags: List[Dict[str, Any]] = Field(default_factory=list)
+    remediation_guidance: List[str] = Field(default_factory=list)
+    results: List[SupplyChainBatchItemResult] = Field(default_factory=list)
+    processed_at_utc: str
+
+
+class VoucherAuditPackageResponse(BaseModel):
+    status: str = "success"
+    meta: ResponseMeta = Field(default_factory=ResponseMeta)
+    passport_id: str
+    standard_authority: str = "MOTIE_K-CBAM_2026 / ISO 14064 / ISO/IEC 17025"
+    supplier_metadata: Dict[str, Any]
+    carbon_accounting_breakdown: Dict[str, Any]
+    mass_balance_audit_trail: Dict[str, Any]
+    regulatory_defense_matrix: Dict[str, Any]
+    government_voucher_reconciliation_hash: str
+    issued_at_utc: str
+
+
+
 
 
 

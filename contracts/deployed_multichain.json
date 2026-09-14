@@ -1,0 +1,72 @@
+{
+  "protocol": "Minerals Oracle x402",
+  "version": "2.5.0",
+  "deployer": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
+  "treasury": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
+  "updated_at": "2026-09-14T10:16:47Z",
+  "networks": {
+    "polygon": {
+      "chain_name": "polygon",
+      "chainId": 137,
+      "display_name": "Polygon Mainnet",
+      "rpc_url": "https://polygon-rpc.com",
+      "explorer_url": "https://polygonscan.com",
+      "status": "active",
+      "usdc_token": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+      "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "contracts": {
+        "AgentPaymentVault": {
+          "address": "0xb44Bc2Acdd156cE08b549A00a3102e4B01276654",
+          "explorer_link": "https://polygonscan.com/address/0xb44Bc2Acdd156cE08b549A00a3102e4B01276654"
+        },
+        "MineralsOracleConsumer": {
+          "address": "0x835d01534a5D2e63D52636Fafb1019f889d1E66B",
+          "explorer_link": "https://polygonscan.com/address/0x835d01534a5D2e63D52636Fafb1019f889d1E66B",
+          "primarySymbol": "Cu"
+        }
+      }
+    },
+    "base": {
+      "chain_name": "base",
+      "chainId": 8453,
+      "display_name": "Base (Coinbase L2)",
+      "rpc_url": "https://mainnet.base.org",
+      "explorer_url": "https://basescan.org",
+      "status": "active",
+      "usdc_token": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "contracts": {
+        "AgentPaymentVault": {
+          "address": "0x3841D3B82e5b7E22d718b958B5c4543b59367F47",
+          "explorer_link": "https://basescan.org/address/0x3841D3B82e5b7E22d718b958B5c4543b59367F47"
+        },
+        "MineralsOracleConsumer": {
+          "address": "0x71e98d1a11516eB70b5A344d5c9f5B345aA5e381",
+          "explorer_link": "https://basescan.org/address/0x71e98d1a11516eB70b5A344d5c9f5B345aA5e381",
+          "primarySymbol": "Cu"
+        }
+      }
+    },
+    "arbitrum": {
+      "chain_name": "arbitrum",
+      "chainId": 42161,
+      "display_name": "Arbitrum One",
+      "rpc_url": "https://arb1.arbitrum.io/rpc",
+      "explorer_url": "https://arbiscan.io",
+      "status": "active",
+      "usdc_token": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      "contracts": {
+        "AgentPaymentVault": {
+          "address": "0x19a0a4c28C913b5a790518dD9B1855F11F153282",
+          "explorer_link": "https://arbiscan.io/address/0x19a0a4c28C913b5a790518dD9B1855F11F153282"
+        },
+        "MineralsOracleConsumer": {
+          "address": "0x52467d3eB40A837C392C62B01Ac583A89b6574c8",
+          "explorer_link": "https://arbiscan.io/address/0x52467d3eB40A837C392C62B01Ac583A89b6574c8",
+          "primarySymbol": "Cu"
+        }
+      }
+    }
+  }
+}

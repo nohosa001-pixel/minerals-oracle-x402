@@ -1,27 +1,31 @@
 {
   "$schema": "https://glama.ai/mcp/schemas/server.json",
-  "name": "minerals-oracle-x402",
-  "description": "Deterministic Web3 x402 critical raw minerals, COMEX/LME arbitrage spreads, and battery passport algorithmic calculation oracle for autonomous AI agents on Polygon.",
+  "name": "battery-passport-oracle",
+  "description": "Deterministic Web3 x402 Battery Passport compliance and critical raw minerals provenance algorithmic calculation oracle for autonomous AI agents on Polygon.",
   "homepage": "https://github.com/nohosa001-pixel/minerals-oracle-x402",
   "maintainers": [
     "nohosa001-pixel"
   ],
   "tools": [
     {
-      "name": "get_mineral_prices",
-      "description": "Retrieve raw algorithmic spot price reference indices and multi-unit conversions (USD/troy_oz, USD/mt, USD/kg, USD/lb) for Copper, Silver, Platinum, Lithium, and Neodymium/Dysprosium. Provided AS-IS without warranty."
+      "name": "verify_composite_battery_passport",
+      "description": "Evaluates end-to-end composite EV battery pack compliance and issues a Master Passport on Polygon. Orchestrates Australian Lithium, Indonesian Nickel, and DRC Cobalt streams; enforces US IRA 30D FEOC clean origin and EU Battery Regulation 2023/1542 carbon footprint/CSDDD due diligence."
     },
     {
-      "name": "get_arbitrage_spreads",
-      "description": "Calculate statistical cross-exchange spreads and locational arbitrage heuristics between COMEX, LME, SMM, and LPPM benchmarks. Provided AS-IS for algorithmic reference only."
+      "name": "verify_lithium_origin",
+      "description": "Verifies Australian hard-rock Spodumene to Lithium Hydroxide supply-chain provenance. Evaluates WA MINEDEX GIS geofencing (Greenbushes, Pilgangoora), stoichiometric mass balance, and US IRA Section 30D FEOC 25% clean origin."
+    },
+    {
+      "name": "verify_nickel_origin",
+      "description": "Verifies Indonesian laterite Limonite-to-Nickel MHP supply-chain provenance. Evaluates Sulawesi/Halmahera concession geofencing (IMIP, IWIP), SIMBARA NTPN tax validation, HPAL stoichiometric mass balance, Captive Coal EU CBAM screening, and US IRA FEOC compliance."
+    },
+    {
+      "name": "verify_cobalt_origin",
+      "description": "Verifies DRC Katanga heterogenite-to-cobalt hydroxide supply-chain provenance. Evaluates Katanga Copperbelt concession geofencing, CEEC tamper-proof barcode seal, ASM segregation, ILO 138/182 zero child labor due diligence, and US IRA FEOC screening."
     },
     {
       "name": "verify_mineral_lot_compliance",
-      "description": "Fetches raw algorithmic indices derived from open satellite/market data and computes 12-trap rule heuristics for a mineral lot. DO NOT use as an official regulatory legal filing or physical assay certification without independent manual verification."
-    },
-    {
-      "name": "get_onchain_signed_feed",
-      "description": "Generate an EIP-712 cryptographically signed price feed payload and raw ABI calldata (v, r, s) on Polygon. Provided AS-IS for smart contract verification without warranty."
+      "description": "Fetches raw algorithmic indices derived from open satellite/market data and computes 12-trap regulatory rule heuristics for a critical mineral consignment."
     }
   ]
 }

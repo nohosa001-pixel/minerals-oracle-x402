@@ -54,6 +54,17 @@ class OnChainOracleSigner:
         self.account = Account.from_key(private_key)
         self.signer_address = self.account.address
 
+    @classmethod
+    def for_chain(cls, chain_identifier: Any, private_key: str = ORACLE_SIGNER_PRIVATE_KEY) -> "OnChainOracleSigner":
+        """Factory method returning an OnChainOracleSigner tailored to a specific chain."""
+        from app.multi_chain import get_chain_config
+        cfg = get_chain_config(chain_identifier)
+        return cls(
+            private_key=private_key,
+            chain_id=cfg.chain_id,
+            contract_address=cfg.oracle_consumer_address,
+        )
+
     def get_domain_data(self) -> Dict[str, Any]:
         """Returns the EIP-712 domain separator matching MineralsOracleConsumer.sol."""
         return {

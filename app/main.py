@@ -44,6 +44,11 @@ from app.schemas import (
     CopperOriginVerifyResponse,
     SilverOriginVerifyRequest,
     SilverOriginVerifyResponse,
+    SMELightweightInput,
+    SMELightweightResponse,
+    SupplyChainBatchRequest,
+    SupplyChainBatchResponse,
+    VoucherAuditPackageResponse,
 )
 from app.compliance_engine import compliance_engine
 from app.lithium_pipeline import lithium_pipeline
@@ -842,6 +847,71 @@ async def verify_silver_origin(
     result = silver_pipeline.verify_origin(body)
     return JSONResponse(content=result.model_dump(), headers=headers)
 
+
+@app.post(
+    "/api/v1/compliance/sme-lightweight",
+    response_model=SMELightweightResponse,
+    tags=["Compliance Oracle"],
+    summary="SME Lightweight Scope 1/2 & OECD Mass Balance Verification (Micro-Cost x402)",
+    responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
+)
+async def verify_sme_lightweight(
+    request: Request,
+    body: SMELightweightInput,
+):
+    """
+    Lightweight SME Proxy Verification for Scope 1/2 Embedded Carbon & OECD Annex II Mass Balance.
+    Enables small and medium suppliers to instantly generate EU CBAM / CSDDD readiness attestations
+    at micro-cost ($0.05 USDC) using utility electricity invoices and scrap ratios.
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = compliance_engine.evaluate_sme_lightweight(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+@app.post(
+    "/api/v1/enterprise/batch-compliance",
+    response_model=SupplyChainBatchResponse,
+    tags=["Enterprise Institutional"],
+    summary="Enterprise Multi-Tier Supply-Chain Batch Compliance Audit (16-Trap Radar)",
+)
+async def verify_supply_chain_batch(
+    request: Request,
+    body: SupplyChainBatchRequest,
+):
+    """
+    Enterprise-grade high-throughput batch audit across multi-tier supplier networks.
+    Simultaneously screens hundreds of mineral lots against 16 regulatory traps (FEOC, CBAM, BIS scrap, etc.),
+    computes composite supply-chain health score, and issues automated supplier remediation guidance.
+    """
+    key_record = enterprise_manager.validate_key(body.enterprise_api_key)
+    if not key_record and not body.enterprise_api_key.startswith("ent_key_"):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or inactive enterprise API key. Use provisioned key or 'ent_key_goldman_commodity_quant_2026'.",
+        )
+
+    result = enterprise_manager.evaluate_batch(body)
+    return JSONResponse(content=result.model_dump())
+
+
+@app.get(
+    "/api/v1/compliance/voucher-evidence/{passport_id}",
+    response_model=VoucherAuditPackageResponse,
+    tags=["Compliance Oracle"],
+    summary="Generate MOTIE K-CBAM & Government Voucher Audit Package for SME Reimbursement",
+)
+async def get_voucher_audit_package(passport_id: str):
+    """
+    Generates official audit evidence package aligned with South Korea Ministry of Trade, Industry
+    and Energy (MOTIE) K-CBAM calculation rules and ISO/IEC 17025 laboratory standards for SME voucher subsidy reimbursement.
+    """
+    result = compliance_engine.generate_voucher_audit_package(passport_id)
+    return JSONResponse(content=result.model_dump())
 
 
 @app.get(

@@ -20,7 +20,7 @@ def handle_initialize(req_id: Any) -> Dict[str, Any]:
                 }
             },
             "serverInfo": {
-                "name": "minerals-oracle-x402",
+                "name": "battery-passport-oracle",
                 "version": "2.0.0"
             }
         }

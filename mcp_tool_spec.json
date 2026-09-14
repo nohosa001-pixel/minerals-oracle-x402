@@ -1,30 +1,6 @@
 {
   "tools": [
-    {
-      "name": "get_mineral_prices",
-      "description": "Fetch raw algorithmic spot price reference indices and multi-unit calculations for critical commodities (NdDy, Li, Cu, Ag, Pt). DO NOT use as an official regulatory legal filing or physical guarantee without independent manual verification. Free tier sandbox trial available. Requires 0.005 USDC on Polygon via x402.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "mineral_type": {
-            "type": "string",
-            "enum": ["Neodymium", "Lithium", "Dysprosium", "Copper", "Silver", "Platinum", "ALL"],
-            "default": "Neodymium",
-            "description": "Specific critical mineral symbol or name preset (default: 'Neodymium')"
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    {
-      "name": "get_arbitrage_spreads",
-      "description": "Calculate raw statistical cross-exchange spreads and locational arbitrage heuristics between COMEX, LME, SMM, and LPPM benchmarks. Provided AS-IS for algorithmic reference only without warranty.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {},
-        "additionalProperties": false
-      }
-    },
+
     {
       "name": "verify_mineral_lot_compliance",
       "description": "Fetches raw algorithmic indices derived from open satellite/market data and computes 12-trap rule heuristics for a mineral lot. DO NOT use as an official regulatory legal filing or physical assay certification without independent manual verification.",
@@ -39,22 +15,7 @@
         "required": ["lot_id", "mineral_type", "source_country", "net_weight_metric_tons"]
       }
     },
-    {
-      "name": "get_onchain_signed_feed",
-      "description": "Generate an EIP-712 cryptographically signed price feed payload and raw ABI calldata (v, r, s) on Polygon. Provided AS-IS for programmatic smart contract verification without warranty.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "symbol": {
-            "type": "string",
-            "enum": ["Cu", "Li", "Ag", "Pt", "NdDy"],
-            "default": "Cu",
-            "description": "Commodity symbol to sign (default: 'Cu')"
-          }
-        },
-        "required": ["symbol"]
-      }
-    },
+
     {
       "name": "minerals_submit_agent_feedback",
       "description": "Allows an autonomous AI agent or bot operator to submit an evolution proposal, mineral dataset addition request, regulatory edge case, or protocol improvement to continuously evolve the Minerals Oracle engine.",
