@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import hashlib
 import json
 import logging
 from datetime import datetime, timezone
-from typing import List, Tuple
+from typing import List, Tuple, Optional, Dict, Any
 
 from app.schemas import (
     MineralLotProvenanceRequest,
