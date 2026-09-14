@@ -72,7 +72,12 @@ py-modules = ["mcp_server", "main"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["app*"]
+include = ["app*", "scripts*"]
 exclude = ["app.__pycache__*", "tests*", "*.pyc"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
 
 
