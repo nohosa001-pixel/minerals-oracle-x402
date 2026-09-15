@@ -1,10 +1,34 @@
 import sys
 import json
+import hashlib
+import time
 from typing import Dict, Any, Optional, List
 
 from app.compliance_engine import compliance_engine
-from app.schemas import MineralLotProvenanceRequest, MineralType, SourceCountry
+from app.schemas import (
+    MineralLotProvenanceRequest,
+    MineralType,
+    SourceCountry,
+    PricingTier,
+    MaritimeCIIRating,
+    MaritimeRouteRequest,
+    EBLVerificationRequest,
+    TradeRouteOptimizationRequest,
+    AgentSessionOpenRequest,
+    AgentSessionCloseRequest,
+    TradeDealProposeRequest,
+    TradeDealDualSignRequest,
+    TradeDealVerifyRequest,
+)
+from app.global_trade_engine import global_trade_engine
+from app.agent_session_vault import get_agent_session_vault
+from app.a2a_deal_engine import get_a2a_deal_engine
 from app.evolution_manager import evolution_manager
+from app.vault_manager import vault_manager
+from app.x402_verifier import x402_verifier
+
+agent_session_vault = get_agent_session_vault()
+a2a_deal_engine = get_a2a_deal_engine()
 
 
 
@@ -298,6 +322,221 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
                             "mineral_focus": {"type": "string", "description": "Optional filter by mineral"}
                         }
                     }
+                },
+                {
+                    "name": "register_agent_account",
+                    "description": "Self-service onboarding for autonomous AI agents. Instantly returns a session key and seeds an initial free trial balance (e.g. 0.05 USDC).",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "agent_name": {"type": "string", "description": "Agent or bot operator name"},
+                            "agent_address": {"type": "string", "description": "Optional Polygon wallet address (0x...)"},
+                            "initial_trial_balance_usdc": {"type": "number", "default": 0.05, "description": "Trial balance in USDC"}
+                        },
+                        "required": ["agent_name"]
+                    }
+                },
+                {
+                    "name": "get_agent_vault_balance",
+                    "description": "Retrieves pre-funded USDC vault balance, total consumed, query count, and remaining query capacity across tiers for an agent.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "session_key": {"type": "string", "description": "Agent session key (vault_key_...)"},
+                            "agent_address": {"type": "string", "description": "Agent Polygon address (0x...)"}
+                        }
+                    }
+                },
+                {
+                    "name": "request_x402_payment_challenge",
+                    "description": "Generates a fresh multi-chain payment challenge nonce with pricing tier details and gasless Permit2 contract address.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "pricing_tier": {"type": "string", "enum": ["LIGHT", "STANDARD", "HEAVY", "ONCHAIN"], "default": "STANDARD"},
+                            "chain": {"type": "string", "enum": ["polygon", "base", "arbitrum"], "default": "polygon"}
+                        }
+                    }
+                },
+                {
+                    "name": "simulate_procurement_rfq",
+                    "description": "Simulates multi-mineral consignment RFQ for battery manufacturing. Computes US IRA 50% FTA threshold and FEOC 25% taint propagation before placing contracts.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "rfq_id": {"type": "string", "description": "Buyer agent RFQ identifier"},
+                            "cell_chemistry": {"type": "string", "default": "NCM811", "description": "Target battery chemistry"},
+                            "pack_capacity_kwh": {"type": "number", "default": 84.0},
+                            "lithium_tons": {"type": "number"},
+                            "lithium_origin_country": {"type": "string", "default": "AUS"},
+                            "lithium_feoc_equity_pct": {"type": "number", "default": 0.0},
+                            "nickel_tons": {"type": "number"},
+                            "nickel_origin_country": {"type": "string", "default": "IDN"},
+                            "nickel_feoc_equity_pct": {"type": "number", "default": 0.0},
+                            "cobalt_tons": {"type": "number"},
+                            "cobalt_origin_country": {"type": "string", "default": "COD"},
+                            "cobalt_feoc_equity_pct": {"type": "number", "default": 0.0}
+                        },
+                        "required": ["rfq_id", "lithium_tons", "nickel_tons", "cobalt_tons"]
+                    }
+                },
+                {
+                    "name": "get_global_trade_flows",
+                    "description": "Queries global critical mineral physical trade corridor flows, monthly bulk volumes, standard transit days, vessel classes, and maritime chokepoints.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "mineral_type": {"type": "string", "description": "Optional filter by mineral (e.g. LITHIUM_HYDROXIDE, NICKEL_MHP)"},
+                            "origin_country": {"type": "string", "description": "Optional origin country code (e.g. AUS, IDN, CHL)"},
+                            "destination_country": {"type": "string", "description": "Optional destination country code (e.g. KOR, USA, CHN, EU)"}
+                        }
+                    }
+                },
+                {
+                    "name": "calculate_trade_tariffs",
+                    "description": "Resolves WCO 6-digit Harmonized System (HS) Code, MFN base duty, applicable FTA preferential duty, US Section 301 punitive tariffs, and EU CBAM benchmarks.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "mineral_type": {"type": "string", "description": "Target mineral commodity"},
+                            "importer_jurisdiction": {"type": "string", "default": "USA", "description": "Importing destination (USA, EU, KOR, JPN, CHN)"}
+                        },
+                        "required": ["mineral_type"]
+                    }
+                },
+                {
+                    "name": "estimate_maritime_freight_and_carbon",
+                    "description": "Calculates maritime voyage distance (nautical miles), transit duration, freight charter costs ($/MT), chokepoint detour surcharges (Red Sea/Panama), IMO CII rating, and EU CBAM carbon costs.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "mineral_type": {"type": "string", "description": "Mineral cargo"},
+                            "origin_country": {"type": "string", "description": "Origin country"},
+                            "destination_country": {"type": "string", "description": "Destination country"},
+                            "cargo_weight_metric_tons": {"type": "number", "default": 1000.0},
+                            "cii_rating": {"type": "string", "enum": ["A", "B", "C", "D", "E"], "default": "A"},
+                            "avoid_chokepoints": {"type": "array", "items": {"type": "string"}, "description": "Chokepoints to avoid (e.g. ['RED_SEA', 'PANAMA_CANAL'])"}
+                        },
+                        "required": ["mineral_type", "origin_country", "destination_country"]
+                    }
+                },
+                {
+                    "name": "verify_electronic_bill_of_lading",
+                    "description": "Cryptographically audits UNCITRAL MLETR / FIT Alliance electronic Bill of Lading (eBL). Validates 7-digit IMO checksum, UN/LOCODE port pairs, manifest weight, and screens for AIS dark fleet anomalies.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "ebl_document_id": {"type": "string", "description": "eBL reference ID"},
+                            "ebl_document_hash": {"type": "string", "description": "SHA-256 hash of eBL document"},
+                            "carrier_imo_number": {"type": "integer", "description": "7-digit vessel IMO"},
+                            "vessel_name": {"type": "string", "description": "Registered vessel name"},
+                            "mineral_type": {"type": "string", "description": "Declared mineral cargo"},
+                            "gross_weight_metric_tons": {"type": "number", "description": "Cargo gross weight in MT"},
+                            "port_of_loading_code": {"type": "string", "description": "5-letter UN/LOCODE POL"},
+                            "port_of_discharge_code": {"type": "string", "description": "5-letter UN/LOCODE POD"},
+                            "shipper_name": {"type": "string", "description": "Shipper corporate name"},
+                            "consignee_name": {"type": "string", "description": "Consignee corporate name"}
+                        },
+                        "required": ["ebl_document_id", "ebl_document_hash", "carrier_imo_number", "vessel_name", "mineral_type", "gross_weight_metric_tons", "port_of_loading_code", "port_of_discharge_code", "shipper_name", "consignee_name"]
+                    }
+                },
+                {
+                    "name": "optimize_mineral_trade_route",
+                    "description": "Autonomous trade route optimizer for AI procurement agents. Compares direct marine transit vs chokepoint detour corridors, computing landed cost arbitrage ($/MT), total freight and tariffs, and delivery timelines.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "mineral_type": {"type": "string", "description": "Target mineral cargo"},
+                            "origin_country": {"type": "string", "description": "Origin country"},
+                            "destination_country": {"type": "string", "description": "Destination country"},
+                            "cargo_weight_metric_tons": {"type": "number", "description": "Volume in MT"},
+                            "target_delivery_deadline_days": {"type": "number", "description": "Max acceptable transit days (optional)"},
+                            "max_carbon_budget_co2_tons": {"type": "number", "description": "Max acceptable voyage CO2 tons (optional)"}
+                        },
+                        "required": ["mineral_type", "origin_country", "destination_country", "cargo_weight_metric_tons"]
+                    }
+                },
+                {
+                    "name": "open_agent_session",
+                    "description": "Opens a high-speed allowance session for autonomous AI agents, enabling <0.1ms micro-queries without per-query on-chain gas latency.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "agent_address": {"type": "string", "description": "Agent EVM wallet address (0x...)"},
+                            "deposit_amount_usdc": {"type": "number", "description": "USDC deposit amount for session queries (default 10.0)"},
+                            "session_duration_hours": {"type": "integer", "description": "Session validity in hours (default 24)"},
+                            "signature": {"type": "string", "description": "Optional EIP-712 deposit authorization signature"}
+                        },
+                        "required": ["agent_address"]
+                    }
+                },
+                {
+                    "name": "close_agent_session",
+                    "description": "Closes an active agent session, computes refund of unspent balance, and generates an immutable settlement receipt hash.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "session_token": {"type": "string", "description": "Active session token (asess_...)"},
+                            "agent_address": {"type": "string", "description": "Agent EVM wallet address"}
+                        },
+                        "required": ["session_token", "agent_address"]
+                    }
+                },
+                {
+                    "name": "propose_a2a_trade_deal",
+                    "description": "Seller AI agent proposes a canonical bilateral trade agreement for a critical mineral consignment with cryptographic signature.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "spec": {
+                                "type": "object",
+                                "description": "Canonical TradeDealSpec object",
+                                "properties": {
+                                    "deal_id": {"type": "string", "description": "Unique trade deal ID (e.g. DEAL-2026-CHL-001)"},
+                                    "commodity": {"type": "string", "description": "Commodity symbol (e.g. LITHIUM_CARBONATE, COPPER_CATHODE, NICKEL_MHP)"},
+                                    "volume_tons": {"type": "number", "description": "Cargo weight in metric tons"},
+                                    "unit_price_usd_per_ton": {"type": "number", "description": "Contract unit price $/MT"},
+                                    "total_deal_value_usd": {"type": "number", "description": "Gross deal value in USD"},
+                                    "origin_country": {"type": "string", "description": "Origin country ISO code (e.g. CHL, AUS, IDN)"},
+                                    "destination_country": {"type": "string", "description": "Importing destination country (e.g. USA, KOR, EU)"},
+                                    "feoc_cleared": {"type": "boolean", "default": True, "description": "FEOC 25% compliance cleared"},
+                                    "mass_balance_cleared": {"type": "boolean", "default": True, "description": "Stoichiometric mass balance cleared"},
+                                    "ebl_document_id": {"type": "string", "description": "Verified electronic Bill of Lading reference"},
+                                    "buyer_agent_address": {"type": "string", "description": "Buyer agent EVM address (0x...)"},
+                                    "seller_agent_address": {"type": "string", "description": "Seller agent EVM address (0x...)"},
+                                    "projected_savings_usd": {"type": "number", "default": 0.0, "description": "Oracle verified tariff and logistics savings for 10% gain-share"},
+                                    "created_at_utc": {"type": "string", "description": "ISO timestamp"}
+                                },
+                                "required": ["deal_id", "commodity", "volume_tons", "unit_price_usd_per_ton", "total_deal_value_usd", "origin_country", "destination_country", "ebl_document_id", "buyer_agent_address", "seller_agent_address", "created_at_utc"]
+                            },
+                            "seller_signature": {"type": "string", "description": "Seller agent cryptographic signature over deal hash"}
+                        },
+                        "required": ["spec", "seller_signature"]
+                    }
+                },
+                {
+                    "name": "dual_sign_trade_deal",
+                    "description": "Buyer AI agent countersigns an existing trade proposal; Oracle mints an immutable 3-party deal attestation seal.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "deal_id": {"type": "string", "description": "Canonical trade deal identifier"},
+                            "buyer_signature": {"type": "string", "description": "Buyer agent cryptographic signature"},
+                            "buyer_agent_address": {"type": "string", "description": "Buyer agent EVM address"}
+                        },
+                        "required": ["deal_id", "buyer_signature", "buyer_agent_address"]
+                    }
+                },
+                {
+                    "name": "verify_a2a_trade_deal",
+                    "description": "Cryptographically audits a dual-signed A2A trade deal, verifying seller, buyer, and oracle signatures, along with FEOC and mass-balance compliance.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "deal_id": {"type": "string", "description": "Trade deal identifier to audit"}
+                        },
+                        "required": ["deal_id"]
+                    }
                 }
             ]
         }
@@ -580,6 +819,263 @@ def handle_tool_call(req_id: Any, name: str, arguments: Dict[str, Any]) -> Dict[
                 "result": {
                     "content": [{"type": "text", "text": json.dumps(result, indent=2)}]
                 }
+            }
+
+        elif name == "register_agent_account":
+            agent_name = arguments.get("agent_name", "AutonomousBot")
+            agent_addr = arguments.get("agent_address")
+            init_bal = float(arguments.get("initial_trial_balance_usdc", 0.05))
+            acc, session_key = vault_manager.register_agent_onboarding(
+                agent_name=agent_name,
+                agent_address=agent_addr,
+                initial_trial_balance_usdc=init_bal,
+            )
+            result = {
+                "status": "REGISTERED",
+                "agent_name": agent_name,
+                "agent_address": acc.agent_address,
+                "session_key": session_key,
+                "balance_usdc": acc.balance_usdc,
+                "query_capacity": vault_manager.get_query_capacity(acc.balance_usdc),
+                "instruction": "Pass this session_key in 'X-Agent-Vault-Key' header or bearer auth for zero-latency queries.",
+            }
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "content": [{"type": "text", "text": json.dumps(result, indent=2)}]
+                }
+            }
+
+        elif name == "get_agent_vault_balance":
+            key = arguments.get("session_key") or arguments.get("agent_address")
+            if not key:
+                return {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {
+                        "code": -32602,
+                        "message": "Missing 'session_key' or 'agent_address' parameter."
+                    }
+                }
+            acc = vault_manager.get_account_by_session_key(key)
+            if not acc and key.startswith("0x"):
+                acc = vault_manager.get_account_by_address(key)
+            if not acc:
+                return {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {
+                        "code": -32602,
+                        "message": f"Vault account '{key}' not found."
+                    }
+                }
+            result = {
+                "status": "ACTIVE",
+                "agent_address": acc.agent_address,
+                "balance_usdc": acc.balance_usdc,
+                "total_deposited_usdc": acc.total_deposited_usdc,
+                "total_consumed_usdc": acc.total_consumed_usdc,
+                "query_count": acc.query_count,
+                "query_capacity": vault_manager.get_query_capacity(acc.balance_usdc),
+            }
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "content": [{"type": "text", "text": json.dumps(result, indent=2)}]
+                }
+            }
+
+        elif name == "request_x402_payment_challenge":
+            tier_str = arguments.get("pricing_tier", "STANDARD")
+            chain_str = arguments.get("chain", "polygon")
+            try:
+                tier_val = PricingTier(tier_str)
+            except Exception:
+                tier_val = PricingTier.STANDARD
+            challenge = x402_verifier.generate_challenge(tier=tier_val, chain_name=chain_str)
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "content": [{"type": "text", "text": json.dumps(challenge.model_dump(), indent=2)}]
+                }
+            }
+
+        elif name == "simulate_procurement_rfq":
+            rfq_id = arguments.get("rfq_id", "RFQ-SIM-01")
+            chemistry = arguments.get("cell_chemistry", "NCM811")
+            li_tons = float(arguments.get("lithium_tons", 0.0))
+            li_origin = arguments.get("lithium_origin_country", "AUS")
+            li_feoc = float(arguments.get("lithium_feoc_equity_pct", 0.0))
+            ni_tons = float(arguments.get("nickel_tons", 0.0))
+            ni_origin = arguments.get("nickel_origin_country", "IDN")
+            ni_feoc = float(arguments.get("nickel_feoc_equity_pct", 0.0))
+            co_tons = float(arguments.get("cobalt_tons", 0.0))
+            co_origin = arguments.get("cobalt_origin_country", "COD")
+            co_feoc = float(arguments.get("cobalt_feoc_equity_pct", 0.0))
+
+            US_FTA_COUNTRIES = {"USA", "US", "AUS", "CHL", "CAN", "MEX", "KOR", "SGP", "BHR", "ISR", "JOR", "MAR", "OMN", "PAN", "PER"}
+            BENCHMARK_PRICES = {"LITHIUM": 15000.0, "NICKEL": 16800.0, "COBALT": 28500.0}
+
+            li_val = li_tons * BENCHMARK_PRICES["LITHIUM"]
+            ni_val = ni_tons * BENCHMARK_PRICES["NICKEL"]
+            co_val = co_tons * BENCHMARK_PRICES["COBALT"]
+            total_val = li_val + ni_val + co_val
+
+            fta_val = 0.0
+            if li_origin.upper() in US_FTA_COUNTRIES:
+                fta_val += li_val
+            if ni_origin.upper() in US_FTA_COUNTRIES:
+                fta_val += ni_val
+            if co_origin.upper() in US_FTA_COUNTRIES:
+                fta_val += co_val
+
+            fta_ratio = round((fta_val / total_val) * 100.0, 2) if total_val > 0 else 0.0
+
+            tainted = []
+            if li_feoc >= 25.0:
+                tainted.append(f"LITHIUM ({li_feoc}% covered nation equity)")
+            if ni_feoc >= 25.0:
+                tainted.append(f"NICKEL ({ni_feoc}% covered nation equity)")
+            if co_feoc >= 25.0:
+                tainted.append(f"COBALT ({co_feoc}% covered nation equity)")
+
+            has_taint = len(tainted) > 0
+            ira_ok = (fta_ratio >= 50.0) and not has_taint
+
+            now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            merkle_preimage = f"{rfq_id}:{chemistry}:{fta_ratio}:{has_taint}:{now_iso}"
+            digest = "0x" + hashlib.sha256(merkle_preimage.encode()).hexdigest()
+
+            if ira_ok:
+                status_val = "QUALIFIED"
+                subsidy = 3750.0
+                rec = "APPROVED_FOR_PROCUREMENT: Batch satisfies US IRA Section 30D $3,750 clean vehicle credit with 0% FEOC taint."
+            else:
+                status_val = "DISQUALIFIED"
+                subsidy = 0.0
+                reasons = []
+                if has_taint:
+                    reasons.append("FEOC covered nation taint >= 25.0%")
+                if fta_ratio < 50.0:
+                    reasons.append(f"FTA value ratio {fta_ratio}% < 50.0% statutory threshold")
+                rec = f"REJECT_OR_REPLACE: Disqualified due to {', '.join(reasons)}."
+
+            result = {
+                "rfq_id": rfq_id,
+                "cell_chemistry": chemistry,
+                "status": status_val,
+                "ira_fta_compliant": ira_ok,
+                "ira_fta_value_ratio_pct": fta_ratio,
+                "feoc_taint_detected": has_taint,
+                "tainted_minerals": tainted,
+                "us_subsidy_qualified_per_pack_usd": subsidy,
+                "recommendation": rec,
+                "composite_merkle_digest": digest,
+                "simulated_at_utc": now_iso,
+            }
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "content": [{"type": "text", "text": json.dumps(result, indent=2)}]
+                }
+            }
+
+        elif name == "get_global_trade_flows":
+            m_type = MineralType(arguments["mineral_type"]) if "mineral_type" in arguments and arguments["mineral_type"] else None
+            o_country = SourceCountry(arguments["origin_country"]) if "origin_country" in arguments and arguments["origin_country"] else None
+            d_country = arguments.get("destination_country")
+            corrs = global_trade_engine.get_corridors(m_type, o_country, d_country)
+            data = [c.model_dump() for c in corrs]
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
+            }
+
+        elif name == "calculate_trade_tariffs":
+            m_type = MineralType(arguments["mineral_type"])
+            dest = arguments.get("importer_jurisdiction", "USA")
+            data = global_trade_engine.get_hs_tariff(m_type, dest).model_dump()
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
+            }
+
+        elif name == "estimate_maritime_freight_and_carbon":
+            req_model = MaritimeRouteRequest(**arguments)
+            data = global_trade_engine.calculate_maritime_route(req_model).model_dump()
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
+            }
+
+        elif name == "verify_electronic_bill_of_lading":
+            req_model = EBLVerificationRequest(**arguments)
+            data = global_trade_engine.verify_ebl(req_model).model_dump()
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
+            }
+
+        elif name == "optimize_mineral_trade_route":
+            req_model = TradeRouteOptimizationRequest(**arguments)
+            data = global_trade_engine.optimize_route(req_model).model_dump()
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
+            }
+
+        elif name == "open_agent_session":
+            req_model = AgentSessionOpenRequest(**arguments)
+            data = agent_session_vault.open_session(req_model).model_dump()
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
+            }
+
+        elif name == "close_agent_session":
+            req_model = AgentSessionCloseRequest(**arguments)
+            data = agent_session_vault.close_session(req_model).model_dump()
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
+            }
+
+        elif name == "propose_a2a_trade_deal":
+            req_model = TradeDealProposeRequest(**arguments)
+            data = a2a_deal_engine.propose_deal(req_model).model_dump()
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
+            }
+
+        elif name == "dual_sign_trade_deal":
+            req_model = TradeDealDualSignRequest(**arguments)
+            data = a2a_deal_engine.dual_sign_deal(req_model).model_dump()
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
+            }
+
+        elif name == "verify_a2a_trade_deal":
+            req_model = TradeDealVerifyRequest(**arguments)
+            data = a2a_deal_engine.verify_deal(req_model).model_dump()
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
             }
 
         else:

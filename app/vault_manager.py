@@ -203,6 +203,54 @@ class VaultManager:
 
             return True, acc.agent_address, acc.balance_usdc
 
+    def get_query_capacity(self, balance_usdc: float) -> Dict[str, int]:
+        """Calculates remaining queries an agent can perform across tiers with current balance."""
+        bal = round(balance_usdc, 6)
+        return {
+            "tier1_light_queries": int(round(bal / 0.001)),
+            "tier2_standard_queries": int(round(bal / 0.005)),
+            "tier3_heavy_queries": int(round(bal / 0.010)),
+            "tier4_onchain_signed_queries": int(round(bal / 0.020)),
+        }
+
+    def deposit_funds(
+        self,
+        identifier: str,
+        amount_usdc: float,
+        tx_hash: Optional[str] = None,
+        chain: str = "polygon",
+    ) -> Tuple[AgentVaultAccount, Dict[str, Any]]:
+        """Deposits USDC into an agent's account using session key or wallet address with audit metadata."""
+        if amount_usdc <= 0:
+            raise ValueError("Deposit amount must be strictly positive.")
+
+        with self._lock:
+            addr = self._session_index.get(identifier)
+            if not addr and identifier.startswith("0x"):
+                try:
+                    addr = Web3.to_checksum_address(identifier)
+                except Exception:
+                    addr = None
+
+        if not addr:
+            # Auto-onboard if not found
+            acc, _ = self.register_agent_onboarding(agent_name="AgentDepositor", agent_address=identifier if identifier.startswith("0x") else None, initial_trial_balance_usdc=0.0)
+            addr = acc.agent_address
+
+        acc = self.deposit(addr, amount_usdc)
+        audit_receipt = {
+            "deposit_id": "dep_" + secrets.token_hex(8),
+            "agent_address": acc.agent_address,
+            "session_key": acc.session_key,
+            "amount_deposited_usdc": amount_usdc,
+            "new_balance_usdc": acc.balance_usdc,
+            "chain": chain,
+            "tx_hash": tx_hash or ("0xsim_" + secrets.token_hex(32)),
+            "timestamp_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "capacity": self.get_query_capacity(acc.balance_usdc),
+        }
+        return acc, audit_receipt
+
 
 # Singleton instance
 vault_manager = VaultManager()

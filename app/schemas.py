@@ -334,12 +334,15 @@ class PaymentReceipt(BaseModel):
 
 
 class VaultDepositRequest(BaseModel):
-    agent_address: str
+    agent_address: Optional[str] = None
+    identifier: Optional[str] = None
     amount_usdc: float = Field(..., gt=0)
     tx_hash: Optional[str] = None
+    chain: str = "polygon"
 
 
 class VaultBalanceResponse(BaseModel):
+    status: Optional[str] = "success"
     agent_address: str
     balance_usdc: float
     total_deposited_usdc: float
@@ -347,6 +350,72 @@ class VaultBalanceResponse(BaseModel):
     session_key: str
     query_count: int
     last_active_utc: str
+    capacity: Optional[Dict[str, int]] = None
+    receipt: Optional[Dict[str, Any]] = None
+
+
+class AgentRegisterRequest(BaseModel):
+    agent_name: str = Field(..., description="Name or identifier of calling autonomous agent")
+    agent_address: Optional[str] = Field(None, description="Optional Polygon wallet address (0x...)")
+    initial_trial_balance_usdc: float = Field(0.05, ge=0.0, description="Trial balance granted on self-onboarding")
+
+
+class AgentRegisterResponse(BaseModel):
+    status: str = "success"
+    agent_name: str
+    agent_address: str
+    session_key: str
+    balance_usdc: float
+    message: str
+    capacity: Dict[str, int]
+    created_at_utc: str
+
+
+class AgentDepositInput(BaseModel):
+    identifier: Optional[str] = Field(None, description="Agent session key (vault_key_...) or wallet address (0x...)")
+    agent_address: Optional[str] = Field(None, description="Agent Polygon wallet address (0x...)")
+    amount_usdc: float = Field(..., gt=0, description="Amount of USDC to deposit")
+    tx_hash: Optional[str] = Field(None, description="On-chain settlement transaction hash (optional for simulated deposit)")
+    chain: str = Field("polygon", description="Settlement chain: polygon, base, arbitrum")
+
+
+class ReceiptVerifyRequest(BaseModel):
+    receipt_id: str
+    payer_address: str
+    amount_paid_usdc: float
+    pricing_tier: str
+    network: str
+    oracle_state_digest: str
+    oracle_receipt_signature: str
+
+
+class ProcurementRFQRequest(BaseModel):
+    rfq_id: str = Field(..., description="Buyer agent RFQ identifier")
+    cell_chemistry: str = Field("NCM811", description="Target battery cell chemistry (e.g. NCM811, NCM622, LFP)")
+    pack_capacity_kwh: float = Field(84.0, gt=0, description="Pack capacity in kWh")
+    lithium_tons: float = Field(..., gt=0)
+    lithium_origin_country: str = Field("AUS")
+    lithium_feoc_equity_pct: float = Field(0.0, ge=0.0, le=100.0)
+    nickel_tons: float = Field(..., gt=0)
+    nickel_origin_country: str = Field("IDN")
+    nickel_feoc_equity_pct: float = Field(0.0, ge=0.0, le=100.0)
+    cobalt_tons: float = Field(..., gt=0)
+    cobalt_origin_country: str = Field("COD")
+    cobalt_feoc_equity_pct: float = Field(0.0, ge=0.0, le=100.0)
+
+
+class ProcurementRFQResponse(BaseModel):
+    rfq_id: str
+    cell_chemistry: str
+    status: str
+    ira_fta_compliant: bool
+    ira_fta_value_ratio_pct: float
+    feoc_taint_detected: bool
+    tainted_minerals: List[str]
+    us_subsidy_qualified_per_pack_usd: float
+    recommendation: str
+    composite_merkle_digest: str
+    simulated_at_utc: str
 
 
 class AutonomousPaymentMethod(str, Enum):
@@ -835,6 +904,248 @@ class VoucherAuditPackageResponse(BaseModel):
     regulatory_defense_matrix: Dict[str, Any]
     government_voucher_reconciliation_hash: str
     issued_at_utc: str
+
+
+# =====================================================================
+# 16. GLOBAL TRADE FLOWS, TARIFFS & MARITIME LOGISTICS SCHEMAS
+# =====================================================================
+
+class TradeCorridorFlow(BaseModel):
+    corridor_id: str = Field(..., description="Unique identifier of the trade corridor")
+    mineral_type: MineralType = Field(..., description="Critical mineral cargo type")
+    origin_country: SourceCountry = Field(..., description="Country of extraction/export")
+    origin_port_name: str = Field(..., description="Port of loading name")
+    origin_port_code: str = Field(..., description="UN/LOCODE 5-letter port code")
+    destination_country: str = Field(..., description="Importing nation ISO-3")
+    destination_port_name: str = Field(..., description="Port of discharge name")
+    destination_port_code: str = Field(..., description="UN/LOCODE 5-letter port code")
+    monthly_volume_metric_tons: float = Field(..., description="Average monthly bulk trade volume (MT)")
+    standard_distance_nm: float = Field(..., description="Standard voyage distance in nautical miles")
+    transit_days: float = Field(..., description="Standard transit days at 13 knots")
+    primary_vessel_class: str = Field(..., description="Typical bulk carrier class (e.g. Supramax, Panamax, Capesize)")
+    chokepoints: List[str] = Field(default_factory=list, description="Key maritime chokepoints traversed")
+    freight_rate_usd_per_mt: float = Field(..., description="Current voyage charter freight rate ($/MT)")
+
+
+class HSCodeTariffInfo(BaseModel):
+    mineral_type: MineralType = Field(..., description="Mineral type")
+    hs_code: str = Field(..., description="WCO 6-digit Harmonized System code")
+    description: str = Field(..., description="Tariff line description")
+    importer_jurisdiction: str = Field(..., description="Importing nation (USA, EU, KOR, JPN, CHN)")
+    mfn_duty_pct: float = Field(..., description="General Most-Favored-Nation (MFN) tariff rate %")
+    fta_preferential_duty_pct: float = Field(..., description="Preferential duty rate % under applicable FTA")
+    fta_name: Optional[str] = Field(None, description="Applicable Free Trade Agreement")
+    section_301_tariff_pct: float = Field(0.0, description="US Section 301 punitive tariff % (e.g. on Chinese goods)")
+    export_licensing_required: bool = Field(False, description="True if origin country requires dual-use/export license")
+    export_restriction_note: Optional[str] = Field(None, description="Export policy note (e.g. MOFCOM or Indonesia DMO)")
+    eu_cbam_applicable: bool = Field(False, description="True if subject to EU Carbon Border Adjustment Mechanism")
+    cbam_default_carbon_intensity: float = Field(0.0, description="Default embedded carbon benchmark (tCO2e/t)")
+
+
+class MaritimeRouteRequest(BaseModel):
+    mineral_type: MineralType = Field(..., description="Mineral being shipped")
+    origin_country: SourceCountry = Field(..., description="Origin extraction country")
+    destination_country: str = Field(..., description="Destination market (e.g. USA, KOR, EU, CHN, JPN)")
+    cargo_weight_metric_tons: float = Field(1000.0, ge=1.0, description="Shipment lot weight in metric tons")
+    vessel_imo_number: Optional[int] = Field(None, description="IMO 7-digit vessel ID")
+    cii_rating: MaritimeCIIRating = Field(MaritimeCIIRating.A, description="Vessel IMO MARPOL Carbon Intensity rating")
+    avoid_chokepoints: List[str] = Field(default_factory=list, description="Chokepoints to bypass (e.g. ['RED_SEA', 'PANAMA_CANAL'])")
+
+
+class MaritimeRouteResponse(BaseModel):
+    status: str = "success"
+    corridor_id: str
+    origin_port: str
+    destination_port: str
+    nautical_miles: float
+    estimated_transit_days: float
+    chokepoints_traversed: List[str]
+    chokepoint_risk_penalty_days: float
+    base_freight_usd_per_mt: float
+    risk_surcharge_usd_per_mt: float
+    total_freight_usd: float
+    cii_rating: MaritimeCIIRating
+    total_voyage_co2_metric_tons: float
+    eu_cbam_estimated_surcharge_usd: float
+    route_advisory: str
+    calculated_at_utc: str
+
+
+class EBLVerificationRequest(BaseModel):
+    ebl_document_id: str = Field(..., description="Electronic Bill of Lading reference number")
+    ebl_document_hash: str = Field(..., description="SHA-256 cryptographic hash of the eBL document")
+    carrier_imo_number: int = Field(..., description="7-digit IMO number of the cargo vessel")
+    vessel_name: str = Field(..., description="Registered vessel name")
+    mineral_type: MineralType = Field(..., description="Declared mineral cargo")
+    gross_weight_metric_tons: float = Field(..., gt=0.0, description="Bill of Lading manifest weight in MT")
+    port_of_loading_code: str = Field(..., description="5-letter UN/LOCODE port of loading")
+    port_of_discharge_code: str = Field(..., description="5-letter UN/LOCODE port of discharge")
+    shipper_name: str = Field(..., description="Name of the exporting/shipping entity")
+    consignee_name: str = Field(..., description="Name of the consignee/receiving entity")
+
+
+class EBLVerificationResponse(BaseModel):
+    status: str = "success"
+    ebl_document_id: str
+    is_valid: bool
+    carrier_imo_valid: bool
+    port_pair_valid: bool
+    ais_anomaly_detected: bool
+    dark_fleet_flag: bool
+    hash_integrity: bool
+    audit_verdict: str
+    verification_timestamp_utc: str
+    cryptographic_audit_hash: str
+
+
+class TradeRouteOptimizationRequest(BaseModel):
+    mineral_type: MineralType = Field(..., description="Mineral cargo to transport")
+    origin_country: SourceCountry = Field(..., description="Origin extraction country")
+    destination_country: str = Field(..., description="Destination consuming nation")
+    cargo_weight_metric_tons: float = Field(..., gt=0.0, description="Cargo volume in metric tons")
+    target_delivery_deadline_days: Optional[float] = Field(None, description="Max acceptable transit time in days")
+    max_carbon_budget_co2_tons: Optional[float] = Field(None, description="Max acceptable voyage CO2 in tons")
+
+
+class TradeRouteOptimizationResponse(BaseModel):
+    status: str = "success"
+    mineral_type: MineralType
+    origin_country: SourceCountry
+    destination_country: str
+    cargo_weight_metric_tons: float
+    optimal_corridor_id: str
+    recommended_route_summary: str
+    options_evaluated: List[Dict[str, Any]]
+    estimated_landed_cost_usd_per_mt: float
+    total_freight_and_tariff_usd: float
+    transit_days: float
+    compliance_rating: str
+    agent_decision: Optional["AgentDecisionSignal"] = None
+    evaluated_at_utc: str
+
+
+# =====================================================================
+# 17. AUTONOMOUS AGENT-NATIVE INTELLIGENCE, SESSION & A2A SETTLEMENT SCHEMAS
+# =====================================================================
+
+class AgentActionType(str, Enum):
+    PROCEED_SETTLEMENT = "PROCEED_SETTLEMENT"
+    EXECUTE_PURCHASE = "EXECUTE_PURCHASE"
+    ABORT_FEOC_VIOLATION = "ABORT_FEOC_VIOLATION"
+    ABORT_DARK_FLEET = "ABORT_DARK_FLEET"
+    REROUTE_PANAMA_BOTTLENECK = "REROUTE_PANAMA_BOTTLENECK"
+    REROUTE_RED_SEA_CONFLICT = "REROUTE_RED_SEA_CONFLICT"
+    REJECT_MASS_BALANCE_MISMATCH = "REJECT_MASS_BALANCE_MISMATCH"
+    FLAG_DOCUMENT_INVALID = "FLAG_DOCUMENT_INVALID"
+    HOLD_FOR_ASSAY_CLARIFICATION = "HOLD_FOR_ASSAY_CLARIFICATION"
+
+
+class AgentDecisionSignal(BaseModel):
+    action: AgentActionType = Field(..., description="Deterministic machine control flag for the calling agent")
+    confidence_score: float = Field(..., ge=0.0, le=1.0, description="Confidence rating from 0.0 to 1.0")
+    risk_score: float = Field(..., ge=0.0, le=1.0, description="Calculated aggregate operational/regulatory risk")
+    bottlenecks: List[str] = Field(default_factory=list, description="Identified logistics or legal bottlenecks")
+    recommended_action: str = Field(..., description="Explicit next-step instruction for the calling agent")
+    projected_cost_delta_usd: float = Field(0.0, description="Projected dollar savings (positive) or penalty (negative)")
+    actionable_command: Optional[str] = Field(None, description="Ready-to-execute next MCP tool call snippet")
+
+
+class AgentSessionOpenRequest(BaseModel):
+    agent_address: str = Field(..., description="Calling agent EVM wallet address (0x...)")
+    deposit_amount_usdc: float = Field(10.0, gt=0.0, description="USDC amount to deposit/lock for high-speed micro-queries")
+    session_duration_hours: int = Field(24, ge=1, le=168, description="Session validity in hours (1-168)")
+    signature: Optional[str] = Field(None, description="Optional EIP-712 deposit authorization signature")
+
+
+class AgentSessionResponse(BaseModel):
+    status: str = "success"
+    session_token: str
+    agent_address: str
+    allocated_balance_usdc: float
+    per_query_cost_usdc: float = 0.05
+    remaining_queries_capacity: int
+    expires_at_utc: str
+    created_at_utc: str
+
+
+class AgentSessionCloseRequest(BaseModel):
+    session_token: str = Field(..., description="Active session token to terminate")
+    agent_address: str = Field(..., description="Agent wallet address")
+
+
+class AgentSessionCloseResponse(BaseModel):
+    status: str = "success"
+    session_token: str
+    agent_address: str
+    queries_executed: int
+    total_consumed_usdc: float
+    refunded_balance_usdc: float
+    settlement_receipt_hash: str
+    closed_at_utc: str
+
+
+class TradeDealSpec(BaseModel):
+    deal_id: str = Field(..., description="Unique A2A trade deal identifier")
+    commodity: MineralType = Field(..., description="Traded mineral commodity")
+    volume_tons: float = Field(..., gt=0.0, description="Cargo volume in metric tons")
+    unit_price_usd_per_ton: float = Field(..., gt=0.0, description="Agreed price per metric ton in USD")
+    total_deal_value_usd: float = Field(..., gt=0.0, description="Gross deal value in USD")
+    origin_country: SourceCountry = Field(..., description="Country of extraction")
+    destination_country: str = Field(..., description="Destination market")
+    feoc_cleared: bool = Field(True, description="True if certified < 25% covered nation equity")
+    mass_balance_cleared: bool = Field(True, description="True if certified under stoichiometric mass balance")
+    ebl_document_id: str = Field(..., description="Associated Electronic Bill of Lading reference")
+    buyer_agent_address: str = Field(..., description="Buyer agent EVM address (0x...)")
+    seller_agent_address: str = Field(..., description="Seller agent EVM address (0x...)")
+    settlement_currency: str = Field("USDC", description="Settlement cryptocurrency")
+    projected_savings_usd: float = Field(0.0, description="Oracle-calculated tariff and logistics savings in USD")
+    gain_share_rate_pct: float = Field(10.0, description="Agreed gain-share percentage (default 10%)")
+    calculated_gain_share_fee_usd: float = Field(0.0, description="Calculated gain-share settlement fee in USD")
+    fee_cap_applied: bool = Field(False, description="True if fee exceeded cap (e.g. $10,000 max)")
+    hybrid_settlement_summary: Optional[str] = Field(None, description="Detailed hybrid fee breakdown")
+    created_at_utc: str
+
+
+class TradeDealProposeRequest(BaseModel):
+    spec: TradeDealSpec = Field(..., description="Canonical trade deal terms")
+    seller_signature: str = Field(..., description="Seller agent cryptographic signature over EIP-712 deal hash")
+
+
+class TradeDealDualSignRequest(BaseModel):
+    deal_id: str = Field(..., description="Deal ID to countersign")
+    buyer_signature: str = Field(..., description="Buyer agent cryptographic signature over EIP-712 deal hash")
+    buyer_agent_address: str = Field(..., description="Buyer agent address for verification")
+
+
+class TradeDealAttestation(BaseModel):
+    deal_id: str
+    status: str = Field("DUAL_SIGNED_CONFIRMED", description="Deal status: PROPOSED, DUAL_SIGNED_CONFIRMED, REJECTED")
+    deal_hash: str
+    spec: TradeDealSpec
+    seller_signature: str
+    buyer_signature: Optional[str] = None
+    oracle_attestation_signature: Optional[str] = None
+    final_contract_hash: Optional[str] = None
+    verified_at_utc: str
+
+
+class TradeDealVerifyRequest(BaseModel):
+    deal_id: str = Field(..., description="Deal identifier to audit")
+
+
+class TradeDealVerifyResponse(BaseModel):
+    status: str = "success"
+    deal_id: str
+    is_valid: bool
+    deal_status: str
+    seller_verified: bool
+    buyer_verified: bool
+    oracle_verified: bool
+    deal_hash: str
+    final_contract_hash: Optional[str]
+    compliance_audit_summary: str
+
+
 
 
 

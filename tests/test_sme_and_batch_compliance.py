@@ -72,7 +72,7 @@ def test_sme_lightweight_api_endpoint():
         "purity_pct": 99.99,
     }
     # In sandbox or test mode, authorization passes
-    res = client.post("/api/v1/compliance/sme-lightweight", json=payload)
+    res = client.post("/api/v1/compliance/sme-lightweight", json=payload, headers={"X-Dev-Bypass": "true"})
     assert res.status_code == 200
     data = res.json()
     assert data["supplier_name"] == "Hansol Metal Recycling Ltd"

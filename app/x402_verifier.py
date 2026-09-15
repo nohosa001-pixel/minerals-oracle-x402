@@ -201,6 +201,25 @@ class X402Verifier:
         """Retrieves an issued payment receipt by its ID."""
         return _ISSUED_RECEIPTS.get(receipt_id)
 
+    def verify_payment_receipt_signature(self, receipt: PaymentReceipt) -> bool:
+        """Cryptographically verifies that the PaymentReceipt was signed by the oracle's private key."""
+        try:
+            tier_val = receipt.pricing_tier.value if hasattr(receipt.pricing_tier, "value") else str(receipt.pricing_tier)
+            chain_name = "polygon"
+            for c in ("polygon", "base", "arbitrum"):
+                if c in receipt.network.lower():
+                    chain_name = c
+                    break
+            digest = receipt.oracle_state_digest
+            if digest.startswith("0x"):
+                digest = digest[2:]
+            receipt_msg = f"minerals-oracle:receipt:{receipt.receipt_id}:{receipt.payer_address}:{receipt.amount_paid_usdc}:{tier_val}:{chain_name}:{digest}"
+            signable = encode_defunct(text=receipt_msg)
+            recovered = Account.recover_message(signable, signature=receipt.oracle_receipt_signature)
+            return recovered.lower() == onchain_signer.account.address.lower()
+        except Exception:
+            return False
+
     def verify_request_payment(
         self,
         request: Request,

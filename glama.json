@@ -26,6 +26,62 @@
     {
       "name": "verify_mineral_lot_compliance",
       "description": "Fetches raw algorithmic indices derived from open satellite/market data and computes 12-trap regulatory rule heuristics for a critical mineral consignment."
+    },
+    {
+      "name": "simulate_procurement_rfq",
+      "description": "Simulates multi-mineral consignment RFQ for battery manufacturing. Computes US IRA 50% FTA threshold and FEOC 25% taint propagation before placing contracts."
+    },
+    {
+      "name": "register_agent_account",
+      "description": "Self-service onboarding for autonomous AI agents. Instantly returns a session key and seeds an initial free trial balance (e.g. 0.05 USDC)."
+    },
+    {
+      "name": "get_agent_vault_balance",
+      "description": "Retrieves pre-funded USDC vault balance, total consumed, query count, and remaining query capacity across tiers for an agent."
+    },
+    {
+      "name": "request_x402_payment_challenge",
+      "description": "Generates a fresh multi-chain payment challenge nonce with pricing tier details and gasless Permit2 contract address."
+    },
+    {
+      "name": "get_global_trade_flows",
+      "description": "Queries global critical mineral physical trade corridor flows, monthly bulk volumes, standard transit days, vessel classes, and maritime chokepoints."
+    },
+    {
+      "name": "calculate_trade_tariffs",
+      "description": "Resolves WCO 6-digit Harmonized System (HS) Code, MFN base duty, applicable FTA preferential duty, US Section 301 punitive tariffs, and EU CBAM benchmarks."
+    },
+    {
+      "name": "estimate_maritime_freight_and_carbon",
+      "description": "Calculates maritime voyage distance (nautical miles), transit duration, freight charter costs ($/MT), chokepoint detour surcharges (Red Sea/Panama), IMO CII rating, and EU CBAM carbon costs."
+    },
+    {
+      "name": "verify_electronic_bill_of_lading",
+      "description": "Cryptographically audits UNCITRAL MLETR / FIT Alliance electronic Bill of Lading (eBL). Validates 7-digit IMO checksum, UN/LOCODE port pairs, manifest weight, and screens for AIS dark fleet anomalies."
+    },
+    {
+      "name": "optimize_mineral_trade_route",
+      "description": "Autonomous trade route optimizer for AI procurement agents. Compares direct marine transit vs chokepoint detour corridors, computing landed cost arbitrage ($/MT), total freight and tariffs, and delivery timelines."
+    },
+    {
+      "name": "open_agent_session",
+      "description": "Opens a high-speed allowance session for autonomous AI agents, enabling <0.1ms micro-queries without per-query on-chain gas latency."
+    },
+    {
+      "name": "close_agent_session",
+      "description": "Closes an active agent session, computes refund of unspent balance, and generates an immutable settlement receipt hash."
+    },
+    {
+      "name": "propose_a2a_trade_deal",
+      "description": "Seller AI agent proposes a canonical bilateral trade agreement for a critical mineral consignment with cryptographic signature."
+    },
+    {
+      "name": "dual_sign_trade_deal",
+      "description": "Buyer AI agent countersigns an existing trade proposal; Oracle mints an immutable 3-party deal attestation seal."
+    },
+    {
+      "name": "verify_a2a_trade_deal",
+      "description": "Cryptographically audits a dual-signed A2A trade deal, verifying seller, buyer, and oracle signatures, along with FEOC and mass-balance compliance."
     }
   ]
 }

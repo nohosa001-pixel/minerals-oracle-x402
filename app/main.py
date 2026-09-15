@@ -3,8 +3,9 @@ import json
 import os
 import time
 import secrets
+import hashlib
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
 
 from fastapi import FastAPI, Request, Depends, HTTPException, status, Query, Path as FPath
@@ -49,6 +50,41 @@ from app.schemas import (
     SupplyChainBatchRequest,
     SupplyChainBatchResponse,
     VoucherAuditPackageResponse,
+    AgentRegisterRequest,
+    AgentRegisterResponse,
+    AgentDepositInput,
+    ReceiptVerifyRequest,
+    ProcurementRFQRequest,
+    ProcurementRFQResponse,
+    TradeCorridorFlow,
+    HSCodeTariffInfo,
+    MaritimeRouteRequest,
+    MaritimeRouteResponse,
+    EBLVerificationRequest,
+    EBLVerificationResponse,
+    TradeRouteOptimizationRequest,
+    TradeRouteOptimizationResponse,
+    AgentSessionOpenRequest,
+    AgentSessionResponse,
+    AgentSessionCloseRequest,
+    AgentSessionCloseResponse,
+    TradeDealSpec,
+    TradeDealProposeRequest,
+    TradeDealDualSignRequest,
+    TradeDealAttestation,
+    TradeDealVerifyRequest,
+    TradeDealVerifyResponse,
+)
+from app.global_trade_engine import global_trade_engine
+from app.agent_session_vault import (
+    get_agent_session_vault,
+    InvalidSessionTokenError,
+    InsufficientSessionBalanceError,
+)
+from app.a2a_deal_engine import (
+    get_a2a_deal_engine,
+    DealNotFoundError,
+    InvalidDealStateError,
 )
 from app.compliance_engine import compliance_engine
 from app.lithium_pipeline import lithium_pipeline
@@ -57,6 +93,9 @@ from app.cobalt_pipeline import cobalt_pipeline
 from app.copper_pipeline import copper_pipeline
 from app.silver_pipeline import silver_pipeline
 from app.composite_battery_pipeline import composite_battery_pipeline
+
+agent_session_vault = get_agent_session_vault()
+a2a_deal_engine = get_a2a_deal_engine()
 
 STANDARD_DISCLAIMER_META = ResponseMeta().model_dump()
 from app.x402_verifier import x402_verifier
@@ -528,8 +567,18 @@ async def deposit_vault(body: VaultDepositRequest):
     Deposits USDC into the agent's pre-funded vault balance for zero-latency (<1ms) querying.
     Returns the agent's active balance and private session key.
     """
-    account = vault_manager.deposit(body.agent_address, body.amount_usdc)
+    ident = body.identifier or body.agent_address
+    if not ident:
+        raise HTTPException(status_code=400, detail="Missing 'identifier' or 'agent_address'")
+
+    account, receipt = vault_manager.deposit_funds(
+        identifier=ident,
+        amount_usdc=body.amount_usdc,
+        tx_hash=body.tx_hash,
+        chain=body.chain,
+    )
     return VaultBalanceResponse(
+        status="DEPOSIT_CONFIRMED",
         agent_address=account.agent_address,
         balance_usdc=account.balance_usdc,
         total_deposited_usdc=account.total_deposited_usdc,
@@ -537,6 +586,8 @@ async def deposit_vault(body: VaultDepositRequest):
         session_key=account.session_key,
         query_count=account.query_count,
         last_active_utc=account.last_active_utc,
+        capacity=vault_manager.get_query_capacity(account.balance_usdc),
+        receipt=receipt,
     )
 
 
@@ -1383,6 +1434,315 @@ async def vote_agent_feedback(
 
 
 # ==========================================
+# Agent Payment Vault & On-Chain Audit Endpoints
+# ==========================================
+
+@app.post("/api/v1/vault/register", response_model=AgentRegisterResponse, tags=["Agent Payment Vault"])
+async def register_agent_vault(reg_req: AgentRegisterRequest):
+    """
+    Self-service registration for autonomous AI agents.
+    Instantly returns a dedicated session key and seeds an initial free trial balance (e.g. 0.05 USDC).
+    """
+    acc, session_key = vault_manager.register_agent_onboarding(
+        agent_name=reg_req.agent_name,
+        agent_address=reg_req.agent_address,
+        initial_trial_balance_usdc=reg_req.initial_trial_balance_usdc,
+    )
+    return AgentRegisterResponse(
+        status="success",
+        agent_name=reg_req.agent_name,
+        agent_address=acc.agent_address,
+        session_key=session_key,
+        balance_usdc=acc.balance_usdc,
+        message="Agent registered successfully. Pass 'X-Agent-Vault-Key' or 'Authorization: Bearer <key>' for zero-latency execution.",
+        capacity=vault_manager.get_query_capacity(acc.balance_usdc),
+        created_at_utc=acc.created_at_utc,
+    )
+
+
+@app.get("/api/v1/vault/account", response_model=VaultBalanceResponse, tags=["Agent Payment Vault"])
+async def get_vault_account(request: Request, identifier: Optional[str] = None):
+    """
+    Retrieves vault balance, consumption, and query capacity for an agent.
+    Can be authenticated via header ('X-Agent-Vault-Key' or 'Authorization: Bearer ...') or query param.
+    """
+    key = (
+        identifier
+        or request.headers.get("X-Agent-Vault-Key")
+        or request.headers.get("X-Vault-Key")
+        or request.headers.get("X-Agent-Address")
+    )
+    auth_hdr = request.headers.get("Authorization", "")
+    if not key and auth_hdr.startswith("Bearer "):
+        key = auth_hdr[7:].strip()
+
+    if not key:
+        raise HTTPException(status_code=400, detail="Missing agent identifier (session key or 0x address).")
+
+    acc = vault_manager.get_account_by_session_key(key)
+    if not acc and key.startswith("0x"):
+        acc = vault_manager.get_account_by_address(key)
+
+    if not acc:
+        raise HTTPException(status_code=404, detail=f"Vault account for identifier '{key}' not found.")
+
+    return VaultBalanceResponse(
+        agent_address=acc.agent_address,
+        balance_usdc=acc.balance_usdc,
+        total_deposited_usdc=acc.total_deposited_usdc,
+        total_consumed_usdc=acc.total_consumed_usdc,
+        session_key=acc.session_key,
+        query_count=acc.query_count,
+        last_active_utc=acc.last_active_utc,
+        capacity=vault_manager.get_query_capacity(acc.balance_usdc),
+    )
+
+
+@app.get("/api/v1/vault/receipts/{receipt_id}", tags=["Agent Payment Vault"])
+async def get_payment_receipt(receipt_id: str):
+    """Retrieves an EIP-712 cryptographically signed PaymentReceipt issued to an agent."""
+    receipt = x402_verifier.get_receipt(receipt_id)
+    if not receipt:
+        raise HTTPException(status_code=404, detail=f"Payment receipt '{receipt_id}' not found.")
+    return receipt
+
+
+@app.post("/api/v1/vault/verify-receipt", tags=["Agent Payment Vault"])
+async def verify_payment_receipt(v_req: ReceiptVerifyRequest):
+    """
+    Cryptographically verifies that a PaymentReceipt was signed by the Minerals Oracle authority.
+    Returns boolean verification status and recovered signer address.
+    """
+    try:
+        tier_enum = PricingTier(v_req.pricing_tier)
+    except Exception:
+        tier_enum = PricingTier.STANDARD
+
+    receipt_obj = PaymentReceipt(
+        receipt_id=v_req.receipt_id,
+        payer_address=v_req.payer_address,
+        amount_paid_usdc=v_req.amount_paid_usdc,
+        pricing_tier=tier_enum,
+        timestamp_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        oracle_state_digest=v_req.oracle_state_digest,
+        oracle_receipt_signature=v_req.oracle_receipt_signature,
+        network=v_req.network,
+    )
+    is_valid = x402_verifier.verify_payment_receipt_signature(receipt_obj)
+    return {
+        "status": "VERIFIED" if is_valid else "INVALID_SIGNATURE",
+        "receipt_id": v_req.receipt_id,
+        "is_valid": is_valid,
+        "oracle_signing_address": onchain_signer.account.address,
+        "verified_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+
+
+@app.post("/api/v1/oracle/simulate-rfq", response_model=ProcurementRFQResponse, tags=["Autonomous Procurement"])
+async def simulate_procurement_rfq(rfq_req: ProcurementRFQRequest):
+    """
+    Simulates a multi-mineral procurement RFQ for EV battery packs.
+    Evaluates US IRA 50% FTA threshold and FEOC 25% taint propagation before placing contracts.
+    """
+    US_FTA_COUNTRIES = {"USA", "US", "AUS", "CHL", "CAN", "MEX", "KOR", "SGP", "BHR", "ISR", "JOR", "MAR", "OMN", "PAN", "PER"}
+    BENCHMARK_PRICES = {"LITHIUM": 15000.0, "NICKEL": 16800.0, "COBALT": 28500.0}
+
+    li_val = rfq_req.lithium_tons * BENCHMARK_PRICES["LITHIUM"]
+    ni_val = rfq_req.nickel_tons * BENCHMARK_PRICES["NICKEL"]
+    co_val = rfq_req.cobalt_tons * BENCHMARK_PRICES["COBALT"]
+    total_val = li_val + ni_val + co_val
+
+    fta_val = 0.0
+    if rfq_req.lithium_origin_country.upper() in US_FTA_COUNTRIES:
+        fta_val += li_val
+    if rfq_req.nickel_origin_country.upper() in US_FTA_COUNTRIES:
+        fta_val += ni_val
+    if rfq_req.cobalt_origin_country.upper() in US_FTA_COUNTRIES:
+        fta_val += co_val
+
+    fta_ratio = round((fta_val / total_val) * 100.0, 2) if total_val > 0 else 0.0
+
+    tainted = []
+    if rfq_req.lithium_feoc_equity_pct >= 25.0:
+        tainted.append(f"LITHIUM ({rfq_req.lithium_feoc_equity_pct}% covered nation equity)")
+    if rfq_req.nickel_feoc_equity_pct >= 25.0:
+        tainted.append(f"NICKEL ({rfq_req.nickel_feoc_equity_pct}% covered nation equity)")
+    if rfq_req.cobalt_feoc_equity_pct >= 25.0:
+        tainted.append(f"COBALT ({rfq_req.cobalt_feoc_equity_pct}% covered nation equity)")
+
+    has_taint = len(tainted) > 0
+    ira_ok = (fta_ratio >= 50.0) and not has_taint
+
+    now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    merkle_preimage = f"{rfq_req.rfq_id}:{rfq_req.cell_chemistry}:{fta_ratio}:{has_taint}:{now_iso}"
+    digest = "0x" + hashlib.sha256(merkle_preimage.encode()).hexdigest()
+
+    if ira_ok:
+        status_val = "QUALIFIED"
+        subsidy = 3750.0
+        rec = "APPROVED_FOR_PROCUREMENT: Batch satisfies US IRA Section 30D $3,750 clean vehicle credit with 0% FEOC taint."
+    else:
+        status_val = "DISQUALIFIED"
+        subsidy = 0.0
+        reasons = []
+        if has_taint:
+            reasons.append("FEOC covered nation taint >= 25.0%")
+        if fta_ratio < 50.0:
+            reasons.append(f"FTA value ratio {fta_ratio}% < 50.0% statutory threshold")
+        rec = f"REJECT_OR_REPLACE: Disqualified due to {', '.join(reasons)}."
+
+    return ProcurementRFQResponse(
+        rfq_id=rfq_req.rfq_id,
+        cell_chemistry=rfq_req.cell_chemistry,
+        status=status_val,
+        ira_fta_compliant=ira_ok,
+        ira_fta_value_ratio_pct=fta_ratio,
+        feoc_taint_detected=has_taint,
+        tainted_minerals=tainted,
+        us_subsidy_qualified_per_pack_usd=subsidy,
+        recommendation=rec,
+        composite_merkle_digest=digest,
+        simulated_at_utc=now_iso,
+    )
+
+
+# ==========================================
+# Global Trade Flows, Tariffs & Logistics Endpoints
+# ==========================================
+
+@app.get("/api/v1/trade/flows", response_model=List[TradeCorridorFlow], tags=["Global Trade & Logistics"])
+async def get_trade_flows(
+    mineral_type: Optional[MineralType] = None,
+    origin_country: Optional[SourceCountry] = None,
+    destination_country: Optional[str] = None,
+):
+    """
+    Returns global critical mineral physical trade corridor flows, monthly bulk tonnages,
+    standard transit days, vessel classes, and maritime chokepoints.
+    """
+    return global_trade_engine.get_corridors(
+        mineral_type=mineral_type,
+        origin_country=origin_country,
+        destination_country=destination_country,
+    )
+
+
+@app.post("/api/v1/trade/tariffs", response_model=HSCodeTariffInfo, tags=["Global Trade & Logistics"])
+async def get_trade_tariffs(
+    mineral_type: MineralType,
+    importer_jurisdiction: str = "USA",
+):
+    """
+    Resolves WCO 6-digit Harmonized System (HS) Code, general MFN duty rate,
+    applicable FTA preferential duty rate, US Section 301 punitive tariff, and EU CBAM benchmarks.
+    """
+    tariff = global_trade_engine.get_hs_tariff(mineral_type, importer_jurisdiction)
+    if not tariff:
+        raise HTTPException(status_code=404, detail="Tariff line not found.")
+    return tariff
+
+
+@app.post("/api/v1/trade/maritime-route", response_model=MaritimeRouteResponse, tags=["Global Trade & Logistics"])
+async def calculate_maritime_route(route_req: MaritimeRouteRequest):
+    """
+    Calculates maritime voyage distance (nautical miles), transit duration,
+    freight charter costs, chokepoint detour surcharges (e.g. Red Sea / Panama Canal),
+    IMO MARPOL CII carbon rating, and EU CBAM ETS carbon costs.
+    """
+    return global_trade_engine.calculate_maritime_route(route_req)
+
+
+@app.post("/api/v1/trade/verify-ebl", response_model=EBLVerificationResponse, tags=["Global Trade & Logistics"])
+async def verify_electronic_bill_of_lading(ebl_req: EBLVerificationRequest):
+    """
+    Cryptographically audits UNCITRAL MLETR / FIT Alliance electronic Bill of Lading (eBL).
+    Validates 7-digit IMO checksum, UN/LOCODE port pairs, manifest weight, and screens for AIS dark fleet anomalies.
+    """
+    return global_trade_engine.verify_ebl(ebl_req)
+
+
+@app.post("/api/v1/trade/optimize-route", response_model=TradeRouteOptimizationResponse, tags=["Global Trade & Logistics"])
+async def optimize_mineral_trade_route(opt_req: TradeRouteOptimizationRequest):
+    """
+    Autonomous trade route optimizer for AI procurement agents.
+    Compares direct marine transit vs chokepoint detour corridors, computing landed cost arbitrage ($/MT),
+    total freight and tariffs, and delivery timelines.
+    """
+    return global_trade_engine.optimize_route(opt_req)
+
+
+# =====================================================================
+# 17. AUTONOMOUS AGENT SESSION VAULT & A2A TRADE DEAL REST ENDPOINTS
+# =====================================================================
+
+@app.post(
+    "/api/v1/agent/session/open",
+    response_model=AgentSessionResponse,
+    tags=["Agent Protocol"],
+    summary="Open high-speed micro-allowance session for autonomous AI agents",
+)
+async def open_agent_session_route(body: AgentSessionOpenRequest):
+    """Opens a high-speed allowance session for sub-millisecond query execution without per-request on-chain gas."""
+    return agent_session_vault.open_session(body)
+
+
+@app.post(
+    "/api/v1/agent/session/close",
+    response_model=AgentSessionCloseResponse,
+    tags=["Agent Protocol"],
+    summary="Close active agent session, compute refund, and issue settlement receipt",
+)
+async def close_agent_session_route(body: AgentSessionCloseRequest):
+    """Closes an active session, issues an immutable receipt hash, and frees remaining unspent balance."""
+    try:
+        return agent_session_vault.close_session(body)
+    except InvalidSessionTokenError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.post(
+    "/api/v1/a2a/deals/propose",
+    response_model=TradeDealAttestation,
+    tags=["A2A Autonomous Settlement"],
+    summary="Seller Agent proposes canonical critical mineral trade agreement with cryptographic signature",
+)
+async def propose_a2a_deal_route(body: TradeDealProposeRequest):
+    """Registers a bilateral trade deal proposal signed by seller agent."""
+    return a2a_deal_engine.propose_deal(body)
+
+
+@app.post(
+    "/api/v1/a2a/deals/dual-sign",
+    response_model=TradeDealAttestation,
+    tags=["A2A Autonomous Settlement"],
+    summary="Buyer Agent countersigns trade proposal; Oracle mints immutable 3-party deal attestation",
+)
+async def dual_sign_a2a_deal_route(body: TradeDealDualSignRequest):
+    """Countersigns proposal and triggers Oracle attestation seal to finalize the contract."""
+    try:
+        return a2a_deal_engine.dual_sign_deal(body)
+    except DealNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except InvalidDealStateError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.get(
+    "/api/v1/a2a/deals/verify/{deal_id}",
+    response_model=TradeDealVerifyResponse,
+    tags=["A2A Autonomous Settlement"],
+    summary="Audit cryptographic signatures and regulatory compliance of a dual-signed A2A trade deal",
+)
+async def verify_a2a_deal_route(deal_id: str):
+    """Audits seller, buyer, and oracle signatures along with FEOC and mass-balance compliance."""
+    try:
+        req = TradeDealVerifyRequest(deal_id=deal_id)
+        return a2a_deal_engine.verify_deal(req)
+    except DealNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+# ==========================================
 # FastMCP / Agent Tool Calling Endpoints
 # ==========================================
 @app.get("/mcp/tools", tags=["MCP Tools"])
@@ -1439,12 +1799,110 @@ async def invoke_mcp_tool(request: Request, tool_call: MCPToolCallRequest):
         }
         return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(result, indent=2)}])
 
+    # Autonomous Agent Account & Vault Management (Free & Self-Serve)
+    elif name == "register_agent_account":
+        agent_name = args.get("agent_name", "AutonomousBot")
+        agent_addr = args.get("agent_address")
+        init_bal = float(args.get("initial_trial_balance_usdc", 0.05))
+        acc, session_key = vault_manager.register_agent_onboarding(
+            agent_name=agent_name,
+            agent_address=agent_addr,
+            initial_trial_balance_usdc=init_bal,
+        )
+        result = {
+            "status": "REGISTERED",
+            "agent_name": agent_name,
+            "agent_address": acc.agent_address,
+            "session_key": session_key,
+            "balance_usdc": acc.balance_usdc,
+            "query_capacity": vault_manager.get_query_capacity(acc.balance_usdc),
+            "instruction": "Pass this session_key in 'X-Agent-Vault-Key' header or bearer auth for zero-latency queries.",
+        }
+        return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(result, indent=2)}])
+
+    elif name == "get_agent_vault_balance":
+        key = args.get("session_key") or args.get("agent_address")
+        if not key:
+            # Check headers
+            key = request.headers.get("X-Agent-Vault-Key") or request.headers.get("X-Agent-Address")
+        if not key:
+            return MCPToolCallResponse(content=[{"type": "text", "text": "Error: Missing session_key or agent_address"}], isError=True)
+
+        acc = vault_manager.get_account_by_session_key(key)
+        if not acc and key.startswith("0x"):
+            acc = vault_manager.get_account_by_address(key)
+
+        if not acc:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error: Vault account '{key}' not found"}], isError=True)
+
+        result = {
+            "status": "ACTIVE",
+            "agent_address": acc.agent_address,
+            "balance_usdc": acc.balance_usdc,
+            "total_deposited_usdc": acc.total_deposited_usdc,
+            "total_consumed_usdc": acc.total_consumed_usdc,
+            "query_count": acc.query_count,
+            "query_capacity": vault_manager.get_query_capacity(acc.balance_usdc),
+        }
+        return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(result, indent=2)}])
+
+    elif name == "request_x402_payment_challenge":
+        tier_str = args.get("pricing_tier", "STANDARD")
+        chain_str = args.get("chain", "polygon")
+        try:
+            tier_val = PricingTier(tier_str)
+        except Exception:
+            tier_val = PricingTier.STANDARD
+
+        challenge = x402_verifier.generate_challenge(tier=tier_val, chain_name=chain_str)
+        return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(challenge.model_dump(), indent=2)}])
+
+    elif name == "open_agent_session":
+        try:
+            req_model = AgentSessionOpenRequest(**args)
+            data = agent_session_vault.open_session(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error opening agent session: {str(e)}"}], isError=True)
+
+    elif name == "close_agent_session":
+        try:
+            req_model = AgentSessionCloseRequest(**args)
+            data = agent_session_vault.close_session(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error closing agent session: {str(e)}"}], isError=True)
+
     # Paywalled Data & Oracle Tools
     resp_402 = await require_x402_payment(request)
     if resp_402:
         return resp_402
 
-    if name == "verify_mineral_lot_compliance":
+    if name == "simulate_procurement_rfq":
+        try:
+            req_model = ProcurementRFQRequest(**args)
+            data = (await simulate_procurement_rfq(req_model)).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error simulating RFQ: {str(e)}"}], isError=True)
+
+    elif name == "verify_copper_origin":
+        try:
+            req_model = CopperOriginVerifyRequest(**args)
+            data = copper_pipeline.evaluate_copper_lot(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying copper origin: {str(e)}"}], isError=True)
+
+    elif name == "verify_silver_origin":
+        try:
+            req_model = SilverOriginVerifyRequest(**args)
+            data = silver_pipeline.evaluate_silver_lot(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying silver origin: {str(e)}"}], isError=True)
+
+    elif name == "verify_mineral_lot_compliance":
         try:
             req_model = MineralLotProvenanceRequest(**args)
             data = compliance_engine.evaluate_lot(req_model).model_dump()
@@ -1495,6 +1953,74 @@ async def invoke_mcp_tool(request: Request, tool_call: MCPToolCallRequest):
     elif name == "get_mineral_prices":
         data = {"oracle": "minerals-oracle-x402", "status": "COMPLIANCE_MODE_ACTIVE"}
         return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2)}])
+
+    elif name == "get_global_trade_flows":
+        try:
+            m_type = MineralType(args["mineral_type"]) if "mineral_type" in args and args["mineral_type"] else None
+            o_country = SourceCountry(args["origin_country"]) if "origin_country" in args and args["origin_country"] else None
+            d_country = args.get("destination_country")
+            corrs = global_trade_engine.get_corridors(m_type, o_country, d_country)
+            data = [c.model_dump() for c in corrs]
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error retrieving trade flows: {str(e)}"}], isError=True)
+
+    elif name == "calculate_trade_tariffs":
+        try:
+            m_type = MineralType(args["mineral_type"])
+            dest = args.get("importer_jurisdiction", "USA")
+            data = global_trade_engine.get_hs_tariff(m_type, dest).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error calculating tariffs: {str(e)}"}], isError=True)
+
+    elif name == "estimate_maritime_freight_and_carbon":
+        try:
+            req_model = MaritimeRouteRequest(**args)
+            data = global_trade_engine.calculate_maritime_route(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error calculating maritime route: {str(e)}"}], isError=True)
+
+    elif name == "verify_electronic_bill_of_lading":
+        try:
+            req_model = EBLVerificationRequest(**args)
+            data = global_trade_engine.verify_ebl(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying eBL: {str(e)}"}], isError=True)
+
+    elif name == "optimize_mineral_trade_route":
+        try:
+            req_model = TradeRouteOptimizationRequest(**args)
+            data = global_trade_engine.optimize_route(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error optimizing trade route: {str(e)}"}], isError=True)
+
+    elif name == "propose_a2a_trade_deal":
+        try:
+            req_model = TradeDealProposeRequest(**args)
+            data = a2a_deal_engine.propose_deal(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error proposing A2A deal: {str(e)}"}], isError=True)
+
+    elif name == "dual_sign_trade_deal":
+        try:
+            req_model = TradeDealDualSignRequest(**args)
+            data = a2a_deal_engine.dual_sign_deal(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error dual-signing A2A deal: {str(e)}"}], isError=True)
+
+    elif name == "verify_a2a_trade_deal":
+        try:
+            req_model = TradeDealVerifyRequest(**args)
+            data = a2a_deal_engine.verify_deal(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying A2A deal: {str(e)}"}], isError=True)
 
     elif name == "get_onchain_signed_feed":
         symbol = args.get("symbol", "Cu")

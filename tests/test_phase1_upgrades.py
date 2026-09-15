@@ -32,6 +32,11 @@ def test_pricing_tiers_endpoint():
 def test_prefunded_agent_vault_deposit_and_balance():
     """Tests depositing USDC and querying balance in AgentPaymentVault."""
     agent_addr = "0x90F79bf6EB2c4f870365E785982E1f101E93b906"
+    # Ensure fresh test state for this address
+    if agent_addr in vault_manager._accounts:
+        old_acc = vault_manager._accounts.pop(agent_addr)
+        vault_manager._session_index.pop(old_acc.session_key, None)
+
     deposit_payload = {
         "agent_address": agent_addr,
         "amount_usdc": 15.00,
