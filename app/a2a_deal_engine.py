@@ -12,10 +12,12 @@ Architecture:
    3-party cryptographically anchored contract hash.
 """
 
+from __future__ import annotations
+
 import json
 import hashlib
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 
 from app.schemas import (
     TradeDealSpec,

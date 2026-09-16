@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 from typing import Dict, List, Optional, Any, Tuple
 from pydantic import BaseModel, Field
@@ -1048,6 +1050,9 @@ class AgentDecisionSignal(BaseModel):
     recommended_action: str = Field(..., description="Explicit next-step instruction for the calling agent")
     projected_cost_delta_usd: float = Field(0.0, description="Projected dollar savings (positive) or penalty (negative)")
     actionable_command: Optional[str] = Field(None, description="Ready-to-execute next MCP tool call snippet")
+
+
+TradeRouteOptimizationResponse.model_rebuild()
 
 
 class AgentSessionOpenRequest(BaseModel):

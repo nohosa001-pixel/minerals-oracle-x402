@@ -52,7 +52,7 @@ def run_live_binding_test(broadcast: bool = False) -> dict:
     pk = os.getenv("POLYGON_DEPLOYER_PRIVATE_KEY")
     if not pk:
         print(f"{RED}[-] Error: POLYGON_DEPLOYER_PRIVATE_KEY not set in .env{RESET}")
-        sys.exit(1)
+        raise ValueError("POLYGON_DEPLOYER_PRIVATE_KEY not set in environment or .env")
     if not pk.startswith("0x"):
         pk = "0x" + pk
 
@@ -78,7 +78,7 @@ def run_live_binding_test(broadcast: bool = False) -> dict:
 
     if not w3.is_connected():
         print(f"{RED}[-] Failed to connect to Polygon RPC endpoint: {rpc_url}{RESET}")
-        sys.exit(1)
+        raise ConnectionError(f"Failed to connect to Polygon RPC endpoint: {rpc_url}")
 
     latest_block = w3.eth.get_block("latest")
     latency_ms = round((time.perf_counter() - start_time) * 1000, 2)
@@ -244,4 +244,8 @@ def run_live_binding_test(broadcast: bool = False) -> dict:
 
 if __name__ == "__main__":
     is_broadcast = "--broadcast" in sys.argv
-    run_live_binding_test(broadcast=is_broadcast)
+    try:
+        run_live_binding_test(broadcast=is_broadcast)
+    except Exception as e:
+        print(f"\n{RED}[-] Execution failed: {e}{RESET}")
+        sys.exit(1)
