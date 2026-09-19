@@ -71,23 +71,28 @@ def test_secure_settlement_for_calculator():
     assert data["security_gate_certified"] is True
 
 
-def test_korean_dedicated_core_dashboard():
-    """Verify Korean dedicated version (/ko) focuses on autonomous agent compliance node."""
-    res = client.get("/ko")
+def test_autonomous_agent_dedicated_dashboard():
+    """Verify autonomous agent console is pure English, M2M focused, with zero Korean UI."""
+    res = client.get("/dashboard")
     assert res.status_code == 200
     html = res.text
 
-    # 1. Korean Agent Node Header & Elements
-    assert 'lang="ko"' in html
+    # 1. Strict English Language & Agent Focus
+    assert 'lang="en"' in html
+    assert "한국어" not in html
     assert "x402" in html
-    assert "Polygon 137" in html
+    assert "Polygon" in html
     assert "EIP-712" in html
     assert "quickOnboardAgent" in html
     assert "simulateComplianceEval" in html
     assert "test402Challenge" in html
     assert "AgentPaymentVault.sol" in html
     assert "MineralsOracleConsumer.sol" in html
+    assert "AUTONOMOUS AGENT RUNTIME" in html
+    assert "FastMCP" in html
 
-    # 2. Global English link
-    assert "Global (EN)" in html
-    assert "/" in html
+    # 2. Legacy /ko route also serves pure English agent console
+    ko_res = client.get("/ko")
+    assert ko_res.status_code == 200
+    assert 'lang="en"' in ko_res.text
+    assert "한국어" not in ko_res.text

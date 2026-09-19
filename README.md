@@ -140,9 +140,9 @@ flowchart TD
 
 ---
 
-### 3. Interactive Web Observatory & Verification Simulator
+### 3. Autonomous Agent Operations Terminal & Telemetry HUD
 
-The built-in browser UI ([`app/static/ko.html`](app/static/ko.html) and [`app/static/index.html`](app/static/index.html)) provides a live 4-tab compliance cockpit:
+The built-in M2M console ([`app/static/index.html`](app/static/index.html) served at `/dashboard`) provides an agent-dedicated compliance cockpit (Pure English RFC-compliant):
 
 | Tab | Key Features |
 | :--- | :--- |

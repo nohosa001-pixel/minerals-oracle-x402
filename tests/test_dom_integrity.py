@@ -3,7 +3,7 @@ from pathlib import Path
 
 def test_dom_element_ids_exist_for_all_js_selectors():
     base_dir = Path(__file__).parent.parent
-    for html_name in ["app/static/ko.html", "app/static/index.html"]:
+    for html_name in ["app/static/index.html"]:
         html_path = base_dir / html_name
         assert html_path.exists(), f"File {html_name} not found"
         content = html_path.read_text(encoding="utf-8")

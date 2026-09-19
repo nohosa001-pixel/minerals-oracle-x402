@@ -145,7 +145,6 @@ app.add_middleware(
 
 STATIC_DIR = Path(__file__).parent / "static"
 INDEX_HTML_PATH = STATIC_DIR / "index.html"
-KO_HTML_PATH = STATIC_DIR / "ko.html"
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
@@ -166,33 +165,28 @@ async def require_x402_payment(request: Request, tier: PricingTier = PricingTier
 
 @app.get("/", tags=["System"])
 async def root(request: Request):
-    """Serves Interactive Web UI Dashboard (English by default, /ko for Korean) or JSON metadata."""
+    """Serves Autonomous Agent Interactive Web UI Console (English RFC Compliant) or JSON metadata."""
     accept_header = request.headers.get("accept", "")
     no_cache_headers = {
         "Cache-Control": "no-cache, no-store, must-revalidate",
         "Pragma": "no-cache",
         "Expires": "0",
+        "X-Language-Policy": "en-US-Agent-Only",
     }
     # If a browser requests text/html, serve the HTML dashboard
     if "text/html" in accept_header or request.query_params.get("ui") == "true":
-        query_lang = request.query_params.get("lang", "").lower()
-        if query_lang == "ko" and KO_HTML_PATH.exists():
-            return FileResponse(KO_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
         if INDEX_HTML_PATH.exists():
             return FileResponse(INDEX_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
-        if KO_HTML_PATH.exists():
-            return FileResponse(KO_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
 
     # API clients, test clients, and curl get JSON service metadata
     return {
         "service": "minerals-oracle-x402",
-        "description": "Global Critical Minerals & Battery Supply-Chain Compliance Oracle",
+        "description": "Autonomous Critical Minerals & Battery Supply-Chain Compliance Oracle (Agent-Exclusive)",
         "version": "2.0.0",
         "protocol": "x402 (HTTP 402 Monetized)",
         "network": "Polygon (Chain ID 137)",
         "price_per_query": "0.005 ~ 0.50 USDC",
         "interactive_dashboard": "/dashboard",
-        "korean_core_edition": "/ko",
         "endpoints": {
             "compliance_verify": "/api/v1/oracle/compliance/verify",
             "lithium_origin_verify": "/api/v1/lithium/verify-origin",
@@ -219,35 +213,31 @@ async def root(request: Request):
 @app.get("/playground", tags=["System"])
 @app.get("/en", tags=["System"])
 async def web_dashboard(request: Request):
-    """Interactive Web UI Dashboard (Global English by default, /ko for Korean)."""
+    """Interactive Web UI Console for Autonomous Agents (English Only)."""
     no_cache_headers = {
         "Cache-Control": "no-cache, no-store, must-revalidate",
         "Pragma": "no-cache",
         "Expires": "0",
+        "X-Language-Policy": "en-US-Agent-Only",
     }
-    if request.query_params.get("lang") == "ko" and KO_HTML_PATH.exists():
-        return FileResponse(KO_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
     if INDEX_HTML_PATH.exists():
         return FileResponse(INDEX_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
-    return HTMLResponse("<h1>Minerals Oracle Dashboard</h1><p>Static index.html not found.</p>")
+    return HTMLResponse("<h1>Minerals Oracle Agent Console</h1><p>Static index.html not found.</p>")
 
 
 @app.get("/ko", tags=["System"])
 @app.get("/dashboard/ko", tags=["System"])
 async def web_dashboard_ko(request: Request):
-    """Interactive Korean Dedicated Core Web UI (Calculator + Payments)."""
+    """Legacy route mapped to Pure English Autonomous Agent Console."""
     no_cache_headers = {
         "Cache-Control": "no-cache, no-store, must-revalidate",
         "Pragma": "no-cache",
         "Expires": "0",
+        "X-Language-Policy": "en-US-Agent-Only",
     }
-    if request.query_params.get("lang") == "en" and INDEX_HTML_PATH.exists():
-        return FileResponse(INDEX_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
-    if KO_HTML_PATH.exists():
-        return FileResponse(KO_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
     if INDEX_HTML_PATH.exists():
         return FileResponse(INDEX_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
-    return HTMLResponse("<h1>Minerals Oracle (한국어)</h1><p>Static ko.html not found.</p>")
+    return HTMLResponse("<h1>Minerals Oracle Agent Console</h1><p>Static index.html not found.</p>")
 
 
 @app.get("/manifest.json", tags=["System"])
