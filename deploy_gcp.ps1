@@ -48,7 +48,7 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "========================================================" -ForegroundColor Green
     $serviceUrl = (gcloud run services describe minerals-oracle-x402 --region asia-northeast3 --format="value(status.url)").Trim()
     Write-Host "Service URL (EN): $serviceUrl" -ForegroundColor Cyan
-    Write-Host "Korean Edition (KO): $serviceUrl/ko" -ForegroundColor Cyan
+    Write-Host "Agent Terminal HUD: $serviceUrl/dashboard" -ForegroundColor Cyan
     Write-Host "Agent Evolution API: $serviceUrl/api/v1/oracle/agent/feedback" -ForegroundColor Cyan
     Write-Host "API Swagger Docs: $serviceUrl/docs" -ForegroundColor Cyan
 } else {
