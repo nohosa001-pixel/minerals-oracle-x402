@@ -35,6 +35,7 @@ def test_hs_tariff_resolution():
     """Verifies HS code, MFN duty, FTA preferential duty, and trade defense barriers."""
     # US Lithium Carbonate
     us_li = global_trade_engine.get_hs_tariff(MineralType.LITHIUM_CARBONATE, "USA")
+    assert us_li is not None
     assert us_li.hs_code == "2825.20.00"
     assert us_li.mfn_duty_pct == 3.7
     assert us_li.fta_preferential_duty_pct == 0.0
@@ -42,6 +43,7 @@ def test_hs_tariff_resolution():
 
     # Indonesia Nickel MHP (Subject to export licensing / CBAM)
     eu_ni = global_trade_engine.get_hs_tariff(MineralType.NICKEL_MHP, "EU")
+    assert eu_ni is not None
     assert eu_ni.hs_code == "7501.10.00"
     assert eu_ni.eu_cbam_applicable is True
     assert eu_ni.cbam_default_carbon_intensity == 18.5

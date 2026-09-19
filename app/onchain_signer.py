@@ -23,8 +23,11 @@ CONTRACT_ADDRESS = os.getenv(
 )
 ORACLE_SIGNER_PRIVATE_KEY = os.getenv(
     "ORACLE_SIGNER_PRIVATE_KEY",
-    # Safe default for local/sandbox development: Hardhat Account #0
-    "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+    os.getenv(
+        "POLYGON_DEPLOYER_PRIVATE_KEY",
+        # Safe default for local/sandbox development: Hardhat Account #0
+        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+    )
 )
 
 # In-memory incremental round sequence tracker per symbol
@@ -53,6 +56,11 @@ class OnChainOracleSigner:
         self.contract_address = Web3.to_checksum_address(contract_address)
         self.account = Account.from_key(private_key)
         self.signer_address = self.account.address
+
+    def is_signer_aligned_with_mainnet(self) -> bool:
+        """Verifies if the current signer matches the trustedSigner of the deployed mainnet contract."""
+        trusted_treasury = Web3.to_checksum_address(os.getenv("ORACLE_TREASURY_WALLET", "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf"))
+        return self.signer_address.lower() == trusted_treasury.lower()
 
     @classmethod
     def for_chain(cls, chain_identifier: Any, private_key: str = ORACLE_SIGNER_PRIVATE_KEY) -> "OnChainOracleSigner":

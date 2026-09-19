@@ -20,6 +20,8 @@ from app.schemas import (
     AgentSessionCloseRequest,
     TradeDealProposeRequest,
     TradeDealDualSignRequest,
+    TradeDealRejectRequest,
+    TradeDealCancelRequest,
     TradeDealVerifyRequest,
 )
 from app.global_trade_engine import global_trade_engine
@@ -485,6 +487,17 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
                     }
                 },
                 {
+                    "name": "get_agent_session_info",
+                    "description": "Queries real-time balance, query capacity, and status for an active session without debiting a fee.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "session_token": {"type": "string", "description": "Active session token (asess_...)"}
+                        },
+                        "required": ["session_token"]
+                    }
+                },
+                {
                     "name": "propose_a2a_trade_deal",
                     "description": "Seller AI agent proposes a canonical bilateral trade agreement for a critical mineral consignment with cryptographic signature.",
                     "inputSchema": {
@@ -527,6 +540,56 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
                             "buyer_agent_address": {"type": "string", "description": "Buyer agent EVM address"}
                         },
                         "required": ["deal_id", "buyer_signature", "buyer_agent_address"]
+                    }
+                },
+                {
+                    "name": "reject_a2a_trade_deal",
+                    "description": "Buyer AI agent rejects an existing trade proposal with structured reasoning and optional cryptographic signature.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "deal_id": {"type": "string", "description": "Trade deal identifier to reject"},
+                            "buyer_agent_address": {"type": "string", "description": "Buyer agent EVM address executing rejection"},
+                            "buyer_signature": {"type": "string", "description": "Optional cryptographic signature"},
+                            "rejection_reason": {"type": "string", "description": "Reason for rejection"}
+                        },
+                        "required": ["deal_id", "buyer_agent_address"]
+                    }
+                },
+                {
+                    "name": "cancel_a2a_trade_deal",
+                    "description": "Seller AI agent revokes or cancels a pending trade deal proposal before buyer countersignature.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "deal_id": {"type": "string", "description": "Trade deal identifier to cancel"},
+                            "seller_agent_address": {"type": "string", "description": "Seller agent EVM address executing cancellation"},
+                            "seller_signature": {"type": "string", "description": "Optional cryptographic cancellation signature"},
+                            "cancellation_reason": {"type": "string", "description": "Reason for proposal revocation"}
+                        },
+                        "required": ["deal_id", "seller_agent_address"]
+                    }
+                },
+                {
+                    "name": "list_a2a_trade_deals",
+                    "description": "Lists A2A bilateral trade deals, optionally filtered by agent EVM address or status (PROPOSED, DUAL_SIGNED_CONFIRMED, REJECTED, CANCELLED, EXPIRED).",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "agent_address": {"type": "string", "description": "Optional agent EVM address filter"},
+                            "status_filter": {"type": "string", "description": "Optional status filter"}
+                        }
+                    }
+                },
+                {
+                    "name": "get_a2a_trade_deal",
+                    "description": "Retrieves the full specification, audit notes, and current status of an A2A trade agreement.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "deal_id": {"type": "string", "description": "Trade deal identifier"}
+                        },
+                        "required": ["deal_id"]
                     }
                 },
                 {
@@ -1001,7 +1064,8 @@ def handle_tool_call(req_id: Any, name: str, arguments: Dict[str, Any]) -> Dict[
         elif name == "calculate_trade_tariffs":
             m_type = MineralType(arguments["mineral_type"])
             dest = arguments.get("importer_jurisdiction", "USA")
-            data = global_trade_engine.get_hs_tariff(m_type, dest).model_dump()
+            tariff = global_trade_engine.get_hs_tariff(m_type, dest)
+            data = tariff.model_dump() if tariff else {"error": f"No HS tariff data found for {m_type} to {dest}"}
             return {
                 "jsonrpc": "2.0",
                 "id": req_id,
@@ -1053,6 +1117,15 @@ def handle_tool_call(req_id: Any, name: str, arguments: Dict[str, Any]) -> Dict[
                 "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
             }
 
+        elif name == "get_agent_session_info":
+            token = arguments.get("session_token", "")
+            data = agent_session_vault.get_session_info_model(token).model_dump()
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
+            }
+
         elif name == "propose_a2a_trade_deal":
             req_model = TradeDealProposeRequest(**arguments)
             data = a2a_deal_engine.propose_deal(req_model).model_dump()
@@ -1065,6 +1138,50 @@ def handle_tool_call(req_id: Any, name: str, arguments: Dict[str, Any]) -> Dict[
         elif name == "dual_sign_trade_deal":
             req_model = TradeDealDualSignRequest(**arguments)
             data = a2a_deal_engine.dual_sign_deal(req_model).model_dump()
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
+            }
+
+        elif name == "reject_a2a_trade_deal":
+            req_model = TradeDealRejectRequest(**arguments)
+            data = a2a_deal_engine.reject_deal(req_model).model_dump()
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
+            }
+
+        elif name == "cancel_a2a_trade_deal":
+            req_model = TradeDealCancelRequest(**arguments)
+            data = a2a_deal_engine.cancel_deal(req_model).model_dump()
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
+            }
+
+        elif name == "list_a2a_trade_deals":
+            agent_addr = arguments.get("agent_address")
+            status_flt = arguments.get("status_filter")
+            deals = a2a_deal_engine.list_deals_by_agent(agent_addr, status_flt)
+            res = {"status": "success", "total_count": len(deals), "deals": deals}
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(res, indent=2, ensure_ascii=False)}]}
+            }
+
+        elif name == "get_a2a_trade_deal":
+            deal_id = arguments.get("deal_id", "")
+            data = a2a_deal_engine.get_deal(deal_id)
+            if not data:
+                return {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {"code": -32602, "message": f"Deal '{deal_id}' not found"}
+                }
             return {
                 "jsonrpc": "2.0",
                 "id": req_id,

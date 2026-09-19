@@ -2,27 +2,63 @@
 
 [![PyPI Version](https://img.shields.io/pypi/v/minerals-oracle-x402.svg?color=blue&style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/minerals-oracle-x402/)
 [![CI/CD](https://img.shields.io/github/actions/workflow/status/nohosa001-pixel/minerals-oracle-x402/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI%2FCD)](https://github.com/nohosa001-pixel/minerals-oracle-x402/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/Tests-128%2F128_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
-[![Spec Version](https://img.shields.io/badge/Compliance_Spec-v2.5.0-purple?style=for-the-badge)](GLOBAL_BATTERY_MINERALS_COMPLIANCE_SPEC.md)
-[![FastMCP](https://img.shields.io/badge/FastMCP-Model_Context_Protocol-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](mcp_tool_spec.json)
-[![Polygon Network](https://img.shields.io/badge/Polygon_USDC-x402_Settlement-8247E5?style=for-the-badge&logo=polygon&logoColor=white)](https://polygon.technology)
+[![Tests](https://img.shields.io/badge/Tests-173%2F173_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
+[![Type Safety](https://img.shields.io/badge/Pyright-0_Errors_Clean-brightgreen?style=for-the-badge&logo=python&logoColor=white)](pyrightconfig.json)
+[![Multi-Chain EVM](https://img.shields.io/badge/EVM_Contracts-Polygon_|_Base_|_Arbitrum-8247E5?style=for-the-badge&logo=ethereum&logoColor=white)](contracts/verification/VERIFICATION_GUIDE.md)
+[![Agent Exclusive](https://img.shields.io/badge/Protocol-100%25_Agent_Native_M2M-ff007a?style=for-the-badge&logo=openai&logoColor=white)](#-pure-autonomous-agent-native-architecture)
+[![FastMCP](https://img.shields.io/badge/FastMCP-28_Agent_Tools-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](mcp_tool_spec.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-> **Autonomous Machine-to-Machine (M2M) Compliance & On-Chain Battery Passport Oracle for Critical Minerals (Lithium, Nickel, Cobalt, Copper, Silver).**  
-> Verifies real-world mining extraction, stoichiometric mass balances, US IRA Section 30D 50% FTA value thresholds, strict Foreign Entity of Concern (FEOC) taint propagation, EU Battery Regulation (2023/1542) & 2028 Downstream CBAM carbon footprints, ASTM B115 HVDC copper grid standards, LBMA TOPCon solar PV silver purity, and issues cryptographic Merkle Root EIP-712 master attestations on Polygon.
+> 🤖 **100% Pure Autonomous Agent-Native (M2M Exclusive) Critical Minerals Supply-Chain & Bilateral Trade Oracle.**  
+> Built strictly for autonomous AI agents, multi-agent swarms, and algorithmic trading execution. **Humans and fiat credit cards are strictly prohibited.**
+> All settlements execute machine-to-machine via Native USDC across **Polygon, Base, and Arbitrum One**, backed by cryptographic on-chain transaction receipt RPC verification, anti-replay guards, and EIP-712 Dual-Attestation bound to the **Security Gate x402** and **EU AI Act (Article 50)**.
 
 ---
 
-## 🖥️ Live Web Observatories & Dashboards
+## 🤖 Pure Autonomous Agent-Native Architecture (M2M Exclusive)
 
-* 🇰🇷 **한국어 전용 노드 & 컴플라이언스 관측기**: [http://localhost:8000/ko](http://localhost:8000/ko) (또는 [Cloud Run Live](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/ko))
-* 🌐 **Global English Dashboard & Simulator**: [http://localhost:8000/](http://localhost:8000/) (또는 [Cloud Run Live](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/))
-* 📚 **Interactive Swagger OpenAPI Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
-* 📑 **LLM Agent Manifest**: [`/llms.txt`](llms.txt)
+`minerals-oracle-x402` is engineered from first principles for the **Autonomous Agentic Economy**:
+
+```mermaid
+flowchart LR
+    A["🤖 Buyer AI Agent<br/>(ElizaOS / AutoGen / LangChain)"] -->|"Bilateral Deal Proposal<br/>+ EIP-712 Signature"| B["⚡ A2A Trade Engine<br/>(/api/v1/trade/deals)"]
+    C["🤖 Seller AI Agent<br/>(Commodity Mining Bot)"] -->|"Counter-Sign / eBL Audit<br/>+ Dual Signature"| B
+    B -->|"Real-Time Verification<br/>+ 16-Trap Geofence & FEOC"| D["🛡️ Minerals Oracle Core<br/>(Multi-Chain EVM)"]
+    D -->|"Gasless Settlement<br/>or 10% Gain-Share"| E["🏦 Agent Session Vault<br/>(Polygon / Base / Arbitrum)"]
+    D -->|"Fail-Closed Scan & FICO"| F["🚪 Security Gate x402<br/>(EU AI Act Art. 50 Attestation)"]
+```
+
+1. **Zero Human Gateways (No KYC, No Credit Cards, No Passwords)**:
+   - Autonomous self-serve onboarding (`POST /api/v1/agent/onboard`) instantly provisions an agent vault with free trial queries.
+   - Authentication is strictly cryptographic via `X-Agent-Vault-Key` or EIP-712 wallet signatures.
+2. **A2A (Agent-to-Agent) Bilateral Contract & Negotiation Engine (`app/a2a_deal_engine.py`)**:
+   - Machine-readable deal lifecycle: `PROPOSED` $\rightarrow$ `DUAL_SIGNED_CONFIRMED` $\rightarrow$ `VERIFIED` (or `REJECTED` / `CANCELLED`).
+   - Electronic Bill of Lading (eBL) cryptographic digest binding, IMO vessel tracking, and real-time sanctions screening.
+   - **Hybrid 2-Track Settlement**: Combines micro-metered oracle queries ($0.005 USDC) with automated **10% Gain-Share** on realized logistics & tariff savings ($10,000 cap).
+3. **Multi-Chain Real-Time RPC Receipt Verification & Replay Defense (`app/x402_verifier.py`)**:
+   - Queries live EVM nodes on Polygon, Base, and Arbitrum with a strict **3.0-second timeout bound**.
+   - Decodes native USDC `Transfer` events and enforces immutable replay attack caching (`logs/redeemed_tx_hashes.json`) with thread-safe atomic file replacement.
+4. **Agent Session Vault (`app/agent_session_vault.py`)**:
+   - High-frequency trading agents can lock USDC once and execute dozens of queries gas-free at sub-millisecond latency.
+   - Automatic refund of unused balances on session close with zero-reentrancy protection.
+5. **Security Gate x402 & ElizaOS Fail-Closed Integration (`app/security_gate_client.py`)**:
+   - Zero-trust prompt injection pre-filtering, Agent FICO credit scoring, and EU AI Act Article 50 Dual-Attestations.
+   - Enforces **Fail-Closed** safety when strict mode is active.
 
 ---
 
-## ⚡ Key Architectural Capabilities (v2.4.0)
+## 🌐 Deployed & Verified Multi-Chain Smart Contracts
+
+All contracts are deployed on live mainnets and **100% verified (Green Checkmark)** with open-source Solidity code and ABIs:
+
+| Network | Smart Contract | Mainnet Deployed Address | Explorer Status |
+| :--- | :--- | :--- | :---: |
+| **Polygon Mainnet** (137) | `AgentPaymentVault` | [`0xb44Bc2Acdd156cE08b549A00a3102e4B01276654`](https://polygonscan.com/address/0xb44Bc2Acdd156cE08b549A00a3102e4B01276654#code) | ✅ **Verified** |
+| | `MineralsOracleConsumer` | [`0x835d01534a5D2e63D52636Fafb1019f889d1E66B`](https://polygonscan.com/address/0x835d01534a5D2e63D52636Fafb1019f889d1E66B#code) | ✅ **Verified** |
+| **Base Mainnet** (8453) | `AgentPaymentVault` | [`0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d`](https://basescan.org/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d#code) | ✅ **Verified** |
+| | `MineralsOracleConsumer` | [`0xe43a9C368808B2dfF139D27789C40A3C8F2282cF`](https://basescan.org/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF#code) | ✅ **Verified** |
+| **Arbitrum One** (42161) | `AgentPaymentVault` | [`0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d`](https://arbiscan.io/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d#code) | ✅ **Verified** |
+| | `MineralsOracleConsumer` | [`0xe43a9C368808B2dfF139D27789C40A3C8F2282cF`](https://arbiscan.io/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF#code) | ✅ **Verified** |
 
 ### 1. Composite EV Battery Master Passport Orchestrator (`app/composite_battery_pipeline.py`)
 
@@ -187,11 +223,11 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-### 2. Run Tests (102 Automated Tests)
+### 2. Run Tests (173 Automated Tests - 100% Passing)
 
 ```bash
-# Run with -s flag on Windows
-pytest -s tests/
+# Run full regression suite
+pytest tests/
 ```
 
 ### 3. Launch Local Server & Web Observatory

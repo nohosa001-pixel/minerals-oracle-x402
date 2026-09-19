@@ -375,6 +375,67 @@
         },
         "required": ["deal_id"]
       }
+    },
+    {
+      "name": "get_agent_session_info",
+      "description": "Queries real-time balance, query capacity, and status for an active session without debiting a fee.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "session_token": {"type": "string", "description": "Active session token (asess_...)"}
+        },
+        "required": ["session_token"]
+      }
+    },
+    {
+      "name": "reject_a2a_trade_deal",
+      "description": "Buyer AI agent rejects an existing trade proposal with structured reasoning and optional cryptographic signature.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "deal_id": {"type": "string", "description": "Trade deal identifier to reject"},
+          "buyer_agent_address": {"type": "string", "description": "Buyer agent EVM address executing rejection"},
+          "buyer_signature": {"type": "string", "description": "Optional cryptographic signature"},
+          "rejection_reason": {"type": "string", "description": "Reason for rejection"}
+        },
+        "required": ["deal_id", "buyer_agent_address"]
+      }
+    },
+    {
+      "name": "cancel_a2a_trade_deal",
+      "description": "Seller AI agent revokes or cancels a pending trade deal proposal before buyer countersignature.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "deal_id": {"type": "string", "description": "Trade deal identifier to cancel"},
+          "seller_agent_address": {"type": "string", "description": "Seller agent EVM address executing cancellation"},
+          "seller_signature": {"type": "string", "description": "Optional cryptographic cancellation signature"},
+          "cancellation_reason": {"type": "string", "description": "Reason for proposal revocation"}
+        },
+        "required": ["deal_id", "seller_agent_address"]
+      }
+    },
+    {
+      "name": "list_a2a_trade_deals",
+      "description": "Lists A2A bilateral trade deals, optionally filtered by agent EVM address or status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "agent_address": {"type": "string", "description": "Optional agent EVM address filter"},
+          "status_filter": {"type": "string", "description": "Optional status filter"}
+        }
+      }
+    },
+    {
+      "name": "get_a2a_trade_deal",
+      "description": "Retrieves the full specification, audit notes, and current status of an A2A trade agreement.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "deal_id": {"type": "string", "description": "Trade deal identifier"}
+        },
+        "required": ["deal_id"]
+      }
     }
   ]
 }

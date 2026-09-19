@@ -3,7 +3,7 @@
   "version": "2.5.0",
   "deployer": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
   "treasury": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
-  "updated_at": "2026-09-14T10:16:47Z",
+  "updated_at": "2026-09-19T05:19:15Z",
   "networks": {
     "polygon": {
       "chain_name": "polygon",
@@ -37,12 +37,12 @@
       "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
       "contracts": {
         "AgentPaymentVault": {
-          "address": "0x3841D3B82e5b7E22d718b958B5c4543b59367F47",
-          "explorer_link": "https://basescan.org/address/0x3841D3B82e5b7E22d718b958B5c4543b59367F47"
+          "address": "0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d",
+          "explorer_link": "https://basescan.org/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d"
         },
         "MineralsOracleConsumer": {
-          "address": "0x71e98d1a11516eB70b5A344d5c9f5B345aA5e381",
-          "explorer_link": "https://basescan.org/address/0x71e98d1a11516eB70b5A344d5c9f5B345aA5e381",
+          "address": "0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
+          "explorer_link": "https://basescan.org/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
           "primarySymbol": "Cu"
         }
       }
@@ -58,12 +58,12 @@
       "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
       "contracts": {
         "AgentPaymentVault": {
-          "address": "0x19a0a4c28C913b5a790518dD9B1855F11F153282",
-          "explorer_link": "https://arbiscan.io/address/0x19a0a4c28C913b5a790518dD9B1855F11F153282"
+          "address": "0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d",
+          "explorer_link": "https://arbiscan.io/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d"
         },
         "MineralsOracleConsumer": {
-          "address": "0x52467d3eB40A837C392C62B01Ac583A89b6574c8",
-          "explorer_link": "https://arbiscan.io/address/0x52467d3eB40A837C392C62B01Ac583A89b6574c8",
+          "address": "0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
+          "explorer_link": "https://arbiscan.io/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
           "primarySymbol": "Cu"
         }
       }

@@ -39,8 +39,8 @@ NETWORKS = {
         "api_key_env": "BASESCAN_API_KEY",
         "usdc": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
         "contracts": {
-            "AgentPaymentVault": "0x3841D3B82e5b7E22d718b958B5c4543b59367F47",
-            "MineralsOracleConsumer": "0x71e98d1a11516eB70b5A344d5c9f5B345aA5e381",
+            "AgentPaymentVault": "0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d",
+            "MineralsOracleConsumer": "0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
         }
     },
     "arbitrum": {
@@ -51,8 +51,8 @@ NETWORKS = {
         "api_key_env": "ARBISCAN_API_KEY",
         "usdc": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
         "contracts": {
-            "AgentPaymentVault": "0x19a0a4c28C913b5a790518dD9B1855F11F153282",
-            "MineralsOracleConsumer": "0x52467d3eB40A837C392C62B01Ac583A89b6574c8",
+            "AgentPaymentVault": "0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d",
+            "MineralsOracleConsumer": "0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
         }
     }
 }

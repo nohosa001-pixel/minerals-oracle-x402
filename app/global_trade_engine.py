@@ -573,7 +573,13 @@ class GlobalTradeEngine:
         
         # Check if document hash matches declared hash or passes SHA256 hex format (supporting 0x prefix)
         raw_hash = req.ebl_document_hash[2:] if req.ebl_document_hash.startswith("0x") else req.ebl_document_hash
-        hash_valid = len(raw_hash) == 64 and all(c in "0123456789abcdefABCDEF" for c in raw_hash)
+        # Strictly reject empty, non-hex, null-hashes (e.g. all '0's), and invalid gross weight
+        hash_valid = (
+            len(raw_hash) == 64
+            and all(c in "0123456789abcdefABCDEF" for c in raw_hash)
+            and raw_hash != "0" * 64
+            and req.gross_weight_metric_tons > 0.0
+        )
 
         # 4. Deceptive Shipping Practices & Dark Fleet screening
         dark_fleet = False
@@ -606,7 +612,7 @@ class GlobalTradeEngine:
             hash_integrity=hash_valid,
             audit_verdict=verdict,
             verification_timestamp_utc=now_utc,
-            cryptographic_audit_hash=audit_hash,
+            cryptographic_audit_hash=f"0x{audit_hash}",
         )
 
     def optimize_route(self, req: TradeRouteOptimizationRequest) -> TradeRouteOptimizationResponse:
@@ -634,12 +640,22 @@ class GlobalTradeEngine:
 
         # Estimated commodity base value ($/MT) - Grounded in Sept 15, 2026 Global Market Benchmark
         base_value_map = {
-            MineralType.LITHIUM_CARBONATE: 21500.0,      # Carbonate rebound at ~152k RMB/MT (~$21.5k)
-            MineralType.LITHIUM_HYDROXIDE: 22800.0,      # Battery-grade hydroxide premium
-            MineralType.NICKEL_MHP: 18500.0,             # Indonesian HPAL intermediate
-            MineralType.COPPER_CATHODE: 14200.0,         # LME ATH test at $14,000~$14,875/MT ($6.45/lb)
-            MineralType.COBALT_HYDROXIDE: 29000.0,       # DRC hydroxide
-            MineralType.SILVER_POWDER_SOLAR_PV: 2045000.0, # Spot $63.60/oz x 32,150.74 oz/MT for TOPCon PV
+            MineralType.LITHIUM_CARBONATE: 21500.0,        # Battery grade carbonate (~$21.5k/MT)
+            MineralType.LITHIUM_HYDROXIDE: 22800.0,        # Battery grade hydroxide premium (~$22.8k/MT)
+            MineralType.NICKEL_MHP: 18500.0,               # Indonesian HPAL intermediate (~$18.5k/MT)
+            MineralType.COPPER_CATHODE: 14200.0,           # LME Grade A Electrolytic Copper (~$14.2k/MT)
+            MineralType.COPPER_CONCENTRATE: 3850.0,        # Flotation concentrate (28% Cu content)
+            MineralType.COBALT_HYDROXIDE: 29000.0,         # DRC hydroxide benchmark
+            MineralType.SILVER_POWDER_SOLAR_PV: 2045000.0, # 99.99% TOPCon Solar PV paste (~$2.045M/MT)
+            MineralType.SILVER_DORE: 850000.0,             # Unrefined Silver Doré bar (~$850k/MT)
+            MineralType.NATURAL_GRAPHITE: 1250.0,          # Spherical natural graphite anode material
+            MineralType.SYNTHETIC_GRAPHITE: 2900.0,        # Synthetic anode graphite
+            MineralType.MANGANESE_SULFATE: 950.0,          # High-purity manganese sulfate precursor
+            MineralType.NEODYMIUM_DYSPROSIUM: 115000.0,    # NdPr/Dy permanent magnet metals
+            MineralType.ANTIMONY_TRIOXIDE: 14500.0,        # Flame retardant / solar glass fining agent
+            MineralType.LITHIUM_BLACK_MASS: 8500.0,        # Recycled shredded battery black mass
+            MineralType.NICKEL_COBALT_BLACK_MASS: 11500.0, # Recycled Ni/Co black mass
+            MineralType.TUNGSTEN_SCRAP: 32000.0,           # Tungsten carbide / metal scrap
         }
         val_per_mt = base_value_map.get(req.mineral_type, 15000.0)
 
@@ -705,6 +721,16 @@ class GlobalTradeEngine:
                 recommended_action="Route transit days exceed contract deadline. Select air-freight or alternative supplier.",
                 projected_cost_delta_usd=-abs(savings_vs_detour),
                 actionable_command="optimize_mineral_trade_route(avoid_chokepoints=['PANAMA_CANAL'])"
+            )
+        elif req.max_carbon_budget_co2_tons and option_a["voyage_co2_tons"] > req.max_carbon_budget_co2_tons:
+            decision = AgentDecisionSignal(
+                action=AgentActionType.HOLD_FOR_ASSAY_CLARIFICATION,
+                confidence_score=0.94,
+                risk_score=0.80,
+                bottlenecks=["CARBON_BUDGET_EXCEEDED"] + direct_res.chokepoints_traversed,
+                recommended_action=f"Voyage CO2 ({option_a['voyage_co2_tons']:.1f} MT) exceeds carbon budget limit ({req.max_carbon_budget_co2_tons:.1f} MT). Request low-emission green corridor.",
+                projected_cost_delta_usd=-round(savings_vs_detour * 0.1, 2),
+                actionable_command="estimate_maritime_freight_and_carbon(cii_rating='A')"
             )
         elif has_red_sea:
             decision = AgentDecisionSignal(

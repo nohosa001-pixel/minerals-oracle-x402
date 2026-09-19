@@ -427,16 +427,9 @@ class ComplianceEngine:
         # Optional Security Gate Attestation
         sec_att = None
         try:
-            gate_eval = security_gate_client.evaluate_agent(
-                agent_address=req.agent_address or "0x71C84107b3a42E2F2Ab4Ba770265EC0c4ce5Cea6",
-                action="AUDIT_MINERAL_LOT_COMPLIANCE"
-            )
-            sec_att = SecurityAttestation(
-                security_gate_certified=gate_eval.get("allow", True),
-                security_gate_url=security_gate_client.base_url,
-                security_gate_mode=security_gate_client.mode,
-                dual_attestation_hash="0x" + hashlib.sha256((digest_hash + str(gate_eval)).encode("utf-8")).hexdigest(),
-                latency_ms=gate_eval.get("latency_ms", 3.2),
+            sec_att = security_gate_client.generate_dual_attestation(
+                oracle_digest=digest_hash,
+                agent_address=req.agent_address,
             )
         except Exception as e:
             logger.debug(f"Security gate optional ping: {e}")

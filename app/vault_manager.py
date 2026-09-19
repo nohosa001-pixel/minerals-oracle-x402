@@ -71,6 +71,8 @@ class VaultManager:
             pass
 
     def _seed_demo_account(self):
+        if os.getenv("ENV", "").lower() == "production" or os.getenv("DISABLE_DEMO_ACCOUNT", "").lower() == "true":
+            return
         demo_addr = Web3.to_checksum_address("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
         demo_key = "vault_key_demo_agent_sandbox_2026"
         now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())

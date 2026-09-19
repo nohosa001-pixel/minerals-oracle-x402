@@ -15,6 +15,7 @@ import sys
 import io
 import json
 import time
+import secrets
 from pathlib import Path
 
 # Force UTF-8 stdout for Windows consoles
@@ -135,8 +136,9 @@ def run_autonomous_trade_pipeline():
     # STEP 4: Seller Proposes Bilateral A2A Trade Deal
     # -------------------------------------------------------------
     print("\n[STEP 4] Seller Agent proposing bilateral Trade Agreement ($33.75M USD)...")
+    unique_deal_id = f"DEAL-2026-CHL-USA-LIT-{secrets.token_hex(3).upper()}"
     deal_spec = TradeDealSpec(
-        deal_id="DEAL-2026-CHL-USA-LIT-008",
+        deal_id=unique_deal_id,
         commodity=MineralType.LITHIUM_CARBONATE,
         volume_tons=2500.0,
         unit_price_usd_per_ton=13500.0,
@@ -174,7 +176,7 @@ def run_autonomous_trade_pipeline():
     t0 = time.perf_counter()
     dual_att = deal_engine.dual_sign_deal(
         TradeDealDualSignRequest(
-            deal_id="DEAL-2026-CHL-USA-LIT-008",
+            deal_id=unique_deal_id,
             buyer_signature="0x" + "8" * 130,
             buyer_agent_address=buyer_address,
         )
@@ -190,7 +192,7 @@ def run_autonomous_trade_pipeline():
     # STEP 6: Cryptographic Verification Audit
     # -------------------------------------------------------------
     print("\n[STEP 6] Performing final bilateral contract audit...")
-    audit_res = deal_engine.verify_deal(TradeDealVerifyRequest(deal_id="DEAL-2026-CHL-USA-LIT-008"))
+    audit_res = deal_engine.verify_deal(TradeDealVerifyRequest(deal_id=unique_deal_id))
     print(f"  ✓ Contract Valid: {audit_res.is_valid}")
     print(f"  ✓ 3-Party Signatures Intact: (Seller: {audit_res.seller_verified}, Buyer: {audit_res.buyer_verified}, Oracle: {audit_res.oracle_verified})")
     print(f"  ✓ Summary: {audit_res.compliance_audit_summary}")

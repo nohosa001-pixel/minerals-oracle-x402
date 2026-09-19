@@ -18,7 +18,7 @@ from app.schemas import SecurityAttestation
 load_dotenv(override=True)
 logger = logging.getLogger("security_gate_client")
 
-DEFAULT_GATE_URL = "https://agent-security-gate-x402-7qxtp3324q-du.a.run.app"
+DEFAULT_GATE_URL = "https://agent-security-gate-x402-212942243360.asia-northeast3.run.app"
 EU_AI_ACT_STANDARD = "EU_AI_ACT_2024_1689_ART50"
 
 
@@ -57,6 +57,7 @@ class SecurityGateClient:
         """
         Scans input string against prompt injection, malicious AST triggers, or secret leaks.
         Falls back to deterministic local safety scanner if remote gate is unreachable.
+        Enforces Fail-Closed blocking if strict_mode is True.
         """
         start = time.perf_counter()
         # Fast local pre-screen for hazardous patterns
@@ -91,6 +92,13 @@ class SecurityGateClient:
                 }
         except Exception as e:
             logger.debug(f"Remote gate verify bypassed: {e}")
+            if self.strict_mode:
+                return {
+                    "is_safe": False,
+                    "reason": f"Fail-Closed: Security Gate unreachable under strict mode ({e})",
+                    "risk_score": 1.0,
+                    "latency_ms": round((time.perf_counter() - start) * 1000.0, 2)
+                }
 
         latency_ms = round((time.perf_counter() - start) * 1000.0, 2)
         return {

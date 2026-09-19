@@ -70,12 +70,16 @@ from app.schemas import (
     AgentSessionResponse,
     AgentSessionCloseRequest,
     AgentSessionCloseResponse,
+    AgentSessionInfoResponse,
     TradeDealSpec,
     TradeDealProposeRequest,
     TradeDealDualSignRequest,
+    TradeDealRejectRequest,
+    TradeDealCancelRequest,
     TradeDealAttestation,
     TradeDealVerifyRequest,
     TradeDealVerifyResponse,
+    TradeDealListResponse,
 )
 from app.global_trade_engine import global_trade_engine
 from app.agent_session_vault import (
@@ -87,6 +91,8 @@ from app.a2a_deal_engine import (
     get_a2a_deal_engine,
     DealNotFoundError,
     InvalidDealStateError,
+    DealExpiredError,
+    InvalidSignatureError,
 )
 from app.compliance_engine import compliance_engine
 from app.lithium_pipeline import lithium_pipeline
@@ -1501,7 +1507,7 @@ async def get_vault_account(request: Request, identifier: Optional[str] = None):
 
 
 @app.get("/api/v1/vault/receipts/{receipt_id}", tags=["Agent Payment Vault"])
-async def get_payment_receipt(receipt_id: str):
+async def get_vault_payment_receipt(receipt_id: str):
     """Retrieves an EIP-712 cryptographically signed PaymentReceipt issued to an agent."""
     receipt = x402_verifier.get_receipt(receipt_id)
     if not receipt:
@@ -1688,6 +1694,20 @@ async def open_agent_session_route(body: AgentSessionOpenRequest):
     return agent_session_vault.open_session(body)
 
 
+@app.get(
+    "/api/v1/agent/session/{session_token}",
+    response_model=AgentSessionInfoResponse,
+    tags=["Agent Protocol"],
+    summary="Query real-time balance and query capacity for an active session without debiting",
+)
+async def get_agent_session_route(session_token: str):
+    """Retrieves session metadata, allocated/current balance, and remaining query capacity."""
+    try:
+        return agent_session_vault.get_session_info_model(session_token)
+    except InvalidSessionTokenError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
 @app.post(
     "/api/v1/agent/session/close",
     response_model=AgentSessionCloseResponse,
@@ -1710,7 +1730,10 @@ async def close_agent_session_route(body: AgentSessionCloseRequest):
 )
 async def propose_a2a_deal_route(body: TradeDealProposeRequest):
     """Registers a bilateral trade deal proposal signed by seller agent."""
-    return a2a_deal_engine.propose_deal(body)
+    try:
+        return a2a_deal_engine.propose_deal(body)
+    except (InvalidDealStateError, InvalidSignatureError, DealExpiredError) as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @app.post(
@@ -1725,8 +1748,65 @@ async def dual_sign_a2a_deal_route(body: TradeDealDualSignRequest):
         return a2a_deal_engine.dual_sign_deal(body)
     except DealNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except InvalidDealStateError as e:
+    except (InvalidDealStateError, DealExpiredError, InvalidSignatureError) as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.post(
+    "/api/v1/a2a/deals/reject",
+    response_model=TradeDealAttestation,
+    tags=["A2A Autonomous Settlement"],
+    summary="Buyer Agent rejects proposed deal terms or pricing",
+)
+async def reject_a2a_deal_route(body: TradeDealRejectRequest):
+    """Marks proposal as REJECTED and records buyer rejection reasoning."""
+    try:
+        return a2a_deal_engine.reject_deal(body)
+    except DealNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except (InvalidDealStateError, DealExpiredError, InvalidSignatureError) as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.post(
+    "/api/v1/a2a/deals/cancel",
+    response_model=TradeDealAttestation,
+    tags=["A2A Autonomous Settlement"],
+    summary="Seller Agent cancels/revokes proposal before countersignature",
+)
+async def cancel_a2a_deal_route(body: TradeDealCancelRequest):
+    """Revokes a pending proposal before buyer countersigns."""
+    try:
+        return a2a_deal_engine.cancel_deal(body)
+    except DealNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except (InvalidDealStateError, DealExpiredError, InvalidSignatureError) as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.get(
+    "/api/v1/a2a/deals/{deal_id}",
+    tags=["A2A Autonomous Settlement"],
+    summary="Retrieve full specification and audit status of an A2A trade deal",
+)
+async def get_a2a_deal_route(deal_id: str):
+    """Retrieves full specification, status, and audit notes of a deal."""
+    deal = a2a_deal_engine.get_deal(deal_id)
+    if not deal:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Deal '{deal_id}' not found.")
+    return deal
+
+
+@app.get(
+    "/api/v1/a2a/deals/by-agent/{agent_address}",
+    response_model=TradeDealListResponse,
+    tags=["A2A Autonomous Settlement"],
+    summary="List active or historic bilateral deals associated with an agent address",
+)
+async def list_a2a_deals_route(agent_address: str, status_filter: Optional[str] = None):
+    """Filters all bilateral agreements for an agent address."""
+    deals = a2a_deal_engine.list_deals_by_agent(agent_address, status_filter)
+    return TradeDealListResponse(status="success", total_count=len(deals), deals=deals)
 
 
 @app.get(
@@ -1891,7 +1971,7 @@ async def invoke_mcp_tool(request: Request, tool_call: MCPToolCallRequest):
     elif name == "verify_copper_origin":
         try:
             req_model = CopperOriginVerifyRequest(**args)
-            data = copper_pipeline.evaluate_copper_lot(req_model).model_dump()
+            data = copper_pipeline.verify_origin(req_model).model_dump()
             return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
         except Exception as e:
             return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying copper origin: {str(e)}"}], isError=True)
@@ -1899,7 +1979,7 @@ async def invoke_mcp_tool(request: Request, tool_call: MCPToolCallRequest):
     elif name == "verify_silver_origin":
         try:
             req_model = SilverOriginVerifyRequest(**args)
-            data = silver_pipeline.evaluate_silver_lot(req_model).model_dump()
+            data = silver_pipeline.verify_origin(req_model).model_dump()
             return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
         except Exception as e:
             return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying silver origin: {str(e)}"}], isError=True)
@@ -1971,7 +2051,8 @@ async def invoke_mcp_tool(request: Request, tool_call: MCPToolCallRequest):
         try:
             m_type = MineralType(args["mineral_type"])
             dest = args.get("importer_jurisdiction", "USA")
-            data = global_trade_engine.get_hs_tariff(m_type, dest).model_dump()
+            tariff = global_trade_engine.get_hs_tariff(m_type, dest)
+            data = tariff.model_dump() if tariff else {"error": f"No HS tariff data found for {m_type} to {dest}"}
             return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
         except Exception as e:
             return MCPToolCallResponse(content=[{"type": "text", "text": f"Error calculating tariffs: {str(e)}"}], isError=True)
@@ -2023,6 +2104,66 @@ async def invoke_mcp_tool(request: Request, tool_call: MCPToolCallRequest):
             return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
         except Exception as e:
             return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying A2A deal: {str(e)}"}], isError=True)
+
+    elif name == "open_agent_session":
+        try:
+            req_model = AgentSessionOpenRequest(**args)
+            data = agent_session_vault.open_session(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error opening agent session: {str(e)}"}], isError=True)
+
+    elif name == "close_agent_session":
+        try:
+            req_model = AgentSessionCloseRequest(**args)
+            data = agent_session_vault.close_session(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error closing agent session: {str(e)}"}], isError=True)
+
+    elif name == "get_agent_session_info":
+        try:
+            token = args.get("session_token", "")
+            data = agent_session_vault.get_session_info_model(token).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error retrieving agent session: {str(e)}"}], isError=True)
+
+    elif name == "reject_a2a_trade_deal":
+        try:
+            req_model = TradeDealRejectRequest(**args)
+            data = a2a_deal_engine.reject_deal(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error rejecting A2A deal: {str(e)}"}], isError=True)
+
+    elif name == "cancel_a2a_trade_deal":
+        try:
+            req_model = TradeDealCancelRequest(**args)
+            data = a2a_deal_engine.cancel_deal(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error cancelling A2A deal: {str(e)}"}], isError=True)
+
+    elif name == "list_a2a_trade_deals":
+        try:
+            agent_addr = args.get("agent_address")
+            status_flt = args.get("status_filter")
+            deals = a2a_deal_engine.list_deals_by_agent(agent_addr, status_flt)
+            res = {"status": "success", "total_count": len(deals), "deals": deals}
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(res, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error listing A2A deals: {str(e)}"}], isError=True)
+
+    elif name == "get_a2a_trade_deal":
+        try:
+            deal_id = args.get("deal_id", "")
+            data = a2a_deal_engine.get_deal(deal_id)
+            if not data:
+                return MCPToolCallResponse(content=[{"type": "text", "text": f"Deal '{deal_id}' not found."}], isError=True)
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error retrieving A2A deal: {str(e)}"}], isError=True)
 
     elif name == "get_onchain_signed_feed":
         symbol = args.get("symbol", "Cu")

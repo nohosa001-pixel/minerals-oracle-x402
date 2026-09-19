@@ -82,6 +82,26 @@
     {
       "name": "verify_a2a_trade_deal",
       "description": "Cryptographically audits a dual-signed A2A trade deal, verifying seller, buyer, and oracle signatures, along with FEOC and mass-balance compliance."
+    },
+    {
+      "name": "get_agent_session_info",
+      "description": "Queries real-time balance, query capacity, and status for an active session without debiting a fee."
+    },
+    {
+      "name": "reject_a2a_trade_deal",
+      "description": "Buyer AI agent rejects an existing trade proposal with structured reasoning and optional cryptographic signature."
+    },
+    {
+      "name": "cancel_a2a_trade_deal",
+      "description": "Seller AI agent revokes or cancels a pending trade deal proposal before buyer countersignature."
+    },
+    {
+      "name": "list_a2a_trade_deals",
+      "description": "Lists A2A bilateral trade deals, optionally filtered by agent EVM address or status."
+    },
+    {
+      "name": "get_a2a_trade_deal",
+      "description": "Retrieves the full specification, audit notes, and current status of an A2A trade agreement."
     }
   ]
 }

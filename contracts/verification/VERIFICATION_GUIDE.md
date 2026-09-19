@@ -51,34 +51,42 @@ This guide provides everything required to verify and publicly display **`AgentP
 
 ---
 
-## 3. Base (Chain ID: 8453) & Arbitrum (Chain ID: 42161) Multi-Chain Parameters
+## 3. Base Mainnet (Chain ID: 8453)
 
-### Base Mainnet
-
+### Contract A: `AgentPaymentVault.sol`
+* **Deployed Address**: [`0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d`](https://basescan.org/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d#code)
+* **Direct Verification URL**: [https://basescan.org/verifyContract?a=0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d](https://basescan.org/verifyContract?a=0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d)
 * **Native USDC Address**: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
-* **AgentPaymentVault Constructor HEX**:
-
+* **Constructor Arguments (HEX)**:
 ```text
 000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000255f9991233f86b29db847c8d5b8cb9915e80dcf
 ```
 
-* **MineralsOracleConsumer Constructor HEX**:
-
+### Contract B: `MineralsOracleConsumer.sol`
+* **Deployed Address**: [`0xe43a9C368808B2dfF139D27789C40A3C8F2282cF`](https://basescan.org/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF#code)
+* **Direct Verification URL**: [https://basescan.org/verifyContract?a=0xe43a9C368808B2dfF139D27789C40A3C8F2282cF](https://basescan.org/verifyContract?a=0xe43a9C368808B2dfF139D27789C40A3C8F2282cF)
+* **Constructor Arguments (HEX)**:
 ```text
 000000000000000000000000255f9991233f86b29db847c8d5b8cb9915e80dcf
 ```
 
-### Arbitrum One
+---
 
+## 4. Arbitrum One (Chain ID: 42161)
+
+### Contract A: `AgentPaymentVault.sol`
+* **Deployed Address**: [`0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d`](https://arbiscan.io/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d#code)
+* **Direct Verification URL**: [https://arbiscan.io/verifyContract?a=0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d](https://arbiscan.io/verifyContract?a=0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d)
 * **Native USDC Address**: `0xaf88d065e77c8cC2239327C5EDb3A432268e5831`
-* **AgentPaymentVault Constructor HEX**:
-
+* **Constructor Arguments (HEX)**:
 ```text
 000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831000000000000000000000000255f9991233f86b29db847c8d5b8cb9915e80dcf
 ```
 
-* **MineralsOracleConsumer Constructor HEX**:
-
+### Contract B: `MineralsOracleConsumer.sol`
+* **Deployed Address**: [`0xe43a9C368808B2dfF139D27789C40A3C8F2282cF`](https://arbiscan.io/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF#code)
+* **Direct Verification URL**: [https://arbiscan.io/verifyContract?a=0xe43a9C368808B2dfF139D27789C40A3C8F2282cF](https://arbiscan.io/verifyContract?a=0xe43a9C368808B2dfF139D27789C40A3C8F2282cF)
+* **Constructor Arguments (HEX)**:
 ```text
 000000000000000000000000255f9991233f86b29db847c8d5b8cb9915e80dcf
 ```
