@@ -146,7 +146,8 @@ class AgentSessionVault:
 
             # Check expiration
             now = datetime.now(timezone.utc)
-            expires = datetime.fromisoformat(session["expires_at_utc"])
+            expires_str = session["expires_at_utc"].replace("Z", "+00:00")
+            expires = datetime.fromisoformat(expires_str)
             if now > expires:
                 session["status"] = "EXPIRED"
                 self._save_to_disk()

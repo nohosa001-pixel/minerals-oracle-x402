@@ -303,7 +303,7 @@ class A2ATradeDealEngine:
             now_dt = datetime.now(timezone.utc)
             # Expiration check (TTL)
             if spec.expires_at_utc:
-                expires_dt = datetime.fromisoformat(spec.expires_at_utc)
+                expires_dt = datetime.fromisoformat(spec.expires_at_utc.replace("Z", "+00:00"))
                 if now_dt > expires_dt:
                     record["status"] = "EXPIRED"
                     self._save_to_disk()
@@ -363,7 +363,7 @@ class A2ATradeDealEngine:
             now_dt = datetime.now(timezone.utc)
             # Expiration check
             if spec.expires_at_utc:
-                expires_dt = datetime.fromisoformat(spec.expires_at_utc)
+                expires_dt = datetime.fromisoformat(spec.expires_at_utc.replace("Z", "+00:00"))
                 if now_dt > expires_dt:
                     record["status"] = "EXPIRED"
                     self._save_to_disk()
@@ -412,7 +412,7 @@ class A2ATradeDealEngine:
             now_dt = datetime.now(timezone.utc)
             # Expiration check
             if spec.expires_at_utc:
-                expires_dt = datetime.fromisoformat(spec.expires_at_utc)
+                expires_dt = datetime.fromisoformat(spec.expires_at_utc.replace("Z", "+00:00"))
                 if now_dt > expires_dt:
                     record["status"] = "EXPIRED"
                     self._save_to_disk()
