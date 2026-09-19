@@ -72,6 +72,10 @@ def test_onchain_tx_random_unconfirmed_hash_rejected(monkeypatch):
     assert ("not found" in reason.lower() or "not confirmed" in reason.lower())
 
 
+@pytest.mark.skipif(
+    not os.getenv("ORACLE_SIGNER_PRIVATE_KEY") and not os.getenv("POLYGON_DEPLOYER_PRIVATE_KEY"),
+    reason="Requires live ORACLE_SIGNER_PRIVATE_KEY or POLYGON_DEPLOYER_PRIVATE_KEY in environment."
+)
 def test_signer_alignment_with_mainnet():
     """
     Verify that the oracle signer private key produces an Ethereum address
