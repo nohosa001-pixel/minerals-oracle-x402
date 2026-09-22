@@ -55,9 +55,12 @@
           "primarySymbol": "Cu"
         },
         "MineralTradeEscrow": {
-          "address": "0x5C890F570b5C527F38a6a6873523B2f52B6E3245",
+          "address": "0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638",
           "creator": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
-          "explorer_link": "https://basescan.org/address/0x5C890F570b5C527F38a6a6873523B2f52B6E3245",
+          "creation_tx": "d3ea506218425ef12b27061256bf342c58260407ee40efac4f609d2356ae205b",
+          "blockNumber": 51647878,
+          "explorer_link": "https://basescan.org/address/0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638",
+          "tx_link": "https://basescan.org/tx/d3ea506218425ef12b27061256bf342c58260407ee40efac4f609d2356ae205b",
           "standard": "ERC-MilestoneTradeEscrow",
           "settlementToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
         }
@@ -83,9 +86,12 @@
           "primarySymbol": "Cu"
         },
         "MineralTradeEscrow": {
-          "address": "0x98D2E9528D8A7bF8278E6cfbBf90bcfc70C716B1",
+          "address": "0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638",
           "creator": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
-          "explorer_link": "https://arbiscan.io/address/0x98D2E9528D8A7bF8278E6cfbBf90bcfc70C716B1",
+          "creation_tx": "320fa60cb901f7290ad73b17446776661746b505e5a670c164d8011bd481eb50",
+          "blockNumber": 507801945,
+          "explorer_link": "https://arbiscan.io/address/0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638",
+          "tx_link": "https://arbiscan.io/tx/320fa60cb901f7290ad73b17446776661746b505e5a670c164d8011bd481eb50",
           "standard": "ERC-MilestoneTradeEscrow",
           "settlementToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
         }
