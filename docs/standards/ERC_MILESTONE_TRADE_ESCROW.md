@@ -134,3 +134,21 @@ Alternative Path:
 - **US IRA § 30D**: Foreign Entity of Concern (FEOC) certification verification before contract finalization.
 - **EU CBAM & Battery Regulation**: Carbon Border Adjustment liability calculation integrated with EU ETS carbon spot oracle feeds ($78.50/tCO2e benchmark).
 - **UN/CEFACT & DCSA**: Electronic Bill of Lading standards alignment.
+
+---
+
+## 8. Cryptographic Disclaimer & Strict Limitation of Liability
+
+To prevent commercial, regulatory, or tort litigation arising from off-chain commodity trade defaults, all transactions, calldata generation, and attestation digests are governed by strict, mathematically enforced liability waivers:
+
+1. **EIP-712 Cryptographic Binding (`disclaimerHash`)**:
+   - The normalized disclaimer terms are hashed via SHA-256 (`disclaimerHash`) and permanently embedded into every on-chain attestation and EIP-712 structured digest.
+   - Any agent, smart contract, or arbitral tribunal verifying the Oracle's cryptographic ECDSA signature (`ecrecover`) mathematically consents to the waiver. Modifying or contesting the disclaimer causes the signature verification to fail.
+2. **Absolute Liability Cap ($0.50 USDC)**:
+   - The Oracle and its operators bear a strict maximum cumulative liability capped at **$0.50 USDC** (the base single-query micro-fee), regardless of the underlying trade value ($700,000+ USDC).
+3. **Algorithmic Verification Only (No Physical Warranty)**:
+   - Output represents automated algorithmic rule checks against open datasets and cryptographic hashes. The Oracle issues **NO WARRANTY**, express or implied, regarding physical ground truth, physical assay purity, batch weight, or laboratory authenticity.
+4. **Zero Consequential Liability**:
+   - The Oracle bears zero liability for customs seizures, port demurrage, regulatory sanctions, vessel delays, supply chain interruption, or loss of profits.
+5. **Non-Delegable Importer Due Diligence Duty**:
+   - Participating buyer and seller agents retain sole, non-delegable legal duty to perform independent physical testing and statutory compliance filings.
