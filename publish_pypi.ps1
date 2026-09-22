@@ -1,29 +1,39 @@
 # ========================================================
-#   minerals-oracle-x402 PyPI Distribution Script
+#   minerals-oracle-x402 v1.2.0 PyPI Distribution Script
 # ========================================================
 
 Write-Host "========================================================" -ForegroundColor Cyan
-Write-Host "  minerals-oracle-x402 PyPI Release Uploader" -ForegroundColor Cyan
+Write-Host "  minerals-oracle-x402 v1.2.0 PyPI Release Uploader" -ForegroundColor Cyan
 Write-Host "========================================================" -ForegroundColor Cyan
 
-# 1. Check dist files
-if (-not (Test-Path "dist\minerals_oracle_x402-1.0.0-py3-none-any.whl")) {
-    Write-Host "[ERROR] Distribution files not found in dist/. Please run 'python -m build' first." -ForegroundColor Red
-    exit 1
+# 1. Load from .env if present
+if (Test-Path ".env") {
+    Get-Content ".env" | ForEach-Object {
+        if ($_ -match "^\s*(PYPI_API_TOKEN|TWINE_PASSWORD)\s*=\s*(.+)$") {
+            $env:TWINE_PASSWORD = $matches[2].Trim().Trim('"').Trim("'")
+            $env:UV_PUBLISH_TOKEN = $matches[2].Trim().Trim('"').Trim("'")
+        }
+    }
 }
 
-# 2. Check twine validation
-Write-Host "`n[1/3] Running twine validation..." -ForegroundColor Yellow
-python -m twine check dist/*
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "[ERROR] Twine verification failed." -ForegroundColor Red
-    exit 1
+# 2. Check dist files for v1.2.0
+$wheelPath = "dist\minerals_oracle_x402-1.2.0-py3-none-any.whl"
+$sdistPath = "dist\minerals_oracle_x402-1.2.0.tar.gz"
+
+if (-not (Test-Path $wheelPath) -or -not (Test-Path $sdistPath)) {
+    Write-Host "[*] v1.2.0 distribution files not found. Building with uv..." -ForegroundColor Yellow
+    $env:UV_LINK_MODE = "copy"
+    uv build
 }
 
-# 3. Prompt for API Token if not set in environment
+# 3. Check API Token
 $pypiToken = $env:TWINE_PASSWORD
 if ([string]::IsNullOrEmpty($pypiToken)) {
-    Write-Host "`n[2/3] PyPI API Token Required" -ForegroundColor Yellow
+    $pypiToken = $env:UV_PUBLISH_TOKEN
+}
+
+if ([string]::IsNullOrEmpty($pypiToken)) {
+    Write-Host "`n[1/2] PyPI API Token Required" -ForegroundColor Yellow
     Write-Host "Please enter your PyPI API Token (starts with 'pypi-...'):" -ForegroundColor Gray
     $pypiToken = Read-Host -MaskInput "PyPI Token"
 }
@@ -33,20 +43,28 @@ if ([string]::IsNullOrEmpty($pypiToken)) {
     exit 1
 }
 
-# 4. Upload to PyPI
-Write-Host "`n[3/3] Uploading package to PyPI (https://upload.pypi.org/legacy/)..." -ForegroundColor Yellow
+# 4. Upload v1.2.0 to PyPI
+Write-Host "`n[2/2] Uploading v1.2.0 package to PyPI..." -ForegroundColor Yellow
+$env:UV_LINK_MODE = "copy"
+$env:UV_PUBLISH_TOKEN = $pypiToken
 $env:TWINE_USERNAME = "__token__"
 $env:TWINE_PASSWORD = $pypiToken
 
-python -m twine upload dist/*
+# Try uv publish first on v1.2.0 files
+uv publish --token $pypiToken dist/minerals_oracle_x402-1.2.0*
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "[*] Retrying upload via twine..." -ForegroundColor Yellow
+    uvx twine upload dist/minerals_oracle_x402-1.2.0* -u __token__ -p $pypiToken --skip-existing
+}
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "`n========================================================" -ForegroundColor Green
-    Write-Host "  [SUCCESS] Successfully published to PyPI!" -ForegroundColor Green
+    Write-Host "  [SUCCESS] Successfully published v1.2.0 to PyPI!" -ForegroundColor Green
     Write-Host "========================================================" -ForegroundColor Green
-    Write-Host "Package URL: https://pypi.org/project/minerals-oracle-x402/" -ForegroundColor Cyan
-    Write-Host "Install: pip install minerals-oracle-x402" -ForegroundColor Cyan
-    Write-Host "Run MCP: uvx minerals-oracle-x402" -ForegroundColor Cyan
+    Write-Host "Package URL: https://pypi.org/project/minerals-oracle-x402/1.2.0/" -ForegroundColor Cyan
+    Write-Host "Install: pip install minerals-oracle-x402==1.2.0" -ForegroundColor Cyan
+    Write-Host "Run MCP: uvx minerals-oracle-x402==1.2.0" -ForegroundColor Cyan
 } else {
-    Write-Host "`n[ERROR] Upload failed. Please check your PyPI token and network connection." -ForegroundColor Red
+    Write-Host "`n[ERROR] Upload failed. Please check your PyPI token and permissions." -ForegroundColor Red
 }
