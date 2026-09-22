@@ -23,6 +23,12 @@
           "address": "0x835d01534a5D2e63D52636Fafb1019f889d1E66B",
           "explorer_link": "https://polygonscan.com/address/0x835d01534a5D2e63D52636Fafb1019f889d1E66B",
           "primarySymbol": "Cu"
+        },
+        "MineralTradeEscrow": {
+          "address": "0x7a34e0C17E3F1c7283B4645229C8B72fF8f161c9",
+          "explorer_link": "https://polygonscan.com/address/0x7a34e0C17E3F1c7283B4645229C8B72fF8f161c9",
+          "standard": "ERC-MilestoneTradeEscrow",
+          "settlementToken": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"
         }
       }
     },
@@ -44,6 +50,12 @@
           "address": "0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
           "explorer_link": "https://basescan.org/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
           "primarySymbol": "Cu"
+        },
+        "MineralTradeEscrow": {
+          "address": "0x5C890F570b5C527F38a6a6873523B2f52B6E3245",
+          "explorer_link": "https://basescan.org/address/0x5C890F570b5C527F38a6a6873523B2f52B6E3245",
+          "standard": "ERC-MilestoneTradeEscrow",
+          "settlementToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
         }
       }
     },
@@ -65,6 +77,12 @@
           "address": "0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
           "explorer_link": "https://arbiscan.io/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
           "primarySymbol": "Cu"
+        },
+        "MineralTradeEscrow": {
+          "address": "0x98D2E9528D8A7bF8278E6cfbBf90bcfc70C716B1",
+          "explorer_link": "https://arbiscan.io/address/0x98D2E9528D8A7bF8278E6cfbBf90bcfc70C716B1",
+          "standard": "ERC-MilestoneTradeEscrow",
+          "settlementToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
         }
       }
     }

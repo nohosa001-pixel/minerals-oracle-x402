@@ -2073,10 +2073,18 @@ async def verify_a2a_deal_route(deal_id: str):
     summary="Generate EVM calldata for MineralTradeEscrow (Trade Prefix Alias)",
     include_in_schema=False,
 )
-async def get_deal_escrow_calldata_route(deal_id: str, escrow_contract_address: Optional[str] = None):
+async def get_deal_escrow_calldata_route(
+    deal_id: str,
+    escrow_contract_address: Optional[str] = None,
+    chain_name: str = "polygon",
+):
     """Generates precise EVM transaction calldata for buyer agent to deposit funds into MineralTradeEscrow."""
     try:
-        return a2a_deal_engine.build_escrow_deposit_calldata(deal_id, escrow_contract_address)
+        return a2a_deal_engine.build_escrow_deposit_calldata(
+            deal_id,
+            escrow_contract_address=escrow_contract_address,
+            chain_name=chain_name,
+        )
     except DealNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except InvalidDealStateError as e:

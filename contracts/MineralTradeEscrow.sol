@@ -18,6 +18,7 @@ interface IERC20 {
  *         1. Stage 1 (30%): Electronic Bill of Lading (eBL) anchored & verified by Oracle.
  *         2. Stage 2 (40%): Mid-transit corridor verification (AIS / Satellite tracking).
  *         3. Stage 3 (30%): Port of Discharge customs clearance & battery passport verification.
+ *         Includes formal dispute arbitration and anti-reentrancy protection.
  */
 contract MineralTradeEscrow {
     enum EscrowStatus {
@@ -43,6 +44,9 @@ contract MineralTradeEscrow {
     address public owner;
     address public trustedOracleSigner;
     IERC20 public immutable usdcToken;
+    bool public paused;
+
+    uint256 private _reentrancyStatus;
 
     mapping(bytes32 => TradeDeal) public deals;
 
@@ -51,6 +55,10 @@ contract MineralTradeEscrow {
     event Stage2Released(bytes32 indexed dealId, uint256 amountReleased);
     event EscrowCompleted(bytes32 indexed dealId, uint256 finalAmountReleased);
     event EscrowRefunded(bytes32 indexed dealId, uint256 refundedAmount);
+    event EscrowDisputed(bytes32 indexed dealId, address indexed initiator);
+    event DisputeResolved(bytes32 indexed dealId, uint256 buyerRefund, uint256 sellerPayout);
+    event Paused(address account);
+    event Unpaused(address account);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner permitted");
@@ -62,12 +70,35 @@ contract MineralTradeEscrow {
         _;
     }
 
+    modifier whenNotPaused() {
+        require(!paused, "Contract is paused");
+        _;
+    }
+
+    modifier nonReentrant() {
+        require(_reentrancyStatus != 2, "ReentrancyGuard: reentrant call");
+        _reentrancyStatus = 2;
+        _;
+        _reentrancyStatus = 1;
+    }
+
     constructor(address _usdcToken, address _trustedOracleSigner) {
         require(_usdcToken != address(0), "Invalid token address");
         require(_trustedOracleSigner != address(0), "Invalid oracle address");
         owner = msg.sender;
         usdcToken = IERC20(_usdcToken);
         trustedOracleSigner = _trustedOracleSigner;
+        _reentrancyStatus = 1;
+    }
+
+    function pause() external onlyOwner {
+        paused = true;
+        emit Paused(msg.sender);
+    }
+
+    function unpause() external onlyOwner {
+        paused = false;
+        emit Unpaused(msg.sender);
     }
 
     /**
@@ -79,7 +110,7 @@ contract MineralTradeEscrow {
         uint256 amountUsdc,
         bytes32 eblHash,
         uint256 durationSeconds
-    ) external {
+    ) external whenNotPaused nonReentrant {
         require(deals[dealId].buyerAgent == address(0), "Deal already exists");
         require(sellerAgent != address(0) && sellerAgent != msg.sender, "Invalid seller address");
         require(amountUsdc > 0, "Amount must be > 0");
@@ -105,7 +136,7 @@ contract MineralTradeEscrow {
     /**
      * @notice Stage 1: Oracle verifies eBL loading manifest on-chain and releases 30% to seller.
      */
-    function releaseStage1BL(bytes32 dealId, bytes32 verifiedEblHash) external onlyOracle {
+    function releaseStage1BL(bytes32 dealId, bytes32 verifiedEblHash) external onlyOracle whenNotPaused nonReentrant {
         TradeDeal storage deal = deals[dealId];
         require(deal.status == EscrowStatus.CREATED, "Invalid stage transition");
         require(deal.eblHash == verifiedEblHash, "eBL hash mismatch");
@@ -123,7 +154,7 @@ contract MineralTradeEscrow {
     /**
      * @notice Stage 2: Mid-transit corridor verification (40% release to seller).
      */
-    function releaseStage2Transit(bytes32 dealId) external onlyOracle {
+    function releaseStage2Transit(bytes32 dealId) external onlyOracle whenNotPaused nonReentrant {
         TradeDeal storage deal = deals[dealId];
         require(deal.status == EscrowStatus.STAGE_1_BL_RELEASED, "Must release Stage 1 first");
 
@@ -140,7 +171,7 @@ contract MineralTradeEscrow {
     /**
      * @notice Stage 3: Port of discharge arrival, customs clearance & passport minting (Final 30%).
      */
-    function completeEscrow(bytes32 dealId) external onlyOracle {
+    function completeEscrow(bytes32 dealId) external onlyOracle whenNotPaused nonReentrant {
         TradeDeal storage deal = deals[dealId];
         require(deal.status == EscrowStatus.STAGE_2_TRANSIT_RELEASED, "Must complete Stage 2 first");
 
@@ -155,13 +186,65 @@ contract MineralTradeEscrow {
     }
 
     /**
+     * @notice Buyer or seller agent raises a formal trade dispute (e.g., quality assay failure).
+     */
+    function raiseDispute(bytes32 dealId) external whenNotPaused {
+        TradeDeal storage deal = deals[dealId];
+        require(deal.buyerAgent != address(0), "Deal does not exist");
+        require(
+            msg.sender == deal.buyerAgent || msg.sender == deal.sellerAgent || msg.sender == owner,
+            "Unauthorized disputer"
+        );
+        require(
+            deal.status != EscrowStatus.COMPLETED &&
+            deal.status != EscrowStatus.REFUNDED &&
+            deal.status != EscrowStatus.DISPUTED,
+            "Cannot dispute in current state"
+        );
+
+        deal.status = EscrowStatus.DISPUTED;
+        emit EscrowDisputed(dealId, msg.sender);
+    }
+
+    /**
+     * @notice Oracle or owner arbitrates dispute and distributes remaining balance.
+     */
+    function resolveDispute(
+        bytes32 dealId,
+        uint256 buyerRefundUsdc,
+        uint256 sellerPayoutUsdc
+    ) external onlyOracle whenNotPaused nonReentrant {
+        TradeDeal storage deal = deals[dealId];
+        require(deal.status == EscrowStatus.DISPUTED, "Deal is not in dispute");
+
+        uint256 remaining = deal.totalAmountUsdc - deal.releasedAmountUsdc;
+        require(buyerRefundUsdc + sellerPayoutUsdc == remaining, "Distribution must equal remaining balance");
+
+        deal.releasedAmountUsdc = deal.totalAmountUsdc;
+        deal.status = EscrowStatus.COMPLETED;
+
+        if (buyerRefundUsdc > 0) {
+            bool okB = usdcToken.transfer(deal.buyerAgent, buyerRefundUsdc);
+            require(okB, "Buyer refund transfer failed");
+        }
+        if (sellerPayoutUsdc > 0) {
+            bool okS = usdcToken.transfer(deal.sellerAgent, sellerPayoutUsdc);
+            require(okS, "Seller payout transfer failed");
+        }
+
+        emit DisputeResolved(dealId, buyerRefundUsdc, sellerPayoutUsdc);
+    }
+
+    /**
      * @notice Refund remaining unreleased funds back to buyer if contract expires without completion.
      */
-    function refundExpiredDeal(bytes32 dealId) external {
+    function refundExpiredDeal(bytes32 dealId) external whenNotPaused nonReentrant {
         TradeDeal storage deal = deals[dealId];
         require(
-            deal.status != EscrowStatus.COMPLETED && deal.status != EscrowStatus.REFUNDED,
-            "Already settled or refunded"
+            deal.status != EscrowStatus.COMPLETED &&
+            deal.status != EscrowStatus.REFUNDED &&
+            deal.status != EscrowStatus.DISPUTED,
+            "Already settled, refunded, or in dispute"
         );
         require(block.timestamp > deal.deadlineTimestamp, "Deal has not expired");
         require(msg.sender == deal.buyerAgent || msg.sender == owner, "Only buyer or owner can refund");

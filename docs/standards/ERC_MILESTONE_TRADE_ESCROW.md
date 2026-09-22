@@ -79,20 +79,24 @@ Alternative Path:
 2. **Hash-Binding Authenticity**: Stage 1 requires exact matching of the on-chain hashed electronic Bill of Lading (`deal.eblHash == verifiedEblHash`).
 3. **Privilege Segregation**:
    - `onlyOracle`: Restricted to `trustedOracleSigner` and contract owner for milestone releases.
-   - `refundExpiredDeal`: Restricted strictly to `buyerAgent` or contract owner, only after `block.timestamp > deadlineTimestamp`.
-4. **Reentrancy & Balance Invariance**: State transitions and released counters are updated prior to ERC-20 transfer calls (`Checks-Effects-Interactions` pattern).
+   - `refundExpiredDeal`: Restricted strictly to `buyerAgent` or contract owner, only after `block.timestamp > deadlineTimestamp`. Cannot be called if deal is under `DISPUTED` arbitration.
+4. **Reentrancy Protection**: Explicit `nonReentrant` mutex guard applied to all state-modifying transfer entrypoints.
+5. **Formal Dispute Arbitration**:
+   - `raiseDispute(bytes32 dealId)`: Allows buyer, seller, or owner to freeze remaining balances upon cargo defect or transit deviation.
+   - `resolveDispute(bytes32 dealId, uint256 buyerRefund, uint256 sellerPayout)`: Oracle-governed arbitration distributing remaining balance without funds entrapment.
+6. **Emergency Circuit Breaker**: `pause()` / `unpause()` owner controls for security emergencies.
 
 ---
 
 ## 5. Agent-to-Agent (A2A) Integration API
 
 ### 5.1 Calldata Generation Endpoint
-- **HTTP Method**: `GET /api/v1/a2a/deals/{deal_id}/escrow-calldata`
+- **HTTP Method**: `GET /api/v1/a2a/deals/{deal_id}/escrow-calldata?chain_name={polygon|base|arbitrum}`
 - **Output Schema**:
 ```json
 {
   "deal_id": "DEAL-2026-LIT-001",
-  "escrow_contract_address": "0xb44Bc2Acdd156cE08b549A00a3102e4B01276654",
+  "escrow_contract_address": "0x7a34e0C17E3F1c7283B4645229C8B72fF8f161c9",
   "required_usdc_amount": 700000.0,
   "required_usdc_units": 700000000000,
   "seller_agent_address": "0x1111111111111111111111111111111111111111",
@@ -109,11 +113,11 @@ Alternative Path:
 ---
 
 ## 6. Multi-Chain Deployment Matrix
-| Network | Chain ID | USDC Token Address | Minerals Oracle Consumer | Mineral Trade Escrow | Status |
+| Network | Chain ID | Native USDC Token Address | Minerals Oracle Consumer | Mineral Trade Escrow Address | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Polygon Mainnet** | 137 | `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359` | `0x835d01534a5D2e63D52636Fafb1019f889d1E66B` | Ready for Broadcast | **Target Active** |
-| **Polygon Amoy** | 80002 | `0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582` | Testnet Oracle | Testnet Escrow | **Supported** |
-| **Base Sepolia** | 84532 | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` | Testnet Oracle | Testnet Escrow | **Supported** |
+| **Polygon Mainnet** | 137 | `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359` | `0x835d01534a5D2e63D52636Fafb1019f889d1E66B` | `0x7a34e0C17E3F1c7283B4645229C8B72fF8f161c9` | **Registered & Active** |
+| **Base (Coinbase L2)** | 8453 | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` | `0xe43a9C368808B2dfF139D27789C40A3C8F2282cF` | `0x5C890F570b5C527F38a6a6873523B2f52B6E3245` | **Registered & Active** |
+| **Arbitrum One** | 42161 | `0xaf88d065e77c8cC2239327C5EDb3A432268e5831` | `0xe43a9C368808B2dfF139D27789C40A3C8F2282cF` | `0x98D2E9528D8A7bF8278E6cfbBf90bcfc70C716B1` | **Registered & Active** |
 
 ---
 
@@ -121,3 +125,4 @@ Alternative Path:
 - **US IRA § 30D**: Foreign Entity of Concern (FEOC) certification verification before contract finalization.
 - **EU CBAM & Battery Regulation**: Carbon Border Adjustment liability calculation integrated with EU ETS carbon spot oracle feeds ($78.50/tCO2e benchmark).
 - **UN/CEFACT & DCSA**: Electronic Bill of Lading standards alignment.
+

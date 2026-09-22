@@ -612,10 +612,12 @@ class A2ATradeDealEngine:
         self,
         deal_id: str,
         escrow_contract_address: Optional[str] = None,
+        chain_name: str = "polygon",
     ) -> Dict[str, Any]:
         """
         Generates smart contract execution payload for buyer AI agent to lock funds in MineralTradeEscrow.sol.
         Requires the deal to be in DUAL_SIGNED_CONFIRMED status.
+        Supports Polygon, Base, and Arbitrum registered deployments.
         """
         with self._lock:
             record = self._deals.get(deal_id)
@@ -628,10 +630,23 @@ class A2ATradeDealEngine:
 
             spec: TradeDealSpec = record["spec"] if isinstance(record["spec"], TradeDealSpec) else TradeDealSpec(**record["spec"])
 
-            target_contract = escrow_contract_address or os.getenv(
-                "MINERAL_TRADE_ESCROW_ADDRESS",
-                "0xb44Bc2Acdd156cE08b549A00a3102e4B01276654"
-            )
+            target_contract = escrow_contract_address
+            if not target_contract:
+                # Attempt lookup from multi-chain deployment registry
+                try:
+                    reg_path = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) / "contracts" / "deployed_multichain.json"
+                    if reg_path.exists():
+                        with open(reg_path, "r", encoding="utf-8") as f:
+                            reg_data = json.load(f)
+                            target_contract = reg_data.get("networks", {}).get(chain_name.lower(), {}).get("contracts", {}).get("MineralTradeEscrow", {}).get("address")
+                except Exception:
+                    pass
+
+            if not target_contract:
+                target_contract = os.getenv(
+                    "MINERAL_TRADE_ESCROW_ADDRESS",
+                    "0x7a34e0C17E3F1c7283B4645229C8B72fF8f161c9"
+                )
 
             amount_usdc_units = int(round(spec.total_deal_value_usd * 1_000_000))
             deal_id_bytes = Web3.keccak(text=deal_id)
