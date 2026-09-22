@@ -27,6 +27,7 @@ from typing import Dict, Any, Optional, Tuple, List
 
 from eth_account import Account
 from eth_account.messages import encode_defunct
+from web3 import Web3
 
 from app.schemas import (
     TradeDealSpec,
@@ -100,6 +101,13 @@ class A2ATradeDealEngine:
 
             with open(self._storage_path, "w", encoding="utf-8") as f:
                 json.dump(serialized, f, indent=2)
+
+            try:
+                from app.distributed_store import distributed_store
+                for deal_id, d_rec in serialized.items():
+                    distributed_store.set_json(f"a2a_deal:{deal_id}", d_rec)
+            except Exception:
+                pass
         except Exception:
             pass
 
@@ -269,6 +277,23 @@ class A2ATradeDealEngine:
             self._deals[req.spec.deal_id] = record
             self._save_to_disk()
 
+            try:
+                from app.webhook_manager import webhook_manager
+                webhook_manager.dispatch_event(
+                    event_type="deal.proposed",
+                    target_agent_address=spec.buyer_agent_address,
+                    data={
+                        "deal_id": req.spec.deal_id,
+                        "deal_hash": deal_hash,
+                        "commodity": spec.commodity.value if hasattr(spec.commodity, "value") else str(spec.commodity),
+                        "total_deal_value_usd": spec.total_deal_value_usd,
+                        "seller_agent_address": spec.seller_agent_address,
+                        "buyer_agent_address": spec.buyer_agent_address,
+                    },
+                )
+            except Exception:
+                pass
+
             return TradeDealAttestation(
                 deal_id=req.spec.deal_id,
                 status="PROPOSED",
@@ -332,6 +357,24 @@ class A2ATradeDealEngine:
             record["verified_at_utc"] = now_str
             self._save_to_disk()
 
+            try:
+                from app.webhook_manager import webhook_manager
+                for target_addr in (spec.seller_agent_address, req.buyer_agent_address):
+                    webhook_manager.dispatch_event(
+                        event_type="deal.dual_signed",
+                        target_agent_address=target_addr,
+                        data={
+                            "deal_id": req.deal_id,
+                            "deal_hash": record["deal_hash"],
+                            "final_contract_hash": final_contract_hash,
+                            "status": "DUAL_SIGNED_CONFIRMED",
+                            "seller_agent_address": spec.seller_agent_address,
+                            "buyer_agent_address": spec.buyer_agent_address,
+                        },
+                    )
+            except Exception:
+                pass
+
             return TradeDealAttestation(
                 deal_id=req.deal_id,
                 status="DUAL_SIGNED_CONFIRMED",
@@ -379,6 +422,21 @@ class A2ATradeDealEngine:
             record["verified_at_utc"] = now_str
             record["audit_notes"] = f"REJECTED_BY_BUYER: {req.rejection_reason}"
             self._save_to_disk()
+
+            try:
+                from app.webhook_manager import webhook_manager
+                webhook_manager.dispatch_event(
+                    event_type="deal.rejected",
+                    target_agent_address=spec.seller_agent_address,
+                    data={
+                        "deal_id": req.deal_id,
+                        "status": "REJECTED",
+                        "buyer_agent_address": req.buyer_agent_address,
+                        "rejection_reason": req.rejection_reason,
+                    },
+                )
+            except Exception:
+                pass
 
             return TradeDealAttestation(
                 deal_id=req.deal_id,
@@ -428,6 +486,21 @@ class A2ATradeDealEngine:
             record["verified_at_utc"] = now_str
             record["audit_notes"] = f"CANCELLED_BY_SELLER: {req.cancellation_reason}"
             self._save_to_disk()
+
+            try:
+                from app.webhook_manager import webhook_manager
+                webhook_manager.dispatch_event(
+                    event_type="deal.cancelled",
+                    target_agent_address=spec.buyer_agent_address,
+                    data={
+                        "deal_id": req.deal_id,
+                        "status": "CANCELLED",
+                        "seller_agent_address": req.seller_agent_address,
+                        "cancellation_reason": req.cancellation_reason,
+                    },
+                )
+            except Exception:
+                pass
 
             return TradeDealAttestation(
                 deal_id=req.deal_id,
@@ -488,6 +561,7 @@ class A2ATradeDealEngine:
                 oracle_verified=oracle_ok,
                 deal_hash=record["deal_hash"],
                 final_contract_hash=record.get("final_contract_hash"),
+                onchain_tx_hash=record.get("onchain_tx_hash"),
                 compliance_audit_summary=summary,
             )
 
@@ -495,6 +569,12 @@ class A2ATradeDealEngine:
         """Retrieves deal record if registered."""
         with self._lock:
             rec = self._deals.get(deal_id)
+            if not rec:
+                try:
+                    from app.distributed_store import distributed_store
+                    rec = distributed_store.get_json(f"a2a_deal:{deal_id}")
+                except Exception:
+                    pass
             if not rec:
                 return None
             copy_rec = dict(rec)
@@ -528,6 +608,77 @@ class A2ATradeDealEngine:
 
             return matched
 
+    def build_escrow_deposit_calldata(
+        self,
+        deal_id: str,
+        escrow_contract_address: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Generates smart contract execution payload for buyer AI agent to lock funds in MineralTradeEscrow.sol.
+        Requires the deal to be in DUAL_SIGNED_CONFIRMED status.
+        """
+        with self._lock:
+            record = self._deals.get(deal_id)
+            if not record:
+                raise DealNotFoundError(f"Trade deal '{deal_id}' not found.")
+            if record["status"] != "DUAL_SIGNED_CONFIRMED":
+                raise InvalidDealStateError(
+                    f"Deal '{deal_id}' is in status '{record['status']}', expected 'DUAL_SIGNED_CONFIRMED'."
+                )
+
+            spec: TradeDealSpec = record["spec"] if isinstance(record["spec"], TradeDealSpec) else TradeDealSpec(**record["spec"])
+
+            target_contract = escrow_contract_address or os.getenv(
+                "MINERAL_TRADE_ESCROW_ADDRESS",
+                "0xb44Bc2Acdd156cE08b549A00a3102e4B01276654"
+            )
+
+            amount_usdc_units = int(round(spec.total_deal_value_usd * 1_000_000))
+            deal_id_bytes = Web3.keccak(text=deal_id)
+
+            ebl_ref = getattr(spec, "ebl_document_id", None) or getattr(spec, "ebl_hash", "EBL_DEFAULT")
+            if isinstance(ebl_ref, str) and ebl_ref.startswith("0x") and len(ebl_ref) == 66:
+                ebl_hash_bytes = bytes.fromhex(ebl_ref[2:])
+            else:
+                ebl_hash_bytes = Web3.keccak(text=str(ebl_ref))
+
+            duration_seconds = 14 * 86400
+            if spec.expires_at_utc:
+                try:
+                    expires_dt = datetime.fromisoformat(spec.expires_at_utc.replace("Z", "+00:00"))
+                    diff = int((expires_dt - datetime.now(timezone.utc)).total_seconds())
+                    if diff >= 60:
+                        duration_seconds = diff
+                except Exception:
+                    pass
+
+            selector = Web3.keccak(text="createEscrow(bytes32,address,uint256,bytes32,uint256)")[:4]
+            seller_address = Web3.to_checksum_address(spec.seller_agent_address)
+            buyer_address = Web3.to_checksum_address(spec.buyer_agent_address)
+
+            from eth_abi import encode
+            encoded_params = encode(
+                ["bytes32", "address", "uint256", "bytes32", "uint256"],
+                [deal_id_bytes, seller_address, amount_usdc_units, ebl_hash_bytes, duration_seconds]
+            )
+            calldata = "0x" + (selector + encoded_params).hex()
+
+            return {
+                "deal_id": deal_id,
+                "escrow_contract_address": Web3.to_checksum_address(target_contract),
+                "required_usdc_amount": spec.total_deal_value_usd,
+                "required_usdc_units": amount_usdc_units,
+                "seller_agent_address": seller_address,
+                "buyer_agent_address": buyer_address,
+                "deal_id_bytes32": "0x" + deal_id_bytes.hex(),
+                "ebl_hash_bytes32": "0x" + ebl_hash_bytes.hex(),
+                "duration_seconds": duration_seconds,
+                "function_signature": "createEscrow(bytes32,address,uint256,bytes32,uint256)",
+                "calldata": calldata,
+                "next_action": "Buyer agent must approve USDC allowance to escrow_contract_address, then broadcast calldata to target contract.",
+            }
+
 
 def get_a2a_deal_engine() -> A2ATradeDealEngine:
     return A2ATradeDealEngine()
+

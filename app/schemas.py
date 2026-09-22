@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from enum import Enum
 from typing import Dict, List, Optional, Any, Tuple
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 # =====================================================================
@@ -1130,6 +1130,16 @@ class TradeDealProposeRequest(BaseModel):
     spec: TradeDealSpec = Field(..., description="Canonical trade deal terms")
     seller_signature: str = Field(..., description="Seller agent cryptographic signature over EIP-712 deal hash")
 
+    @model_validator(mode="before")
+    @classmethod
+    def check_spec_packaging(cls, data: Any) -> Any:
+        if isinstance(data, dict) and "spec" not in data:
+            data_copy = dict(data)
+            seller_sig = data_copy.pop("seller_signature", None)
+            if seller_sig is not None:
+                return {"spec": data_copy, "seller_signature": seller_sig}
+        return data
+
 
 class TradeDealDualSignRequest(BaseModel):
     deal_id: str = Field(..., description="Deal ID to countersign")
@@ -1160,6 +1170,7 @@ class TradeDealAttestation(BaseModel):
     buyer_signature: Optional[str] = None
     oracle_attestation_signature: Optional[str] = None
     final_contract_hash: Optional[str] = None
+    onchain_tx_hash: Optional[str] = Field(default=None, description="Polygon transaction hash if anchored by gasless relayer")
     verified_at_utc: str
     audit_notes: Optional[str] = None
 
@@ -1178,6 +1189,7 @@ class TradeDealVerifyResponse(BaseModel):
     oracle_verified: bool
     deal_hash: str
     final_contract_hash: Optional[str]
+    onchain_tx_hash: Optional[str] = Field(default=None, description="Polygon transaction hash if anchored by gasless relayer")
     compliance_audit_summary: str
 
 

@@ -114,6 +114,11 @@ class AgentSessionVault:
 
             self._sessions[session_token] = record
             self._save_to_disk()
+            try:
+                from app.distributed_store import distributed_store
+                distributed_store.set_json(f"agent_session:{session_token}", record)
+            except Exception:
+                pass
 
             return AgentSessionResponse(
                 status="success",
@@ -137,6 +142,14 @@ class AgentSessionVault:
 
         with self._lock:
             session = self._sessions.get(session_token)
+            if not session:
+                try:
+                    from app.distributed_store import distributed_store
+                    session = distributed_store.get_json(f"agent_session:{session_token}")
+                    if session:
+                        self._sessions[session_token] = session
+                except Exception:
+                    pass
 
             if not session:
                 raise InvalidSessionTokenError(f"Session token '{session_token}' not found.")
@@ -161,6 +174,11 @@ class AgentSessionVault:
             session["current_balance_usdc"] = round(session["current_balance_usdc"] - cost, 4)
             session["queries_executed"] += 1
             self._save_to_disk()
+            try:
+                from app.distributed_store import distributed_store
+                distributed_store.set_json(f"agent_session:{session_token}", session)
+            except Exception:
+                pass
 
             return session["current_balance_usdc"], session["queries_executed"]
 
@@ -199,6 +217,11 @@ class AgentSessionVault:
             receipt_hash = "0x" + hashlib.sha256(raw_receipt.encode("utf-8")).hexdigest()
             session["receipt_hash"] = receipt_hash
             self._save_to_disk()
+            try:
+                from app.distributed_store import distributed_store
+                distributed_store.set_json(f"agent_session:{req.session_token}", session)
+            except Exception:
+                pass
 
             return AgentSessionCloseResponse(
                 status="success",
@@ -215,6 +238,14 @@ class AgentSessionVault:
         """Retrieves session metadata if exists (thread-safe)."""
         with self._lock:
             session = self._sessions.get(session_token)
+            if not session:
+                try:
+                    from app.distributed_store import distributed_store
+                    session = distributed_store.get_json(f"agent_session:{session_token}")
+                    if session:
+                        self._sessions[session_token] = session
+                except Exception:
+                    pass
             if not session:
                 return None
             return dict(session)

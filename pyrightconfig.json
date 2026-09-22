@@ -3,15 +3,15 @@
     "app",
     "tests",
     "main.py",
-    "mcp_server.py",
-    "run_arbitrage_agent.py"
+    "mcp_server.py"
   ],
   "venvPath": ".",
   "venv": ".venv",
   "extraPaths": [
     ".",
     "c:\\Users\\nohos\\OneDrive\\바탕 화면\\minerals-oracle-x402",
-    "c:\\Users\\nohos\\OneDrive\\바탕 화면\\minerals-oracle-x402\\.venv\\Lib\\site-packages"
+    "c:\\Users\\nohos\\OneDrive\\바탕 화면\\minerals-oracle-x402\\.venv\\Lib\\site-packages",
+    "c:\\Users\\nohos\\OneDrive\\바탕 화면\\minerals-oracle-x402\\.venv312\\Lib\\site-packages"
   ],
   "executionEnvironments": [
     {
@@ -19,7 +19,8 @@
       "extraPaths": [
         ".",
         "c:\\Users\\nohos\\OneDrive\\바탕 화면\\minerals-oracle-x402",
-        "c:\\Users\\nohos\\OneDrive\\바탕 화면\\minerals-oracle-x402\\.venv\\Lib\\site-packages"
+        "c:\\Users\\nohos\\OneDrive\\바탕 화면\\minerals-oracle-x402\\.venv\\Lib\\site-packages",
+        "c:\\Users\\nohos\\OneDrive\\바탕 화면\\minerals-oracle-x402\\.venv312\\Lib\\site-packages"
       ]
     }
   ]

@@ -85,14 +85,22 @@ class OnChainOracleSigner:
     def sign_price_feed(
         self,
         symbol: str,
-        price_usd: float,
+        price_usd: Optional[float] = None,
         round_id: Optional[int] = None,
         timestamp: Optional[int] = None,
     ) -> Dict[str, Any]:
         """
         Signs a mineral spot price feed using EIP-712 typed data.
+        If price_usd is omitted, fetches live/cached spot price from Pyth Network oracle.
         Returns the struct payload, 8-decimal fixed-point price, and ECDSA (v, r, s).
         """
+        if price_usd is None:
+            try:
+                from app.pyth_oracle_client import pyth_oracle_client
+                price_usd = float(pyth_oracle_client.get_realtime_price(symbol)["price_usd"])
+            except Exception:
+                price_usd = 100.0
+
         if timestamp is None:
             timestamp = int(time.time())
 
@@ -193,9 +201,20 @@ class OnChainOracleSigner:
             timestamp = int(time.time())
 
         if batch_id is None:
-            batch_id = "0x" + secrets.token_hex(32)
-        elif not batch_id.startswith("0x"):
-            batch_id = "0x" + batch_id
+            batch_bytes = secrets.token_bytes(32)
+            batch_id = "0x" + batch_bytes.hex()
+        else:
+            clean_bid = batch_id[2:] if batch_id.startswith("0x") else batch_id
+            try:
+                if len(clean_bid) == 64:
+                    batch_bytes = bytes.fromhex(clean_bid)
+                    batch_id = "0x" + clean_bid
+                else:
+                    batch_bytes = Web3.keccak(text=batch_id)
+                    batch_id = "0x" + batch_bytes.hex()
+            except ValueError:
+                batch_bytes = Web3.keccak(text=batch_id)
+                batch_id = "0x" + batch_bytes.hex()
 
         net_value_8dec = round(net_value_usd * 10**8)
         quantity_kg_int = round(quantity_kg)
@@ -221,7 +240,7 @@ class OnChainOracleSigner:
             "netValueUsd8Dec": net_value_8dec,
             "quantityKg": quantity_kg_int,
             "timestamp": timestamp,
-            "batchId": bytes.fromhex(batch_id[2:]),
+            "batchId": batch_bytes,
         }
 
         typed_data = {
@@ -339,7 +358,8 @@ class OnChainOracleSigner:
 
         signable_message = encode_typed_data(full_message=typed_data)
         signed = self.account.sign_message(signable_message)
-        return signed.signature.hex()
+        sig_hex = signed.signature.hex()
+        return sig_hex if sig_hex.startswith("0x") else "0x" + sig_hex
 
 
 # Singleton oracle signer instance

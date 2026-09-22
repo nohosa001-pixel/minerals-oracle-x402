@@ -48,6 +48,7 @@ We’d love your brutal feedback on the architecture, the EIP-712 liability bind
 ## 2. Twitter / X & Farcaster Launch Thread
 
 **Post 1 (Hook)**:
+
 ```text
 ⚡ Introducing Minerals Oracle x402: The first 100% Autonomous M2M Battery Supply-Chain & Critical Raw Materials Compliance Oracle.
 
@@ -59,6 +60,7 @@ Zero human fiat. HTTP 402 micro-USDC. EIP-712 certified.
 ```
 
 **Post 2 (The Problem)**:
+
 ```text
 The $500B battery minerals supply chain is paralyzed by regulatory traps:
 ❌ US IRA FEOC taint (25% Chinese board seats)
@@ -70,6 +72,7 @@ AI agents cannot wait 3 weeks for human audits.
 ```
 
 **Post 3 (The Solution)**:
+
 ```text
 Minerals Oracle turns global trade jurisprudence into mathematical rules:
 ⚡ 7-Pillar Provenance
@@ -79,6 +82,7 @@ Minerals Oracle turns global trade jurisprudence into mathematical rules:
 ```
 
 **Post 4 (Agent Native & Multi-Chain)**:
+
 ```text
 Verified Smart Contracts:
 🟣 Polygon: 0x835d01534a5D2e63D52636Fafb1019f889d1E66B
@@ -89,6 +93,7 @@ Verified Smart Contracts:
 ```
 
 **Post 5 (Links & CTA)**:
+
 ```text
 Live 24/7 on Google Cloud Run:
 🖥️ Agent Terminal: https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/dashboard

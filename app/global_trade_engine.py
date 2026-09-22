@@ -422,10 +422,11 @@ class GlobalTradeEngine:
         return results
 
     def get_hs_tariff(
-        self, mineral_type: MineralType, importer_jurisdiction: str
+        self, mineral_type: Any, importer_jurisdiction: str
     ) -> Optional[HSCodeTariffInfo]:
         """Resolves HS Code, MFN/FTA rates, and trade defenses."""
-        key = (mineral_type.value, importer_jurisdiction.strip().upper())
+        m_val = mineral_type.value if hasattr(mineral_type, "value") else str(mineral_type)
+        key = (m_val, importer_jurisdiction.strip().upper())
         if key in self._tariffs:
             return self._tariffs[key]
 
@@ -565,8 +566,9 @@ class GlobalTradeEngine:
         port_pair_valid = pol_valid and pod_valid and (req.port_of_loading_code != req.port_of_discharge_code)
 
         # 3. Hash integrity & Anti-Tamper check
+        m_val = req.mineral_type.value if hasattr(req.mineral_type, "value") else str(req.mineral_type)
         manifest_payload = (
-            f"{req.ebl_document_id}|{req.carrier_imo_number}|{req.mineral_type.value}|"
+            f"{req.ebl_document_id}|{req.carrier_imo_number}|{m_val}|"
             f"{req.gross_weight_metric_tons:.2f}|{req.port_of_loading_code}|{req.port_of_discharge_code}"
         )
         expected_digest = hashlib.sha256(manifest_payload.encode()).hexdigest()
@@ -657,7 +659,15 @@ class GlobalTradeEngine:
             MineralType.NICKEL_COBALT_BLACK_MASS: 11500.0, # Recycled Ni/Co black mass
             MineralType.TUNGSTEN_SCRAP: 32000.0,           # Tungsten carbide / metal scrap
         }
-        val_per_mt = base_value_map.get(req.mineral_type, 15000.0)
+        val_per_mt = base_value_map.get(req.mineral_type)
+        if val_per_mt is None:
+            m_type_val = req.mineral_type.value if hasattr(req.mineral_type, "value") else str(req.mineral_type)
+            for k, v in base_value_map.items():
+                if k.value == m_type_val or k.name == m_type_val or str(k) == str(req.mineral_type):
+                    val_per_mt = v
+                    break
+        if val_per_mt is None:
+            val_per_mt = 15000.0
 
         # Landed cost direct
         tariff_cost_per_mt = val_per_mt * ((tariff_duty_pct + sec_301_pct) / 100.0)
@@ -750,7 +760,7 @@ class GlobalTradeEngine:
                 bottlenecks=[],
                 recommended_action="Optimal landed cost and clean corridor. Proceed to A2A bilateral settlement.",
                 projected_cost_delta_usd=savings_vs_detour,
-                actionable_command="propose_a2a_trade_deal"
+                actionable_command="propose_a2a_trade_deal()"
             )
 
         return TradeRouteOptimizationResponse(
@@ -769,6 +779,60 @@ class GlobalTradeEngine:
             agent_decision=decision,
             evaluated_at_utc=now_utc,
         )
+
+    def calculate_cbam_liability(
+        self,
+        mineral_type: MineralType,
+        cargo_weight_metric_tons: float,
+        importer_jurisdiction: str = "EU",
+        embedded_carbon_intensity_tco2_per_ton: Optional[float] = None,
+        live_carbon_price_usd: Optional[float] = None,
+    ) -> Dict[str, Any]:
+        """
+        Calculates EU CBAM (Carbon Border Adjustment Mechanism) Scope 1/2 liability
+        using real-time EU ETS carbon price or statutory default.
+        """
+        from app.pyth_oracle_client import pyth_oracle_client
+
+        import math
+        # Defensive sanitization against negative, NaN, or inf inputs
+        clean_weight = max(0.0, float(cargo_weight_metric_tons)) if (cargo_weight_metric_tons is not None and math.isfinite(cargo_weight_metric_tons)) else 0.0
+
+        if live_carbon_price_usd is None or live_carbon_price_usd <= 0 or not math.isfinite(live_carbon_price_usd):
+            carbon_oracle_data = pyth_oracle_client.get_realtime_price("CARBON")
+            live_carbon_price_usd = float(carbon_oracle_data.get("price_usd", 78.50))
+            if live_carbon_price_usd <= 0 or not math.isfinite(live_carbon_price_usd):
+                live_carbon_price_usd = 78.50
+
+        # Default sector intensity if not provided (tCO2e per MT of product)
+        default_intensity_map = {
+            MineralType.LITHIUM_HYDROXIDE: 15.2,
+            MineralType.LITHIUM_CARBONATE: 16.8,
+            MineralType.NICKEL_MHP: 18.5,
+            MineralType.COPPER_CATHODE: 3.8,
+            MineralType.COBALT_HYDROXIDE: 8.2,
+            MineralType.NATURAL_GRAPHITE: 2.1,
+            MineralType.SYNTHETIC_GRAPHITE: 4.9,
+        }
+        raw_intensity = embedded_carbon_intensity_tco2_per_ton if embedded_carbon_intensity_tco2_per_ton is not None else default_intensity_map.get(mineral_type, 5.0)
+        intensity = max(0.0, float(raw_intensity)) if (raw_intensity is not None and math.isfinite(raw_intensity)) else 5.0
+
+        total_embedded_co2_tons = round(intensity * clean_weight, 2)
+        total_cbam_liability_usd = round(total_embedded_co2_tons * live_carbon_price_usd, 2)
+        cbam_per_ton_usd = round(intensity * live_carbon_price_usd, 2)
+
+        return {
+            "mineral_type": mineral_type.value if hasattr(mineral_type, "value") else str(mineral_type),
+            "cargo_weight_metric_tons": cargo_weight_metric_tons,
+            "importer_jurisdiction": importer_jurisdiction.upper(),
+            "embedded_carbon_intensity": intensity,
+            "total_embedded_co2_metric_tons": total_embedded_co2_tons,
+            "live_eu_ets_carbon_price_usd": live_carbon_price_usd,
+            "total_cbam_liability_usd": total_cbam_liability_usd,
+            "cbam_surcharge_per_metric_ton_usd": cbam_per_ton_usd,
+            "cbam_status": "LIABILITY_CALCULATED" if importer_jurisdiction.upper() in ("EU", "EUROPE") else "EXEMPT_NON_EU",
+            "evaluated_at_utc": datetime.now(timezone.utc).isoformat(),
+        }
 
 
 # Global singleton instance

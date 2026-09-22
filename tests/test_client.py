@@ -240,6 +240,22 @@ def test_free_alpha_signals_and_economics():
     assert agent_manifest["schema_version"] == "v1"
     assert agent_manifest["auth"]["amount_usdc"] == 0.005
 
+    # 5. A2A Manifest & Skills Discovery
+    resp_a2a = client.get("/.well-known/a2a.json")
+    assert resp_a2a.status_code == 200
+    a2a_data = resp_a2a.json()
+    assert a2a_data["agent_name"] == "minerals-oracle-x402"
+    assert "skills" in a2a_data
+
+    resp_skills = client.get("/.well-known/agent-skills.json")
+    assert resp_skills.status_code == 200
+    assert resp_skills.json()["protocol_version"] == "1.0.0"
+
+    # 6. Real-time Oracle Stream (SSE)
+    resp_stream = client.get("/api/v1/oracle/stream")
+    assert resp_stream.status_code == 200
+    assert "text/event-stream" in resp_stream.headers.get("content-type", "")
+
 
 def test_mcp_stdio_jsonrpc_protocol():
     """Verify MCP stdio protocol handlers: initialize, ping, tools/list, tools/call."""

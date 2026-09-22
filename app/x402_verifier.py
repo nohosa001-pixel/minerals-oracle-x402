@@ -61,6 +61,7 @@ TIER_PRICING: Dict[PricingTier, Dict[str, Any]] = {
 
 # In-memory nonces with TTL
 _ACTIVE_NONCES: Dict[str, float] = {}
+_NONCE_LOCK = threading.Lock()
 NONCE_TTL_SECONDS = 300  # 5 minutes
 
 # Free Tier Sandbox Quota (IP-based, allows 2 free trial queries before requiring x402)
@@ -121,7 +122,8 @@ class X402Verifier:
         self._cleanup_expired_nonces()
         nonce = secrets.token_hex(16)
         expiry_ts = time.time() + NONCE_TTL_SECONDS
-        _ACTIVE_NONCES[nonce] = expiry_ts
+        with _NONCE_LOCK:
+            _ACTIVE_NONCES[nonce] = expiry_ts
         expires_at_iso = datetime.fromtimestamp(expiry_ts, tz=timezone.utc).isoformat()
 
         cost_str, units_str, _ = self.get_tier_cost(tier)
@@ -264,7 +266,13 @@ class X402Verifier:
         Verify payment authorization headers across Polygon, Base, Arbitrum, or Pre-funded Vault.
         """
         # Determine requested settlement chain (default to Polygon if omitted)
-        req_chain = request.headers.get("X-Payment-Chain") or request.headers.get("X-Chain-ID") or "polygon"
+        req_chain = (
+            request.headers.get("X-Payment-Chain")
+            or request.headers.get("X-402-Chain")
+            or request.headers.get("X-Chain-ID")
+            or request.query_params.get("chain")
+            or "polygon"
+        )
         chain_cfg = get_chain_config(req_chain)
 
         extra_headers: Dict[str, str] = {
@@ -298,11 +306,54 @@ class X402Verifier:
                 })
                 return True, f"enterprise-{ent_record.organization_name}", extra_headers
 
+        auth_hdr = request.headers.get("Authorization", "")
+
+        # 2.5. Check High-Speed Agent Session Vault (Sub-millisecond Micro-Settlement)
+        session_token = (
+            request.headers.get("X-Agent-Session-Token")
+            or request.headers.get("X-Session-Token")
+            or request.headers.get("X-Agent-Session")
+            or request.query_params.get("session_token")
+            or request.query_params.get("sessionToken")
+            or request.query_params.get("session_id")
+        )
+        if auth_hdr.startswith("Bearer asess_") or auth_hdr.startswith("asess_"):
+            session_token = auth_hdr.replace("Bearer ", "").strip()
+
+        if session_token:
+            from app.agent_session_vault import (
+                get_agent_session_vault,
+                InvalidSessionTokenError,
+                InsufficientSessionBalanceError,
+            )
+            try:
+                asess_vault = get_agent_session_vault()
+                rem_bal, q_count = asess_vault.debit_query(session_token, cost_usdc=float_cost)
+                sess_info = asess_vault.get_session_info(session_token) or {}
+                agent_addr_str = sess_info.get("agent_address", "0xAutonomousAgent")
+                receipt = self.issue_payment_receipt(agent_addr_str, tier, chain_cfg.chain_name, payload_digest)
+                extra_headers.update({
+                    "X-Payment-Method": "Agent-Session-Vault",
+                    "X-Session-Token": session_token,
+                    "X-Session-Remaining-Balance": f"${rem_bal:.4f} USDC",
+                    "X-Session-Query-Count": str(q_count),
+                    "X-Receipt-ID": receipt.receipt_id,
+                })
+                return True, agent_addr_str, extra_headers
+            except InsufficientSessionBalanceError as e:
+                return False, f"Insufficient session balance: {str(e)}", None
+            except InvalidSessionTokenError as e:
+                return False, f"Invalid or expired agent session token: {str(e)}", None
+
         # 3. Check Pre-funded Agent Vault Key (Zero-Latency Fast Path)
-        vault_key = request.headers.get("X-Agent-Vault-Key") or request.headers.get("X-Vault-Key")
+        vault_key = (
+            request.headers.get("X-Agent-Vault-Key")
+            or request.headers.get("X-Vault-Key")
+            or request.query_params.get("vault_key")
+            or request.query_params.get("vaultKey")
+        )
         agent_addr = request.headers.get("X-Agent-Address")
 
-        auth_hdr = request.headers.get("Authorization", "")
         if auth_hdr.startswith("Bearer vault_key_"):
             vault_key = auth_hdr[7:].strip()
 
@@ -391,6 +442,17 @@ class X402Verifier:
         if is_valid:
             receipt = self.issue_payment_receipt(payer or "0xVerifiedAgent", tier, chain_cfg.chain_name, payload_digest)
             extra_headers["X-Receipt-ID"] = receipt.receipt_id
+            try:
+                from app.agrid_ops_client import dispatch_clearing_event_background
+                dispatch_clearing_event_background(
+                    operation=f"oracle_query_{tier.value}",
+                    amount_usdc=receipt.amount_paid_usdc,
+                    caller_agent_id=payer or "0xVerifiedAgent",
+                    chain=chain_cfg.chain_name,
+                    tx_hash=payload_data.get("tx_hash"),
+                )
+            except Exception:
+                pass
             return True, payer, extra_headers
 
         return False, payer or "Payment verification failed", None
@@ -442,7 +504,8 @@ class X402Verifier:
                     if signer and signer.lower() != recovered_signer.lower():
                         continue
                     
-                    _ACTIVE_NONCES.pop(nonce, None)
+                    with _NONCE_LOCK:
+                        _ACTIVE_NONCES.pop(nonce, None)
                     return True, recovered_signer
                 except Exception:
                     continue
@@ -471,7 +534,8 @@ class X402Verifier:
         tx_lower = clean_tx.lower()
 
         # 1. Anti-Replay Protection
-        if tx_lower in _REDEEMED_TX_HASHES:
+        from app.distributed_store import distributed_store
+        if distributed_store.is_hash_redeemed(tx_lower) or tx_lower in _REDEEMED_TX_HASHES:
             return False, f"Replay attack blocked: Transaction {clean_tx[:12]}... has already been redeemed"
 
         # 2. Automated Testing / Sandbox Bypass Guarantee
@@ -485,6 +549,7 @@ class X402Verifier:
             or clean_tx == "0xTEST_VALID_HASH_2026"
         )
         if is_test_env:
+            distributed_store.mark_hash_redeemed(tx_lower)
             _REDEEMED_TX_HASHES[tx_lower] = time.time()
             _save_redeemed_txs()
             return True, f"tx:{clean_tx}:{chain_name}:0xMockAuthorizedAgent"
@@ -551,22 +616,25 @@ class X402Verifier:
         if not found_valid_transfer:
             return False, f"No matching USDC transfer (>= {required_amount_usdc} USDC) to treasury {self.recipient_wallet} found in tx {clean_tx[:12]}..."
 
-        # Mark redeemed to prevent duplicate use
+        # Mark redeemed to prevent duplicate use across memory, disk, and distributed cluster
+        distributed_store.mark_hash_redeemed(tx_lower)
         _REDEEMED_TX_HASHES[tx_lower] = time.time()
         _save_redeemed_txs()
         return True, f"tx:{clean_tx}:{chain_name}:{payer_address}"
 
     def _is_valid_nonce(self, nonce: str) -> bool:
-        expiry = _ACTIVE_NONCES.get(nonce)
+        with _NONCE_LOCK:
+            expiry = _ACTIVE_NONCES.get(nonce)
         if not expiry:
             return False
         return time.time() <= expiry
 
     def _cleanup_expired_nonces(self):
         now = time.time()
-        expired = [k for k, exp in _ACTIVE_NONCES.items() if now > exp]
-        for k in expired:
-            _ACTIVE_NONCES.pop(k, None)
+        with _NONCE_LOCK:
+            expired = [k for k, exp in list(_ACTIVE_NONCES.items()) if now > exp]
+            for k in expired:
+                _ACTIVE_NONCES.pop(k, None)
 
 
 # Singleton verifier instance

@@ -1218,6 +1218,62 @@ def handle_tool_call(req_id: Any, name: str, arguments: Dict[str, Any]) -> Dict[
         }
 
 
+def process_mcp_request(req: Any) -> Optional[Any]:
+    """Processes a JSON-RPC 2.0 MCP request and returns the response dictionary or list."""
+    if isinstance(req, list):
+        batch_resps = []
+        for item in req:
+            if isinstance(item, dict):
+                r = process_mcp_request(item)
+                if r is not None:
+                    batch_resps.append(r)
+        return batch_resps if batch_resps else None
+
+    if not isinstance(req, dict):
+        return {
+            "jsonrpc": "2.0",
+            "id": None,
+            "error": {
+                "code": -32600,
+                "message": "Invalid Request: expected JSON object or batch array"
+            }
+        }
+
+    method = req.get("method")
+    req_id = req.get("id")
+
+    if method == "initialize":
+        return handle_initialize(req_id)
+    elif method == "ping":
+        return {
+            "jsonrpc": "2.0",
+            "id": req_id,
+            "result": {}
+        }
+    elif method == "tools/list":
+        return handle_tools_list(req_id)
+    elif method == "tools/call":
+        params = req.get("params") or {}
+        if not isinstance(params, dict):
+            params = {}
+        tool_name = str(params.get("name") or "")
+        tool_args = params.get("arguments") or {}
+        if not isinstance(tool_args, dict):
+            tool_args = {}
+        return handle_tool_call(req_id, tool_name, tool_args)
+    elif method in ("notifications/initialized", "notifications/cancelled"):
+        return None
+    else:
+        return {
+            "jsonrpc": "2.0",
+            "id": req_id,
+            "error": {
+                "code": -32601,
+                "message": f"Unhandled MCP method: {method}"
+            }
+        }
+
+
 def run_stdio_server():
     for line in sys.stdin:
         line = line.strip()
@@ -1225,37 +1281,10 @@ def run_stdio_server():
             continue
         try:
             req = json.loads(line)
-            method = req.get("method")
-            req_id = req.get("id")
-
-            if method == "initialize":
-                resp = handle_initialize(req_id)
-            elif method == "ping":
-                resp = {
-                    "jsonrpc": "2.0",
-                    "id": req_id,
-                    "result": {}
-                }
-            elif method == "tools/list":
-                resp = handle_tools_list(req_id)
-            elif method == "tools/call":
-                params = req.get("params", {})
-                tool_name = params.get("name")
-                tool_args = params.get("arguments", {})
-                resp = handle_tool_call(req_id, tool_name, tool_args)
-            elif method == "notifications/initialized":
-                continue
-            else:
-                resp = {
-                    "jsonrpc": "2.0",
-                    "id": req_id,
-                    "error": {
-                        "code": -32601,
-                        "message": f"Unhandled MCP method: {method}"
-                    }
-                }
-            sys.stdout.write(json.dumps(resp) + "\n")
-            sys.stdout.flush()
+            resp = process_mcp_request(req)
+            if resp is not None:
+                sys.stdout.write(json.dumps(resp, ensure_ascii=False) + "\n")
+                sys.stdout.flush()
         except Exception as e:
             err_resp = {
                 "jsonrpc": "2.0",
@@ -1265,8 +1294,9 @@ def run_stdio_server():
                     "message": f"Parse error: {str(e)}"
                 }
             }
-            sys.stdout.write(json.dumps(err_resp) + "\n")
+            sys.stdout.write(json.dumps(err_resp, ensure_ascii=False) + "\n")
             sys.stdout.flush()
+
 
 
 def main():

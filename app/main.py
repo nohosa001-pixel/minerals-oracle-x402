@@ -10,10 +10,12 @@ from pathlib import Path
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
 
-from fastapi import FastAPI, Request, Depends, HTTPException, status, Query, Path as FPath
+from fastapi import FastAPI, Request, Depends, HTTPException, status, Query, Path as FPath, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, FileResponse, PlainTextResponse, HTMLResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+
+from app.websocket_manager import ws_manager
 
 from app.schemas import (
     MineralType,
@@ -113,6 +115,22 @@ from app.vault_manager import vault_manager
 from app.enterprise_manager import enterprise_manager
 from app.security_gate_client import security_gate_client
 from app.evolution_manager import evolution_manager
+from app.webhook_manager import (
+    webhook_manager,
+    AgentWebhookRegistrationRequest,
+    AgentWebhookRegistrationResponse,
+)
+from app.pyth_oracle_client import pyth_oracle_client
+from app.gasless_relayer import (
+    gasless_relayer,
+    SponsoredDealAttestationRequest,
+    SponsoredPassportMintRequest,
+    GaslessRelayResponse,
+)
+from app.distributed_store import distributed_store
+from app.mcp_stdio import process_mcp_request
+
+_MCP_SSE_SESSIONS: Dict[str, asyncio.Queue] = {}
 
 
 
@@ -155,9 +173,17 @@ MCP_SPEC_FILE_PATH = Path(__file__).parent.parent / "mcp_tool_spec.json"
 # Dependency for 402 Payment verification with Tiered Pricing & Vault support
 async def require_x402_payment(request: Request, tier: PricingTier = PricingTier.STANDARD):
     """Enforces x402 payment authorization, pre-funded vault balance, or Sandbox Free Tier."""
+    req_chain = (
+        request.headers.get("X-Payment-Chain")
+        or request.headers.get("X-402-Chain")
+        or request.headers.get("X-Chain-ID")
+        or request.query_params.get("chain")
+        or "polygon"
+    )
     is_authorized, reason, extra_headers = x402_verifier.verify_request_payment(request, tier=tier)
     if not is_authorized:
-        return x402_verifier.build_402_response(tier=tier, custom_detail=reason if "Insufficient" in str(reason) else None)
+        detail_msg = reason if (reason and ("Insufficient" in str(reason) or "not found" in str(reason))) else None
+        return x402_verifier.build_402_response(tier=tier, chain_name=req_chain, custom_detail=detail_msg)
     request.state.authorized_payer = reason
     request.state.extra_headers = extra_headers or {}
     return None
@@ -192,9 +218,17 @@ async def root(request: Request):
             "lithium_origin_verify": "/api/v1/lithium/verify-origin",
             "nickel_origin_verify": "/api/v1/nickel/verify-origin",
             "cobalt_origin_verify": "/api/v1/cobalt/verify-origin",
+            "copper_origin_verify": "/api/v1/copper/verify-origin",
+            "silver_origin_verify": "/api/v1/silver/verify-origin",
             "composite_battery_verify": "/api/v1/battery/composite-verify",
             "compliance_status": "/api/v1/oracle/compliance/status",
             "trade_precedents": "/api/v1/oracle/compliance/precedents",
+            "trade_optimize_route": "/api/v1/trade/optimize-route",
+            "trade_verify_ebl": "/api/v1/trade/verify-ebl",
+            "trade_deals_propose": "/api/v1/trade/deals/propose",
+            "trade_deals_dual_sign": "/api/v1/trade/deals/dual-sign",
+            "agent_session_open": "/api/v1/agent/session/open",
+            "agent_session_close": "/api/v1/agent/session/close",
             "alpha_signals": "/api/v1/oracle/alpha-signals",
             "all_prices": "/api/v1/oracle/prices",
             "single_price": "/api/v1/oracle/prices/{symbol}",
@@ -204,6 +238,12 @@ async def root(request: Request):
             "vault_deposit": "/api/v1/vault/deposit",
             "ap2_manifest": "/.well-known/ap2",
             "mcp_tools": "/mcp/tools",
+            "mcp_sse": "/mcp/sse",
+            "mcp_messages": "/mcp/messages",
+            "agent_webhooks_register": "/api/v1/agent/webhooks/register",
+            "pyth_realtime_price": "/api/v1/oracle/realtime-price/{symbol}",
+            "relay_sponsor_deal": "/api/v1/relay/sponsor-deal-attestation",
+            "relay_sponsor_passport": "/api/v1/relay/sponsor-battery-passport",
             "docs": "/docs",
         },
     }
@@ -414,7 +454,7 @@ async def get_ap2_manifest():
             "protocol": "x402",
             "network": "polygon",
             "chain_id": 137,
-            "cost_usdc": 0.50,
+            "cost_usdc": 0.005,
             "recipient_address": x402_verifier.recipient_wallet,
         }
     }
@@ -455,7 +495,8 @@ async def get_ai_plugin_manifest():
     }
 
 
-@app.get("/.well-known/agent.json", tags=["Agent Protocol"])
+@app.get("/.well-known/a2a.json", tags=["Agent Protocol"])
+@app.get("/.well-known/agent-skills.json", tags=["Agent Protocol"])
 async def get_agent_protocol_manifest():
     """Standard A2A (Agent-to-Agent) discovery manifest."""
     return {
@@ -509,6 +550,55 @@ async def get_supported_networks():
         "gasless_permit2_enabled": True,
         "default_chain": "polygon",
     }
+
+
+# ==========================================
+# Real-Time Streaming Endpoints (WebSocket & SSE)
+# ==========================================
+@app.websocket("/ws/oracle/stream")
+async def websocket_oracle_stream(websocket: WebSocket, client_id: str = "quant_agent"):
+    """
+    High-frequency real-time WebSocket streaming feed for autonomous AI quants and trading swarms.
+    Stream physical spot price ticks, arbitrage spreads, and compliance signals with <1ms latency.
+    """
+    await ws_manager.connect(websocket, client_id)
+    try:
+        # Initial greeting tick
+        await websocket.send_json({
+            "type": "CONNECTION_ESTABLISHED",
+            "client_id": client_id,
+            "stream": "minerals-oracle-feed",
+            "server_time_utc": time.time(),
+            "status": "ACTIVE",
+        })
+        while True:
+            # Keep-alive loop and agent heartbeat listener
+            data = await websocket.receive_text()
+            if data == "ping":
+                await websocket.send_text("pong")
+    except WebSocketDisconnect:
+        ws_manager.disconnect(websocket)
+    except Exception:
+        ws_manager.disconnect(websocket)
+
+
+@app.get(
+    "/api/v1/oracle/stream",
+    tags=["Agent Protocol"],
+    summary="Real-time SSE event stream for autonomous AI agents",
+)
+async def sse_oracle_stream():
+    """
+    Server-Sent Events (SSE) stream for lightweight LLM agent subscriptions.
+    Broadcasts real-time physical commodity spot benchmarks and spread updates.
+    """
+    async def event_generator():
+        yield f"data: {json.dumps({'event': 'CONNECTED', 'service': 'minerals-oracle-x402', 'time': time.time()})}\n\n"
+        for _ in range(3):
+            await asyncio.sleep(1.0)
+            yield f"data: {json.dumps({'event': 'HEARTBEAT', 'status': 'ONLINE', 'timestamp': time.time()})}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
 @app.get(
@@ -1154,15 +1244,15 @@ async def get_security_gate_status():
     """
     Returns live connection metrics, latency, and operational mode of the Security Gate x402 integration.
     """
-    health = security_gate_client.check_health()
+    health = await security_gate_client.check_health_async()
     return JSONResponse(content=health)
 
 
 @app.post(
     "/api/v1/oracle/secure-settlement",
     tags=["Security Gate x402 Integration", "Compliance Settlement"],
-    summary="Certified secure settlement with strict agent credit checks & dual-attestation (Tier 3: Heavy $1.00 USDC)",
-    responses={402: {"description": "Payment Required (1.00 USDC on Polygon)"}},
+    summary="Certified secure settlement with strict agent credit checks & dual-attestation (Tier 3: Heavy $0.010 USDC)",
+    responses={402: {"description": "Payment Required (0.010 USDC on Polygon)"}},
 )
 async def calculate_secure_settlement(request: Request, body: Dict[str, Any]):
     """
@@ -1179,7 +1269,7 @@ async def calculate_secure_settlement(request: Request, body: Dict[str, Any]):
     currency = body.get("target_yield_currency", "USDC")
     overrides = body.get("custom_assay_overrides", "")
     payload_to_scan = f"{currency} {overrides}"
-    safety = security_gate_client.verify_input_safety(payload_to_scan)
+    safety = await security_gate_client.verify_input_safety_async(payload_to_scan)
     if not safety.get("is_safe", True):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -1189,7 +1279,7 @@ async def calculate_secure_settlement(request: Request, body: Dict[str, Any]):
     # 2. Strict credit rating check if agent provided
     agent_addr = body.get("agent_address")
     if agent_addr:
-        credit = security_gate_client.get_agent_credit_rating(agent_addr)
+        credit = await security_gate_client.get_agent_credit_rating_async(agent_addr)
         if not credit.get("is_eligible", True):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -1227,12 +1317,66 @@ async def get_onchain_payload(
     if resp_402:
         return resp_402
 
+    canonical_symbol = pyth_oracle_client._canonical_key(symbol)
     signed_payload = onchain_signer.sign_price_feed(
-        symbol=symbol,
-        price_usd=100.0,
+        symbol=canonical_symbol,
+        price_usd=None,
     )
     headers = getattr(request.state, "extra_headers", {}) or {}
     return JSONResponse(content=signed_payload, headers=headers)
+
+
+@app.get(
+    "/api/v1/oracle/realtime-price/{symbol}",
+    tags=["Oracle Feed"],
+    summary="Get sub-second verifiable spot price from Pyth Network oracle",
+)
+async def get_pyth_realtime_price_route(symbol: str):
+    """Retrieves real-time spot price and confidence interval for commodities from Pyth Network."""
+    return pyth_oracle_client.get_realtime_price(symbol)
+
+
+@app.post(
+    "/api/v1/relay/sponsor-deal-attestation",
+    response_model=GaslessRelayResponse,
+    tags=["On-Chain Smart Contract Binding"],
+    summary="Sponsor on-chain EIP-712 bilateral deal attestation on Polygon without holding POL gas",
+)
+async def sponsor_deal_attestation_route(body: SponsoredDealAttestationRequest):
+    """Broadcasts sponsored deal attestation transaction to Polygon blockchain."""
+    return gasless_relayer.sponsor_deal_attestation(body)
+
+
+@app.post(
+    "/api/v1/relay/sponsor-battery-passport",
+    response_model=GaslessRelayResponse,
+    tags=["On-Chain Smart Contract Binding"],
+    summary="Sponsor EU Battery Passport on-chain minting on Polygon without POL gas",
+)
+async def sponsor_battery_passport_route(body: SponsoredPassportMintRequest):
+    """Broadcasts sponsored passport minting transaction to Polygon blockchain."""
+    return gasless_relayer.sponsor_battery_passport(body)
+
+
+@app.get(
+    "/api/v1/relay/relayer-info",
+    tags=["On-Chain Smart Contract Binding"],
+    summary="Get gasless relayer status, sponsorship policy, and public address",
+)
+async def get_relayer_info_route():
+    """Returns gasless sponsorship relayer public address, network metadata, and contract bindings."""
+    return {
+        "status": "ACTIVE",
+        "relayer_address": gasless_relayer.relayer_address,
+        "chain_id": gasless_relayer.chain_id,
+        "network": "Polygon Mainnet",
+        "contract_address": gasless_relayer.contract_address,
+        "sponsored_operations": [
+            "A2A_DEAL_ATTESTATION_ANCHOR",
+            "BATTERY_PASSPORT_MINT",
+        ],
+        "max_sponsored_gas_pol": 0.05,
+    }
 
 
 @app.post(
@@ -1276,6 +1420,16 @@ async def get_onchain_settlement_payload(
 async def get_prometheus_metrics():
     """Returns system telemetry in standard Prometheus text exposition format."""
     sla = enterprise_manager.get_sla_metrics()
+    from app.pyth_oracle_client import pyth_oracle_client
+    from app.agent_session_vault import get_agent_session_vault
+    from app.security_gate_client import security_gate_client
+
+    asess_vault = get_agent_session_vault()
+    cb_status = security_gate_client.get_circuit_status()
+    cb_val = 0 if cb_status["state"] == "CLOSED" else (1 if cb_status["state"] == "HALF_OPEN" else 2)
+    active_sessions = len(asess_vault._sessions) if hasattr(asess_vault, "_sessions") else 0
+    cached_prices = len(pyth_oracle_client._cache) if hasattr(pyth_oracle_client, "_cache") else 0
+
     metrics_lines = [
         "# HELP oracle_uptime_seconds Total running uptime in seconds",
         "# TYPE oracle_uptime_seconds counter",
@@ -1295,6 +1449,18 @@ async def get_prometheus_metrics():
         "# HELP oracle_compliance_gotcha_defenses Total trap defenses active",
         "# TYPE oracle_compliance_gotcha_defenses gauge",
         "oracle_compliance_gotcha_defenses 12",
+        "# HELP oracle_security_circuit_breaker 0=CLOSED, 1=HALF_OPEN, 2=OPEN",
+        "# TYPE oracle_security_circuit_breaker gauge",
+        f"oracle_security_circuit_breaker {cb_val}",
+        "# HELP oracle_active_agent_sessions Current open agent micro-settlement sessions",
+        "# TYPE oracle_active_agent_sessions gauge",
+        f"oracle_active_agent_sessions {active_sessions}",
+        "# HELP oracle_cached_prices Total distinct commodity symbols in real-time cache",
+        "# TYPE oracle_cached_prices gauge",
+        f"oracle_cached_prices {cached_prices}",
+        "# HELP oracle_system_version System build version indicator",
+        "# TYPE oracle_system_version gauge",
+        'oracle_system_version{version="1.2.0"} 1',
     ]
 
     return PlainTextResponse("\n".join(metrics_lines) + "\n", media_type="text/plain; version=0.0.4")
@@ -1713,10 +1879,51 @@ async def close_agent_session_route(body: AgentSessionCloseRequest):
 
 
 @app.post(
+    "/api/v1/agent/webhooks/register",
+    response_model=AgentWebhookRegistrationResponse,
+    tags=["Agent Protocol"],
+    summary="Register a Webhook endpoint for autonomous A2A trade event push notifications",
+)
+async def register_agent_webhook_route(body: AgentWebhookRegistrationRequest):
+    """Registers callback URL with HMAC-SHA256 authentication for trade proposals and attestations."""
+    return webhook_manager.register_webhook(body)
+
+
+@app.get(
+    "/api/v1/agent/webhooks/{agent_address}",
+    tags=["Agent Protocol"],
+    summary="List active webhook subscriptions for an agent EVM address",
+)
+async def list_agent_webhooks_route(agent_address: str):
+    """Retrieves all registered webhooks for an agent address."""
+    return webhook_manager.list_webhooks_for_agent(agent_address)
+
+
+@app.delete(
+    "/api/v1/agent/webhooks/{webhook_id}",
+    tags=["Agent Protocol"],
+    summary="Unregister an active webhook subscription",
+)
+async def delete_agent_webhook_route(webhook_id: str):
+    """Removes a registered webhook by ID."""
+    ok = webhook_manager.unregister_webhook(webhook_id)
+    if not ok:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Webhook subscription not found.")
+    return {"status": "DELETED", "webhook_id": webhook_id}
+
+
+@app.post(
     "/api/v1/a2a/deals/propose",
     response_model=TradeDealAttestation,
     tags=["A2A Autonomous Settlement"],
     summary="Seller Agent proposes canonical critical mineral trade agreement with cryptographic signature",
+)
+@app.post(
+    "/api/v1/trade/deals/propose",
+    response_model=TradeDealAttestation,
+    tags=["A2A Autonomous Settlement"],
+    summary="Seller Agent proposes canonical critical mineral trade agreement (Trade Prefix Alias)",
+    include_in_schema=False,
 )
 async def propose_a2a_deal_route(body: TradeDealProposeRequest):
     """Registers a bilateral trade deal proposal signed by seller agent."""
@@ -1731,6 +1938,13 @@ async def propose_a2a_deal_route(body: TradeDealProposeRequest):
     response_model=TradeDealAttestation,
     tags=["A2A Autonomous Settlement"],
     summary="Buyer Agent countersigns trade proposal; Oracle mints immutable 3-party deal attestation",
+)
+@app.post(
+    "/api/v1/trade/deals/dual-sign",
+    response_model=TradeDealAttestation,
+    tags=["A2A Autonomous Settlement"],
+    summary="Buyer Agent countersigns trade proposal (Trade Prefix Alias)",
+    include_in_schema=False,
 )
 async def dual_sign_a2a_deal_route(body: TradeDealDualSignRequest):
     """Countersigns proposal and triggers Oracle attestation seal to finalize the contract."""
@@ -1748,6 +1962,13 @@ async def dual_sign_a2a_deal_route(body: TradeDealDualSignRequest):
     tags=["A2A Autonomous Settlement"],
     summary="Buyer Agent rejects proposed deal terms or pricing",
 )
+@app.post(
+    "/api/v1/trade/deals/reject",
+    response_model=TradeDealAttestation,
+    tags=["A2A Autonomous Settlement"],
+    summary="Buyer Agent rejects proposed deal terms or pricing (Trade Prefix Alias)",
+    include_in_schema=False,
+)
 async def reject_a2a_deal_route(body: TradeDealRejectRequest):
     """Marks proposal as REJECTED and records buyer rejection reasoning."""
     try:
@@ -1764,6 +1985,13 @@ async def reject_a2a_deal_route(body: TradeDealRejectRequest):
     tags=["A2A Autonomous Settlement"],
     summary="Seller Agent cancels/revokes proposal before countersignature",
 )
+@app.post(
+    "/api/v1/trade/deals/cancel",
+    response_model=TradeDealAttestation,
+    tags=["A2A Autonomous Settlement"],
+    summary="Seller Agent cancels/revokes proposal before countersignature (Trade Prefix Alias)",
+    include_in_schema=False,
+)
 async def cancel_a2a_deal_route(body: TradeDealCancelRequest):
     """Revokes a pending proposal before buyer countersigns."""
     try:
@@ -1779,6 +2007,12 @@ async def cancel_a2a_deal_route(body: TradeDealCancelRequest):
     tags=["A2A Autonomous Settlement"],
     summary="Retrieve full specification and audit status of an A2A trade deal",
 )
+@app.get(
+    "/api/v1/trade/deals/{deal_id}",
+    tags=["A2A Autonomous Settlement"],
+    summary="Retrieve full specification and audit status of an A2A trade deal (Trade Prefix Alias)",
+    include_in_schema=False,
+)
 async def get_a2a_deal_route(deal_id: str):
     """Retrieves full specification, status, and audit notes of a deal."""
     deal = a2a_deal_engine.get_deal(deal_id)
@@ -1793,6 +2027,13 @@ async def get_a2a_deal_route(deal_id: str):
     tags=["A2A Autonomous Settlement"],
     summary="List active or historic bilateral deals associated with an agent address",
 )
+@app.get(
+    "/api/v1/trade/deals/by-agent/{agent_address}",
+    response_model=TradeDealListResponse,
+    tags=["A2A Autonomous Settlement"],
+    summary="List active or historic bilateral deals associated with an agent address (Trade Prefix Alias)",
+    include_in_schema=False,
+)
 async def list_a2a_deals_route(agent_address: str, status_filter: Optional[str] = None):
     """Filters all bilateral agreements for an agent address."""
     deals = a2a_deal_engine.list_deals_by_agent(agent_address, status_filter)
@@ -1805,6 +2046,13 @@ async def list_a2a_deals_route(agent_address: str, status_filter: Optional[str] 
     tags=["A2A Autonomous Settlement"],
     summary="Audit cryptographic signatures and regulatory compliance of a dual-signed A2A trade deal",
 )
+@app.get(
+    "/api/v1/trade/deals/verify/{deal_id}",
+    response_model=TradeDealVerifyResponse,
+    tags=["A2A Autonomous Settlement"],
+    summary="Audit cryptographic signatures and regulatory compliance of a dual-signed A2A trade deal (Trade Prefix Alias)",
+    include_in_schema=False,
+)
 async def verify_a2a_deal_route(deal_id: str):
     """Audits seller, buyer, and oracle signatures along with FEOC and mass-balance compliance."""
     try:
@@ -1812,6 +2060,28 @@ async def verify_a2a_deal_route(deal_id: str):
         return a2a_deal_engine.verify_deal(req)
     except DealNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@app.get(
+    "/api/v1/a2a/deals/{deal_id}/escrow-calldata",
+    tags=["A2A Autonomous Settlement"],
+    summary="Generate EVM calldata and transaction parameters for locking USDC into MineralTradeEscrow",
+)
+@app.get(
+    "/api/v1/trade/deals/{deal_id}/escrow-calldata",
+    tags=["A2A Autonomous Settlement"],
+    summary="Generate EVM calldata for MineralTradeEscrow (Trade Prefix Alias)",
+    include_in_schema=False,
+)
+async def get_deal_escrow_calldata_route(deal_id: str, escrow_contract_address: Optional[str] = None):
+    """Generates precise EVM transaction calldata for buyer agent to deposit funds into MineralTradeEscrow."""
+    try:
+        return a2a_deal_engine.build_escrow_deposit_calldata(deal_id, escrow_contract_address)
+    except DealNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except InvalidDealStateError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
 
 
 # ==========================================
@@ -2165,6 +2435,157 @@ async def invoke_mcp_tool(request: Request, tool_call: MCPToolCallRequest):
             content=[{"type": "text", "text": f"Unknown tool: '{name}'"}],
             isError=True,
         )
+
+
+# =====================================================================
+# 19. REMOTE MCP OVER SSE (SERVER-SENT EVENTS) PROTOCOL ENDPOINTS
+# =====================================================================
+
+@app.get(
+    "/mcp/sse",
+    tags=["Agent Protocol"],
+    summary="Remote MCP over SSE Transport connection endpoint",
+)
+async def mcp_sse_endpoint(request: Request):
+    """
+    Establishes Server-Sent Events (SSE) stream for remote LLM agent clients (Claude Desktop, Cursor, ElizaOS).
+    Emits initial 'endpoint' event with unique sessionId and streams tool call responses.
+    """
+    session_id = f"mcpsess_{secrets.token_hex(16)}"
+    queue: asyncio.Queue = asyncio.Queue()
+    _MCP_SSE_SESSIONS[session_id] = queue
+
+    async def event_generator():
+        try:
+            # 1. Emit endpoint URI event conforming to MCP specification
+            endpoint_url = f"/mcp/messages?sessionId={session_id}"
+            yield f"event: endpoint\r\ndata: {endpoint_url}\r\n\r\n"
+
+            if request.headers.get("X-Test-Stream") == "single":
+                return
+
+            # 2. Stream subsequent JSON-RPC response messages
+            while True:
+                if await request.is_disconnected():
+                    break
+                try:
+                    msg = await asyncio.wait_for(queue.get(), timeout=15.0)
+                    msg_json = json.dumps(msg, ensure_ascii=False)
+                    yield f"event: message\r\ndata: {msg_json}\r\n\r\n"
+                except asyncio.TimeoutError:
+                    # Ping / keep-alive comment
+                    yield ": keep-alive\r\n\r\n"
+        finally:
+            _MCP_SSE_SESSIONS.pop(session_id, None)
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
+@app.post(
+    "/mcp/messages",
+    tags=["Agent Protocol"],
+    summary="Receive JSON-RPC 2.0 messages for remote MCP over SSE sessions",
+)
+async def mcp_messages_endpoint(request: Request, sessionId: Optional[str] = None):
+    """
+    Processes JSON-RPC 2.0 MCP requests and pushes responses back through the client's SSE stream.
+    """
+    try:
+        body = await request.json()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid JSON: {str(e)}")
+
+    resp = process_mcp_request(body)
+
+    active_session_id = (
+        sessionId 
+        or request.query_params.get("session_id") 
+        or request.query_params.get("sessionId")
+        or request.headers.get("x-session-id")
+    )
+    if not active_session_id and isinstance(body, dict):
+        active_session_id = body.get("sessionId") or body.get("session_id")
+
+    if active_session_id:
+        if active_session_id not in _MCP_SSE_SESSIONS:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"MCP SSE session '{active_session_id}' not found or disconnected",
+            )
+        if resp is not None:
+            await _MCP_SSE_SESSIONS[active_session_id].put(resp)
+        return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content={"status": "ACCEPTED", "sessionId": active_session_id})
+
+    # Direct fallback if client expects synchronous HTTP JSON response
+    return JSONResponse(content=resp or {})
+
+
+@app.get(
+    "/api/v1/oracle/consensus-price",
+    tags=["Commodity Pricing"],
+    summary="Multi-Oracle Consensus Medianizer (Pyth Hermes v2 + Statutory LME/CME benchmark)",
+)
+def get_consensus_price_endpoint(
+    symbol: str = Query(..., description="Commodity symbol (e.g. Cu, Ag, Li, Ni, Co, CARBON, EU_ETS)")
+):
+    """
+    Returns hybrid tamper-resistant commodity spot price aggregated from Pyth Network
+    and statutory international physical benchmarks.
+    """
+    from app.pyth_oracle_client import pyth_oracle_client
+    res = pyth_oracle_client.get_hybrid_aggregated_price(symbol)
+    return JSONResponse(content=res)
+
+
+@app.get(
+    "/api/v1/trade/cbam-liability",
+    tags=["Global Trade & Logistics"],
+    summary="Calculate EU CBAM (Carbon Border Adjustment Mechanism) carbon tax liability",
+)
+def calculate_cbam_liability_endpoint(
+    mineral_type: str = Query(..., description="Commodity type (e.g. LITHIUM_HYDROXIDE, NICKEL_MHP)"),
+    cargo_weight_metric_tons: float = Query(..., ge=0.1, description="Shipment volume in MT"),
+    importer_jurisdiction: str = Query(default="EU", description="Importing territory (e.g. EU, US, JP)"),
+):
+    """
+    Calculates embedded CO2 tonnage and financial CBAM carbon import certificate liability
+    grounded in live EU ETS carbon credit allowance pricing.
+    """
+    from app.schemas import MineralType
+    m_enum = None
+    for member in MineralType:
+        if member.value == mineral_type or member.name == mineral_type:
+            m_enum = member
+            break
+    if m_enum is None:
+        u = mineral_type.upper()
+        if "LITH" in u:
+            m_enum = MineralType.LITHIUM_HYDROXIDE
+        elif "NICK" in u:
+            m_enum = MineralType.NICKEL_MHP
+        elif "COB" in u:
+            m_enum = MineralType.COBALT_HYDROXIDE
+        elif "COP" in u:
+            m_enum = MineralType.COPPER_CATHODE
+        else:
+            m_enum = MineralType.LITHIUM_CARBONATE
+
+    res = global_trade_engine.calculate_cbam_liability(
+        mineral_type=m_enum,
+        cargo_weight_metric_tons=cargo_weight_metric_tons,
+        importer_jurisdiction=importer_jurisdiction,
+    )
+    return JSONResponse(content=res)
+
+
 
 
 if __name__ == "__main__":

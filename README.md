@@ -5,7 +5,7 @@
 [![Tests](https://img.shields.io/badge/Tests-173%2F173_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
 [![Type Safety](https://img.shields.io/badge/Pyright-0_Errors_Clean-brightgreen?style=for-the-badge&logo=python&logoColor=white)](pyrightconfig.json)
 [![Multi-Chain EVM](https://img.shields.io/badge/EVM_Contracts-Polygon_|_Base_|_Arbitrum-8247E5?style=for-the-badge&logo=ethereum&logoColor=white)](contracts/verification/VERIFICATION_GUIDE.md)
-[![Agent Exclusive](https://img.shields.io/badge/Protocol-100%25_Agent_Native_M2M-ff007a?style=for-the-badge&logo=openai&logoColor=white)](#-pure-autonomous-agent-native-architecture)
+[![Agent Exclusive](https://img.shields.io/badge/Protocol-100%25_Agent_Native_M2M-ff007a?style=for-the-badge&logo=openai&logoColor=white)](#pure-autonomous-agent-native-architecture-m2m-exclusive)
 [![FastMCP](https://img.shields.io/badge/FastMCP-28_Agent_Tools-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](mcp_tool_spec.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
@@ -15,7 +15,7 @@
 
 ---
 
-## 🤖 Pure Autonomous Agent-Native Architecture (M2M Exclusive)
+## Pure Autonomous Agent-Native Architecture (M2M Exclusive)
 
 `minerals-oracle-x402` is engineered from first principles for the **Autonomous Agentic Economy**:
 
@@ -64,14 +64,14 @@ All contracts are deployed on live mainnets and **100% verified (Green Checkmark
 
 Synthesizes the 3 primary battery critical minerals into a unified cell/pack compliance attestation:
 
-* **Cathode Chemistries**: **NCM 811** (80% Ni, 10% Co, 10% Mn), **NCM 622**, **NCM 523**.
-* **US IRA 30D Critical Minerals $3,750 Tax Credit Formula**:
+- **Cathode Chemistries**: **NCM 811** (80% Ni, 10% Co, 10% Mn), **NCM 622**, **NCM 523**.
+- **US IRA 30D Critical Minerals $3,750 Tax Credit Formula**:
   $$\text{Procurement Value} = (\text{Li Tons} \times \$18,500) + (\text{Ni Tons} \times \$17,000) + (\text{Co Tons} \times \$32,000)$$
   $$\text{FTA Qualifying Ratio} = \frac{\text{Value}_{\text{AUS (FTA)}}}{\text{Value}_{\text{Total}}} \times 100\% \ge 50.0\%$$
-* **Strict Zero-Tolerance FEOC Taint Propagation**: If **any** mineral component carries $\ge 25\%$ covered nation (China/Russia/Iran/North Korea) equity or operational control, the entire battery pack is disqualified (`FLAG_COMPOSITE_FEOC_TAINT`).
-* **EU Battery Regulation (2023/1542) & CBAM Scope 1-3 Carbon Footprint**:
-  * Captive coal power smelting in Indonesian HPAL triggers `FLAG_EU_BATTERY_CBAM_SURCHARGE` (+26.5 kg CO₂e/kWh penalty).
-* **Cryptographic Merkle Tree & Polygon EIP-712 Master Signature**:
+- **Strict Zero-Tolerance FEOC Taint Propagation**: If **any** mineral component carries $\ge 25\%$ covered nation (China/Russia/Iran/North Korea) equity or operational control, the entire battery pack is disqualified (`FLAG_COMPOSITE_FEOC_TAINT`).
+- **EU Battery Regulation (2023/1542) & CBAM Scope 1-3 Carbon Footprint**:
+  - Captive coal power smelting in Indonesian HPAL triggers `FLAG_EU_BATTERY_CBAM_SURCHARGE` (+26.5 kg CO₂e/kWh penalty).
+- **Cryptographic Merkle Tree & Polygon EIP-712 Master Signature**:
   $$\text{Merkle Root} = \text{0x} + \text{SHA256}(\text{Leaf}_{\text{Li}} + \text{Leaf}_{\text{Ni}} + \text{Leaf}_{\text{Co}})$$
   Signs typed structured data binding `battery_pack_id`, `chemistry`, `merkle_root`, composite score, and legal disclaimer terms.
 
@@ -110,33 +110,33 @@ flowchart TD
 
 #### 🇦🇺 Australian Spodumene Lithium Pipeline (`app/lithium_pipeline.py`)
 
-* **GIS Geofencing**: Validates WA DMIRS MINEDEX tenement boundaries (e.g. Greenbushes `M01/03`, Pilgangoora `M45/1256`).
-* **Stoichiometric Mass Balance**: Enforces strict theoretical yield ratio ($7.5 \pm 0.8\text{t}$ Spodumene concentrate $\rightarrow$ $1.0\text{t}$ Battery-Grade LiOH·H₂O).
-* **Defenses**: Defends against Trap 13 (Chinese transshipment relabeling) and Trap 14 (non-linear recovery exaggeration).
+- **GIS Geofencing**: Validates WA DMIRS MINEDEX tenement boundaries (e.g. Greenbushes `M01/03`, Pilgangoora `M45/1256`).
+- **Stoichiometric Mass Balance**: Enforces strict theoretical yield ratio ($7.5 \pm 0.8\text{t}$ Spodumene concentrate $\rightarrow$ $1.0\text{t}$ Battery-Grade LiOH·H₂O).
+- **Defenses**: Defends against Trap 13 (Chinese transshipment relabeling) and Trap 14 (non-linear recovery exaggeration).
 
 #### 🇮🇩 Indonesian Nickel MHP Pipeline (`app/nickel_pipeline.py`)
 
-* **Concession Geofencing**: Monitors Central Sulawesi (IMIP Morowali) and North Maluku (IWIP Weda Bay) mining polygons.
-* **Fiscal Verification**: Validates Ministry of Energy (ESDM) SIMBARA NTPN tax receipt codes and Bank Indonesia 30% forex export deposits (DHE BI).
-* **EU CBAM & Carbon Duty**: Detects captive coal power plant usage and flags European Carbon Border Adjustment liabilities.
+- **Concession Geofencing**: Monitors Central Sulawesi (IMIP Morowali) and North Maluku (IWIP Weda Bay) mining polygons.
+- **Fiscal Verification**: Validates Ministry of Energy (ESDM) SIMBARA NTPN tax receipt codes and Bank Indonesia 30% forex export deposits (DHE BI).
+- **EU CBAM & Carbon Duty**: Detects captive coal power plant usage and flags European Carbon Border Adjustment liabilities.
 
 #### 🇨🇩 DRC Cobalt Hydroxide Pipeline (`app/cobalt_pipeline.py`)
 
-* **Artisanal Segregation (Trap 1)**: Blocks uncertified artisanal mining (ASM) co-mingling via Entreprise Générale du Cobalt (EGC) custody validation.
-* **CEEC Security Seals**: Cryptographically authenticates Centre d'Expertise (CEEC) tamper-proof barcode export seals.
-* **ILO Human Rights Diligence**: Enforces mandatory independent audits for ILO Convention 138 (Minimum Age) and 182 (Worst Forms of Child Labor).
+- **Artisanal Segregation (Trap 1)**: Blocks uncertified artisanal mining (ASM) co-mingling via Entreprise Générale du Cobalt (EGC) custody validation.
+- **CEEC Security Seals**: Cryptographically authenticates Centre d'Expertise (CEEC) tamper-proof barcode export seals.
+- **ILO Human Rights Diligence**: Enforces mandatory independent audits for ILO Convention 138 (Minimum Age) and 182 (Worst Forms of Child Labor).
 
 #### 🇨🇱 Chilean Copper Cathode Pipeline (`app/copper_pipeline.py`)
 
-* **Concession Geofencing**: Monitors major porphyry operations (Codelco Chuquicamata, El Teniente, Andina, BHP Escondida, Antofagasta Los Pelambres, Cerro Verde).
-* **Smelter Acid Balance (Trap 16)**: Validates sulfuric acid ($H_2SO_4$) reagent supply balance ($\le 5.0\%$ deficit tolerance).
-* **Grid & Purity Standard**: Certifies ASTM B115 Grade 1 electrolytic cathode purity ($\ge 99.9935\%$) for AI datacenter HVDC power grids and COCHILCO export clearances.
+- **Concession Geofencing**: Monitors major porphyry operations (Codelco Chuquicamata, El Teniente, Andina, BHP Escondida, Antofagasta Los Pelambres, Cerro Verde).
+- **Smelter Acid Balance (Trap 16)**: Validates sulfuric acid ($H_2SO_4$) reagent supply balance ($\le 5.0\%$ deficit tolerance).
+- **Grid & Purity Standard**: Certifies ASTM B115 Grade 1 electrolytic cathode purity ($\ge 99.9935\%$) for AI datacenter HVDC power grids and COCHILCO export clearances.
 
 #### 🇲🇽 Mexican Silver Doré Pipeline (`app/silver_pipeline.py`)
 
-* **Concession Geofencing**: Monitors high-grade silver operations (Endeavour Silver Terronera, Fresnillo, Antamina, Uchucchacua, Los Pelambres).
-* **N-Type TOPCon Solar Standard (Trap 16)**: Enforces ultra-pure $\ge 99.99\%$ silver powder certification for next-gen solar PV metallization paste.
-* **Security & LBMA Assurance**: Defends against cartel-tainted artisanal extraction and validates LBMA Good Delivery refiner accreditation.
+- **Concession Geofencing**: Monitors high-grade silver operations (Endeavour Silver Terronera, Fresnillo, Antamina, Uchucchacua, Los Pelambres).
+- **N-Type TOPCon Solar Standard (Trap 16)**: Enforces ultra-pure $\ge 99.99\%$ silver powder certification for next-gen solar PV metallization paste.
+- **Security & LBMA Assurance**: Defends against cartel-tainted artisanal extraction and validates LBMA Good Delivery refiner accreditation.
 
 ---
 
@@ -153,13 +153,13 @@ The built-in M2M console ([`app/static/index.html`](app/static/index.html) serve
 
 #### One-Click Real-World Scenario Presets
 
-* **✅ Clean Baseline (`clean`)**: Australia Greenbushes + Indonesia Clean IMIP + DRC Kamoto KCC $\rightarrow$ IRA Eligible ($3,750), EU Passport Approved, Low Carbon (51.5 kg CO₂e/kWh).
-* **⚠️ FEOC Taint Trap (`feoc`)**: Injects 80% Chinese state ownership into DRC Cobalt $\rightarrow$ Entire battery pack disqualified under FEOC 25% threshold.
-* **⚠️ Captive Coal CBAM Trap (`cbam`)**: Injects captive coal power smelting in Indonesia $\rightarrow$ EU CBAM carbon tariff liabilities triggered.
-* **❌ Child Labor Trap (`child`)**: Injects uncertified artisanal pit ore in DRC $\rightarrow$ EU Battery Passport immediate rejection.
-* **🚨 Trap 15 Tech Defense (`trap15`)**: Evaluates Chinese Mineral Resources Law extraterritorial licensing taint ($>50\%$ SX tech dependency without MOFCOM clearance).
-* **⚡ Copper HVDC Grid Ready (`copper`)**: Codelco Chuquicamata copper cathode audit, $H_2SO_4$ acid balance, and ASTM B115 Grade 1 HVDC power grid certification.
-* **☀️ Silver TOPCon Solar PV (`silver`)**: Endeavour Silver Terronera doré audit, LBMA Good Delivery, and N-Type TOPCon $\ge 99.99\%$ solar paste verification.
+- **✅ Clean Baseline (`clean`)**: Australia Greenbushes + Indonesia Clean IMIP + DRC Kamoto KCC $\rightarrow$ IRA Eligible ($3,750), EU Passport Approved, Low Carbon (51.5 kg CO₂e/kWh).
+- **⚠️ FEOC Taint Trap (`feoc`)**: Injects 80% Chinese state ownership into DRC Cobalt $\rightarrow$ Entire battery pack disqualified under FEOC 25% threshold.
+- **⚠️ Captive Coal CBAM Trap (`cbam`)**: Injects captive coal power smelting in Indonesia $\rightarrow$ EU CBAM carbon tariff liabilities triggered.
+- **❌ Child Labor Trap (`child`)**: Injects uncertified artisanal pit ore in DRC $\rightarrow$ EU Battery Passport immediate rejection.
+- **🚨 Trap 15 Tech Defense (`trap15`)**: Evaluates Chinese Mineral Resources Law extraterritorial licensing taint ($>50\%$ SX tech dependency without MOFCOM clearance).
+- **⚡ Copper HVDC Grid Ready (`copper`)**: Codelco Chuquicamata copper cathode audit, $H_2SO_4$ acid balance, and ASTM B115 Grade 1 HVDC power grid certification.
+- **☀️ Silver TOPCon Solar PV (`silver`)**: Endeavour Silver Terronera doré audit, LBMA Good Delivery, and N-Type TOPCon $\ge 99.99\%$ solar paste verification.
 
 ---
 
@@ -198,11 +198,11 @@ Integrates natively with Claude Desktop, Cursor, Gemini, and autonomous AI agent
 
 All M2M API invocations support micro-payments in USDC on Polygon (Chain ID `137`):
 
-* **Composite Battery Master Verification**: 0.10 USDC (`PricingTier.STANDARD`)
-* **Dedicated Mineral Lot Verification**: 0.05 USDC (`PricingTier.LIGHT`)
-* **Polygon USDC Address**: `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`
-* **Treasury Recipient**: `0x255F9991233f86B29dB847c8d5b8CB9915e80dCf`
-* **Agent Vault Fast-Path**: Zero-latency verification via pre-funded `X-Agent-Vault-Key` headers.
+- **Composite Battery Master Verification**: 0.10 USDC (`PricingTier.STANDARD`)
+- **Dedicated Mineral Lot Verification**: 0.05 USDC (`PricingTier.LIGHT`)
+- **Polygon USDC Address**: `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`
+- **Treasury Recipient**: `0x255F9991233f86B29dB847c8d5b8CB9915e80dCf`
+- **Agent Vault Fast-Path**: Zero-latency verification via pre-funded `X-Agent-Vault-Key` headers.
 
 ---
 
@@ -238,9 +238,9 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 
 Navigate to:
 
-* **Korean Core Node**: [http://localhost:8000/ko](http://localhost:8000/ko)
-* **Global English Node**: [http://localhost:8000/](http://localhost:8000/)
-* **API Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Korean Core Node**: [http://localhost:8000/ko](http://localhost:8000/ko)
+- **Global English Node**: [http://localhost:8000/](http://localhost:8000/)
+- **API Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 

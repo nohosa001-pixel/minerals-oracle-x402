@@ -62,6 +62,7 @@ class ComplianceEngine:
                 gotcha_defenses.append("DEFENSE_IDN_DHE_FOREX_DEPOSITED: Bank Indonesia 30% retention receipt verified.")
 
             # WTO DS592 Precedent Check: Must be refined (MHP or Ferronickel), raw ore is illegal
+            is_nickel_commodity = "NICKEL" in str(req.mineral_type).upper()
             if req.mineral_type == MineralType.NICKEL_MHP:
                 citations.append(TradeJurisprudenceCitation(
                     precedent_case_id="WTO_DS592_INDONESIA_RAW_MATERIALS",
@@ -69,7 +70,7 @@ class ComplianceEngine:
                     legal_rule_applied="Domestic smelting mandate upheld in status quo; raw nickel ore export prohibited.",
                     compliance_status="COMPLIANT"
                 ))
-            else:
+            elif is_nickel_commodity:
                 fatal_violations.append("WTO_DS592_VIOLATION: Unprocessed raw nickel ore export prohibited under UU 3/2020.")
                 score -= 30.0
 
@@ -402,8 +403,10 @@ class ComplianceEngine:
         disclaimer = self.build_legal_disclaimer(fee_paid_usdc=0.50)
 
         # Attestation Digest Binding
+        min_val = req.mineral_type.value if hasattr(req.mineral_type, "value") else str(req.mineral_type)
+        src_val = req.source_country.value if hasattr(req.source_country, "value") else str(req.source_country)
         digest_input = (
-            f"{req.lot_id}|{req.mineral_type.value}|{req.source_country.value}|"
+            f"{req.lot_id}|{min_val}|{src_val}|"
             f"{final_score}|{is_compliant}|{us_bis_cleared}|{china_tech_cleared}|{cbam_definitive_verified}|{now_utc}"
         )
         digest_hash = "0x" + hashlib.sha256(digest_input.encode("utf-8")).hexdigest()
@@ -413,8 +416,8 @@ class ComplianceEngine:
         try:
             onchain_sig = onchain_signer.sign_compliance_verdict(
                 lot_id=req.lot_id,
-                mineral_type=req.mineral_type.value,
-                source_country=req.source_country.value,
+                mineral_type=min_val,
+                source_country=src_val,
                 score=int(final_score * 10),
                 is_compliant=is_compliant,
                 digest_hash=digest_hash,
@@ -437,8 +440,8 @@ class ComplianceEngine:
         # Construct QR Data Payload (ZKP Blinded)
         qr_payload = {
             "lot_id": req.lot_id,
-            "mineral": req.mineral_type.value,
-            "origin": req.source_country.value,
+            "mineral": min_val,
+            "origin": src_val,
             "score": round(final_score, 1),
             "status": "COMPLIANT" if is_compliant else "NON_COMPLIANT",
             "digest": digest_hash,

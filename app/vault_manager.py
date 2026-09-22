@@ -206,13 +206,13 @@ class VaultManager:
             return True, acc.agent_address, acc.balance_usdc
 
     def get_query_capacity(self, balance_usdc: float) -> Dict[str, int]:
-        """Calculates remaining queries an agent can perform across tiers with current balance."""
+        """Calculates remaining queries an agent can perform across tiers with current balance (strictly floored)."""
         bal = round(balance_usdc, 6)
         return {
-            "tier1_light_queries": int(round(bal / 0.001)),
-            "tier2_standard_queries": int(round(bal / 0.005)),
-            "tier3_heavy_queries": int(round(bal / 0.010)),
-            "tier4_onchain_signed_queries": int(round(bal / 0.020)),
+            "tier1_light_queries": int((bal + 1e-9) // 0.001),
+            "tier2_standard_queries": int((bal + 1e-9) // 0.005),
+            "tier3_heavy_queries": int((bal + 1e-9) // 0.010),
+            "tier4_onchain_signed_queries": int((bal + 1e-9) // 0.020),
         }
 
     def deposit_funds(

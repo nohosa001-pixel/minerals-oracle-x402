@@ -29,6 +29,8 @@ interface AggregatorV3Interface {
     );
 }
 
+
+
 /**
  * @title IMineralsOracleConsumer
  * @notice Interface for on-chain consumption and verification of minerals-oracle-x402 EIP-712 certified feeds.

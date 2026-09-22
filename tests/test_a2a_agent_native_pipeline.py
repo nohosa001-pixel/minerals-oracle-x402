@@ -10,6 +10,7 @@ Verifies:
 """
 
 import pytest
+import secrets
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -730,4 +731,89 @@ def test_mcp_cancel_and_list_deals(client):
     assert r_cancel.status_code == 200
     data_cancel = json.loads(r_cancel.json()["content"][0]["text"])
     assert data_cancel["status"] == "CANCELLED"
+
+
+def test_trade_deal_route_aliases_and_flat_args():
+    """Verifies that /api/v1/trade/deals/* aliases work and accept flattened parameters."""
+    client = TestClient(app)
+    seller_addr = "0x7777777777777777777777777777777777777777"
+    buyer_addr = "0x8888888888888888888888888888888888888888"
+
+    # 1. Propose via /api/v1/trade/deals/propose with flattened arguments
+    deal_id = f"DEAL-ALIAS-FLAT-{secrets.token_hex(3).upper()}"
+    flat_proposal = {
+        "deal_id": deal_id,
+        "commodity": MineralType.LITHIUM_CARBONATE.value,
+        "volume_tons": 100.0,
+        "unit_price_usd_per_ton": 15000.0,
+        "total_deal_value_usd": 1500000.0,
+        "origin_country": "CHL",
+        "destination_country": "USA",
+        "feoc_cleared": True,
+        "mass_balance_cleared": True,
+        "ebl_document_id": "EBL-ALIAS-001",
+        "buyer_agent_address": buyer_addr,
+        "seller_agent_address": seller_addr,
+        "created_at_utc": "2026-09-21T10:00:00Z",
+        "seller_signature": "0x" + "7" * 130,
+    }
+    r = client.post("/api/v1/trade/deals/propose", json=flat_proposal)
+    assert r.status_code == 200, r.text
+    data = r.json()
+    assert data["status"] == "PROPOSED"
+    assert data["deal_id"] == deal_id
+
+    # 2. Get via /api/v1/trade/deals/{deal_id}
+    r_get = client.get(f"/api/v1/trade/deals/{deal_id}")
+    assert r_get.status_code == 200
+    assert r_get.json()["deal_id"] == deal_id
+
+    # 3. Dual-sign via /api/v1/trade/deals/dual-sign
+    r_dual = client.post("/api/v1/trade/deals/dual-sign", json={
+        "deal_id": deal_id,
+        "buyer_agent_address": buyer_addr,
+        "buyer_signature": "0x" + "8" * 130,
+    })
+    assert r_dual.status_code == 200
+    assert r_dual.json()["status"] == "DUAL_SIGNED_CONFIRMED"
+
+    # 4. Verify via /api/v1/trade/deals/verify/{deal_id}
+    r_ver = client.get(f"/api/v1/trade/deals/verify/{deal_id}")
+    assert r_ver.status_code == 200
+    assert r_ver.json()["is_valid"] is True
+    assert r_ver.json()["deal_status"] == "DUAL_SIGNED_CONFIRMED"
+
+
+def test_agent_session_vault_payment_integration():
+    """Verifies that an autonomous agent can pay for oracle queries using an Agent Session Token."""
+    client = TestClient(app)
+    agent_addr = "0x9999999999999999999999999999999999999999"
+
+    # 1. Open agent session
+    r_open = client.post("/api/v1/agent/session/open", json={
+        "agent_address": agent_addr,
+        "deposit_amount_usdc": 5.0,
+        "session_duration_hours": 12,
+    })
+    assert r_open.status_code == 200
+    sess_data = r_open.json()
+    session_token = sess_data["session_token"]
+    assert session_token.startswith("asess_")
+
+    # 2. Make authenticated oracle query with Bearer asess_...
+    r_query = client.get(
+        "/api/v1/oracle/prices/cu",
+        headers={"Authorization": f"Bearer {session_token}", "X-Trial-Bypass": "true"}
+    )
+    assert r_query.status_code == 200
+    assert r_query.headers.get("X-Payment-Method") == "Agent-Session-Vault"
+    assert r_query.headers.get("X-Session-Token") == session_token
+
+    # 3. Verify session balance was debited
+    r_info = client.get(f"/api/v1/agent/session/{session_token}")
+    assert r_info.status_code == 200
+    info_data = r_info.json()
+    assert info_data["queries_executed"] == 1
+    assert info_data["current_balance_usdc"] < 5.0
+
 
