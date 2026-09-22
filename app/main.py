@@ -1460,7 +1460,7 @@ async def get_prometheus_metrics():
         f"oracle_cached_prices {cached_prices}",
         "# HELP oracle_system_version System build version indicator",
         "# TYPE oracle_system_version gauge",
-        'oracle_system_version{version="1.2.0"} 1',
+        'oracle_system_version{version="1.2.1"} 1',
     ]
 
     return PlainTextResponse("\n".join(metrics_lines) + "\n", media_type="text/plain; version=0.0.4")

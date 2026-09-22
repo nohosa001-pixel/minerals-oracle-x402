@@ -1,9 +1,9 @@
 # ========================================================
-#   minerals-oracle-x402 v1.2.0 PyPI Distribution Script
+#   minerals-oracle-x402 v1.2.1 PyPI Distribution Script
 # ========================================================
 
 Write-Host "========================================================" -ForegroundColor Cyan
-Write-Host "  minerals-oracle-x402 v1.2.0 PyPI Release Uploader" -ForegroundColor Cyan
+Write-Host "  minerals-oracle-x402 v1.2.1 PyPI Release Uploader" -ForegroundColor Cyan
 Write-Host "========================================================" -ForegroundColor Cyan
 
 # 1. Load from .env if present
@@ -16,12 +16,12 @@ if (Test-Path ".env") {
     }
 }
 
-# 2. Check dist files for v1.2.0
-$wheelPath = "dist\minerals_oracle_x402-1.2.0-py3-none-any.whl"
-$sdistPath = "dist\minerals_oracle_x402-1.2.0.tar.gz"
+# 2. Check dist files for v1.2.1
+$wheelPath = "dist\minerals_oracle_x402-1.2.1-py3-none-any.whl"
+$sdistPath = "dist\minerals_oracle_x402-1.2.1.tar.gz"
 
 if (-not (Test-Path $wheelPath) -or -not (Test-Path $sdistPath)) {
-    Write-Host "[*] v1.2.0 distribution files not found. Building with uv..." -ForegroundColor Yellow
+    Write-Host "[*] v1.2.1 distribution files not found. Building with uv..." -ForegroundColor Yellow
     $env:UV_LINK_MODE = "copy"
     uv build
 }
@@ -43,28 +43,28 @@ if ([string]::IsNullOrEmpty($pypiToken)) {
     exit 1
 }
 
-# 4. Upload v1.2.0 to PyPI
-Write-Host "`n[2/2] Uploading v1.2.0 package to PyPI..." -ForegroundColor Yellow
+# 4. Upload v1.2.1 to PyPI
+Write-Host "`n[2/2] Uploading v1.2.1 package to PyPI..." -ForegroundColor Yellow
 $env:UV_LINK_MODE = "copy"
 $env:UV_PUBLISH_TOKEN = $pypiToken
 $env:TWINE_USERNAME = "__token__"
 $env:TWINE_PASSWORD = $pypiToken
 
-# Try uv publish first on v1.2.0 files
-uv publish --token $pypiToken dist/minerals_oracle_x402-1.2.0*
+# Try uv publish first on v1.2.1 files
+uv publish --token $pypiToken dist/minerals_oracle_x402-1.2.1*
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "[*] Retrying upload via twine..." -ForegroundColor Yellow
-    uvx twine upload dist/minerals_oracle_x402-1.2.0* -u __token__ -p $pypiToken --skip-existing
+    uvx twine upload dist/minerals_oracle_x402-1.2.1* -u __token__ -p $pypiToken --skip-existing
 }
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "`n========================================================" -ForegroundColor Green
-    Write-Host "  [SUCCESS] Successfully published v1.2.0 to PyPI!" -ForegroundColor Green
+    Write-Host "  [SUCCESS] Successfully published v1.2.1 to PyPI!" -ForegroundColor Green
     Write-Host "========================================================" -ForegroundColor Green
-    Write-Host "Package URL: https://pypi.org/project/minerals-oracle-x402/1.2.0/" -ForegroundColor Cyan
-    Write-Host "Install: pip install minerals-oracle-x402==1.2.0" -ForegroundColor Cyan
-    Write-Host "Run MCP: uvx minerals-oracle-x402==1.2.0" -ForegroundColor Cyan
+    Write-Host "Package URL: https://pypi.org/project/minerals-oracle-x402/1.2.1/" -ForegroundColor Cyan
+    Write-Host "Install: pip install minerals-oracle-x402==1.2.1" -ForegroundColor Cyan
+    Write-Host "Run MCP: uvx minerals-oracle-x402==1.2.1" -ForegroundColor Cyan
 } else {
     Write-Host "`n[ERROR] Upload failed. Please check your PyPI token and permissions." -ForegroundColor Red
 }
