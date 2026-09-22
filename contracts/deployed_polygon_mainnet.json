@@ -14,6 +14,15 @@
       "address": "0x835d01534a5D2e63D52636Fafb1019f889d1E66B",
       "trustedSigner": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
       "primarySymbol": "Cu"
+    },
+    "MineralTradeEscrow": {
+      "address": "0x1270ddebad0ca90070342336a581eaACBA2060Ab",
+      "creator": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
+      "creation_tx": "d36a8e9e3ff4b65ee3c35797179bfc46b8c16f510bf4cc9a1b3ec74dbf102fb9",
+      "blockNumber": 94253020,
+      "usdcToken": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+      "trustedOracleSigner": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
+      "explorer_link": "https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab"
     }
   }
 }

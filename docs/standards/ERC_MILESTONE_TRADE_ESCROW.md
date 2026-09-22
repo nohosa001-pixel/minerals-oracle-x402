@@ -113,11 +113,11 @@ Alternative Path:
 ---
 
 ## 6. Multi-Chain Deployment Matrix
-| Network | Chain ID | Native USDC Token Address | Minerals Oracle Consumer | Mineral Trade Escrow Address | Status |
+| Network | Chain ID | Contract Creator (Deployer) | Mineral Trade Escrow Address | Creation TX / Verification | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Polygon Mainnet** | 137 | `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359` | `0x835d01534a5D2e63D52636Fafb1019f889d1E66B` | `0x7a34e0C17E3F1c7283B4645229C8B72fF8f161c9` | **Registered & Active** |
-| **Base (Coinbase L2)** | 8453 | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` | `0xe43a9C368808B2dfF139D27789C40A3C8F2282cF` | `0x5C890F570b5C527F38a6a6873523B2f52B6E3245` | **Registered & Active** |
-| **Arbitrum One** | 42161 | `0xaf88d065e77c8cC2239327C5EDb3A432268e5831` | `0xe43a9C368808B2dfF139D27789C40A3C8F2282cF` | `0x98D2E9528D8A7bF8278E6cfbBf90bcfc70C716B1` | **Registered & Active** |
+| **Polygon Mainnet** | 137 | `0x255F9991233f86B29dB847c8d5b8CB9915e80dCf` | [`0x1270ddebad0ca90070342336a581eaACBA2060Ab`](https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab) | [`0xd36a8e9e...`](https://polygonscan.com/tx/0xd36a8e9e3ff4b65ee3c35797179bfc46b8c16f510bf4cc9a1b3ec74dbf102fb9) (Block 94253020) | **On-Chain Live** |
+| **Base (Coinbase L2)** | 8453 | `0x255F9991233f86B29dB847c8d5b8CB9915e80dCf` | [`0x5C890F570b5C527F38a6a6873523B2f52B6E3245`](https://basescan.org/address/0x5C890F570b5C527F38a6a6873523B2f52B6E3245) | Registered Canonical Address | **Registered & Active** |
+| **Arbitrum One** | 42161 | `0x255F9991233f86B29dB847c8d5b8CB9915e80dCf` | [`0x98D2E9528D8A7bF8278E6cfbBf90bcfc70C716B1`](https://arbiscan.io/address/0x98D2E9528D8A7bF8278E6cfbBf90bcfc70C716B1) | Registered Canonical Address | **Registered & Active** |
 
 ---
 

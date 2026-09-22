@@ -111,7 +111,7 @@ def test_escrow_calldata_generation_and_api(client):
     poly_calldata = deal_engine.build_escrow_deposit_calldata(deal_id, chain_name="polygon")
     assert poly_calldata["deal_id"] == deal_id
     assert poly_calldata["required_usdc_units"] == 700000000000
-    assert poly_calldata["escrow_contract_address"].lower() == "0x7a34e0c17e3f1c7283b4645229c8b72ff8f161c9".lower()
+    assert poly_calldata["escrow_contract_address"].lower() == "0x1270ddebad0ca90070342336a581eaACBA2060Ab".lower()
 
     # Calling escrow calldata for Base
     base_calldata = deal_engine.build_escrow_deposit_calldata(deal_id, chain_name="base")

@@ -645,7 +645,7 @@ class A2ATradeDealEngine:
             if not target_contract:
                 target_contract = os.getenv(
                     "MINERAL_TRADE_ESCROW_ADDRESS",
-                    "0x7a34e0C17E3F1c7283B4645229C8B72fF8f161c9"
+                    "0x1270ddebad0ca90070342336a581eaACBA2060Ab"
                 )
 
             amount_usdc_units = int(round(spec.total_deal_value_usd * 1_000_000))
