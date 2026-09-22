@@ -38,5 +38,3 @@ jobs:
         with:
           skip-existing: true
           verbose: true
-          # Works with both PyPI Trusted Publishing (OIDC) and PYPI_API_TOKEN secret fallback
-          password: ${{ secrets.PYPI_API_TOKEN }}

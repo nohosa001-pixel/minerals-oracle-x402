@@ -1,6 +1,7 @@
 # ERC-MilestoneTradeEscrow Standard Specification
 
 ## 1. Abstract
+
 The **Autonomous Multi-Milestone Escrow Standard for Physical Commodities & Battery Minerals (`MineralTradeEscrow`)** defines a standardized smart contract architecture and agent-to-agent (A2A) interface for settling high-value physical commodity trades.
 
 By transitioning from legacy, paper-based Letters of Credit (L/C)—which incur 1.5–3.0% financial overhead and multi-week processing delays—to an autonomous, oracle-attested smart contract, trades are settled transparently, instantaneously, and cryptographically.
@@ -8,7 +9,9 @@ By transitioning from legacy, paper-based Letters of Credit (L/C)—which incur 
 ---
 
 ## 2. Motivation & Industry Background
+
 Global trade in critical minerals (Lithium, Nickel, Cobalt, Rare Earth Elements, Copper) requires phased payment matching the physical supply chain risks:
+
 1. **At Mine / Port of Loading**: Seller incurs significant extraction, logistics, and loading costs; requires proof of title transfer via Electronic Bill of Lading (eBL).
 2. **In Mid-Transit Corridor**: Maritime shipment traverses high-seas corridors; requires independent geospatial tracking (AIS satellite pings).
 3. **At Port of Discharge**: Buyer receives cargo; requires customs clearance, lab assay certificates, and EU Battery Passport / FEOC compliance validation before releasing final retention funds.
@@ -58,7 +61,8 @@ sequenceDiagram
 ## 4. Contract Specifications (`MineralTradeEscrow.sol`)
 
 ### 4.1 State Machine
-```
+
+```text
 [CREATED] 
     │
     ▼ (releaseStage1BL: 30% release upon verified eBL hash match)
@@ -75,6 +79,7 @@ Alternative Path:
 ```
 
 ### 4.2 Security Guards
+
 1. **Anti-Instant-Expiry Guard**: `durationSeconds >= 60` strictly checked at creation to prevent front-running refund exploits.
 2. **Hash-Binding Authenticity**: Stage 1 requires exact matching of the on-chain hashed electronic Bill of Lading (`deal.eblHash == verifiedEblHash`).
 3. **Privilege Segregation**:
@@ -91,8 +96,10 @@ Alternative Path:
 ## 5. Agent-to-Agent (A2A) Integration API
 
 ### 5.1 Calldata Generation Endpoint
+
 - **HTTP Method**: `GET /api/v1/a2a/deals/{deal_id}/escrow-calldata?chain_name={polygon|base|arbitrum}`
 - **Output Schema**:
+
 ```json
 {
   "deal_id": "DEAL-2026-LIT-001",
@@ -113,6 +120,7 @@ Alternative Path:
 ---
 
 ## 6. Multi-Chain Deployment Matrix
+
 | Network | Chain ID | Contract Creator (Deployer) | Mineral Trade Escrow Address | Creation TX / Verification | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Polygon Mainnet** | 137 | `0x255F9991233f86B29dB847c8d5b8CB9915e80dCf` | [`0x1270ddebad0ca90070342336a581eaACBA2060Ab`](https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab) | [`0xd36a8e9e...`](https://polygonscan.com/tx/0xd36a8e9e3ff4b65ee3c35797179bfc46b8c16f510bf4cc9a1b3ec74dbf102fb9) (Block 94253020) | **On-Chain Live** |
@@ -122,7 +130,7 @@ Alternative Path:
 ---
 
 ## 7. Compliance Compatibility
+
 - **US IRA § 30D**: Foreign Entity of Concern (FEOC) certification verification before contract finalization.
 - **EU CBAM & Battery Regulation**: Carbon Border Adjustment liability calculation integrated with EU ETS carbon spot oracle feeds ($78.50/tCO2e benchmark).
 - **UN/CEFACT & DCSA**: Electronic Bill of Lading standards alignment.
-
