@@ -436,6 +436,19 @@
         },
         "required": ["deal_id"]
       }
+    },
+    {
+      "name": "get_trade_escrow_calldata",
+      "description": "Generates deterministic EVM calldata and transaction parameters for the buyer AI agent to lock USDC funds into the on-chain MineralTradeEscrow (Polygon/Base/Arbitrum) for a dual-signed trade agreement.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "deal_id": {"type": "string", "description": "Canonical dual-signed trade deal identifier"},
+          "chain_name": {"type": "string", "enum": ["polygon", "base", "arbitrum"], "default": "polygon", "description": "Target settlement blockchain"},
+          "escrow_contract_address": {"type": "string", "description": "Optional custom MineralTradeEscrow contract address override"}
+        },
+        "required": ["deal_id"]
+      }
     }
   ]
 }

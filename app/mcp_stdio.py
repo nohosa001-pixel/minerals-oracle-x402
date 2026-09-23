@@ -602,6 +602,23 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
                         },
                         "required": ["deal_id"]
                     }
+                },
+                {
+                    "name": "get_trade_escrow_calldata",
+                    "description": (
+                        "Generates deterministic EVM calldata and transaction parameters for the buyer AI agent "
+                        "to lock USDC funds into the on-chain MineralTradeEscrow (Polygon/Base/Arbitrum) "
+                        "for a dual-signed trade agreement."
+                    ),
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "deal_id": {"type": "string", "description": "Canonical dual-signed trade deal identifier"},
+                            "chain_name": {"type": "string", "enum": ["polygon", "base", "arbitrum"], "default": "polygon", "description": "Target settlement blockchain"},
+                            "escrow_contract_address": {"type": "string", "description": "Optional custom MineralTradeEscrow contract address override"}
+                        },
+                        "required": ["deal_id"]
+                    }
                 }
             ]
         }
@@ -1191,6 +1208,21 @@ def handle_tool_call(req_id: Any, name: str, arguments: Dict[str, Any]) -> Dict[
         elif name == "verify_a2a_trade_deal":
             req_model = TradeDealVerifyRequest(**arguments)
             data = a2a_deal_engine.verify_deal(req_model).model_dump()
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
+            }
+
+        elif name == "get_trade_escrow_calldata":
+            deal_id = arguments.get("deal_id", "")
+            chain_name = arguments.get("chain_name", "polygon")
+            escrow_addr = arguments.get("escrow_contract_address")
+            data = a2a_deal_engine.build_escrow_deposit_calldata(
+                deal_id,
+                escrow_contract_address=escrow_addr,
+                chain_name=chain_name,
+            )
             return {
                 "jsonrpc": "2.0",
                 "id": req_id,

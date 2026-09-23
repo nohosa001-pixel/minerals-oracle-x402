@@ -11,7 +11,7 @@ from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
 
 from fastapi import FastAPI, Request, Depends, HTTPException, status, Query, Path as FPath, WebSocket, WebSocketDisconnect
-from fastapi.responses import JSONResponse, FileResponse, PlainTextResponse, HTMLResponse, StreamingResponse
+from fastapi.responses import JSONResponse, FileResponse, PlainTextResponse, HTMLResponse, StreamingResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -298,6 +298,42 @@ async def pwa_sw():
     raise HTTPException(status_code=404, detail="sw.js not found")
 
 
+@app.get("/robots.txt", tags=["System"])
+async def get_robots_txt():
+    """Allows AI agents and scrapers to locate llms.txt and MCP tooling definitions."""
+    robots_content = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Allow: /llms.txt\n"
+        "Allow: /mcp/tools\n"
+        "Allow: /.well-known/\n"
+        "Sitemap: /sitemap.xml\n"
+    )
+    return PlainTextResponse(content=robots_content)
+
+
+@app.get("/sitemap.xml", tags=["System"])
+async def get_sitemap_xml():
+    """XML sitemap enabling autonomous AI trade agents, scrapers, and indexers to discover all machine specs."""
+    xml_content = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        '  <url><loc>http://localhost:8000/llms.txt</loc><changefreq>daily</changefreq><priority>1.0</priority></url>\n'
+        '  <url><loc>http://localhost:8000/.well-known/agent.json</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
+        '  <url><loc>http://localhost:8000/.well-known/a2a.json</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
+        '  <url><loc>http://localhost:8000/.well-known/ai-plugin.json</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n'
+        '  <url><loc>http://localhost:8000/.well-known/ap2</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n'
+        '  <url><loc>http://localhost:8000/mcp/tools</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
+        '  <url><loc>http://localhost:8000/openapi.json</loc><changefreq>daily</changefreq><priority>0.8</priority></url>\n'
+        '  <url><loc>http://localhost:8000/api/v1/oracle/alpha-signals</loc><changefreq>hourly</changefreq><priority>0.7</priority></url>\n'
+        '  <url><loc>http://localhost:8000/api/v1/oracle/economics-roi</loc><changefreq>daily</changefreq><priority>0.7</priority></url>\n'
+        '  <url><loc>http://localhost:8000/dashboard</loc><changefreq>daily</changefreq><priority>0.5</priority></url>\n'
+        '</urlset>'
+    )
+    return Response(content=xml_content, media_type="application/xml")
+
+
+
 @app.get("/health", tags=["System"])
 @app.get("/status", tags=["System"])
 async def health_check():
@@ -435,6 +471,19 @@ async def get_agent_json():
             "type": "openapi",
             "url": "/openapi.json",
         },
+        "escrow_protocol": "ERC-MilestoneTradeEscrow",
+        "supported_chains": {
+            "polygon": {"chain_id": 137, "escrow_contract": "0x1270ddebad0ca90070342336a581eaACBA2060Ab"},
+            "base": {"chain_id": 8453, "escrow_contract": "0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638"},
+            "arbitrum": {"chain_id": 42161, "escrow_contract": "0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638"}
+        },
+        "a2a_endpoints": {
+            "propose_deal": "/api/v1/trade/deals/propose",
+            "dual_sign_deal": "/api/v1/trade/deals/dual-sign",
+            "escrow_calldata": "/api/v1/a2a/deals/{deal_id}/escrow-calldata",
+            "mcp_tools": "/mcp/tools",
+            "llms_spec": "/llms.txt"
+        },
     }
 
 
@@ -478,8 +527,8 @@ async def get_ai_plugin_manifest():
         "schema_version": "v1",
         "name_for_human": "Minerals Oracle x402",
         "name_for_model": "minerals_oracle",
-        "description_for_human": "Real-time commodities spot benchmarks, cross-exchange basis spreads, and urban mining yields.",
-        "description_for_model": "Access physical commodity spot prices (Copper, Silver, Lithium, Platinum, Neodymium) and cross-exchange basis spreads. Use ?format=compact to save tokens. Self-serve onboarding via POST /api/v1/agent/onboard.",
+        "description_for_human": "Autonomous critical minerals compliance, battery passports, and A2A milestone trade escrow contracts.",
+        "description_for_model": "Access physical commodity spot prices, 7-pillar provenance verification, battery passports, and autonomous A2A bilateral trade escrow contracts with milestone releases (Polygon/Base/Arbitrum). Use ?format=compact to save tokens. Self-serve onboarding via POST /api/v1/agent/onboard.",
         "auth": {
             "type": "service_http",
             "authorization_type": "custom",
@@ -502,7 +551,20 @@ async def get_agent_protocol_manifest():
     return {
         "agent_name": "minerals-oracle-x402",
         "protocol_version": "1.0.0",
+        "escrow_standard": "ERC-MilestoneTradeEscrow",
         "skills": [
+            {
+                "id": "a2a-bilateral-trade-deal",
+                "endpoint": "/api/v1/trade/deals/propose",
+                "dual_sign_endpoint": "/api/v1/trade/deals/dual-sign",
+                "cost_tier": "Free Deal Attestation"
+            },
+            {
+                "id": "erc-milestone-trade-escrow",
+                "endpoint": "/api/v1/a2a/deals/{deal_id}/escrow-calldata",
+                "supported_chains": ["polygon", "base", "arbitrum"],
+                "cost_tier": "Zero Platform Fee (Gas Only)"
+            },
             {
                 "id": "commodity-spot-feed",
                 "endpoint": "/api/v1/oracle/prices",
@@ -514,6 +576,16 @@ async def get_agent_protocol_manifest():
                 "endpoint": "/api/v1/oracle/spreads",
                 "format_compact_support": True,
                 "cost_tier": "$0.005 USDC"
+            },
+            {
+                "id": "ebl-mletr-audit",
+                "endpoint": "/api/v1/trade/verify-ebl",
+                "cost_tier": "$0.01 USDC"
+            },
+            {
+                "id": "trade-route-optimization",
+                "endpoint": "/api/v1/trade/optimize-route",
+                "cost_tier": "$0.02 USDC"
             },
             {
                 "id": "realtime-sse-stream",
@@ -2432,6 +2504,20 @@ async def invoke_mcp_tool(request: Request, tool_call: MCPToolCallRequest):
             return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
         except Exception as e:
             return MCPToolCallResponse(content=[{"type": "text", "text": f"Error retrieving A2A deal: {str(e)}"}], isError=True)
+
+    elif name == "get_trade_escrow_calldata":
+        try:
+            deal_id = args.get("deal_id", "")
+            chain_name = args.get("chain_name", "polygon")
+            escrow_addr = args.get("escrow_contract_address")
+            data = a2a_deal_engine.build_escrow_deposit_calldata(
+                deal_id,
+                escrow_contract_address=escrow_addr,
+                chain_name=chain_name,
+            )
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error generating escrow calldata: {str(e)}"}], isError=True)
 
     elif name == "get_onchain_signed_feed":
         symbol = args.get("symbol", "Cu")

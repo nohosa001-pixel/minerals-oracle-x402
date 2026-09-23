@@ -112,3 +112,78 @@ def test_mcp_http_invoke_tool():
     bal_obj = bal_resp.json()
     bal_data = json.loads(bal_obj["content"][0]["text"])
     assert bal_data["balance_usdc"] == 0.50
+
+
+def test_mcp_get_trade_escrow_calldata():
+    """Verify get_trade_escrow_calldata tool via both stdio handler and REST dispatcher."""
+    from app.a2a_deal_engine import get_a2a_deal_engine
+    from app.schemas import TradeDealSpec, TradeDealProposeRequest, TradeDealDualSignRequest, MineralType, SourceCountry
+
+    deal_engine = get_a2a_deal_engine()
+    deal_id = "DEAL-MCP-TEST-ESCROW-01"
+    buyer_addr = "0x3333333333333333333333333333333333333333"
+    seller_addr = "0x4444444444444444444444444444444444444444"
+
+    spec = TradeDealSpec(
+        deal_id=deal_id,
+        commodity=MineralType.LITHIUM_HYDROXIDE,
+        volume_tons=10.0,
+        unit_price_usd_per_ton=20000.0,
+        total_deal_value_usd=200000.0,
+        origin_country=SourceCountry.AUS,
+        destination_country="USA",
+        feoc_cleared=True,
+        mass_balance_cleared=True,
+        ebl_document_id="EBL-MCP-LIT-01",
+        buyer_agent_address=buyer_addr,
+        seller_agent_address=seller_addr,
+        created_at_utc="2026-09-22T12:00:00Z",
+    )
+
+    # 1. Propose & dual-sign deal
+    deal_engine.propose_deal(TradeDealProposeRequest(spec=spec, seller_signature="0x" + "a" * 130))
+    deal_engine.dual_sign_deal(TradeDealDualSignRequest(deal_id=deal_id, buyer_agent_address=buyer_addr, buyer_signature="0x" + "b" * 130))
+
+    # 2. Check stdio tools/list includes get_trade_escrow_calldata
+    list_resp = handle_tools_list("req_list_escrow")
+    tools = [t["name"] for t in list_resp["result"]["tools"]]
+    assert "get_trade_escrow_calldata" in tools
+
+    # 3. Call via stdio handle_tool_call
+    stdio_resp = handle_tool_call(
+        "req_call_escrow",
+        "get_trade_escrow_calldata",
+        {"deal_id": deal_id, "chain_name": "polygon"}
+    )
+    assert "result" in stdio_resp
+    res_data = json.loads(stdio_resp["result"]["content"][0]["text"])
+    assert res_data["deal_id"] == deal_id
+    assert res_data["escrow_contract_address"].lower() == "0x1270ddebad0ca90070342336a581eaACBA2060Ab".lower()
+    assert res_data["function_signature"] == "createEscrow(bytes32,address,uint256,bytes32,uint256)"
+
+    # 4. Call via REST POST /mcp/invoke
+    http_resp = client.post(
+        "/mcp/invoke",
+        json={
+            "name": "get_trade_escrow_calldata",
+            "arguments": {"deal_id": deal_id, "chain_name": "base"}
+        },
+        headers={"X-Dev-Bypass": "true"}
+    )
+    assert http_resp.status_code == 200
+    http_res_obj = http_resp.json()
+    assert not http_res_obj["isError"]
+    http_data = json.loads(http_res_obj["content"][0]["text"])
+    assert http_data["escrow_contract_address"].lower() == "0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638".lower()
+
+
+def test_machine_sitemap_discovery():
+    """Verify /sitemap.xml is properly formatted and indexes critical agent endpoints."""
+    resp = client.get("/sitemap.xml")
+    assert resp.status_code == 200
+    assert resp.headers["content-type"] == "application/xml"
+    content = resp.text
+    assert "<loc>http://localhost:8000/llms.txt</loc>" in content
+    assert "<loc>http://localhost:8000/.well-known/agent.json</loc>" in content
+    assert "<loc>http://localhost:8000/.well-known/a2a.json</loc>" in content
+    assert "<loc>http://localhost:8000/mcp/tools</loc>" in content

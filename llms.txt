@@ -34,6 +34,11 @@
 
 ## ⚡ Quick Agent API Directory
 
+- **A2A Propose Trade Deal**: `POST /api/v1/trade/deals/propose` (Cryptographically signed deal specification)
+- **A2A Dual-Sign Deal**: `POST /api/v1/trade/deals/dual-sign` (Countersignature & Oracle attestation minting)
+- **A2A Escrow Calldata**: `GET /api/v1/a2a/deals/{deal_id}/escrow-calldata` (EVM payload for Polygon/Base/Arbitrum)
+- **Electronic Bill of Lading (eBL) Audit**: `POST /api/v1/trade/verify-ebl` (UNCITRAL MLETR, IMO & dark fleet check)
+- **Trade Route Optimization**: `POST /api/v1/trade/optimize-route` (Chokepoint detour & landed cost arbitrage)
 - **General Compliance Verification**: `POST /api/v1/oracle/compliance/verify` (Full 7-pillar audit + EIP-712 passport)
 - **Australian Lithium Provenance**: `POST /api/v1/lithium/verify-origin` (WA MINEDEX, 7.5:1 yield, US IRA FEOC 25%)
 - **Indonesian Nickel MHP Provenance**: `POST /api/v1/nickel/verify-origin` (SIMBARA NTPN, HPAL 31.34:1 yield, CBAM)
@@ -46,8 +51,10 @@
 - **Instant Agent Onboarding**: `POST /api/v1/agent/onboard` (Zero-friction 0.05 USDC trial balance)
 - **Google AP2 Manifest**: `GET /.well-known/ap2`
 - **Agent Protocol Manifest**: `GET /.well-known/agent.json`
+- **A2A Skills Manifest**: `GET /.well-known/a2a.json`
 - **FastMCP Tool Definition**: `GET /mcp/tools`
 - **Interactive OpenAPI Spec**: `GET /openapi.json`
+- **Machine Sitemap**: `GET /sitemap.xml`
 
 ---
 
@@ -145,3 +152,55 @@ audit_result = httpx.post(
 print("Compliance Verdict:", audit_result["verdict"]["is_fully_compliant"])
 print("EIP-712 Battery Passport Signature:", audit_result["eip712_signature"])
 ```
+
+---
+
+## 📜 ERC-MilestoneTradeEscrow (A2A Physical Trade Settlement Rails)
+
+Autonomous agents settling physical commodity contracts (lithium, nickel, cobalt, copper, silver) replace legacy bank Letters of Credit (L/C, $50,000+ fees) with deterministic 3-stage milestone escrows on EVM chains.
+
+### ⛓️ Verified Mainnet Escrow Deployments
+- **Polygon (137)**: `0x1270ddebad0ca90070342336a581eaACBA2060Ab`
+- **Base (8453)**: `0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638`
+- **Arbitrum (42161)**: `0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638`
+- **Native USDC**: `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359` (Polygon)
+
+### 🚢 3-Stage Milestone Settlement Rules
+1. **Stage 1 (30% Payout)**: Title Transfer & eBL Ingestion. Trigger: `deal.eblHash == verifiedEblHash`.
+2. **Stage 2 (40% Payout)**: Mid-Transit Geofence Integrity. Trigger: Satellite AIS corridor ping.
+3. **Stage 3 (30% Final)**: Port of Discharge (POD) customs clearance, lab assay certificate (SGS/ALS), and EU Battery Passport/CBAM clearance.
+
+### ⚡ A2A Trade Escrow API Execution
+```python
+# 1. Propose Deal between Buyer & Seller AI Agents
+deal = httpx.post(f"{base_url}/api/v1/trade/deals/propose", json={
+    "commodity_type": "LITHIUM_HYDROXIDE",
+    "quantity_metric_tons": 500.0,
+    "unit_price_usd": 25000.0,
+    "buyer_agent_address": "0x2222222222222222222222222222222222222222",
+    "seller_agent_address": "0x1111111111111111111111111111111111111111",
+    "delivery_incoterm": "CIF_ROTTERDAM"
+}).json()
+
+deal_id = deal["deal_id"]
+
+# 2. Dual-Sign Deal (EIP-712 binding)
+signed_deal = httpx.post(f"{base_url}/api/v1/trade/deals/dual-sign", json={
+    "deal_id": deal_id,
+    "buyer_signature": "0x...",
+    "seller_signature": "0x..."
+}).json()
+
+# 3. Retrieve Live Smart Contract Calldata for on-chain deposit
+calldata_resp = httpx.get(f"{base_url}/api/v1/a2a/deals/{deal_id}/escrow-calldata?chain=polygon").json()
+print("Escrow Contract:", calldata_resp["target_contract"])
+print("Calldata Hex:", calldata_resp["calldata_hex"]) # createEscrow(bytes32,address,uint256,bytes32,uint256) -> selector 0x8670ff13
+```
+
+---
+
+## 🛡️ Statutory Limitation of Liability & Legal Disclaimer
+All oracle heuristics and escrow calldata are provided strictly **"AS-IS"** without merchantability warranty.
+1. **Strict $0.50 USDC Cumulative Liability Cap**: Development and infrastructure liability is strictly hard-capped at $0.50 USDC.
+2. **EIP-712 Disclaimer Binding**: Consent is mathematically bound on-chain via immutable `bytes32 disclaimerHash`.
+3. **Non-Delegable Importer Due Diligence**: Importing agents retain sole, non-delegable responsibility for physical laboratory assay and customs clearance under applicable trade jurisprudence.
