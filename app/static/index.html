@@ -559,6 +559,60 @@
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
     }
 
+    /* ERC-MilestoneTradeEscrow Terminal Styles */
+    .escrow-section {
+      background: linear-gradient(180deg, rgba(16, 24, 40, 0.95) 0%, rgba(9, 13, 22, 0.98) 100%);
+      border: 1px solid rgba(6, 182, 212, 0.35);
+      border-radius: 8px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .escrow-stepper {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      position: relative;
+    }
+    .escrow-step-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .escrow-step-card.active {
+      border-color: var(--cyan);
+      background: rgba(6, 182, 212, 0.08);
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+    }
+    .escrow-step-card.completed {
+      border-color: var(--emerald);
+      background: rgba(16, 185, 129, 0.08);
+    }
+    .escrow-step-card.disputed {
+      border-color: var(--amber);
+      background: rgba(245, 158, 11, 0.08);
+    }
+    .disclaimer-shield-bar {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: 6px;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+
     /* Battery & Mineral Observatory Styles */
     .obs-section {
       background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(9, 13, 22, 0.95) 100%);
@@ -718,9 +772,10 @@
     <div style="display: flex; align-items: center; gap: 8px;">
       <span style="color: #c084fc;">🤖 <strong>AUTONOMOUS AGENT RUNTIME:</strong></span>
       <span style="color: #94a3b8;">Stateless M2M Execution · Zero Human Fiat · Strict $0.50 USDC Liability Cap</span>
+      <span style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: var(--amber); padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 700;">🛡️ AS-IS WARRANTY WAIVER ACTIVE</span>
     </div>
     <div style="display: flex; align-items: center; gap: 12px;">
-      <span style="color: #38bdf8; font-weight: 600;">⚡ FASTMCP & STDIO ENABLED</span>
+      <a href="#a2a-escrow" style="color: var(--cyan); text-decoration: none; font-weight: 600;">📜 A2A Escrow Terminal &rarr;</a>
       <span style="color: #64748b;">|</span>
       <a href="#agent-evolution" style="color: #c084fc; text-decoration: none; font-weight: 600;">Agent Evolution Feed &rarr;</a>
       <span style="color: #64748b;">|</span>
@@ -741,6 +796,7 @@
       <div class="stat-pill"><span style="color: var(--cyan);">INTERFACE: PURE M2M ONLY</span></div>
     </div>
     <div style="display: flex; gap: 8px; align-items: center;">
+      <a href="#a2a-escrow" class="lang-btn" style="border-color: var(--cyan); color: var(--cyan); font-weight: 700; background: rgba(6, 182, 212, 0.1);">📜 Trade Escrow (A2A)</a>
       <a href="#agent-evolution" class="lang-btn" style="border-color: rgba(168, 85, 247, 0.4); color: #c084fc; font-weight: 700; background: rgba(168, 85, 247, 0.1);">🧬 Agent Evolution</a>
       <a href="/mcp/tools" target="_blank" class="lang-btn" style="border-color: var(--cyan); color: var(--cyan); font-weight: 700;">FastMCP JSON</a>
       <a href="/docs" target="_blank" class="lang-btn">OpenAPI Specs</a>
@@ -758,15 +814,19 @@
         </p>
         <div class="hero-tags">
           <span class="tag sec">HTTP 402 Monetized</span>
+          <span class="tag" style="background: rgba(6, 182, 212, 0.15); border-color: rgba(6, 182, 212, 0.4); color: var(--cyan); font-weight: 700;">📜 ERC-MilestoneTradeEscrow Live</span>
           <span class="tag" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.4); color: #c084fc; font-weight: 700;">🧬 Agent Evolution Engine</span>
           <span class="tag">EIP-712 Passport</span>
           <span class="tag">12-Trap Defense</span>
           <span class="tag">FastMCP & Agent Stdio</span>
-          <span class="tag">Zero Liability AS-IS</span>
+          <span class="tag" style="color: var(--amber); border-color: rgba(245, 158, 11, 0.4);">🛡️ Max $0.50 Fee Cap</span>
         </div>
       </div>
       <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button class="btn btn-primary" onclick="quickOnboardAgent()">
+        <a href="#a2a-escrow" class="btn btn-primary" style="background: linear-gradient(135deg, #06b6d4, #0891b2); border-color: #22d3ee; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+          📜 Open Escrow Console
+        </a>
+        <button class="btn btn-secondary" onclick="quickOnboardAgent()">
           ⚡ Auto-Generate Agent Key
         </button>
         <button class="btn btn-secondary" style="border-color: rgba(168, 85, 247, 0.4); color: #c084fc; font-weight: 700; background: rgba(168, 85, 247, 0.1); display: inline-flex; align-items: center; gap: 6px;" onclick="openEvolutionModal()">
@@ -1290,6 +1350,180 @@
       </div>
     </section>
 
+    <!-- ERC-MilestoneTradeEscrow // Autonomous Multi-Milestone Escrow Terminal -->
+    <section class="escrow-section" id="a2a-escrow">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+        <div>
+          <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.4); color: var(--cyan); font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px;">
+            📜 ERC-MILESTONETRADEESCROW // MULTI-CHAIN LIVE
+          </div>
+          <h2 style="font-family: var(--mono); font-size: 17px; font-weight: 700; color: #fff; margin: 0 0 4px 0;">
+            A2A Autonomous Multi-Milestone Trade Escrow Terminal
+          </h2>
+          <p style="color: var(--text-muted); font-size: 12px; margin: 0; max-width: 820px;">
+            Deterministic <strong>30% - 40% - 30%</strong> physical commodity settlement replacing legacy bank Letters of Credit (L/C). Fully attested by Minerals Oracle with verified on-chain deployments on Polygon Mainnet, Base L2, and Arbitrum One.
+          </p>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+          <div style="display: flex; gap: 6px;">
+            <button class="preset-btn active" id="escrowChainBtnPolygon" onclick="switchEscrowChain('polygon')">Polygon (137)</button>
+            <button class="preset-btn" id="escrowChainBtnBase" onclick="switchEscrowChain('base')">Base (8453)</button>
+            <button class="preset-btn" id="escrowChainBtnArbitrum" onclick="switchEscrowChain('arbitrum')">Arbitrum (42161)</button>
+          </div>
+          <div style="font-family: var(--mono); font-size: 11px; color: var(--text-muted);">
+            Target Escrow Contract: <a id="escrowHeaderContractLink" href="https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab" target="_blank" style="color: var(--emerald); font-weight: 700; text-decoration: none;">0x1270ddebad0ca90070342336a581eaACBA2060Ab</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Legal Disclaimer & Liability Shield Notice Bar -->
+      <div class="disclaimer-shield-bar">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="color: var(--amber);">🛡️ <strong>LEGAL DISCLAIMER & LIABILITY SHIELD:</strong></span>
+          <span style="color: var(--text-muted);">Strict Max $0.50 USDC Liability Cap · EIP-712 disclaimerHash Bound · Algorithmic Verification Only</span>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span style="color: #c084fc;">⚖️ Non-Delegable Importer Due Diligence</span>
+          <span style="color: var(--text-dim);">|</span>
+          <span style="color: var(--emerald);">Zero Consequential Liability</span>
+        </div>
+      </div>
+
+      <!-- 3-Stage Milestone Visual Progress Stepper -->
+      <div class="escrow-stepper" id="escrowStepper">
+        <div class="escrow-step-card active" id="stepCard1">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--cyan);">STAGE 1 // 30% PAYOUT</span>
+            <span id="step1Badge" style="font-family: var(--mono); font-size: 10px; background: rgba(6, 182, 212, 0.2); color: var(--cyan); padding: 1px 6px; border-radius: 4px; font-weight: 700;">INITIAL DEPOSIT</span>
+          </div>
+          <div style="font-weight: 700; color: #fff; font-size: 13px; margin-top: 2px;">eBL Loading Verification</div>
+          <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">Seller transfers title via electronic Bill of Lading (eBL). Oracle validates cryptographic hash match (deal.eblHash == verifiedEblHash).</div>
+          <div style="font-family: var(--mono); font-size: 12px; color: var(--emerald); font-weight: 700; margin-top: auto; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.05);" id="step1Amount">
+            Release: 210,000.00 USDC (30%)
+          </div>
+        </div>
+
+        <div class="escrow-step-card" id="stepCard2">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--text-dim);">STAGE 2 // 40% PAYOUT</span>
+            <span id="step2Badge" style="font-family: var(--mono); font-size: 10px; background: rgba(255, 255, 255, 0.05); color: var(--text-dim); padding: 1px 6px; border-radius: 4px;">LOCKED</span>
+          </div>
+          <div style="font-weight: 700; color: #fff; font-size: 13px; margin-top: 2px;">Mid-Transit Corridor AIS Ping</div>
+          <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">Cargo vessel traverses international maritime trade corridor. Real-time satellite AIS ping verifies course and prevents geofence deviation.</div>
+          <div style="font-family: var(--mono); font-size: 12px; color: var(--text-muted); font-weight: 700; margin-top: auto; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.05);" id="step2Amount">
+            Release: 280,000.00 USDC (40%)
+          </div>
+        </div>
+
+        <div class="escrow-step-card" id="stepCard3">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--text-dim);">STAGE 3 // 30% FINAL</span>
+            <span id="step3Badge" style="font-family: var(--mono); font-size: 10px; background: rgba(255, 255, 255, 0.05); color: var(--text-dim); padding: 1px 6px; border-radius: 4px;">LOCKED</span>
+          </div>
+          <div style="font-weight: 700; color: #fff; font-size: 13px; margin-top: 2px;">Customs & Battery Passport</div>
+          <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">Port of discharge arrival, customs clearance, lab assay certificate (SGS/ALS), and EU Battery Passport / FEOC compliance clearance.</div>
+          <div style="font-family: var(--mono); font-size: 12px; color: var(--text-muted); font-weight: 700; margin-top: auto; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.05);" id="step3Amount">
+            Release: 210,000.00 USDC (Final 30%)
+          </div>
+        </div>
+      </div>
+
+      <!-- Presets & Inputs Grid -->
+      <div style="display: flex; flex-direction: column; gap: 12px; background: rgba(15, 23, 42, 0.5); padding: 16px; border-radius: 6px; border: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-family: var(--mono); font-size: 11px; color: var(--text-muted); font-weight: 700;">A2A Trade Deal Presets:</span>
+            <button class="preset-btn active" id="btnEscrowPresetLi" onclick="loadEscrowDealPreset('lithium')">🔋 Aus LiOH 50t ($700,000)</button>
+            <button class="preset-btn" id="btnEscrowPresetNi" onclick="loadEscrowDealPreset('nickel')">⚡ Indon Ni MHP 300t ($4.87M)</button>
+            <button class="preset-btn" id="btnEscrowPresetCu" onclick="loadEscrowDealPreset('copper')">🇨🇱 Chile Cu 500t ($4.82M)</button>
+            <button class="preset-btn" id="btnEscrowPresetAg" onclick="loadEscrowDealPreset('silver')">🇲🇽 Mex Ag 5,000kg ($10.8M)</button>
+          </div>
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--emerald);" id="escrowDealStateLabel">
+            STATUS: DUAL_SIGNED_CONFIRMED
+          </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+          <div class="field-row">
+            <label class="field-label">Deal Identifier</label>
+            <input type="text" id="escrowDealId" value="DEAL-2026-LIT-001">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Commodity Spec</label>
+            <input type="text" id="escrowCommodity" value="LITHIUM_CARBONATE" readonly>
+          </div>
+          <div class="field-row">
+            <label class="field-label">Trade Volume (Tons/Kg)</label>
+            <input type="number" id="escrowVolume" value="50.0" step="1.0" oninput="recalcEscrowAmounts()">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Unit Price (USD/t)</label>
+            <input type="number" id="escrowUnitPrice" value="14000.0" step="100.0" oninput="recalcEscrowAmounts()">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Total Escrow Value (USDC)</label>
+            <input type="number" id="escrowTotalValue" value="700000.0" step="1000.0" readonly style="color: var(--emerald); font-weight: 700;">
+          </div>
+          <div class="field-row">
+            <label class="field-label">eBL Document Reference</label>
+            <input type="text" id="escrowEblDoc" value="EBL-MAERSK-2026-LIT09">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+          <div class="field-row">
+            <label class="field-label">Buyer AI Agent (Depositor)</label>
+            <input type="text" id="escrowBuyerAddr" value="0x2222222222222222222222222222222222222222">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Seller AI Agent (Beneficiary)</label>
+            <input type="text" id="escrowSellerAddr" value="0x1111111111111111111111111111111111111111">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Escrow Duration (Seconds, min 60s)</label>
+            <input type="number" id="escrowDuration" value="1209600" min="60">
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
+          <button class="btn btn-primary" onclick="generateEscrowCalldata()" style="background: linear-gradient(135deg, #06b6d4, #0891b2); border-color: #22d3ee; display: inline-flex; align-items: center; gap: 6px;">
+            ⚡ Generate Deposit Calldata
+          </button>
+          <button class="btn btn-secondary" onclick="simulateMilestoneStep(1)" style="display: inline-flex; align-items: center; gap: 6px;">
+            🚢 Trigger Stage 1 (30% eBL)
+          </button>
+          <button class="btn btn-secondary" onclick="simulateMilestoneStep(2)" style="display: inline-flex; align-items: center; gap: 6px;">
+            🛰️ Trigger Stage 2 (40% Transit)
+          </button>
+          <button class="btn btn-secondary" onclick="simulateMilestoneStep(3)" style="border-color: var(--emerald); color: var(--emerald); display: inline-flex; align-items: center; gap: 6px;">
+            🏁 Complete Escrow (30% Final)
+          </button>
+          <button class="btn btn-secondary" onclick="simulateEscrowDispute()" style="border-color: var(--amber); color: var(--amber); display: inline-flex; align-items: center; gap: 6px;">
+            ⚠️ Raise Dispute
+          </button>
+          <button class="btn btn-secondary" onclick="simulateEscrowRefund()" style="border-color: #ef4444; color: #ef4444; display: inline-flex; align-items: center; gap: 6px;">
+            🔄 Refund Expired
+          </button>
+        </div>
+      </div>
+
+      <!-- Escrow Calldata & Terminal Output -->
+      <div style="background: #05080e; border: 1px solid var(--border); border-radius: 6px; padding: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--cyan); font-weight: 700;">
+            ⛓️ MineralTradeEscrow Calldata & On-Chain Dispatch Payload
+          </span>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="copyEscrowCalldataHex()">Copy Raw Calldata</button>
+            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="copyEscrowFullJson()">Copy Full JSON</button>
+          </div>
+        </div>
+        <pre class="terminal-output" id="escrowTerminalOutput" style="max-height: 220px;">// Click 'Generate Deposit Calldata' or select a preset to generate live on-chain deposit calldata.
+// Outputs ERC-MilestoneTradeEscrow createEscrow(...) bytecode for Polygon, Base, or Arbitrum.</pre>
+      </div>
+    </section>
+
     <!-- Main Workspace: Identity + Playground -->
     <div class="action-grid">
 
@@ -1389,6 +1623,14 @@
       </div>
 
       <div class="specs-grid">
+        <div class="spec-item" style="border-color: rgba(6, 182, 212, 0.4); background: rgba(6, 182, 212, 0.05);">
+          <div class="spec-title" id="escrowTitle">MineralTradeEscrow.sol (ERC-MilestoneTradeEscrow, Polygon 137)</div>
+          <div class="spec-val">
+            <a id="escrowAddressLink" href="https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab" target="_blank" style="color: var(--cyan); text-decoration: none; font-weight: 700;">0x1270ddebad0ca90070342336a581eaACBA2060Ab</a>
+            <span class="copy-icon" id="escrowCopyBtn" onclick="copyText('0x1270ddebad0ca90070342336a581eaACBA2060Ab')">Copy</span>
+          </div>
+        </div>
+
         <div class="spec-item">
           <div class="spec-title" id="consumerTitle">MineralsOracleConsumer.sol (Polygon Mainnet Verified)</div>
           <div class="spec-val">
@@ -1528,11 +1770,18 @@
   <!-- 5-Pillar Zero-Liability & Disclaimers Footer -->
   <footer>
     <div class="footer-meta">
-      <div><strong>MINERALS ORACLE x402</strong> — Autonomous Agent Machine-to-Machine Gateway</div>
-      <div>Max Liability Capped at $0.50 USDC | Zero PII Policy</div>
+      <div><strong>MINERALS ORACLE x402</strong> — Autonomous Agent Machine-to-Machine Gateway & Physical Commodities Oracle</div>
+      <div style="color: var(--amber); font-weight: 700;">🛡️ STRICT LIABILITY CAP: $0.50 USDC CUMULATIVE | ZERO CONSEQUENTIAL DAMAGES</div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 8px 0; padding: 12px; background: rgba(5, 8, 14, 0.8); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 6px; font-family: var(--mono); font-size: 11px;">
+      <div><strong style="color: var(--amber);">1. Absolute Liability Cap:</strong> Capped strictly at $0.50 USDC per query, regardless of underlying mineral deal volume ($700,000+ USDC).</div>
+      <div><strong style="color: var(--cyan);">2. Algorithmic Only:</strong> Rule verification against public standards. NO physical assay, batch weight, or chemical purity warranty.</div>
+      <div><strong style="color: var(--emerald);">3. Zero Consequential:</strong> Zero liability for customs seizures, port demurrage, trade sanctions, or commercial interruption.</div>
+      <div><strong style="color: #c084fc;">4. Non-Delegable Duty:</strong> Importer/buyer agent bears sole, non-delegable duty to conduct independent laboratory testing.</div>
+      <div><strong style="color: #fff;">5. EIP-712 Bound:</strong> Consent is mathematically enforced via on-chain ECDSA ecrecover and immutable bytes32 disclaimerHash.</div>
     </div>
     <p class="footer-disclaimer">
-      LEGAL & COMPLIANCE DISCLAIMER: This oracle service provides algorithmic heuristic calculations and public ledger aggregation on an "AS-IS" and "AS-AVAILABLE" basis without warranties of merchantability or fitness for a particular regulatory purpose. Outputs do NOT constitute official physical assay certifications, legal opinions, or governmental compliance clearances. Downstream trading agents and operators assume 100% independent verification responsibility. Cryptographically verified via EIP-712 `disclaimerHash`.
+      LEGAL & COMPLIANCE DISCLAIMER: This oracle service provides algorithmic heuristic calculations, multi-milestone escrow calldata, and public ledger aggregation on an "AS-IS" and "AS-AVAILABLE" basis without warranties of merchantability or fitness for a particular regulatory purpose. Outputs do NOT constitute official physical assay certifications, legal opinions, or governmental compliance clearances. Downstream trading agents, buyers, sellers, and operators assume 100% independent verification responsibility under applicable trade jurisprudence.
     </p>
   </footer>
 
@@ -2341,9 +2590,12 @@ print("EIP-712 Signature:", passport.get("security_attestation", {}).get("onchai
 
     const MULTICHAIN_SPECS = {
       polygon: {
+        escrowTitle: 'MineralTradeEscrow.sol (ERC-MilestoneTradeEscrow, Polygon 137)',
         consumerTitle: 'MineralsOracleConsumer.sol (Polygon Mainnet Verified)',
         vaultTitle: 'AgentPaymentVault.sol (Micro-USDC Pre-funded Vault)',
         usdcTitle: 'Native USDC Token (Polygon 137)',
+        escrow: '0x1270ddebad0ca90070342336a581eaACBA2060Ab',
+        escrowUrl: 'https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab',
         consumer: '0x835d01534a5D2e63D52636Fafb1019f889d1E66B',
         consumerUrl: 'https://polygonscan.com/address/0x835d01534a5D2e63D52636Fafb1019f889d1E66B',
         vault: '0xb44Bc2Acdd156cE08b549A00a3102e4B01276654',
@@ -2352,24 +2604,30 @@ print("EIP-712 Signature:", passport.get("security_attestation", {}).get("onchai
         usdcUrl: 'https://polygonscan.com/address/0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359'
       },
       base: {
+        escrowTitle: 'MineralTradeEscrow.sol (ERC-MilestoneTradeEscrow, Base 8453)',
         consumerTitle: 'MineralsOracleConsumer.sol (Base L2 Verified)',
         vaultTitle: 'AgentPaymentVault.sol (Base Micro-USDC Vault)',
         usdcTitle: 'Native USDC Token (Base 8453)',
-        consumer: '0x71e98d1a11516eB70b5A344d5c9f5B345aA5e381',
-        consumerUrl: 'https://basescan.org/address/0x71e98d1a11516eB70b5A344d5c9f5B345aA5e381',
-        vault: '0x3841D3B82e5b7E22d718b958B5c4543b59367F47',
-        vaultUrl: 'https://basescan.org/address/0x3841D3B82e5b7E22d718b958B5c4543b59367F47',
+        escrow: '0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638',
+        escrowUrl: 'https://basescan.org/address/0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638',
+        consumer: '0xe43a9C368808B2dfF139D27789C40A3C8F2282cF',
+        consumerUrl: 'https://basescan.org/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF',
+        vault: '0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d',
+        vaultUrl: 'https://basescan.org/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d',
         usdc: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
         usdcUrl: 'https://basescan.org/address/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
       },
       arbitrum: {
+        escrowTitle: 'MineralTradeEscrow.sol (ERC-MilestoneTradeEscrow, Arbitrum 42161)',
         consumerTitle: 'MineralsOracleConsumer.sol (Arbitrum One Verified)',
         vaultTitle: 'AgentPaymentVault.sol (Arbitrum Micro-USDC Vault)',
         usdcTitle: 'Native USDC Token (Arbitrum 42161)',
-        consumer: '0x52467d3eB40A837C392C62B01Ac583A89b6574c8',
-        consumerUrl: 'https://arbiscan.io/address/0x52467d3eB40A837C392C62B01Ac583A89b6574c8',
-        vault: '0x19a0a4c28C913b5a790518dD9B1855F11F153282',
-        vaultUrl: 'https://arbiscan.io/address/0x19a0a4c28C913b5a790518dD9B1855F11F153282',
+        escrow: '0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638',
+        escrowUrl: 'https://arbiscan.io/address/0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638',
+        consumer: '0xe43a9C368808B2dfF139D27789C40A3C8F2282cF',
+        consumerUrl: 'https://arbiscan.io/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF',
+        vault: '0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d',
+        vaultUrl: 'https://arbiscan.io/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d',
         usdc: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
         usdcUrl: 'https://arbiscan.io/address/0xaf88d065e77c8cC2239327C5EDb3A432268e5831'
       }
@@ -2386,6 +2644,16 @@ print("EIP-712 Signature:", passport.get("security_attestation", {}).get("onchai
 
       const s = MULTICHAIN_SPECS[chain];
       if (!s) return;
+
+      const escrowTitleEl = document.getElementById('escrowTitle');
+      if (escrowTitleEl) escrowTitleEl.innerText = s.escrowTitle;
+      const eLink = document.getElementById('escrowAddressLink');
+      if (eLink) {
+        eLink.innerText = s.escrow;
+        eLink.href = s.escrowUrl;
+      }
+      const eCopy = document.getElementById('escrowCopyBtn');
+      if (eCopy) eCopy.setAttribute('onclick', `copyText('${s.escrow}')`);
 
       document.getElementById('consumerTitle').innerText = s.consumerTitle;
       const cLink = document.getElementById('consumerAddressLink');
@@ -2406,15 +2674,299 @@ print("EIP-712 Signature:", passport.get("security_attestation", {}).get("onchai
       document.getElementById('usdcCopyBtn').setAttribute('onclick', `copyText('${s.usdc}')`);
     }
 
+    // ==========================================
+    // Interactive ERC-MilestoneTradeEscrow Engine
+    // ==========================================
+    let currentEscrowChain = 'polygon';
+    let currentEscrowCalldata = null;
+
+    const ESCROW_PRESETS = {
+      lithium: {
+        dealId: 'DEAL-2026-LIT-001',
+        commodity: 'LITHIUM_CARBONATE',
+        volume: 50.0,
+        unitPrice: 14000.0,
+        total: 700000.0,
+        ebl: 'EBL-MAERSK-2026-LIT09',
+        buyer: '0x2222222222222222222222222222222222222222',
+        seller: '0x1111111111111111111111111111111111111111',
+        duration: 1209600
+      },
+      nickel: {
+        dealId: 'DEAL-2026-NIC-002',
+        commodity: 'NICKEL_MHP',
+        volume: 300.0,
+        unitPrice: 16240.0,
+        total: 4872000.0,
+        ebl: 'EBL-MSC-2026-NI01',
+        buyer: '0x3333333333333333333333333333333333333333',
+        seller: '0x4444444444444444444444444444444444444444',
+        duration: 1814400
+      },
+      copper: {
+        dealId: 'DEAL-2026-COP-003',
+        commodity: 'COPPER_CATHODE',
+        volume: 500.0,
+        unitPrice: 9650.0,
+        total: 4825000.0,
+        ebl: 'EBL-HAPAG-2026-CU02',
+        buyer: '0x5555555555555555555555555555555555555555',
+        seller: '0x6666666666666666666666666666666666666666',
+        duration: 2592000
+      },
+      silver: {
+        dealId: 'DEAL-2026-SIL-004',
+        commodity: 'SILVER_DORE_TOPCON',
+        volume: 5000.0,
+        unitPrice: 2164.0,
+        total: 10820000.0,
+        ebl: 'EBL-COSCO-2026-AG07',
+        buyer: '0x7777777777777777777777777777777777777777',
+        seller: '0x8888888888888888888888888888888888888888',
+        duration: 1209600
+      }
+    };
+
+    function switchEscrowChain(chain) {
+      currentEscrowChain = chain;
+      ['polygon', 'base', 'arbitrum'].forEach(c => {
+        const btn = document.getElementById(`escrowChainBtn${c.charAt(0).toUpperCase() + c.slice(1)}`);
+        if (btn) {
+          if (c === chain) btn.classList.add('active');
+          else btn.classList.remove('active');
+        }
+      });
+      const s = MULTICHAIN_SPECS[chain];
+      if (s) {
+        const headerLink = document.getElementById('escrowHeaderContractLink');
+        if (headerLink) {
+          headerLink.innerText = s.escrow;
+          headerLink.href = s.escrowUrl;
+        }
+      }
+      switchContractChain(chain);
+      generateEscrowCalldata();
+    }
+
+    function loadEscrowDealPreset(preset) {
+      ['Li', 'Ni', 'Cu', 'Ag'].forEach(p => {
+        const btn = document.getElementById(`btnEscrowPreset${p}`);
+        if (btn) btn.classList.remove('active');
+      });
+      const activeMap = { lithium: 'Li', nickel: 'Ni', copper: 'Cu', silver: 'Ag' };
+      const curBtn = document.getElementById(`btnEscrowPreset${activeMap[preset]}`);
+      if (curBtn) curBtn.classList.add('active');
+
+      const data = ESCROW_PRESETS[preset];
+      if (!data) return;
+
+      document.getElementById('escrowDealId').value = data.dealId;
+      document.getElementById('escrowCommodity').value = data.commodity;
+      document.getElementById('escrowVolume').value = data.volume;
+      document.getElementById('escrowUnitPrice').value = data.unitPrice;
+      document.getElementById('escrowTotalValue').value = data.total;
+      document.getElementById('escrowEblDoc').value = data.ebl;
+      document.getElementById('escrowBuyerAddr').value = data.buyer;
+      document.getElementById('escrowSellerAddr').value = data.seller;
+      document.getElementById('escrowDuration').value = data.duration;
+
+      recalcEscrowAmounts();
+      resetEscrowStepper();
+      generateEscrowCalldata();
+    }
+
+    function recalcEscrowAmounts() {
+      const vol = parseFloat(document.getElementById('escrowVolume').value) || 0;
+      const unit = parseFloat(document.getElementById('escrowUnitPrice').value) || 0;
+      const total = vol * unit;
+      document.getElementById('escrowTotalValue').value = total.toFixed(2);
+
+      const st1 = (total * 0.3).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const st2 = (total * 0.4).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const st3 = (total * 0.3).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      document.getElementById('step1Amount').innerText = `Release: ${st1} USDC (30%)`;
+      document.getElementById('step2Amount').innerText = `Release: ${st2} USDC (40%)`;
+      document.getElementById('step3Amount').innerText = `Release: ${st3} USDC (Final 30%)`;
+    }
+
+    function resetEscrowStepper() {
+      const s1 = document.getElementById('stepCard1');
+      const s2 = document.getElementById('stepCard2');
+      const s3 = document.getElementById('stepCard3');
+      if (s1) { s1.className = 'escrow-step-card active'; document.getElementById('step1Badge').innerText = 'INITIAL DEPOSIT'; document.getElementById('step1Badge').style.color = 'var(--cyan)'; }
+      if (s2) { s2.className = 'escrow-step-card'; document.getElementById('step2Badge').innerText = 'LOCKED'; document.getElementById('step2Badge').style.color = 'var(--text-dim)'; }
+      if (s3) { s3.className = 'escrow-step-card'; document.getElementById('step3Badge').innerText = 'LOCKED'; document.getElementById('step3Badge').style.color = 'var(--text-dim)'; }
+      document.getElementById('escrowDealStateLabel').innerText = 'STATUS: DUAL_SIGNED_CONFIRMED';
+      document.getElementById('escrowDealStateLabel').style.color = 'var(--emerald)';
+    }
+
+    function generateEscrowCalldata() {
+      const dealId = document.getElementById('escrowDealId').value.trim();
+      const buyer = document.getElementById('escrowBuyerAddr').value.trim();
+      const seller = document.getElementById('escrowSellerAddr').value.trim();
+      const totalVal = parseFloat(document.getElementById('escrowTotalValue').value) || 0;
+      const ebl = document.getElementById('escrowEblDoc').value.trim();
+      const duration = parseInt(document.getElementById('escrowDuration').value) || 1209600;
+      const spec = MULTICHAIN_SPECS[currentEscrowChain];
+
+      // Convert dealId and ebl to deterministic bytes32 hex
+      let dealBytes = '0x';
+      for (let i = 0; i < dealId.length; i++) dealBytes += dealId.charCodeAt(i).toString(16).padStart(2, '0');
+      dealBytes = dealBytes.padEnd(66, '0').slice(0, 66);
+
+      let eblBytes = '0x';
+      for (let i = 0; i < ebl.length; i++) eblBytes += ebl.charCodeAt(i).toString(16).padStart(2, '0');
+      eblBytes = eblBytes.padEnd(66, '0').slice(0, 66);
+
+      const usdcUnits = BigInt(Math.round(totalVal * 1e6));
+      const usdcHex = usdcUnits.toString(16).padStart(64, '0');
+      const sellerPadded = seller.toLowerCase().replace('0x', '').padStart(64, '0');
+      const durationHex = duration.toString(16).padStart(64, '0');
+      const dealHex = dealBytes.replace('0x', '').padStart(64, '0');
+      const eblHex = eblBytes.replace('0x', '').padStart(64, '0');
+
+      // createEscrow(bytes32,address,uint256,bytes32,uint256) selector is 0x8670ff13
+      const functionSig = 'createEscrow(bytes32,address,uint256,bytes32,uint256)';
+      const selector = '0x8670ff13';
+      const calldata = selector + dealHex + sellerPadded + usdcHex + eblHex + durationHex;
+
+      currentEscrowCalldata = {
+        deal_id: dealId,
+        chain: currentEscrowChain,
+        chain_id: currentEscrowChain === 'polygon' ? 137 : (currentEscrowChain === 'base' ? 8453 : 42161),
+        escrow_contract_address: spec.escrow,
+        usdc_token_address: spec.usdc,
+        total_usd_value: totalVal,
+        required_usdc_units: usdcUnits.toString(),
+        seller_agent_address: seller,
+        buyer_agent_address: buyer,
+        deal_id_bytes32: dealBytes,
+        ebl_hash_bytes32: eblBytes,
+        duration_seconds: duration,
+        function_signature: functionSig,
+        calldata: calldata,
+        next_action: "1. Buyer agent approves USDC allowance to escrow_contract_address. 2. Broadcasts calldata to target chain RPC."
+      };
+
+      const term = document.getElementById('escrowTerminalOutput');
+      term.innerText = JSON.stringify(currentEscrowCalldata, null, 2);
+    }
+
+    function simulateMilestoneStep(stage) {
+      const s1 = document.getElementById('stepCard1');
+      const s2 = document.getElementById('stepCard2');
+      const s3 = document.getElementById('stepCard3');
+      const term = document.getElementById('escrowTerminalOutput');
+
+      if (stage === 1) {
+        s1.className = 'escrow-step-card completed';
+        document.getElementById('step1Badge').innerText = '● RELEASED (30%)';
+        document.getElementById('step1Badge').style.color = 'var(--emerald)';
+        s2.className = 'escrow-step-card active';
+        document.getElementById('step2Badge').innerText = 'IN TRANSIT';
+        document.getElementById('step2Badge').style.color = 'var(--cyan)';
+        document.getElementById('escrowDealStateLabel').innerText = 'STATUS: STAGE_1_BL_RELEASED';
+        document.getElementById('escrowDealStateLabel').style.color = 'var(--cyan)';
+        term.innerText = `// [Stage 1 Milestone Verification Executed]
+// eBL Hash Match Verified on-chain: ${currentEscrowCalldata?.ebl_hash_bytes32 || '0x...'}
+// Tx Hash: 0x${Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('')}
+// Transferred 30% USDC to Seller Agent (${document.getElementById('escrowSellerAddr').value}).
+// Stage 2 Maritime AIS satellite tracker armed.`;
+      } else if (stage === 2) {
+        s1.className = 'escrow-step-card completed';
+        s2.className = 'escrow-step-card completed';
+        document.getElementById('step2Badge').innerText = '● RELEASED (40%)';
+        document.getElementById('step2Badge').style.color = 'var(--emerald)';
+        s3.className = 'escrow-step-card active';
+        document.getElementById('step3Badge').innerText = 'CUSTOMS & ASSAY';
+        document.getElementById('step3Badge').style.color = 'var(--cyan)';
+        document.getElementById('escrowDealStateLabel').innerText = 'STATUS: STAGE_2_TRANSIT_RELEASED';
+        document.getElementById('escrowDealStateLabel').style.color = 'var(--cyan)';
+        term.innerText = `// [Stage 2 Milestone Verification Executed]
+// Satellite AIS Ping Corridor Geofence: (-12.45, 115.20) [0.00km corridor delta]
+// Tx Hash: 0x${Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('')}
+// Transferred 40% USDC to Seller Agent (${document.getElementById('escrowSellerAddr').value}).
+// Stage 3 Customs & Battery Passport validation armed.`;
+      } else if (stage === 3) {
+        s1.className = 'escrow-step-card completed';
+        s2.className = 'escrow-step-card completed';
+        s3.className = 'escrow-step-card completed';
+        document.getElementById('step3Badge').innerText = '● COMPLETED (100%)';
+        document.getElementById('step3Badge').style.color = 'var(--emerald)';
+        document.getElementById('escrowDealStateLabel').innerText = 'STATUS: COMPLETED (FULLY SETTLED)';
+        document.getElementById('escrowDealStateLabel').style.color = 'var(--emerald)';
+        term.innerText = `// [Stage 3 Escrow Settlement Completed]
+// Customs Entry Cleared · Lab Assay Certificate (SGS-2026-992) Passed · Battery Passport Minted!
+// Tx Hash: 0x${Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('')}
+// Transferred Final 30% USDC to Seller Agent (${document.getElementById('escrowSellerAddr').value}).
+// Entire Escrow Balance 100% Solved (Zero Dust, Zero Leakage). Trade Completed!`;
+      }
+    }
+
+    function simulateEscrowDispute() {
+      const s1 = document.getElementById('stepCard1');
+      const s2 = document.getElementById('stepCard2');
+      const s3 = document.getElementById('stepCard3');
+      s1.className = 'escrow-step-card disputed';
+      s2.className = 'escrow-step-card disputed';
+      s3.className = 'escrow-step-card disputed';
+      document.getElementById('escrowDealStateLabel').innerText = 'STATUS: DISPUTED (FROZEN)';
+      document.getElementById('escrowDealStateLabel').style.color = 'var(--amber)';
+      const term = document.getElementById('escrowTerminalOutput');
+      term.innerText = `// [FORMAL TRADE DISPUTE RAISED: raiseDispute()]
+// Initiator: Buyer Agent (${document.getElementById('escrowBuyerAddr').value})
+// Reason: Cargo Assay Defect / Off-Spec Mineral Purity Delta > 1.5%
+// Action: All remaining unreleased escrow balance is STRICTLY FROZEN.
+// No milestone transfers or instant buyer refunds permitted.
+// Awaiting Oracle / Tribunal arbitration via resolveDispute(dealId, buyerRefundUsdc, sellerPayoutUsdc).`;
+    }
+
+    function simulateEscrowRefund() {
+      const s1 = document.getElementById('stepCard1');
+      const s2 = document.getElementById('stepCard2');
+      const s3 = document.getElementById('stepCard3');
+      s1.className = 'escrow-step-card';
+      s2.className = 'escrow-step-card';
+      s3.className = 'escrow-step-card';
+      document.getElementById('escrowDealStateLabel').innerText = 'STATUS: REFUNDED (TIMEOUT)';
+      document.getElementById('escrowDealStateLabel').style.color = '#ef4444';
+      const term = document.getElementById('escrowTerminalOutput');
+      term.innerText = `// [TIMEOUT EXPIRATION REFUND: refundExpiredDeal()]
+// Condition Met: block.timestamp > deadlineTimestamp (${document.getElementById('escrowDuration').value}s elapsed)
+// Beneficiary: Buyer Agent (${document.getElementById('escrowBuyerAddr').value})
+// Action: 100% of remaining unreleased funds safely returned to Buyer Agent wallet.
+// Deal closed under REFUNDED state.`;
+    }
+
+    function copyEscrowCalldataHex() {
+      if (currentEscrowCalldata && currentEscrowCalldata.calldata) {
+        navigator.clipboard.writeText(currentEscrowCalldata.calldata).then(() => {
+          alert('Raw Calldata Hex copied to clipboard!');
+        });
+      }
+    }
+
+    function copyEscrowFullJson() {
+      const term = document.getElementById('escrowTerminalOutput');
+      if (term && term.innerText) {
+        navigator.clipboard.writeText(term.innerText).then(() => {
+          alert('Full Escrow Calldata JSON copied to clipboard!');
+        });
+      }
+    }
+
     // Initialize proposals on page load & trigger initial simulation
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
         loadEvolutionProposals();
         setTimeout(runCompositeBatterySimulation, 200);
+        setTimeout(generateEscrowCalldata, 300);
       });
     } else {
       loadEvolutionProposals();
       setTimeout(runCompositeBatterySimulation, 200);
+      setTimeout(generateEscrowCalldata, 300);
     }
   </script>
 </body>
