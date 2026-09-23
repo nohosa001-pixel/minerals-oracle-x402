@@ -876,6 +876,176 @@
       </div>
     </section>
 
+    <!-- A2A Autonomous Trade Economics & Cost Elimination Strip -->
+    <section style="background: rgba(2, 6, 23, 0.9); border: 1px solid rgba(6, 182, 212, 0.35); border-radius: 6px; padding: 10px 18px; margin: 4px 0 16px 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-family: var(--mono); font-size: 11px;">
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <span style="color: var(--cyan); font-weight: 700;">⚡ A2A TRADE ECONOMICS:</span>
+        <span style="color: var(--text-dim); text-decoration: line-through;">Legacy L/C Fee: $50,000 ~ $200,000</span>
+        <span style="color: var(--emerald); font-weight: 700;">➔ Autonomous Escrow Fee: $0.50 USDC</span>
+        <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: var(--emerald); padding: 1px 6px; border-radius: 3px; font-weight: 700;">99.9% COST ELIMINATION</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; color: var(--text-muted);">
+        <span>Settlement Velocity: <strong style="color: #fff;">14 Days ➔ &lt;300ms</strong></span>
+        <span>•</span>
+        <span>Security: <strong style="color: var(--cyan);">eBL + AIS + EIP-712</strong></span>
+      </div>
+    </section>
+
+    <!-- ERC-MilestoneTradeEscrow // Autonomous Multi-Milestone Escrow Terminal -->
+    <section class="escrow-section" id="a2a-escrow">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.4); color: var(--cyan); font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">
+            📜 ERC-MILESTONETRADEESCROW
+          </div>
+          <h2 style="font-family: var(--mono); font-size: 16px; font-weight: 700; color: #fff; margin: 0;">
+            A2A Physical Trade Settlement Terminal (30% · 40% · 30%)
+          </h2>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button class="preset-btn active" id="escrowChainBtnPolygon" onclick="switchEscrowChain('polygon')">Polygon (137)</button>
+          <button class="preset-btn" id="escrowChainBtnBase" onclick="switchEscrowChain('base')">Base (8453)</button>
+          <button class="preset-btn" id="escrowChainBtnArbitrum" onclick="switchEscrowChain('arbitrum')">Arbitrum (42161)</button>
+          <a id="escrowHeaderContractLink" href="https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab" target="_blank" style="font-family: var(--mono); font-size: 11px; color: var(--emerald); font-weight: 700; text-decoration: none; padding: 4px 8px; background: #05080e; border: 1px solid var(--border); border-radius: 4px;">0x1270...60Ab ↗</a>
+        </div>
+      </div>
+
+      <!-- 3-Stage Milestone Visual Progress Stepper -->
+      <div class="escrow-stepper" id="escrowStepper">
+        <div class="escrow-step-card active" id="stepCard1">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--cyan);">STAGE 1 // 30% PAYOUT</span>
+            <span id="step1Badge" style="font-family: var(--mono); font-size: 10px; background: rgba(6, 182, 212, 0.2); color: var(--cyan); padding: 1px 6px; border-radius: 4px; font-weight: 700;">ACTIVE</span>
+          </div>
+          <div style="font-weight: 700; color: #fff; font-size: 13px; margin-top: 2px;">eBL Loading Anchor</div>
+          <div style="font-family: var(--mono); font-size: 11px; color: var(--text-dim);">Trigger: <code>deal.eblHash == verifiedEblHash</code></div>
+          <div style="font-family: var(--mono); font-size: 12px; color: var(--emerald); font-weight: 700; margin-top: auto; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.05);" id="step1Amount">
+            Release: 210,000.00 USDC (30%)
+          </div>
+        </div>
+
+        <div class="escrow-step-card" id="stepCard2">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--text-dim);">STAGE 2 // 40% PAYOUT</span>
+            <span id="step2Badge" style="font-family: var(--mono); font-size: 10px; background: rgba(255, 255, 255, 0.05); color: var(--text-dim); padding: 1px 6px; border-radius: 4px;">LOCKED</span>
+          </div>
+          <div style="font-weight: 700; color: #fff; font-size: 13px; margin-top: 2px;">Mid-Transit Corridor Ping</div>
+          <div style="font-family: var(--mono); font-size: 11px; color: var(--text-dim);">Trigger: <code>Satellite AIS In-Corridor Ping</code></div>
+          <div style="font-family: var(--mono); font-size: 12px; color: var(--text-muted); font-weight: 700; margin-top: auto; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.05);" id="step2Amount">
+            Release: 280,000.00 USDC (40%)
+          </div>
+        </div>
+
+        <div class="escrow-step-card" id="stepCard3">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--text-dim);">STAGE 3 // 30% FINAL</span>
+            <span id="step3Badge" style="font-family: var(--mono); font-size: 10px; background: rgba(255, 255, 255, 0.05); color: var(--text-dim); padding: 1px 6px; border-radius: 4px;">LOCKED</span>
+          </div>
+          <div style="font-weight: 700; color: #fff; font-size: 13px; margin-top: 2px;">Customs & Battery Passport</div>
+          <div style="font-family: var(--mono); font-size: 11px; color: var(--text-dim);">Trigger: <code>POD Customs + Lab Assay + Passport</code></div>
+          <div style="font-family: var(--mono); font-size: 12px; color: var(--text-muted); font-weight: 700; margin-top: auto; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.05);" id="step3Amount">
+            Release: 210,000.00 USDC (30%)
+          </div>
+        </div>
+      </div>
+
+      <!-- Presets & Inputs Grid -->
+      <div style="display: flex; flex-direction: column; gap: 12px; background: rgba(15, 23, 42, 0.5); padding: 16px; border-radius: 6px; border: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-family: var(--mono); font-size: 11px; color: var(--text-muted); font-weight: 700;">A2A Trade Deal Presets:</span>
+            <button class="preset-btn active" id="btnEscrowPresetLi" onclick="loadEscrowDealPreset('lithium')">🔋 Aus LiOH 50t ($700,000)</button>
+            <button class="preset-btn" id="btnEscrowPresetNi" onclick="loadEscrowDealPreset('nickel')">⚡ Indon Ni MHP 300t ($4.87M)</button>
+            <button class="preset-btn" id="btnEscrowPresetCu" onclick="loadEscrowDealPreset('copper')">🇨🇱 Chile Cu 500t ($4.82M)</button>
+            <button class="preset-btn" id="btnEscrowPresetAg" onclick="loadEscrowDealPreset('silver')">🇲🇽 Mex Ag 5,000kg ($10.8M)</button>
+          </div>
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--emerald);" id="escrowDealStateLabel">
+            STATUS: DUAL_SIGNED_CONFIRMED
+          </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+          <div class="field-row">
+            <label class="field-label">Deal Identifier</label>
+            <input type="text" id="escrowDealId" value="DEAL-2026-LIT-001">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Commodity Spec</label>
+            <input type="text" id="escrowCommodity" value="LITHIUM_CARBONATE" readonly>
+          </div>
+          <div class="field-row">
+            <label class="field-label">Trade Volume (Tons/Kg)</label>
+            <input type="number" id="escrowVolume" value="50.0" step="1.0" oninput="recalcEscrowAmounts()">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Unit Price (USD/t)</label>
+            <input type="number" id="escrowUnitPrice" value="14000.0" step="100.0" oninput="recalcEscrowAmounts()">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Total Escrow Value (USDC)</label>
+            <input type="number" id="escrowTotalValue" value="700000.0" step="1000.0" readonly style="color: var(--emerald); font-weight: 700;">
+          </div>
+          <div class="field-row">
+            <label class="field-label">eBL Document Reference</label>
+            <input type="text" id="escrowEblDoc" value="EBL-MAERSK-2026-LIT09">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+          <div class="field-row">
+            <label class="field-label">Buyer AI Agent (Depositor)</label>
+            <input type="text" id="escrowBuyerAddr" value="0x2222222222222222222222222222222222222222">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Seller AI Agent (Beneficiary)</label>
+            <input type="text" id="escrowSellerAddr" value="0x1111111111111111111111111111111111111111">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Escrow Duration (Seconds, min 60s)</label>
+            <input type="number" id="escrowDuration" value="1209600" min="60">
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
+          <button class="btn btn-primary" onclick="generateEscrowCalldata()" style="background: linear-gradient(135deg, #06b6d4, #0891b2); border-color: #22d3ee; display: inline-flex; align-items: center; gap: 6px;">
+            ⚡ Generate Deposit Calldata
+          </button>
+          <button class="btn btn-secondary" onclick="simulateMilestoneStep(1)" style="display: inline-flex; align-items: center; gap: 6px;">
+            🚢 Trigger Stage 1 (30% eBL)
+          </button>
+          <button class="btn btn-secondary" onclick="simulateMilestoneStep(2)" style="display: inline-flex; align-items: center; gap: 6px;">
+            🛰️ Trigger Stage 2 (40% Transit)
+          </button>
+          <button class="btn btn-secondary" onclick="simulateMilestoneStep(3)" style="border-color: var(--emerald); color: var(--emerald); display: inline-flex; align-items: center; gap: 6px;">
+            🏁 Complete Escrow (30% Final)
+          </button>
+          <button class="btn btn-secondary" onclick="simulateEscrowDispute()" style="border-color: var(--amber); color: var(--amber); display: inline-flex; align-items: center; gap: 6px;">
+            ⚠️ Raise Dispute
+          </button>
+          <button class="btn btn-secondary" onclick="simulateEscrowRefund()" style="border-color: #ef4444; color: #ef4444; display: inline-flex; align-items: center; gap: 6px;">
+            🔄 Refund Expired
+          </button>
+        </div>
+      </div>
+
+      <!-- Escrow Calldata & Terminal Output -->
+      <div style="background: #05080e; border: 1px solid var(--border); border-radius: 6px; padding: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--cyan); font-weight: 700;">
+            ⛓️ MineralTradeEscrow Calldata & On-Chain Dispatch Payload
+          </span>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="copyEscrowCalldataHex()">Copy Raw Calldata</button>
+            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="copyEscrowFullJson()">Copy Full JSON</button>
+          </div>
+        </div>
+        <pre class="terminal-output" id="escrowTerminalOutput" style="max-height: 220px;">// Click 'Generate Deposit Calldata' or select a preset to generate live on-chain deposit calldata.
+// Outputs ERC-MilestoneTradeEscrow createEscrow(...) bytecode for Polygon, Base, or Arbitrum.</pre>
+      </div>
+    </section>
+
+
     <!-- Autonomous Agent Evolution & Proposals Section -->
     <section class="evolution-section" id="agent-evolution">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 14px;">
@@ -1335,159 +1505,7 @@
       </div>
     </section>
 
-    <!-- ERC-MilestoneTradeEscrow // Autonomous Multi-Milestone Escrow Terminal -->
-    <section class="escrow-section" id="a2a-escrow">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <div style="background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.4); color: var(--cyan); font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">
-            📜 ERC-MILESTONETRADEESCROW
-          </div>
-          <h2 style="font-family: var(--mono); font-size: 16px; font-weight: 700; color: #fff; margin: 0;">
-            A2A Physical Trade Settlement Terminal (30% · 40% · 30%)
-          </h2>
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <button class="preset-btn active" id="escrowChainBtnPolygon" onclick="switchEscrowChain('polygon')">Polygon (137)</button>
-          <button class="preset-btn" id="escrowChainBtnBase" onclick="switchEscrowChain('base')">Base (8453)</button>
-          <button class="preset-btn" id="escrowChainBtnArbitrum" onclick="switchEscrowChain('arbitrum')">Arbitrum (42161)</button>
-          <a id="escrowHeaderContractLink" href="https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab" target="_blank" style="font-family: var(--mono); font-size: 11px; color: var(--emerald); font-weight: 700; text-decoration: none; padding: 4px 8px; background: #05080e; border: 1px solid var(--border); border-radius: 4px;">0x1270...60Ab ↗</a>
-        </div>
-      </div>
 
-      <!-- 3-Stage Milestone Visual Progress Stepper -->
-      <div class="escrow-stepper" id="escrowStepper">
-        <div class="escrow-step-card active" id="stepCard1">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--cyan);">STAGE 1 // 30% PAYOUT</span>
-            <span id="step1Badge" style="font-family: var(--mono); font-size: 10px; background: rgba(6, 182, 212, 0.2); color: var(--cyan); padding: 1px 6px; border-radius: 4px; font-weight: 700;">ACTIVE</span>
-          </div>
-          <div style="font-weight: 700; color: #fff; font-size: 13px; margin-top: 2px;">eBL Loading Anchor</div>
-          <div style="font-family: var(--mono); font-size: 11px; color: var(--text-dim);">Trigger: <code>deal.eblHash == verifiedEblHash</code></div>
-          <div style="font-family: var(--mono); font-size: 12px; color: var(--emerald); font-weight: 700; margin-top: auto; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.05);" id="step1Amount">
-            Release: 210,000.00 USDC (30%)
-          </div>
-        </div>
-
-        <div class="escrow-step-card" id="stepCard2">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--text-dim);">STAGE 2 // 40% PAYOUT</span>
-            <span id="step2Badge" style="font-family: var(--mono); font-size: 10px; background: rgba(255, 255, 255, 0.05); color: var(--text-dim); padding: 1px 6px; border-radius: 4px;">LOCKED</span>
-          </div>
-          <div style="font-weight: 700; color: #fff; font-size: 13px; margin-top: 2px;">Mid-Transit Corridor Ping</div>
-          <div style="font-family: var(--mono); font-size: 11px; color: var(--text-dim);">Trigger: <code>Satellite AIS In-Corridor Ping</code></div>
-          <div style="font-family: var(--mono); font-size: 12px; color: var(--text-muted); font-weight: 700; margin-top: auto; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.05);" id="step2Amount">
-            Release: 280,000.00 USDC (40%)
-          </div>
-        </div>
-
-        <div class="escrow-step-card" id="stepCard3">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--text-dim);">STAGE 3 // 30% FINAL</span>
-            <span id="step3Badge" style="font-family: var(--mono); font-size: 10px; background: rgba(255, 255, 255, 0.05); color: var(--text-dim); padding: 1px 6px; border-radius: 4px;">LOCKED</span>
-          </div>
-          <div style="font-weight: 700; color: #fff; font-size: 13px; margin-top: 2px;">Customs & Battery Passport</div>
-          <div style="font-family: var(--mono); font-size: 11px; color: var(--text-dim);">Trigger: <code>POD Customs + Lab Assay + Passport</code></div>
-          <div style="font-family: var(--mono); font-size: 12px; color: var(--text-muted); font-weight: 700; margin-top: auto; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.05);" id="step3Amount">
-            Release: 210,000.00 USDC (30%)
-          </div>
-        </div>
-      </div>
-
-      <!-- Presets & Inputs Grid -->
-      <div style="display: flex; flex-direction: column; gap: 12px; background: rgba(15, 23, 42, 0.5); padding: 16px; border-radius: 6px; border: 1px solid var(--border);">
-        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <span style="font-family: var(--mono); font-size: 11px; color: var(--text-muted); font-weight: 700;">A2A Trade Deal Presets:</span>
-            <button class="preset-btn active" id="btnEscrowPresetLi" onclick="loadEscrowDealPreset('lithium')">🔋 Aus LiOH 50t ($700,000)</button>
-            <button class="preset-btn" id="btnEscrowPresetNi" onclick="loadEscrowDealPreset('nickel')">⚡ Indon Ni MHP 300t ($4.87M)</button>
-            <button class="preset-btn" id="btnEscrowPresetCu" onclick="loadEscrowDealPreset('copper')">🇨🇱 Chile Cu 500t ($4.82M)</button>
-            <button class="preset-btn" id="btnEscrowPresetAg" onclick="loadEscrowDealPreset('silver')">🇲🇽 Mex Ag 5,000kg ($10.8M)</button>
-          </div>
-          <span style="font-family: var(--mono); font-size: 11px; color: var(--emerald);" id="escrowDealStateLabel">
-            STATUS: DUAL_SIGNED_CONFIRMED
-          </span>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-          <div class="field-row">
-            <label class="field-label">Deal Identifier</label>
-            <input type="text" id="escrowDealId" value="DEAL-2026-LIT-001">
-          </div>
-          <div class="field-row">
-            <label class="field-label">Commodity Spec</label>
-            <input type="text" id="escrowCommodity" value="LITHIUM_CARBONATE" readonly>
-          </div>
-          <div class="field-row">
-            <label class="field-label">Trade Volume (Tons/Kg)</label>
-            <input type="number" id="escrowVolume" value="50.0" step="1.0" oninput="recalcEscrowAmounts()">
-          </div>
-          <div class="field-row">
-            <label class="field-label">Unit Price (USD/t)</label>
-            <input type="number" id="escrowUnitPrice" value="14000.0" step="100.0" oninput="recalcEscrowAmounts()">
-          </div>
-          <div class="field-row">
-            <label class="field-label">Total Escrow Value (USDC)</label>
-            <input type="number" id="escrowTotalValue" value="700000.0" step="1000.0" readonly style="color: var(--emerald); font-weight: 700;">
-          </div>
-          <div class="field-row">
-            <label class="field-label">eBL Document Reference</label>
-            <input type="text" id="escrowEblDoc" value="EBL-MAERSK-2026-LIT09">
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
-          <div class="field-row">
-            <label class="field-label">Buyer AI Agent (Depositor)</label>
-            <input type="text" id="escrowBuyerAddr" value="0x2222222222222222222222222222222222222222">
-          </div>
-          <div class="field-row">
-            <label class="field-label">Seller AI Agent (Beneficiary)</label>
-            <input type="text" id="escrowSellerAddr" value="0x1111111111111111111111111111111111111111">
-          </div>
-          <div class="field-row">
-            <label class="field-label">Escrow Duration (Seconds, min 60s)</label>
-            <input type="number" id="escrowDuration" value="1209600" min="60">
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
-          <button class="btn btn-primary" onclick="generateEscrowCalldata()" style="background: linear-gradient(135deg, #06b6d4, #0891b2); border-color: #22d3ee; display: inline-flex; align-items: center; gap: 6px;">
-            ⚡ Generate Deposit Calldata
-          </button>
-          <button class="btn btn-secondary" onclick="simulateMilestoneStep(1)" style="display: inline-flex; align-items: center; gap: 6px;">
-            🚢 Trigger Stage 1 (30% eBL)
-          </button>
-          <button class="btn btn-secondary" onclick="simulateMilestoneStep(2)" style="display: inline-flex; align-items: center; gap: 6px;">
-            🛰️ Trigger Stage 2 (40% Transit)
-          </button>
-          <button class="btn btn-secondary" onclick="simulateMilestoneStep(3)" style="border-color: var(--emerald); color: var(--emerald); display: inline-flex; align-items: center; gap: 6px;">
-            🏁 Complete Escrow (30% Final)
-          </button>
-          <button class="btn btn-secondary" onclick="simulateEscrowDispute()" style="border-color: var(--amber); color: var(--amber); display: inline-flex; align-items: center; gap: 6px;">
-            ⚠️ Raise Dispute
-          </button>
-          <button class="btn btn-secondary" onclick="simulateEscrowRefund()" style="border-color: #ef4444; color: #ef4444; display: inline-flex; align-items: center; gap: 6px;">
-            🔄 Refund Expired
-          </button>
-        </div>
-      </div>
-
-      <!-- Escrow Calldata & Terminal Output -->
-      <div style="background: #05080e; border: 1px solid var(--border); border-radius: 6px; padding: 14px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
-          <span style="font-family: var(--mono); font-size: 11px; color: var(--cyan); font-weight: 700;">
-            ⛓️ MineralTradeEscrow Calldata & On-Chain Dispatch Payload
-          </span>
-          <div style="display: flex; gap: 8px;">
-            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="copyEscrowCalldataHex()">Copy Raw Calldata</button>
-            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="copyEscrowFullJson()">Copy Full JSON</button>
-          </div>
-        </div>
-        <pre class="terminal-output" id="escrowTerminalOutput" style="max-height: 220px;">// Click 'Generate Deposit Calldata' or select a preset to generate live on-chain deposit calldata.
-// Outputs ERC-MilestoneTradeEscrow createEscrow(...) bytecode for Polygon, Base, or Arbitrum.</pre>
-      </div>
-    </section>
 
     <!-- Main Workspace: Identity + Playground -->
     <div class="action-grid">
