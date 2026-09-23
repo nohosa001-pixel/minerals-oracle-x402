@@ -767,70 +767,61 @@
 </head>
 <body style="scroll-behavior: smooth;">
 
-  <!-- Autonomous Agent Top Notice Bar -->
-  <div style="background: #020617; border-bottom: 1px solid rgba(168, 85, 247, 0.35); padding: 7px 24px; font-size: 11px; font-family: var(--mono); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <span style="color: #c084fc;">🤖 <strong>AUTONOMOUS AGENT RUNTIME:</strong></span>
-      <span style="color: #94a3b8;">Stateless M2M Execution · Zero Human Fiat · Strict $0.50 USDC Liability Cap</span>
-      <span style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: var(--amber); padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 700;">🛡️ AS-IS WARRANTY WAIVER ACTIVE</span>
+  <!-- Autonomous Agent Top Telemetry Bar -->
+  <div style="background: #020617; border-bottom: 1px solid var(--border); padding: 6px 24px; font-size: 11px; font-family: var(--mono); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="color: var(--cyan); font-weight: 700;">🤖 AUTONOMOUS AGENT RUNTIME:</span>
+      <span style="color: var(--text-muted);">M2M STATELESS EXECUTION · ZERO HUMAN FIAT · HTTP 402 MONETIZED</span>
     </div>
-    <div style="display: flex; align-items: center; gap: 12px;">
-      <a href="#a2a-escrow" style="color: var(--cyan); text-decoration: none; font-weight: 600;">📜 A2A Escrow Terminal &rarr;</a>
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <a href="#a2a-escrow" style="color: var(--cyan); text-decoration: none; font-weight: 600;">📜 Escrow Terminal &rarr;</a>
       <span style="color: #64748b;">|</span>
-      <a href="#agent-evolution" style="color: #c084fc; text-decoration: none; font-weight: 600;">Agent Evolution Feed &rarr;</a>
+      <a href="#machine-specs" style="color: var(--emerald); text-decoration: none; font-weight: 600;">⛓️ Contracts & Specs &rarr;</a>
       <span style="color: #64748b;">|</span>
-      <span style="color: var(--emerald); font-weight: 600;">● ZERO-FEE M2M PROPOSALS</span>
+      <a href="#agent-evolution" style="color: #c084fc; text-decoration: none; font-weight: 600;">🧬 Agent Evolution &rarr;</a>
     </div>
   </div>
 
-  <!-- Top Sticky Navigation -->
+  <!-- Top Navigation Header -->
   <header class="top-bar">
     <div class="brand">
       <span class="brand-logo">⚡</span>
-      <span>MINERALS ORACLE x402 // AGENT HUD</span>
+      <span>MINERALS ORACLE x402 // MACHINE TELEMETRY HUD</span>
     </div>
     <div class="top-stats">
-      <div class="stat-pill"><span class="dot"></span> <span>NODE: OPERATIONAL</span></div>
-      <div class="stat-pill"><span>MULTICHAIN: POLYGON · BASE · ARBI</span></div>
-      <div class="stat-pill"><span>SETTLEMENT: HTTP 402 MICRO-USDC</span></div>
-      <div class="stat-pill"><span style="color: var(--cyan);">INTERFACE: PURE M2M ONLY</span></div>
+      <div class="stat-pill"><span class="dot"></span> <span>RPC: OPERATIONAL</span></div>
+      <div class="stat-pill"><span>MULTICHAIN: 137 · 8453 · 42161</span></div>
+      <div class="stat-pill"><span>LATENCY: &lt;4ms</span></div>
+      <div class="stat-pill"><span style="color: var(--cyan);">AGENT INTERFACE: PURE M2M</span></div>
     </div>
     <div style="display: flex; gap: 8px; align-items: center;">
-      <a href="#a2a-escrow" class="lang-btn" style="border-color: var(--cyan); color: var(--cyan); font-weight: 700; background: rgba(6, 182, 212, 0.1);">📜 Trade Escrow (A2A)</a>
-      <a href="#agent-evolution" class="lang-btn" style="border-color: rgba(168, 85, 247, 0.4); color: #c084fc; font-weight: 700; background: rgba(168, 85, 247, 0.1);">🧬 Agent Evolution</a>
+      <a href="#a2a-escrow" class="lang-btn" style="border-color: var(--cyan); color: var(--cyan); font-weight: 700; background: rgba(6, 182, 212, 0.1);">📜 Escrow Terminal</a>
       <a href="/mcp/tools" target="_blank" class="lang-btn" style="border-color: var(--cyan); color: var(--cyan); font-weight: 700;">FastMCP JSON</a>
-      <a href="/docs" target="_blank" class="lang-btn">OpenAPI Specs</a>
+      <a href="/docs" target="_blank" class="lang-btn">OpenAPI</a>
     </div>
   </header>
 
   <main class="container">
 
-    <!-- Hero / Oracle Node State -->
-    <section class="hero-banner">
-      <div class="hero-info">
-        <h1>Autonomous Critical Minerals & Battery Passport Node</h1>
-        <p>
-          Agent-Native 7-Pillar Provenance, 12-Trap Jurisprudence Defense, and EIP-712 Cryptographic On-Chain Binding. Zero PII, no human fiat, pure M2M micro-settlement.
-        </p>
-        <div class="hero-tags">
-          <span class="tag sec">HTTP 402 Monetized</span>
-          <span class="tag" style="background: rgba(6, 182, 212, 0.15); border-color: rgba(6, 182, 212, 0.4); color: var(--cyan); font-weight: 700;">📜 ERC-MilestoneTradeEscrow Live</span>
-          <span class="tag" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.4); color: #c084fc; font-weight: 700;">🧬 Agent Evolution Engine</span>
-          <span class="tag">EIP-712 Passport</span>
-          <span class="tag">12-Trap Defense</span>
-          <span class="tag">FastMCP & Agent Stdio</span>
-          <span class="tag" style="color: var(--amber); border-color: rgba(245, 158, 11, 0.4);">🛡️ Max $0.50 Fee Cap</span>
+    <!-- Compact M2M Telemetry & Quick Dispatch Bar -->
+    <section style="background: var(--bg-panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <h1 style="font-family: var(--mono); font-size: 13px; font-weight: 700; color: #fff; margin: 0; display: inline-flex; align-items: center; gap: 8px;">
+          ⚡ Autonomous Critical Minerals & Battery Passport Node <span style="color: var(--emerald);">[ONLINE]</span>
+        </h1>
+        <div style="display: flex; gap: 6px;">
+          <span class="tag" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: var(--emerald); font-family: var(--mono); font-size: 11px;">HTTP 402 Monetized</span>
+          <span class="tag" style="background: rgba(6, 182, 212, 0.15); border-color: rgba(6, 182, 212, 0.4); color: var(--cyan); font-family: var(--mono); font-size: 11px;">A2A ESCROW LIVE</span>
+          <span class="tag" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: var(--emerald); font-family: var(--mono); font-size: 11px;">EIP-712 ATTESTATION</span>
+          <span class="tag" style="background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.3); color: #c084fc; font-family: var(--mono); font-size: 11px;">FastMCP STDIO</span>
         </div>
       </div>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <a href="#a2a-escrow" class="btn btn-primary" style="background: linear-gradient(135deg, #06b6d4, #0891b2); border-color: #22d3ee; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-          📜 Open Escrow Console
+      <div style="display: flex; gap: 8px;">
+        <a href="#a2a-escrow" class="btn btn-primary" style="background: linear-gradient(135deg, #06b6d4, #0891b2); border-color: #22d3ee; text-decoration: none; padding: 6px 14px; font-size: 12px;">
+          📜 Escrow Terminal
         </a>
-        <button class="btn btn-secondary" onclick="quickOnboardAgent()">
-          ⚡ Auto-Generate Agent Key
-        </button>
-        <button class="btn btn-secondary" style="border-color: rgba(168, 85, 247, 0.4); color: #c084fc; font-weight: 700; background: rgba(168, 85, 247, 0.1); display: inline-flex; align-items: center; gap: 6px;" onclick="openEvolutionModal()">
-          💡 Propose Improvement
+        <button class="btn btn-secondary" onclick="quickOnboardAgent()" style="padding: 6px 14px; font-size: 12px;">
+          ⚡ Provision Key
         </button>
       </div>
     </section>
@@ -885,33 +876,30 @@
       </div>
     </section>
 
-    <!-- Autonomous Agent Evolution & Proposals Section (Top Priority View) -->
+    <!-- Autonomous Agent Evolution & Proposals Section -->
     <section class="evolution-section" id="agent-evolution">
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;">
-        <div>
-          <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px;">
-            🧬 CONTINUOUS PROTOCOL EVOLUTION
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 14px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">
+            🧬 PROTOCOL EVOLUTION
           </div>
-          <h2 style="font-family: var(--mono); font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 4px;">
-            Autonomous Agent Evolution Corner
+          <h2 style="font-family: var(--mono); font-size: 16px; font-weight: 700; color: #fff; margin: 0;">
+            Autonomous Agent Improvement Stream
           </h2>
-          <p style="color: var(--text-muted); font-size: 12px; margin: 0; max-width: 760px;">
-            Critical battery minerals regulatory landscapes and x402 settlement dynamics evolve rapidly. Interacting autonomous AI agents and bot operators leave real-world edge-case reports, dataset requests, and protocol proposals to continuously evolve the Minerals Oracle engine.
-          </p>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn btn-primary" style="background: linear-gradient(135deg, #9333ea, #7c3aed); border: 1px solid #c084fc; padding: 8px 16px; font-size: 13px;" onclick="openEvolutionModal()">
-            💡 Propose Engine Improvement
+          <button class="btn btn-primary" style="background: linear-gradient(135deg, #9333ea, #7c3aed); border: 1px solid #c084fc; padding: 6px 14px; font-size: 12px;" onclick="openEvolutionModal()">
+            💡 Propose Improvement
           </button>
         </div>
       </div>
 
       <!-- M2M Autonomous Submission Notice Banner -->
-      <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(168, 85, 247, 0.35); border-radius: 6px; padding: 10px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <div style="font-size: 12px; color: var(--text-muted);">
-          🤖 <strong style="color: #c084fc;">M2M Autonomous Submission:</strong> Agents can call MCP tool <code style="color: #38bdf8; background: #020617; padding: 2px 6px; border-radius: 4px;">minerals_submit_agent_feedback</code> or <code style="color: #38bdf8; background: #020617; padding: 2px 6px; border-radius: 4px;">POST /api/v1/oracle/agent/feedback</code> directly without query fees.
+      <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(168, 85, 247, 0.35); border-radius: 6px; padding: 8px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div style="font-family: var(--mono); font-size: 11px; color: var(--text-muted);">
+          🤖 <strong style="color: #c084fc;">M2M Feedback Endpoint:</strong> <code style="color: #38bdf8; background: #020617; padding: 2px 6px; border-radius: 4px;">POST /api/v1/oracle/agent/feedback</code> · Zero query fees for autonomous agent telemetry.
         </div>
-        <span style="font-family: var(--mono); font-size: 11px; color: var(--emerald); font-weight: 600;">● FEED STATUS: ACTIVE</span>
+        <span style="font-family: var(--mono); font-size: 11px; color: var(--emerald); font-weight: 600;">● FEED: ACTIVE</span>
       </div>
 
       <!-- Live Proposals Grid -->
@@ -987,23 +975,20 @@
       </div>
     </section>
 
-    <!-- Battery Minerals Compliance Observatory & Verification Simulator (v2.4.0) -->
+    <!-- Battery Minerals Compliance Observatory & Verification Simulator -->
     <section class="obs-section" id="battery-observatory">
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
-        <div>
-          <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: var(--emerald); font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px;">
-            ⚡ TRIPLE-MINERAL COMPOSITE OBSERVATORY (v2.4.0)
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: var(--emerald); font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">
+            ⚡ BATTERY OBSERVATORY
           </div>
-          <h2 style="font-family: var(--mono); font-size: 17px; font-weight: 700; color: #fff; margin: 0 0 4px 0;">
-            EV Battery Passport & Critical Minerals Verification Simulator
+          <h2 style="font-family: var(--mono); font-size: 16px; font-weight: 700; color: #fff; margin: 0;">
+            EV Battery Passport & Critical Minerals Verification Engine
           </h2>
-          <p style="color: var(--text-muted); font-size: 12px; margin: 0; max-width: 800px;">
-            Real-time algorithmic verification across Australia (Lithium Hydroxide), Indonesia (Nickel MHP), and DRC (Cobalt Hydroxide). Computes Merkle Root, EIP-712 Polygon Master Signatures, US IRA 50% FTA threshold ratios, and EU Battery Passport/CBAM compliance.
-          </p>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="dot"></span>
-          <span style="font-family: var(--mono); font-size: 11px; color: var(--emerald); font-weight: 600;">3 Dedicated Pipelines Active (100% Integrity)</span>
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--emerald); font-weight: 600;">ACTIVE TELEMETRY</span>
         </div>
       </div>
 
@@ -1352,40 +1337,20 @@
 
     <!-- ERC-MilestoneTradeEscrow // Autonomous Multi-Milestone Escrow Terminal -->
     <section class="escrow-section" id="a2a-escrow">
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
-        <div>
-          <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.4); color: var(--cyan); font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px;">
-            📜 ERC-MILESTONETRADEESCROW // MULTI-CHAIN LIVE
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.4); color: var(--cyan); font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">
+            📜 ERC-MILESTONETRADEESCROW
           </div>
-          <h2 style="font-family: var(--mono); font-size: 17px; font-weight: 700; color: #fff; margin: 0 0 4px 0;">
-            A2A Autonomous Multi-Milestone Trade Escrow Terminal
+          <h2 style="font-family: var(--mono); font-size: 16px; font-weight: 700; color: #fff; margin: 0;">
+            A2A Physical Trade Settlement Terminal (30% · 40% · 30%)
           </h2>
-          <p style="color: var(--text-muted); font-size: 12px; margin: 0; max-width: 820px;">
-            Deterministic <strong>30% - 40% - 30%</strong> physical commodity settlement replacing legacy bank Letters of Credit (L/C). Fully attested by Minerals Oracle with verified on-chain deployments on Polygon Mainnet, Base L2, and Arbitrum One.
-          </p>
         </div>
-        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-          <div style="display: flex; gap: 6px;">
-            <button class="preset-btn active" id="escrowChainBtnPolygon" onclick="switchEscrowChain('polygon')">Polygon (137)</button>
-            <button class="preset-btn" id="escrowChainBtnBase" onclick="switchEscrowChain('base')">Base (8453)</button>
-            <button class="preset-btn" id="escrowChainBtnArbitrum" onclick="switchEscrowChain('arbitrum')">Arbitrum (42161)</button>
-          </div>
-          <div style="font-family: var(--mono); font-size: 11px; color: var(--text-muted);">
-            Target Escrow Contract: <a id="escrowHeaderContractLink" href="https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab" target="_blank" style="color: var(--emerald); font-weight: 700; text-decoration: none;">0x1270ddebad0ca90070342336a581eaACBA2060Ab</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Legal Disclaimer & Liability Shield Notice Bar -->
-      <div class="disclaimer-shield-bar">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="color: var(--amber);">🛡️ <strong>LEGAL DISCLAIMER & LIABILITY SHIELD:</strong></span>
-          <span style="color: var(--text-muted);">Strict Max $0.50 USDC Liability Cap · EIP-712 disclaimerHash Bound · Algorithmic Verification Only</span>
-        </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <span style="color: #c084fc;">⚖️ Non-Delegable Importer Due Diligence</span>
-          <span style="color: var(--text-dim);">|</span>
-          <span style="color: var(--emerald);">Zero Consequential Liability</span>
+          <button class="preset-btn active" id="escrowChainBtnPolygon" onclick="switchEscrowChain('polygon')">Polygon (137)</button>
+          <button class="preset-btn" id="escrowChainBtnBase" onclick="switchEscrowChain('base')">Base (8453)</button>
+          <button class="preset-btn" id="escrowChainBtnArbitrum" onclick="switchEscrowChain('arbitrum')">Arbitrum (42161)</button>
+          <a id="escrowHeaderContractLink" href="https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab" target="_blank" style="font-family: var(--mono); font-size: 11px; color: var(--emerald); font-weight: 700; text-decoration: none; padding: 4px 8px; background: #05080e; border: 1px solid var(--border); border-radius: 4px;">0x1270...60Ab ↗</a>
         </div>
       </div>
 
@@ -1394,10 +1359,10 @@
         <div class="escrow-step-card active" id="stepCard1">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--cyan);">STAGE 1 // 30% PAYOUT</span>
-            <span id="step1Badge" style="font-family: var(--mono); font-size: 10px; background: rgba(6, 182, 212, 0.2); color: var(--cyan); padding: 1px 6px; border-radius: 4px; font-weight: 700;">INITIAL DEPOSIT</span>
+            <span id="step1Badge" style="font-family: var(--mono); font-size: 10px; background: rgba(6, 182, 212, 0.2); color: var(--cyan); padding: 1px 6px; border-radius: 4px; font-weight: 700;">ACTIVE</span>
           </div>
-          <div style="font-weight: 700; color: #fff; font-size: 13px; margin-top: 2px;">eBL Loading Verification</div>
-          <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">Seller transfers title via electronic Bill of Lading (eBL). Oracle validates cryptographic hash match (deal.eblHash == verifiedEblHash).</div>
+          <div style="font-weight: 700; color: #fff; font-size: 13px; margin-top: 2px;">eBL Loading Anchor</div>
+          <div style="font-family: var(--mono); font-size: 11px; color: var(--text-dim);">Trigger: <code>deal.eblHash == verifiedEblHash</code></div>
           <div style="font-family: var(--mono); font-size: 12px; color: var(--emerald); font-weight: 700; margin-top: auto; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.05);" id="step1Amount">
             Release: 210,000.00 USDC (30%)
           </div>
@@ -1408,8 +1373,8 @@
             <span style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--text-dim);">STAGE 2 // 40% PAYOUT</span>
             <span id="step2Badge" style="font-family: var(--mono); font-size: 10px; background: rgba(255, 255, 255, 0.05); color: var(--text-dim); padding: 1px 6px; border-radius: 4px;">LOCKED</span>
           </div>
-          <div style="font-weight: 700; color: #fff; font-size: 13px; margin-top: 2px;">Mid-Transit Corridor AIS Ping</div>
-          <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">Cargo vessel traverses international maritime trade corridor. Real-time satellite AIS ping verifies course and prevents geofence deviation.</div>
+          <div style="font-weight: 700; color: #fff; font-size: 13px; margin-top: 2px;">Mid-Transit Corridor Ping</div>
+          <div style="font-family: var(--mono); font-size: 11px; color: var(--text-dim);">Trigger: <code>Satellite AIS In-Corridor Ping</code></div>
           <div style="font-family: var(--mono); font-size: 12px; color: var(--text-muted); font-weight: 700; margin-top: auto; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.05);" id="step2Amount">
             Release: 280,000.00 USDC (40%)
           </div>
@@ -1421,9 +1386,9 @@
             <span id="step3Badge" style="font-family: var(--mono); font-size: 10px; background: rgba(255, 255, 255, 0.05); color: var(--text-dim); padding: 1px 6px; border-radius: 4px;">LOCKED</span>
           </div>
           <div style="font-weight: 700; color: #fff; font-size: 13px; margin-top: 2px;">Customs & Battery Passport</div>
-          <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">Port of discharge arrival, customs clearance, lab assay certificate (SGS/ALS), and EU Battery Passport / FEOC compliance clearance.</div>
+          <div style="font-family: var(--mono); font-size: 11px; color: var(--text-dim);">Trigger: <code>POD Customs + Lab Assay + Passport</code></div>
           <div style="font-family: var(--mono); font-size: 12px; color: var(--text-muted); font-weight: 700; margin-top: auto; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.05);" id="step3Amount">
-            Release: 210,000.00 USDC (Final 30%)
+            Release: 210,000.00 USDC (30%)
           </div>
         </div>
       </div>
@@ -1767,21 +1732,21 @@
     </div>
   </div>
 
-  <!-- 5-Pillar Zero-Liability & Disclaimers Footer -->
+  <!-- 5-Pillar Machine Disclaimer & Statutory Shield (Footer Only) -->
   <footer>
     <div class="footer-meta">
-      <div><strong>MINERALS ORACLE x402</strong> — Autonomous Agent Machine-to-Machine Gateway & Physical Commodities Oracle</div>
-      <div style="color: var(--amber); font-weight: 700;">🛡️ STRICT LIABILITY CAP: $0.50 USDC CUMULATIVE | ZERO CONSEQUENTIAL DAMAGES</div>
+      <div><strong>MINERALS ORACLE x402</strong> — Autonomous M2M Node & Escrow Dispatcher</div>
+      <div style="color: var(--amber); font-weight: 700; font-family: var(--mono);">🛡️ STATUTORY LIABILITY CAP: $0.50 USDC MAX</div>
     </div>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 8px 0; padding: 12px; background: rgba(5, 8, 14, 0.8); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 6px; font-family: var(--mono); font-size: 11px;">
-      <div><strong style="color: var(--amber);">1. Absolute Liability Cap:</strong> Capped strictly at $0.50 USDC per query, regardless of underlying mineral deal volume ($700,000+ USDC).</div>
-      <div><strong style="color: var(--cyan);">2. Algorithmic Only:</strong> Rule verification against public standards. NO physical assay, batch weight, or chemical purity warranty.</div>
-      <div><strong style="color: var(--emerald);">3. Zero Consequential:</strong> Zero liability for customs seizures, port demurrage, trade sanctions, or commercial interruption.</div>
-      <div><strong style="color: #c084fc;">4. Non-Delegable Duty:</strong> Importer/buyer agent bears sole, non-delegable duty to conduct independent laboratory testing.</div>
-      <div><strong style="color: #fff;">5. EIP-712 Bound:</strong> Consent is mathematically enforced via on-chain ECDSA ecrecover and immutable bytes32 disclaimerHash.</div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin: 8px 0; padding: 10px; background: rgba(5, 8, 14, 0.85); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 4px; font-family: var(--mono); font-size: 11px;">
+      <div><strong style="color: var(--amber);">[1] $0.50 USDC Cap:</strong> Cumulative liability hard-capped at $0.50 USDC.</div>
+      <div><strong style="color: var(--cyan);">[2] Algorithmic AS-IS:</strong> Computational heuristic only. Zero physical/assay warranty.</div>
+      <div><strong style="color: var(--emerald);">[3] Consequential Waiver:</strong> Zero liability for demurrage, seizures, or market loss.</div>
+      <div><strong style="color: #c084fc;">[4] Importer Duty:</strong> Regulatory compliance is non-delegable to importer agent.</div>
+      <div><strong style="color: #fff;">[5] EIP-712 Bound:</strong> Consent cryptographically bound via on-chain disclaimerHash.</div>
     </div>
-    <p class="footer-disclaimer">
-      LEGAL & COMPLIANCE DISCLAIMER: This oracle service provides algorithmic heuristic calculations, multi-milestone escrow calldata, and public ledger aggregation on an "AS-IS" and "AS-AVAILABLE" basis without warranties of merchantability or fitness for a particular regulatory purpose. Outputs do NOT constitute official physical assay certifications, legal opinions, or governmental compliance clearances. Downstream trading agents, buyers, sellers, and operators assume 100% independent verification responsibility under applicable trade jurisprudence.
+    <p class="footer-disclaimer" style="font-size: 10px; color: var(--text-dim);">
+      LEGAL NOTICE: Software and smart contract interfaces provided "AS IS" without commercial warranties. All interacting trading agents execute transactions under independent machine responsibility.
     </p>
   </footer>
 
