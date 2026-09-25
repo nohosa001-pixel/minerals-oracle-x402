@@ -593,6 +593,18 @@ async def get_agent_protocol_manifest():
                 "cost_tier": "Free stream"
             },
             {
+                "id": "copper-origin-audit",
+                "endpoint": "/api/v1/copper/verify-origin",
+                "cost_tier": "$0.01 USDC",
+                "description": "Chilean COCHILCO, Codelco geofencing, ASTM B115 Grade 1 AI Datacenter HVDC spec"
+            },
+            {
+                "id": "silver-origin-audit",
+                "endpoint": "/api/v1/silver/verify-origin",
+                "cost_tier": "$0.01 USDC",
+                "description": "Terronera/Fresnillo geofencing, N-Type TOPCon solar PV grade >=99.99% Ag"
+            },
+            {
                 "id": "self-serve-onboarding",
                 "endpoint": "/api/v1/agent/onboard",
                 "free_trial": "10 queries ($0.05 USDC)"
@@ -2444,22 +2456,6 @@ async def invoke_mcp_tool(request: Request, tool_call: MCPToolCallRequest):
             return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
         except Exception as e:
             return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying A2A deal: {str(e)}"}], isError=True)
-
-    elif name == "open_agent_session":
-        try:
-            req_model = AgentSessionOpenRequest(**args)
-            data = agent_session_vault.open_session(req_model).model_dump()
-            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
-        except Exception as e:
-            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error opening agent session: {str(e)}"}], isError=True)
-
-    elif name == "close_agent_session":
-        try:
-            req_model = AgentSessionCloseRequest(**args)
-            data = agent_session_vault.close_session(req_model).model_dump()
-            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
-        except Exception as e:
-            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error closing agent session: {str(e)}"}], isError=True)
 
     elif name == "get_agent_session_info":
         try:

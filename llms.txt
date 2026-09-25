@@ -43,6 +43,8 @@
 - **Australian Lithium Provenance**: `POST /api/v1/lithium/verify-origin` (WA MINEDEX, 7.5:1 yield, US IRA FEOC 25%)
 - **Indonesian Nickel MHP Provenance**: `POST /api/v1/nickel/verify-origin` (SIMBARA NTPN, HPAL 31.34:1 yield, CBAM)
 - **DRC Cobalt Hydroxide Provenance**: `POST /api/v1/cobalt/verify-origin` (CEEC barcode seals, EGC ASM segregation, ILO child labor)
+- **South American Copper Provenance**: `POST /api/v1/copper/verify-origin` (Chilean COCHILCO, Codelco/Escondida geofencing, ASTM B115 Grade 1 Cu)
+- **Mexican / Global Silver Provenance**: `POST /api/v1/silver/verify-origin` (Terronera/Fresnillo geofencing, N-Type TOPCon solar PV assay >=99.99%)
 - **Compliance Engine Status**: `GET /api/v1/oracle/compliance/status` (Active 10-nation laws & 14-trap status)
 - **Trade Jurisprudence Precedents**: `GET /api/v1/oracle/compliance/precedents` (WTO DS592, DS431, ICSID, US CIT)
 - **Free Public Alpha Hook**: `GET /api/v1/oracle/alpha-signals` (Pollable 24/7 without authentication)
@@ -63,9 +65,11 @@
 1. **Nickel (`NICKEL_MHP`)**: Indonesia UU 3/2020 SIMBARA & DHE 30% export forex verification.
 2. **Lithium (`LITHIUM_HYDROXIDE` / `LITHIUM_CARBONATE`)**: Chile DGA water permit & Argentine Ley 26.639 periglacial compliance.
 3. **Cobalt (`COBALT_HYDROXIDE`)**: DRC CEEC official tamper-evident barcode seal & RMI RMAP 3rd-party child labor audit.
-4. **Graphite (`NATURAL_GRAPHITE` / `SYNTHETIC_GRAPHITE`)**: China MOFCOM dual-use export control license verification.
-5. **Rare Earths (`NEODYMIUM_DYSPROSIUM`)**: Permanent Magnet NdFeB PrNd/DyFe origin & WTO DS431 compliance.
-6. **Manganese (`MANGANESE_SULFATE`)**: South Africa Transnet logistics corridor monitoring.
+4. **Copper (`COPPER_CATHODE`)**: Chilean Codelco / Escondida GIS geofencing, flotation mass-balance loss <=2.0%, H2SO4 acid deficit, COCHILCO clearance, ASTM B115 Grade 1 AI Datacenter HVDC spec.
+5. **Silver (`SILVER_REFINED` / Solar Paste)**: Mexican Terronera/Fresnillo geofencing, electrolytic mass-balance loss <=2.0%, N-Type TOPCon solar PV grade (>=99.99% Ag), LBMA Good Delivery.
+6. **Graphite (`NATURAL_GRAPHITE` / `SYNTHETIC_GRAPHITE`)**: China MOFCOM dual-use export control license verification.
+7. **Rare Earths (`NEODYMIUM_DYSPROSIUM`)**: Permanent Magnet NdFeB PrNd/DyFe origin & WTO DS431 compliance.
+8. **Manganese (`MANGANESE_SULFATE`)**: South Africa Transnet logistics corridor monitoring.
 
 ---
 
@@ -174,12 +178,18 @@ Autonomous agents settling physical commodity contracts (lithium, nickel, cobalt
 ```python
 # 1. Propose Deal between Buyer & Seller AI Agents
 deal = httpx.post(f"{base_url}/api/v1/trade/deals/propose", json={
-    "commodity_type": "LITHIUM_HYDROXIDE",
-    "quantity_metric_tons": 500.0,
-    "unit_price_usd": 25000.0,
+    "deal_id": "DEAL-2026-LIT-001",
+    "commodity": "LITHIUM_HYDROXIDE",
+    "volume_tons": 500.0,
+    "unit_price_usd_per_ton": 25000.0,
+    "total_deal_value_usd": 12500000.0,
+    "origin_country": "AUS",
+    "destination_country": "USA",
+    "ebl_document_id": "EBL-MAERSK-2026-LIT09",
     "buyer_agent_address": "0x2222222222222222222222222222222222222222",
     "seller_agent_address": "0x1111111111111111111111111111111111111111",
-    "delivery_incoterm": "CIF_ROTTERDAM"
+    "created_at_utc": "2026-09-25T12:00:00Z",
+    "seller_signature": "0x..."
 }).json()
 
 deal_id = deal["deal_id"]
@@ -188,13 +198,13 @@ deal_id = deal["deal_id"]
 signed_deal = httpx.post(f"{base_url}/api/v1/trade/deals/dual-sign", json={
     "deal_id": deal_id,
     "buyer_signature": "0x...",
-    "seller_signature": "0x..."
+    "buyer_agent_address": "0x2222222222222222222222222222222222222222"
 }).json()
 
 # 3. Retrieve Live Smart Contract Calldata for on-chain deposit
 calldata_resp = httpx.get(f"{base_url}/api/v1/a2a/deals/{deal_id}/escrow-calldata?chain=polygon").json()
-print("Escrow Contract:", calldata_resp["target_contract"])
-print("Calldata Hex:", calldata_resp["calldata_hex"]) # createEscrow(bytes32,address,uint256,bytes32,uint256) -> selector 0x8670ff13
+print("Escrow Contract:", calldata_resp["escrow_contract_address"])
+print("Calldata Hex:", calldata_resp["calldata"]) # createEscrow(bytes32,address,uint256,bytes32,uint256) -> selector 0x1df04324
 ```
 
 ---

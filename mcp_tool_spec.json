@@ -449,6 +449,22 @@
         },
         "required": ["deal_id"]
       }
+    },
+    {
+      "name": "list_trade_precedents",
+      "description": "Query international trade jurisprudence precedents embedded in the oracle: WTO DS592 (Indonesia Raw Materials), WTO DS431 (China Rare Earths), ICSID ARB/15/31 (Gabriel Resources), and US CIT Superior Wire (Origin Laundering).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_compliance_status",
+      "description": "Check current regulatory monitoring status across 10 jurisdictions and 12-trap defenses.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
     }
   ]
 }

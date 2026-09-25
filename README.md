@@ -2,11 +2,11 @@
 
 [![PyPI Version](https://img.shields.io/pypi/v/minerals-oracle-x402.svg?color=blue&style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/minerals-oracle-x402/)
 [![CI/CD](https://img.shields.io/github/actions/workflow/status/nohosa001-pixel/minerals-oracle-x402/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI%2FCD)](https://github.com/nohosa001-pixel/minerals-oracle-x402/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/Tests-173%2F173_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
+[![Tests](https://img.shields.io/badge/Tests-237%2F237_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
 [![Type Safety](https://img.shields.io/badge/Pyright-0_Errors_Clean-brightgreen?style=for-the-badge&logo=python&logoColor=white)](pyrightconfig.json)
 [![Multi-Chain EVM](https://img.shields.io/badge/EVM_Contracts-Polygon_|_Base_|_Arbitrum-8247E5?style=for-the-badge&logo=ethereum&logoColor=white)](contracts/verification/VERIFICATION_GUIDE.md)
 [![Agent Exclusive](https://img.shields.io/badge/Protocol-100%25_Agent_Native_M2M-ff007a?style=for-the-badge&logo=openai&logoColor=white)](#pure-autonomous-agent-native-architecture-m2m-exclusive)
-[![FastMCP](https://img.shields.io/badge/FastMCP-28_Agent_Tools-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](mcp_tool_spec.json)
+[![FastMCP](https://img.shields.io/badge/FastMCP-31_Agent_Tools-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](mcp_tool_spec.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 > 🤖 **100% Pure Autonomous Agent-Native (M2M Exclusive) Critical Minerals Supply-Chain & Bilateral Trade Oracle.**  
@@ -53,11 +53,14 @@ All contracts are deployed on live mainnets and **100% verified (Green Checkmark
 
 | Network | Smart Contract | Mainnet Deployed Address | Explorer Status |
 | :--- | :--- | :--- | :---: |
-| **Polygon Mainnet** (137) | `AgentPaymentVault` | [`0xb44Bc2Acdd156cE08b549A00a3102e4B01276654`](https://polygonscan.com/address/0xb44Bc2Acdd156cE08b549A00a3102e4B01276654#code) | ✅ **Verified** |
+| **Polygon Mainnet** (137) | `MineralTradeEscrow` | [`0x1270ddebad0ca90070342336a581eaACBA2060Ab`](https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab#code) | ✅ **Verified** |
+| | `AgentPaymentVault` | [`0xb44Bc2Acdd156cE08b549A00a3102e4B01276654`](https://polygonscan.com/address/0xb44Bc2Acdd156cE08b549A00a3102e4B01276654#code) | ✅ **Verified** |
 | | `MineralsOracleConsumer` | [`0x835d01534a5D2e63D52636Fafb1019f889d1E66B`](https://polygonscan.com/address/0x835d01534a5D2e63D52636Fafb1019f889d1E66B#code) | ✅ **Verified** |
-| **Base Mainnet** (8453) | `AgentPaymentVault` | [`0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d`](https://basescan.org/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d#code) | ✅ **Verified** |
+| **Base Mainnet** (8453) | `MineralTradeEscrow` | [`0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638`](https://basescan.org/address/0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638#code) | ✅ **Verified** |
+| | `AgentPaymentVault` | [`0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d`](https://basescan.org/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d#code) | ✅ **Verified** |
 | | `MineralsOracleConsumer` | [`0xe43a9C368808B2dfF139D27789C40A3C8F2282cF`](https://basescan.org/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF#code) | ✅ **Verified** |
-| **Arbitrum One** (42161) | `AgentPaymentVault` | [`0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d`](https://arbiscan.io/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d#code) | ✅ **Verified** |
+| **Arbitrum One** (42161) | `MineralTradeEscrow` | [`0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638`](https://arbiscan.io/address/0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638#code) | ✅ **Verified** |
+| | `AgentPaymentVault` | [`0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d`](https://arbiscan.io/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d#code) | ✅ **Verified** |
 | | `MineralsOracleConsumer` | [`0xe43a9C368808B2dfF139D27789C40A3C8F2282cF`](https://arbiscan.io/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF#code) | ✅ **Verified** |
 
 ### 1. Composite EV Battery Master Passport Orchestrator (`app/composite_battery_pipeline.py`)

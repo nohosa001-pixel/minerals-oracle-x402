@@ -106,6 +106,30 @@
     {
       "name": "get_trade_escrow_calldata",
       "description": "Generates deterministic EVM calldata and transaction parameters for the buyer AI agent to lock USDC funds into the on-chain MineralTradeEscrow (Polygon/Base/Arbitrum) for a dual-signed trade agreement."
+    },
+    {
+      "name": "verify_copper_origin",
+      "description": "Verifies South American Copper-to-Cathode supply-chain provenance. Evaluates Codelco/Escondida GIS geofencing, flotation-to-cathode mass balance, sulfuric acid deficit screening, Chilean COCHILCO export clearance, and AI Data Center/HVDC Power Grid specs (ASTM B115 Grade 1, 99.9935% Cu)."
+    },
+    {
+      "name": "verify_silver_origin",
+      "description": "Verifies Mexican and Global Silver supply-chain provenance. Evaluates Terronera/Fresnillo GIS geofencing, electrolytic mass balance, N-Type TOPCon High-Efficiency Solar PV paste purity (>= 99.99% Ag), and anti-cartel conflict ASM screening."
+    },
+    {
+      "name": "list_trade_precedents",
+      "description": "Queries international trade jurisprudence precedents embedded in the oracle: WTO DS592 (Indonesia Raw Materials), WTO DS431 (China Rare Earths), ICSID ARB/15/31 (Gabriel Resources), and US CIT Superior Wire."
+    },
+    {
+      "name": "get_compliance_status",
+      "description": "Checks current regulatory monitoring operational health across 10 monitored jurisdictions and 12-trap defenses."
+    },
+    {
+      "name": "minerals_submit_agent_feedback",
+      "description": "Allows an autonomous AI agent to submit an evolution proposal, mineral dataset request, regulatory edge case, or protocol improvement to continuously evolve the Minerals Oracle."
+    },
+    {
+      "name": "minerals_list_evolution_proposals",
+      "description": "Lists active autonomous agent evolution proposals and improvement requests to coordinate agent consensus."
     }
   ]
 }
