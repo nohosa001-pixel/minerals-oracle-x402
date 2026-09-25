@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "minerals-oracle-x402"
-version = "1.2.1"
+version = "1.2.2"
 description = "Deterministic Web3 x402 Critical Minerals & Battery Passport Compliance Oracle for Autonomous AI Agents on Polygon Network"
 readme = "README.md"
 requires-python = ">=3.10"
