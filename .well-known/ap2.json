@@ -3,9 +3,9 @@
   "name": "minerals-oracle-x402",
   "display_name": "Critical Raw Minerals & Urban Mining Oracle",
   "description": "High-performance micro-oracle serving deterministic real-time prices, cross-exchange arbitrage spreads, and urban-mining scrap valuations for critical raw minerals (Silver, Platinum, Copper, Lithium, Nd/Dy Rare Earths).",
-  "version": "1.0.0",
+  "version": "1.2.2",
   "protocol": "ap2",
-  "homepage": "https://github.com/your-org/minerals-oracle-x402",
+  "homepage": "https://github.com/nohosa001-pixel/minerals-oracle-x402",
   "contact": {
     "organization": "Minerals Oracle Labs",
     "email": "oracle@minerals-x402.eth"
@@ -19,7 +19,7 @@
     "token_contract": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
     "cost_per_request_usdc": 0.005,
     "cost_per_request_atomic_units": "5000",
-    "recipient_address": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
+    "recipient_address": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
     "settlement_facilitator": "https://facilitator.polygon.technology/v1/verify"
   },
   "capabilities": [
@@ -61,6 +61,14 @@
       "method": "POST",
       "description": "Calculates gross contained metal value, recovery rates, and net settlement after refining charges for EV Battery Black Mass, Auto Catalysts, E-Waste, and Rare Earth Magnets.",
       "cost_usdc": 0.005
+    },
+    {
+      "id": "compliance:eudr_satellite",
+      "name": "EUDR Satellite Concession Audit",
+      "endpoint": "/api/v1/compliance/eudr-satellite-audit",
+      "method": "POST",
+      "description": "Multi-satellite Sentinel-1/2 SAR radar deforestation (2020-12-31 cutoff), indigenous land protection, and TRACES-NT DDS reference generation.",
+      "cost_usdc": 0.020
     }
   ],
   "supported_commodities": [

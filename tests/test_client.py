@@ -33,7 +33,7 @@ def test_ap2_manifest_and_mcp_spec():
     assert ap2_data["ap2_version"] == "0.2.0"
     assert ap2_data["name"] == "minerals-oracle-x402"
     assert ap2_data["payment"]["chain_id"] == 137
-    assert ap2_data["payment"]["recipient_address"] == "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf"
+    assert ap2_data["payment"]["recipient_address"] == "0xA185B43fDD19619f99952AAed6eabf1029bF36a1"
 
     resp_mcp = client.get("/mcp/tools")
     assert resp_mcp.status_code == 200
@@ -51,7 +51,7 @@ def test_402_challenge_flow():
     assert "WWW-Authenticate" in resp.headers
     assert resp.headers["X-Payment-Required"] == "true"
     assert resp.headers["X-Payment-ChainId"] == "137"
-    assert resp.headers["X-Payment-Recipient"] == "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf"
+    assert resp.headers["X-Payment-Recipient"] == "0xA185B43fDD19619f99952AAed6eabf1029bF36a1"
 
     body = resp.json()
     assert body["code"] == 402
@@ -60,7 +60,7 @@ def test_402_challenge_flow():
     assert challenge["chain_id"] == 137
     assert challenge["amount"] == "0.005"
     assert challenge["accepted_token"] == "USDC"
-    assert challenge["recipient_address"] == "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf"
+    assert challenge["recipient_address"] == "0xA185B43fDD19619f99952AAed6eabf1029bF36a1"
     assert len(challenge["nonce"]) > 0
 
 

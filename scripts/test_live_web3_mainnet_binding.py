@@ -58,7 +58,7 @@ def run_live_binding_test(broadcast: bool = False) -> dict:
 
     account = Account.from_key(pk)
     wallet_address = account.address
-    treasury_address = os.getenv("ORACLE_TREASURY_WALLET", "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf")
+    treasury_address = os.getenv("ORACLE_TREASURY_WALLET", "0xA185B43fDD19619f99952AAed6eabf1029bF36a1")
     consumer_address = os.getenv("MINERALS_ORACLE_CONTRACT_ADDRESS", "0x835d01534a5D2e63D52636Fafb1019f889d1E66B")
     vault_address = os.getenv("AGENT_PAYMENT_VAULT_CONTRACT_ADDRESS", "0xb44Bc2Acdd156cE08b549A00a3102e4B01276654")
     rpc_url = os.getenv("POLYGON_RPC_URL", "https://polygon-bor-rpc.publicnode.com")

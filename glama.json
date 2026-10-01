@@ -28,6 +28,10 @@
       "description": "Fetches raw algorithmic indices derived from open satellite/market data and computes 12-trap regulatory rule heuristics for a critical mineral consignment."
     },
     {
+      "name": "eudr_satellite_mine_audit",
+      "description": "Audits mining concession plot coordinates against EUDR (EU 2023/1115) deforestation cutoff (2020-12-31) and indigenous territory boundaries using multi-satellite radar (Sentinel-1/2 SAR) & Hansen GFC. Generates cryptographic evidence hash and official EU TRACES-NT DDS reference format."
+    },
+    {
       "name": "simulate_procurement_rfq",
       "description": "Simulates multi-mineral consignment RFQ for battery manufacturing. Computes US IRA 50% FTA threshold and FEOC 25% taint propagation before placing contracts."
     },

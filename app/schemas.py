@@ -27,6 +27,15 @@ class MineralType(str, Enum):
     NICKEL_COBALT_BLACK_MASS = "NICKEL_COBALT_BLACK_MASS" # Recycled Ni/Co black mass (US BIS export restricted)
     TUNGSTEN_SCRAP = "TUNGSTEN_SCRAP"                   # Recycled tungsten scrap (US BIS export restricted)
 
+    @classmethod
+    def _missing_(cls, value: object):
+        if isinstance(value, str):
+            normalized = value.strip().upper().replace(" ", "_").replace("-", "_")
+            for member in cls:
+                if member.value == normalized or member.name == normalized:
+                    return member
+        return None
+
 
 class SourceCountry(str, Enum):
     IDN = "IDN"   # Indonesia
@@ -40,6 +49,30 @@ class SourceCountry(str, Enum):
     USA = "USA"   # United States of America
     MEX = "MEX"   # Mexico (World #1 Silver Producer)
     PER = "PER"   # Peru (Top Copper & Silver Producer)
+
+    @classmethod
+    def _missing_(cls, value: object):
+        if isinstance(value, str):
+            v = value.strip().upper()
+            country_aliases = {
+                "INDONESIA": "IDN", "ID": "IDN",
+                "CONGO": "COD", "DRC": "COD", "CD": "COD",
+                "CHILE": "CHL", "CL": "CHL",
+                "ARGENTINA": "ARG", "AR": "ARG",
+                "AUSTRALIA": "AUS", "AU": "AUS",
+                "BRAZIL": "BRA", "BR": "BRA",
+                "CHINA": "CHN", "CN": "CHN",
+                "SOUTH AFRICA": "ZAF", "ZA": "ZAF",
+                "UNITED STATES": "USA", "US": "USA",
+                "MEXICO": "MEX", "MX": "MEX",
+                "PERU": "PER", "PE": "PER",
+            }
+            if v in country_aliases:
+                v = country_aliases[v]
+            for member in cls:
+                if member.value == v or member.name == v:
+                    return member
+        return None
 
 
 class MaritimeCIIRating(str, Enum):
@@ -84,6 +117,9 @@ class EcologicalSpatialRecord(BaseModel):
     indigenous_territory_encroachment: bool = Field(default=False, description="True if encroaching on Brazil Art. 231 indigenous land")
     tailing_dam_dce_certified: bool = Field(default=True, description="Brazil ANM 95/2022 tailing dam stability certificate (DCE)")
     aquifer_depletion_alert: bool = Field(default=False, description="Chile DGA Atacama monitoring well anomaly alert")
+    satellite_evidence_hash: Optional[str] = Field(default=None, description="Cryptographic SHA-256 hash of multi-satellite radar proof")
+    traces_nt_dds_reference: Optional[str] = Field(default=None, description="Official EU TRACES-NT Due Diligence Statement (DDS) reference ID")
+    satellite_audit_source: Optional[str] = Field(default="LOCAL_STANDALONE", description="Audit source: REMOTE_EUDR_AGENT or LOCAL_STANDALONE")
 
 
 # Pillar 3: Labor, Human Rights & Social Safeguards
@@ -1197,6 +1233,28 @@ class TradeDealListResponse(BaseModel):
     status: str = "success"
     total_count: int
     deals: List[Dict[str, Any]]
+
+
+class MineSiteSatelliteAuditRequest(BaseModel):
+    latitude: float = Field(..., ge=-90.0, le=90.0, description="Mine extraction centroid latitude")
+    longitude: float = Field(..., ge=-180.0, le=180.0, description="Mine extraction centroid longitude")
+    country_code: str = Field(default="ID", min_length=2, max_length=3, description="ISO country code")
+    area_hectares: float = Field(default=10.0, gt=0.0, description="Concession area in hectares")
+    concession_id: Optional[str] = Field(default=None, description="Optional mining concession identifier")
+    production_date: Optional[str] = Field(default=None, description="Production/harvest date (YYYY-MM-DD)")
+
+
+class MineSiteSatelliteAuditResponse(BaseModel):
+    status: str = "success"
+    is_compliant: bool
+    deforestation_detected: bool
+    forest_loss_pct: float
+    indigenous_territory_encroachment: bool
+    reason: str
+    satellite_evidence_hash: str
+    traces_nt_dds_reference: Optional[str] = None
+    audit_source: str
+    latency_ms: float
 
 
 

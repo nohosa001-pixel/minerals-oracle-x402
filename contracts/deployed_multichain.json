@@ -1,8 +1,8 @@
 {
   "protocol": "Minerals Oracle x402",
   "version": "2.5.0",
-  "deployer": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
-  "treasury": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
+  "deployer": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+  "treasury": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
   "updated_at": "2026-09-19T05:19:15Z",
   "networks": {
     "polygon": {
@@ -26,7 +26,7 @@
         },
         "MineralTradeEscrow": {
           "address": "0x1270ddebad0ca90070342336a581eaACBA2060Ab",
-          "creator": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
+          "creator": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
           "creation_tx": "d36a8e9e3ff4b65ee3c35797179bfc46b8c16f510bf4cc9a1b3ec74dbf102fb9",
           "blockNumber": 94253020,
           "explorer_link": "https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab",
@@ -56,7 +56,7 @@
         },
         "MineralTradeEscrow": {
           "address": "0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638",
-          "creator": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
+          "creator": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
           "creation_tx": "d3ea506218425ef12b27061256bf342c58260407ee40efac4f609d2356ae205b",
           "blockNumber": 51647878,
           "explorer_link": "https://basescan.org/address/0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638",
@@ -87,7 +87,7 @@
         },
         "MineralTradeEscrow": {
           "address": "0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638",
-          "creator": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf",
+          "creator": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
           "creation_tx": "320fa60cb901f7290ad73b17446776661746b505e5a670c164d8011bd481eb50",
           "blockNumber": 507801945,
           "explorer_link": "https://arbiscan.io/address/0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638",

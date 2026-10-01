@@ -9,7 +9,7 @@
     "chain_id": 8453,
     "token": "USDC",
     "amount_usdc": 0.005,
-    "recipient": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf"
+    "recipient": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1"
   },
   "api": {
     "type": "openapi",

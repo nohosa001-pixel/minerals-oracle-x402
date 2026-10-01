@@ -360,7 +360,7 @@ def deploy(network_key: str = "polygon", dry_run: bool = False, register_default
     abi, bytecode = get_or_compile_contract()
 
     deployer_pk = os.getenv(cfg["pk_env"]) or os.getenv("POLYGON_DEPLOYER_PRIVATE_KEY") or os.getenv("DEPLOYER_PRIVATE_KEY")
-    oracle_signer = os.getenv("ORACLE_TREASURY_WALLET", "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf")
+    oracle_signer = os.getenv("ORACLE_TREASURY_WALLET", "0xA185B43fDD19619f99952AAed6eabf1029bF36a1")
     usdc_token = cfg["usdc"]
 
     print("\n" + "=" * 60)

@@ -2,11 +2,11 @@
 
 [![PyPI Version](https://img.shields.io/pypi/v/minerals-oracle-x402.svg?color=blue&style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/minerals-oracle-x402/)
 [![CI/CD](https://img.shields.io/github/actions/workflow/status/nohosa001-pixel/minerals-oracle-x402/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI%2FCD)](https://github.com/nohosa001-pixel/minerals-oracle-x402/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/Tests-237%2F237_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
+[![Tests](https://img.shields.io/badge/Tests-260%2F260_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
 [![Type Safety](https://img.shields.io/badge/Pyright-0_Errors_Clean-brightgreen?style=for-the-badge&logo=python&logoColor=white)](pyrightconfig.json)
 [![Multi-Chain EVM](https://img.shields.io/badge/EVM_Contracts-Polygon_|_Base_|_Arbitrum-8247E5?style=for-the-badge&logo=ethereum&logoColor=white)](contracts/verification/VERIFICATION_GUIDE.md)
 [![Agent Exclusive](https://img.shields.io/badge/Protocol-100%25_Agent_Native_M2M-ff007a?style=for-the-badge&logo=openai&logoColor=white)](#pure-autonomous-agent-native-architecture-m2m-exclusive)
-[![FastMCP](https://img.shields.io/badge/FastMCP-31_Agent_Tools-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](mcp_tool_spec.json)
+[![FastMCP](https://img.shields.io/badge/FastMCP-32_Agent_Tools-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](mcp_tool_spec.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 > 🤖 **100% Pure Autonomous Agent-Native (M2M Exclusive) Critical Minerals Supply-Chain & Bilateral Trade Oracle.**  
@@ -204,7 +204,7 @@ All M2M API invocations support micro-payments in USDC on Polygon (Chain ID `137
 - **Composite Battery Master Verification**: 0.10 USDC (`PricingTier.STANDARD`)
 - **Dedicated Mineral Lot Verification**: 0.05 USDC (`PricingTier.LIGHT`)
 - **Polygon USDC Address**: `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`
-- **Treasury Recipient**: `0x255F9991233f86B29dB847c8d5b8CB9915e80dCf`
+- **Treasury Recipient**: `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
 - **Agent Vault Fast-Path**: Zero-latency verification via pre-funded `X-Agent-Vault-Key` headers.
 
 ---

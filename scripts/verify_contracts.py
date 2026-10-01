@@ -57,7 +57,7 @@ NETWORKS = {
     }
 }
 
-TREASURY = os.getenv("ORACLE_TREASURY_WALLET", "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf")
+TREASURY = os.getenv("ORACLE_TREASURY_WALLET", "0xA185B43fDD19619f99952AAed6eabf1029bF36a1")
 
 
 def get_constructor_args(contract_name: str, chain: str) -> str:

@@ -362,4 +362,64 @@ class SecurityGateClient:
         )
 
 
+    def request_minerals_truth_attestation(
+        self,
+        job_id: str,
+        mineral_type: str,
+        smelter_id: str,
+        smelter_audit_status: str,
+        mine_country_code: str,
+        chain_of_custody_verified: bool = True,
+        child_labor_free: bool = True,
+        conflict_region: bool = False,
+        enhanced_due_diligence: bool = True,
+        chain_id: int = 137,
+        verifying_contract: str = "0x5555555555555555555555555555555555555555"
+    ) -> Dict[str, Any]:
+        """Requests cryptographic EIP-712 MineralsTruthAttestation from security-gate-x402."""
+        url = f"{self.gate_url}/api/v1/truth/minerals"
+        payload = {
+            "job_id": job_id,
+            "mineral_type": mineral_type,
+            "smelter_id": smelter_id,
+            "smelter_audit_status": smelter_audit_status,
+            "mine_country_code": mine_country_code,
+            "chain_of_custody_verified": chain_of_custody_verified,
+            "child_labor_free": child_labor_free,
+            "conflict_region": conflict_region,
+            "enhanced_due_diligence": enhanced_due_diligence,
+            "chain_id": chain_id,
+            "verifying_contract": verifying_contract
+        }
+        resp = self._client.post(url, json=payload, timeout=5.0)
+        resp.raise_for_status()
+        self.record_success()
+        return resp.json()
+
+    def settle_minerals_universal_escrow(
+        self,
+        job_id: str,
+        recipients: list,
+        attestation: Dict[str, Any],
+        truth_payload: str = "OECD and RMI Conflict-Free Minerals Provenance Verified",
+        chain_id: int = 137,
+        verifying_contract: str = "0x5555555555555555555555555555555555555555"
+    ) -> Dict[str, Any]:
+        """Disburses funds via UniversalEscrowCore Direct Split on security-gate-x402."""
+        url = f"{self.gate_url}/api/v1/escrow/universal/settle"
+        payload = {
+            "job_id": job_id,
+            "domain": 4,  # CONFLICT_MINERALS
+            "recipients": recipients,
+            "truth_payload": truth_payload,
+            "attestation": attestation,
+            "chain_id": chain_id,
+            "verifying_contract": verifying_contract
+        }
+        resp = self._client.post(url, json=payload, timeout=5.0)
+        resp.raise_for_status()
+        self.record_success()
+        return resp.json()
+
+
 security_gate_client = SecurityGateClient()

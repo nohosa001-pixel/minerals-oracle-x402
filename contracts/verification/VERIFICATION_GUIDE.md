@@ -26,7 +26,7 @@ This guide provides everything required to verify and publicly display **`AgentP
 * **Source File**: [`contracts/verification/AgentPaymentVault.flattened.sol`](AgentPaymentVault.flattened.sol)
 * **Constructor Arguments**:
   * `_usdcTokenAddress` (Polygon Native USDC): `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`
-  * `_oracleOperator` (Treasury): `0x255F9991233f86B29dB847c8d5b8CB9915e80dCf`
+  * `_oracleOperator` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
 * **ABI-Encoded Constructor Arguments (HEX)**:
 
 ```text
@@ -42,7 +42,7 @@ This guide provides everything required to verify and publicly display **`AgentP
 * **Direct Verification URL**: [https://polygonscan.com/verifyContract?a=0x835d01534a5D2e63D52636Fafb1019f889d1E66B](https://polygonscan.com/verifyContract?a=0x835d01534a5D2e63D52636Fafb1019f889d1E66B)
 * **Source File**: [`contracts/verification/MineralsOracleConsumer.flattened.sol`](MineralsOracleConsumer.flattened.sol)
 * **Constructor Arguments**:
-  * `_trustedOracleSigner` (Treasury): `0x255F9991233f86B29dB847c8d5b8CB9915e80dCf`
+  * `_trustedOracleSigner` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
 * **ABI-Encoded Constructor Arguments (HEX)**:
 
 ```text

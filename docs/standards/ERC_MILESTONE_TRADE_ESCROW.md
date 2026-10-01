@@ -123,9 +123,9 @@ Alternative Path:
 
 | Network | Chain ID | Contract Creator (Deployer) | Mineral Trade Escrow Address | Creation TX / Verification | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Polygon Mainnet** | 137 | `0x255F9991233f86B29dB847c8d5b8CB9915e80dCf` | [`0x1270ddebad0ca90070342336a581eaACBA2060Ab`](https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab) | [`0xd36a8e9e...`](https://polygonscan.com/tx/0xd36a8e9e3ff4b65ee3c35797179bfc46b8c16f510bf4cc9a1b3ec74dbf102fb9) (Block 94253020) | **On-Chain Live** |
-| **Base (Coinbase L2)** | 8453 | `0x255F9991233f86B29dB847c8d5b8CB9915e80dCf` | [`0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638`](https://basescan.org/address/0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638) | [`0xd3ea5062...`](https://basescan.org/tx/0xd3ea506218425ef12b27061256bf342c58260407ee40efac4f609d2356ae205b) (Block 51647878) | **On-Chain Live** |
-| **Arbitrum One** | 42161 | `0x255F9991233f86B29dB847c8d5b8CB9915e80dCf` | [`0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638`](https://arbiscan.io/address/0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638) | [`0x320fa60c...`](https://arbiscan.io/tx/0x320fa60cb901f7290ad73b17446776661746b505e5a670c164d8011bd481eb50) (Block 507801945) | **On-Chain Live** |
+| **Polygon Mainnet** | 137 | `0xA185B43fDD19619f99952AAed6eabf1029bF36a1` | [`0x1270ddebad0ca90070342336a581eaACBA2060Ab`](https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab) | [`0xd36a8e9e...`](https://polygonscan.com/tx/0xd36a8e9e3ff4b65ee3c35797179bfc46b8c16f510bf4cc9a1b3ec74dbf102fb9) (Block 94253020) | **On-Chain Live** |
+| **Base (Coinbase L2)** | 8453 | `0xA185B43fDD19619f99952AAed6eabf1029bF36a1` | [`0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638`](https://basescan.org/address/0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638) | [`0xd3ea5062...`](https://basescan.org/tx/0xd3ea506218425ef12b27061256bf342c58260407ee40efac4f609d2356ae205b) (Block 51647878) | **On-Chain Live** |
+| **Arbitrum One** | 42161 | `0xA185B43fDD19619f99952AAed6eabf1029bF36a1` | [`0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638`](https://arbiscan.io/address/0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638) | [`0x320fa60c...`](https://arbiscan.io/tx/0x320fa60cb901f7290ad73b17446776661746b505e5a670c164d8011bd481eb50) (Block 507801945) | **On-Chain Live** |
 
 ---
 

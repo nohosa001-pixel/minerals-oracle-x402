@@ -65,7 +65,7 @@ Every mineral lot evaluated by the oracle must clear the **7 Pillars of Critical
 
 ### Pillar 2: Ecological, Spatial & Climate Multi-Layer
 
-- **EUDR Deforestation Verification**: Verification that mine site land coordinates were not deforested or degraded after December 31, 2020, complying with EU Regulation 2023/1115.
+- **EUDR Deforestation Verification**: Multi-satellite radar verification (Sentinel-1/2 SAR cross-analysis & Hansen Global Forest Change) verifying mine site concession coordinates had zero deforestation or forest degradation after December 31, 2020 (EU Regulation 2023/1115). Automatically generates cryptographic SHA-256 satellite evidence hash (`satellite_evidence_hash`) and official EU `TRACES-NT` Due Diligence Statement (`traces_nt_dds_reference`).
 - **Periglacial & Glacier Exclusion**: Validation against Argentine National Institute of Snow, Glaciology and Environmental Sciences (`IANIGLA`) periglacial inventory buffer zones under Ley 26.639 Art. 6.
 - **Indigenous Territory Buffer**: Verification of minimum 10 km spatial buffer from demarcated indigenous lands under Brazilian Constitution Art. 231 and Australian Native Title.
 - **Tailing Dam Stability**: Proof of DCE geotechnical stability certification under ANM Resolução 95/2022 (upstream tailings dam ban).

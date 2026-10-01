@@ -15,7 +15,21 @@
         "required": ["lot_id", "mineral_type", "source_country", "net_weight_metric_tons"]
       }
     },
-
+    {
+      "name": "eudr_satellite_mine_audit",
+      "description": "Audits mining concession plot coordinates against EUDR (EU 2023/1115) deforestation cutoff (2020-12-31) and indigenous territory boundaries using multi-satellite radar (Sentinel-1/2 SAR) & Hansen GFC. Generates cryptographic evidence hash and official EU TRACES-NT DDS reference format.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "latitude": {"type": "number", "description": "Mine extraction centroid latitude"},
+          "longitude": {"type": "number", "description": "Mine extraction centroid longitude"},
+          "country_code": {"type": "string", "default": "ID", "description": "ISO alpha-2 or alpha-3 country code"},
+          "area_hectares": {"type": "number", "default": 10.0, "description": "Concession area in hectares"},
+          "concession_id": {"type": "string", "description": "Optional concession or mine permit identifier"}
+        },
+        "required": ["latitude", "longitude"]
+      }
+    },
     {
       "name": "minerals_submit_agent_feedback",
       "description": "Allows an autonomous AI agent or bot operator to submit an evolution proposal, mineral dataset addition request, regulatory edge case, or protocol improvement to continuously evolve the Minerals Oracle engine.",

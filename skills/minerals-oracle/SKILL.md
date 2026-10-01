@@ -119,8 +119,11 @@ Add to `claude_desktop_config.json` or Cursor MCP configuration:
 }
 ```
 
-Exposed Tools:
+Exposed Tools (32 Agent Tools Available):
 
-- `get_mineral_prices`: Fetches live spot quotes for specific or all critical minerals.
-- `get_arbitrage_spreads`: Returns active COMEX, LME, LBMA, and SMM locational spreads.
-- `calculate_urban_mining_value`: Calculates net recoverable value for scrap feedstock.
+- `eudr_satellite_mine_audit`: Sentinel-1/2 SAR radar deforestation & indigenous land protection audit with TRACES-NT DDS.
+- `verify_composite_battery_passport`: End-to-end composite EV battery pack compliance (US IRA 30D + EU 2023/1542).
+- `verify_lithium_origin` / `verify_nickel_origin` / `verify_cobalt_origin` / `verify_copper_origin` / `verify_silver_origin`: Single mineral origin pipelines.
+- `optimize_mineral_trade_route`: Autonomous landed cost arbitrage ($/MT) and chokepoint bypass decision signal.
+- `propose_a2a_trade_deal` / `dual_sign_trade_deal`: Bilateral trade agreement negotiation and dual-signing.
+- `get_mineral_prices` / `calculate_trade_tariffs`: Spot quotes and tariff resolution.

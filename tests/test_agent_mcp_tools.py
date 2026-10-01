@@ -20,6 +20,7 @@ def test_mcp_stdio_tools_list():
     assert "simulate_procurement_rfq" in tool_names
     assert "verify_copper_origin" in tool_names
     assert "verify_silver_origin" in tool_names
+    assert "eudr_satellite_mine_audit" in tool_names
 
 
 def test_mcp_stdio_register_and_check_balance():

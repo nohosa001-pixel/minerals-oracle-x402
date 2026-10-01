@@ -1,6 +1,6 @@
 """
 Live Polygon Mainnet Deployment Script for MineralTradeEscrow.sol.
-Deploys from canonical deployer wallet 0x255F9991233f86B29dB847c8d5b8CB9915e80dCf.
+Deploys from canonical deployer wallet 0xA185B43fDD19619f99952AAed6eabf1029bF36a1.
 """
 
 import os
@@ -19,7 +19,7 @@ load_dotenv(ROOT_DIR / ".env")
 POLYGON_RPC_URL = os.getenv("POLYGON_RPC_URL", "https://polygon-bor-rpc.publicnode.com")
 CHAIN_ID = int(os.getenv("POLYGON_CHAIN_ID", os.getenv("CHAIN_ID", "137")))
 DEPLOYER_PK = os.getenv("POLYGON_DEPLOYER_PRIVATE_KEY") or os.getenv("DEPLOYER_PRIVATE_KEY")
-TREASURY_WALLET = os.getenv("ORACLE_TREASURY_WALLET", "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf")
+TREASURY_WALLET = os.getenv("ORACLE_TREASURY_WALLET", "0xA185B43fDD19619f99952AAed6eabf1029bF36a1")
 POLYGON_NATIVE_USDC = "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"
 
 if not DEPLOYER_PK:

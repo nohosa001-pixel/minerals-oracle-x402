@@ -82,6 +82,25 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
                     }
                 },
                 {
+                    "name": "eudr_satellite_mine_audit",
+                    "description": (
+                        "Audits mining concession plot coordinates against EUDR (EU 2023/1115) deforestation cutoff (2020-12-31) "
+                        "and indigenous territory boundaries using multi-satellite radar (Sentinel-1/2 SAR) & Hansen GFC. "
+                        "Generates cryptographic evidence hash and official EU TRACES-NT DDS reference format."
+                    ),
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "latitude": {"type": "number", "description": "Mine extraction centroid latitude"},
+                            "longitude": {"type": "number", "description": "Mine extraction centroid longitude"},
+                            "country_code": {"type": "string", "default": "ID", "description": "ISO alpha-2 or alpha-3 country code"},
+                            "area_hectares": {"type": "number", "default": 10.0, "description": "Concession area in hectares"},
+                            "concession_id": {"type": "string", "description": "Optional concession or mine permit identifier"}
+                        },
+                        "required": ["latitude", "longitude"]
+                    }
+                },
+                {
                     "name": "verify_lithium_origin",
                     "description": (
                         "Verifies Australian hard-rock Spodumene to Lithium Hydroxide supply-chain provenance. "
@@ -838,6 +857,24 @@ def handle_tool_call(req_id: Any, name: str, arguments: Dict[str, Any]) -> Dict[
                 "id": req_id,
                 "result": {
                     "content": [{"type": "text", "text": json.dumps(data, indent=2)}]
+                }
+            }
+
+        elif name == "eudr_satellite_mine_audit":
+            from app.eudr_client import eudr_client
+            lat = float(arguments.get("latitude", 0.0))
+            lon = float(arguments.get("longitude", 0.0))
+            cc = str(arguments.get("country_code", "ID"))
+            area = float(arguments.get("area_hectares", 10.0))
+            cid = arguments.get("concession_id")
+            audit_res = eudr_client.verify_mine_site_compliance(
+                latitude=lat, longitude=lon, country_code=cc, area_hectares=area, concession_id=cid
+            )
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "content": [{"type": "text", "text": json.dumps(audit_res, indent=2)}]
                 }
             }
 

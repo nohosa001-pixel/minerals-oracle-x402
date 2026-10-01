@@ -22,6 +22,7 @@ from app.schemas import (
 )
 from app.security_gate_client import security_gate_client
 from app.onchain_signer import onchain_signer
+from app.eudr_client import eudr_client
 
 
 logger = logging.getLogger("ComplianceEngine")
@@ -147,11 +148,33 @@ class ComplianceEngine:
         # -----------------------------------------------------------------
         # Pillar 2: Ecological & EUDR Deforestation
         # -----------------------------------------------------------------
-        if not req.ecological_spatial.eudr_deforestation_free:
-            fatal_violations.append("EUDR_DEFORESTATION_FAILED: Land clearing detected after 2020-12-31 cutoff date.")
+        sat_result = eudr_client.verify_mine_site_compliance(
+            latitude=req.ecological_spatial.latitude,
+            longitude=req.ecological_spatial.longitude,
+            country_code=req.source_country.value if hasattr(req.source_country, "value") else str(req.source_country),
+            area_hectares=10.0
+        )
+
+        req.ecological_spatial.satellite_evidence_hash = sat_result.get("satellite_evidence_hash")
+        req.ecological_spatial.traces_nt_dds_reference = sat_result.get("traces_nt_dds_reference")
+        req.ecological_spatial.satellite_audit_source = sat_result.get("audit_source", "LOCAL_STANDALONE")
+
+        if sat_result.get("indigenous_territory_encroachment"):
+            req.ecological_spatial.indigenous_territory_encroachment = True
+            fatal_violations.append("INDIGENOUS_TERRITORY_ENCROACHMENT: Mining site overlaps demarcated protected indigenous lands.")
+            score -= 40.0
+
+        is_deforest = (not req.ecological_spatial.eudr_deforestation_free) or sat_result.get("deforestation_detected", False)
+
+        if is_deforest:
+            req.ecological_spatial.eudr_deforestation_free = False
+            ev_hash = str(sat_result.get('satellite_evidence_hash', ''))[:16]
+            fatal_violations.append(f"EUDR_DEFORESTATION_FAILED: Land clearing detected after 2020-12-31 cutoff date (Satellite verified: {ev_hash}...).")
             score -= 35.0
         else:
-            gotcha_defenses.append("DEFENSE_EUDR_DEFORESTATION_FREE: Sentinel-1/2 SAR cross-analysis confirms zero post-2020 deforestation.")
+            ev_hash = str(sat_result.get('satellite_evidence_hash', ''))[:16]
+            dds_ref = sat_result.get('traces_nt_dds_reference', 'PENDING')
+            gotcha_defenses.append(f"DEFENSE_EUDR_DEFORESTATION_FREE: Sentinel-1/2 SAR cross-analysis confirms zero post-2020 deforestation [Evidence: {ev_hash}..., TRACES-NT: {dds_ref}].")
 
         # ICSID Environmental Precedent
         citations.append(TradeJurisprudenceCitation(

@@ -52,7 +52,7 @@ def test_dual_attestation_generation():
     oracle_hash = "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
     attestation = security_gate_client.generate_dual_attestation(
         oracle_digest=oracle_hash,
-        agent_address="0x255F9991233f86B29dB847c8d5b8CB9915e80dCf"
+        agent_address="0xA185B43fDD19619f99952AAed6eabf1029bF36a1"
     )
 
     assert attestation.security_gate_certified is True
@@ -85,7 +85,7 @@ def test_api_secure_settlement_endpoint(client):
     payload = {
         "scrap_category": "E_WASTE_HIGH_GRADE_PCB",
         "quantity_metric_tons": 2.0,
-        "agent_address": "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf"
+        "agent_address": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1"
     }
     # Using dev bypass header to test calculation pipeline
     resp = client.post(

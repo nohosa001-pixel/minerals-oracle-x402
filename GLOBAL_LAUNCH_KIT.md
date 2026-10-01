@@ -30,12 +30,12 @@ Human customs brokers and auditing firms take weeks. Autonomous procurement agen
 ### Architecture & Tech Stack
 1. **Stateless Heuristic Engine**: Codifies 16 regulatory traps and international trade law precedents (WTO DS592/DS431, ICSID ARB/15/31, US CIT Superior Wire).
 2. **EIP-712 Cryptographic Binding**: Normalizes disclaimer terms into a canonical SHA-256 hash (`disclaimerHash`) and cryptographically signs verdicts. Any downstream smart contract or agent verifying the proof accepts the terms and hard $0.50 USDC liability cap.
-3. **HTTP 402 & FastMCP Native**: Zero human signups or KYC. Agents pay $0.005–$0.50 USDC via pre-funded vaults or RFC-x402 headers, or invoke tools via Model Context Protocol (FastMCP stdio/SSE).
+3. **HTTP 402 & FastMCP Native**: Zero human signups or KYC. Agents pay $0.005–$0.50 USDC via pre-funded vaults or RFC-x402 headers, or invoke 32 tools via Model Context Protocol (FastMCP stdio/SSE) including EUDR Sentinel-1/2 SAR satellite radar checks.
 4. **Multi-Chain Verified Smart Contracts**:
    - Polygon Mainnet (137): `MineralsOracleConsumer` (`0x835d01534a5D2e63D52636Fafb1019f889d1E66B`)
    - Base Mainnet (8453): `MineralsOracleConsumer` (`0xe43a9C368808B2dfF139D27789C40A3C8F2282cF`)
    - Arbitrum One (42161): `MineralsOracleConsumer` (`0xe43a9C368808B2dfF139D27789C40A3C8F2282cF`)
-5. **Rigorous Quality Bar**: 173 unit/integration tests passing (100%), 0 Pyright errors/warnings, hosted 24/7 on Google Cloud Run (Always-On in Seoul).
+5. **Rigorous Quality Bar**: 260 unit/integration/pathway tests passing (100%), 0 Pyright errors/warnings, hosted 24/7 on Google Cloud Run (Always-On in Seoul).
 
 Live Dashboard: https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/dashboard
 Code & Specs: https://github.com/nohosa001-pixel/minerals-oracle-x402

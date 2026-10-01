@@ -39,6 +39,7 @@
 - **A2A Escrow Calldata**: `GET /api/v1/a2a/deals/{deal_id}/escrow-calldata` (EVM payload for Polygon/Base/Arbitrum)
 - **Electronic Bill of Lading (eBL) Audit**: `POST /api/v1/trade/verify-ebl` (UNCITRAL MLETR, IMO & dark fleet check)
 - **Trade Route Optimization**: `POST /api/v1/trade/optimize-route` (Chokepoint detour & landed cost arbitrage)
+- **EUDR Satellite Radar Audit**: `POST /api/v1/compliance/eudr-satellite-audit` (Sentinel-1/2 SAR radar, 2020-12-31 cutoff, TRACES-NT DDS)
 - **General Compliance Verification**: `POST /api/v1/oracle/compliance/verify` (Full 7-pillar audit + EIP-712 passport)
 - **Australian Lithium Provenance**: `POST /api/v1/lithium/verify-origin` (WA MINEDEX, 7.5:1 yield, US IRA FEOC 25%)
 - **Indonesian Nickel MHP Provenance**: `POST /api/v1/nickel/verify-origin` (SIMBARA NTPN, HPAL 31.34:1 yield, CBAM)

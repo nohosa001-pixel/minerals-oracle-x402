@@ -18,7 +18,7 @@ load_dotenv(ROOT_DIR / ".env")
 
 CONTRACTS_DIR = ROOT_DIR / "contracts"
 DEPLOYED_FILE = CONTRACTS_DIR / "deployed_multichain.json"
-TREASURY_WALLET = os.getenv("ORACLE_TREASURY_WALLET", "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf")
+TREASURY_WALLET = os.getenv("ORACLE_TREASURY_WALLET", "0xA185B43fDD19619f99952AAed6eabf1029bF36a1")
 
 # Chain deployment configurations
 CHAINS = {

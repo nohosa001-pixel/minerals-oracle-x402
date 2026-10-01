@@ -82,7 +82,10 @@ from app.schemas import (
     TradeDealVerifyRequest,
     TradeDealVerifyResponse,
     TradeDealListResponse,
+    MineSiteSatelliteAuditRequest,
+    MineSiteSatelliteAuditResponse,
 )
+from app.eudr_client import eudr_client
 from app.global_trade_engine import global_trade_engine
 from app.agent_session_vault import (
     get_agent_session_vault,
@@ -605,6 +608,13 @@ async def get_agent_protocol_manifest():
                 "description": "Terronera/Fresnillo geofencing, N-Type TOPCon solar PV grade >=99.99% Ag"
             },
             {
+                "id": "eudr-satellite-radar-audit",
+                "endpoint": "/api/v1/compliance/eudr-satellite-audit",
+                "mcp_tool": "eudr_satellite_mine_audit",
+                "cost_tier": "$0.02 USDC",
+                "description": "Multi-satellite Sentinel-1/2 SAR radar deforestation (2020-12-31 cutoff) & TRACES-NT DDS issuance"
+            },
+            {
                 "id": "self-serve-onboarding",
                 "endpoint": "/api/v1/agent/onboard",
                 "free_trial": "10 queries ($0.05 USDC)"
@@ -810,7 +820,7 @@ async def onboard_autonomous_agent(body: AgentOnboardRequest):
         agent_address=body.agent_address,
         initial_trial_balance_usdc=0.05,
     )
-    treasury_wallet = os.getenv("ORACLE_TREASURY_WALLET", "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf")
+    treasury_wallet = os.getenv("ORACLE_TREASURY_WALLET", "0xA185B43fDD19619f99952AAed6eabf1029bF36a1")
     return {
         "status": "success",
         "meta": STANDARD_DISCLAIMER_META,
@@ -885,6 +895,43 @@ async def verify_mineral_lot_compliance(
     headers = getattr(request.state, "extra_headers", {}) or {}
     passport = compliance_engine.evaluate_lot(body)
     return JSONResponse(content=passport.model_dump(), headers=headers)
+
+
+@app.post(
+    "/api/v1/compliance/eudr-satellite-audit",
+    response_model=MineSiteSatelliteAuditResponse,
+    tags=["Compliance Oracle"],
+    summary="Audit Mining Concession Plot via EUDR Satellite Radar (Sentinel-1/2 SAR & TRACES-NT)",
+)
+async def audit_mine_site_eudr(
+    body: MineSiteSatelliteAuditRequest,
+    request: Request,
+):
+    """
+    Connects with eudr-compliance-agent for multi-satellite radar (Sentinel-1/2 SAR) & Hansen GFC
+    deforestation screening (2020-12-31 cutoff), indigenous land protection, and TRACES-NT DDS reference issuance.
+    """
+    res = eudr_client.verify_mine_site_compliance(
+        latitude=body.latitude,
+        longitude=body.longitude,
+        country_code=body.country_code,
+        area_hectares=body.area_hectares,
+        concession_id=body.concession_id,
+        production_date=body.production_date,
+    )
+    return MineSiteSatelliteAuditResponse(
+        status="success",
+        is_compliant=res.get("is_compliant", True),
+        deforestation_detected=res.get("deforestation_detected", False),
+        forest_loss_pct=res.get("forest_loss_pct", 0.0),
+        indigenous_territory_encroachment=res.get("indigenous_territory_encroachment", False),
+        reason=res.get("reason", "Verified clean"),
+        satellite_evidence_hash=res.get("satellite_evidence_hash", ""),
+        traces_nt_dds_reference=res.get("traces_nt_dds_reference"),
+        audit_source=res.get("audit_source", "LOCAL_STANDALONE"),
+        latency_ms=res.get("latency_ms", 0.0),
+    )
+
 
 
 @app.post(
@@ -2676,6 +2723,60 @@ def calculate_cbam_liability_endpoint(
     return JSONResponse(content=res)
 
 
+
+
+# -------------------------------------------------------------------------
+# Security Gate x402 Universal Escrow Settlement Rail (Domain 4: CONFLICT_MINERALS)
+# -------------------------------------------------------------------------
+from app.security_gate_client import security_gate_client
+
+class MineralsUniversalSettleRequest(BaseModel):
+    job_id: str
+    mineral_type: str
+    smelter_id: str
+    smelter_audit_status: str
+    mine_country_code: str
+    chain_of_custody_verified: bool = True
+    child_labor_free: bool = True
+    conflict_region: bool = False
+    enhanced_due_diligence: bool = True
+    recipients: List[Dict[str, Any]]
+    chain_id: int = 137
+
+@app.post(
+    "/api/v1/escrow/universal/settle-minerals",
+    tags=["Security Gate x402 Escrow Rail"],
+    summary="Request Conflict-Free Minerals Truth Attestation and Disburse Universal Escrow"
+)
+async def settle_minerals_universal_escrow_endpoint(req: MineralsUniversalSettleRequest):
+    """
+    End-to-End Interoperability Bridge:
+    1. Obtains cryptographic EIP-712 MineralsTruthAttestation from security-gate-x402.
+    2. Atomically triggers 0.1s Direct Split disbursement to miners, logistics, and refiners.
+    """
+    attestation = security_gate_client.request_minerals_truth_attestation(
+        job_id=req.job_id,
+        mineral_type=req.mineral_type,
+        smelter_id=req.smelter_id,
+        smelter_audit_status=req.smelter_audit_status,
+        mine_country_code=req.mine_country_code,
+        chain_of_custody_verified=req.chain_of_custody_verified,
+        child_labor_free=req.child_labor_free,
+        conflict_region=req.conflict_region,
+        enhanced_due_diligence=req.enhanced_due_diligence,
+        chain_id=req.chain_id
+    )
+    settlement = security_gate_client.settle_minerals_universal_escrow(
+        job_id=req.job_id,
+        recipients=req.recipients,
+        attestation=attestation,
+        chain_id=req.chain_id
+    )
+    return {
+        "status": "SUCCESS",
+        "attestation": attestation,
+        "settlement": settlement
+    }
 
 
 if __name__ == "__main__":

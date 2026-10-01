@@ -27,7 +27,7 @@ load_dotenv()
 
 # Configuration constants
 POLYGON_CHAIN_ID = int(os.getenv("POLYGON_CHAIN_ID", os.getenv("CHAIN_ID", "137")))
-DEFAULT_RECIPIENT_WALLET = os.getenv("ORACLE_TREASURY_WALLET", "0x255F9991233f86B29dB847c8d5b8CB9915e80dCf")
+DEFAULT_RECIPIENT_WALLET = os.getenv("ORACLE_TREASURY_WALLET", "0xA185B43fDD19619f99952AAed6eabf1029bF36a1")
 FACILITATOR_URL = os.getenv("X402_FACILITATOR_URL", "https://facilitator.polygon.technology/v1/verify")
 ALLOW_DEV_BYPASS = os.getenv("ALLOW_DEV_BYPASS", "false").lower() in ("1", "true", "yes")
 
