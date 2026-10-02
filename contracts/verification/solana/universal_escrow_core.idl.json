@@ -1,0 +1,83 @@
+{
+  "version": "1.0.0",
+  "name": "universal_escrow_core",
+  "instructions": [
+    {
+      "name": "initializeEscrow",
+      "accounts": [
+        {"name": "escrowAccount", "isMut": true, "isSigner": true},
+        {"name": "buyerAgent", "isMut": true, "isSigner": true},
+        {"name": "buyerTokenAccount", "isMut": true, "isSigner": false},
+        {"name": "escrowTokenVault", "isMut": true, "isSigner": false},
+        {"name": "usdcMint", "isMut": false, "isSigner": false},
+        {"name": "tokenProgram", "isMut": false, "isSigner": false},
+        {"name": "systemProgram", "isMut": false, "isSigner": false},
+        {"name": "rent", "isMut": false, "isSigner": false}
+      ],
+      "args": [
+        {"name": "dealId", "type": "string"},
+        {"name": "amountUsdc", "type": "u64"},
+        {"name": "domainId", "type": "u8"},
+        {"name": "expiresAt", "type": "i64"}
+      ]
+    },
+    {
+      "name": "executeDirectSplit",
+      "accounts": [
+        {"name": "escrowAccount", "isMut": true, "isSigner": false},
+        {"name": "escrowTokenVault", "isMut": true, "isSigner": false},
+        {"name": "sellerAgentTokenAccount", "isMut": true, "isSigner": false},
+        {"name": "mineralsOracleTreasury", "isMut": true, "isSigner": false},
+        {"name": "securityGateStakingPool", "isMut": true, "isSigner": false},
+        {"name": "oracleAuthority", "isMut": false, "isSigner": true},
+        {"name": "tokenProgram", "isMut": false, "isSigner": false}
+      ],
+      "args": [
+        {"name": "dealId", "type": "string"},
+        {"name": "truthHash", "type": "[u8; 32]"},
+        {"name": "ed25519Signature", "type": "[u8; 64]"},
+        {"name": "sellerPayoutAmount", "type": "u64"},
+        {"name": "oracleFeeAmount", "type": "u64"},
+        {"name": "stakingFeeAmount", "type": "u64"}
+      ]
+    },
+    {
+      "name": "refundEscrow",
+      "accounts": [
+        {"name": "escrowAccount", "isMut": true, "isSigner": false},
+        {"name": "escrowTokenVault", "isMut": true, "isSigner": false},
+        {"name": "buyerTokenAccount", "isMut": true, "isSigner": false},
+        {"name": "oracleAuthority", "isMut": false, "isSigner": true},
+        {"name": "tokenProgram", "isMut": false, "isSigner": false}
+      ],
+      "args": [
+        {"name": "dealId", "type": "string"},
+        {"name": "refundReason", "type": "string"}
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "EscrowAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {"name": "dealId", "type": "string"},
+          {"name": "buyerAgent", "type": "publicKey"},
+          {"name": "sellerAgent", "type": "publicKey"},
+          {"name": "grossAmountUsdc", "type": "u64"},
+          {"name": "domainId", "type": "u8"},
+          {"name": "state", "type": "u8"},
+          {"name": "createdAt", "type": "i64"},
+          {"name": "settledAt", "type": "i64"}
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "address": "AGR3W3R9pKxnuZGYrpaggfkbMKVrjoniLaGvi1voBFSC",
+    "origin": "minerals-oracle-x402 / security-gate-x402",
+    "network": "solana-mainnet",
+    "chainId": 501
+  }
+}

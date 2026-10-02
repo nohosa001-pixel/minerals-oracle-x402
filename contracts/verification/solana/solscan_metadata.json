@@ -1,0 +1,52 @@
+{
+  "project_name": "Minerals Oracle x402",
+  "project_tag": "minerals-oracle",
+  "symbol": "MINERALS",
+  "category": "Oracle / Autonomous AI Agent / Real World Assets (RWA)",
+  "network": "Solana Mainnet-Beta",
+  "chain_id": 501,
+  "website": "https://minerals-oracle-x402.com",
+  "api_endpoint": "http://127.0.0.1:8000",
+  "rpc_url": "https://api.mainnet-beta.solana.com",
+  "treasury_pubkey": "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp",
+  "settlement_token": {
+    "name": "USD Coin",
+    "symbol": "USDC",
+    "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    "decimals": 6
+  },
+  "programs": [
+    {
+      "name": "UniversalEscrowCore",
+      "program_id": "AGR3W3R9pKxnuZGYrpaggfkbMKVrjoniLaGvi1voBFSC",
+      "idl_file": "universal_escrow_core.idl.json",
+      "description": "Sub-second (0.4s) direct split escrow settlement rail with Ed25519 oracle truth attestation for critical mineral lots and deforestation-free timber",
+      "solscan_url": "https://solscan.io/account/AGR3W3R9pKxnuZGYrpaggfkbMKVrjoniLaGvi1voBFSC"
+    },
+    {
+      "name": "AgentPaymentVault",
+      "program_id": "7oZ16YaazQzN6z5uA1nAZWD9oGUDXyvHwXGJLFYyWi3y",
+      "idl_file": "agent_payment_vault.idl.json",
+      "description": "Autonomous AI Agent pre-funded micro-payment vault supporting zero-latency query execution under HTTP 402 Monetization",
+      "solscan_url": "https://solscan.io/account/7oZ16YaazQzN6z5uA1nAZWD9oGUDXyvHwXGJLFYyWi3y"
+    },
+    {
+      "name": "MineralsOracleConsumer",
+      "program_id": "21ZR1QCyAbNrRLs1iWEkdbNsfCFdJcy6ip9R2JxDbkTL",
+      "idl_file": "minerals_oracle_consumer.idl.json",
+      "description": "Verifiable spot pricing and EU Battery Passport Merkle root consumer on Solana",
+      "solscan_url": "https://solscan.io/account/21ZR1QCyAbNrRLs1iWEkdbNsfCFdJcy6ip9R2JxDbkTL"
+    }
+  ],
+  "compliance_standards": [
+    "EUDR_2023_1115 (EU Deforestation Regulation)",
+    "US_IRA_SECTION_30D (Foreign Entity of Concern <25% Equity Screening)",
+    "OECD_DUE_DILIGENCE_ANNEX_II (Conflict Minerals Mass Balance)",
+    "EU_BATTERY_REGULATION_2023_1542 (Digital Battery Passport)",
+    "EU_AI_ACT_ARTICLE_50 (Dual-Attestation Machine-to-Machine Trust)"
+  ],
+  "contact": {
+    "project_email": "ops@cleanweb.ai",
+    "github_repo": "https://github.com/nohosa001-pixel/minerals-oracle-x402"
+  }
+}

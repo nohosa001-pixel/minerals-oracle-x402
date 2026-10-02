@@ -1,0 +1,55 @@
+{
+  "version": "1.0.0",
+  "name": "minerals_oracle_consumer",
+  "instructions": [
+    {
+      "name": "updatePriceFeed",
+      "accounts": [
+        {"name": "priceFeedAccount", "isMut": true, "isSigner": false},
+        {"name": "oracleSigner", "isMut": false, "isSigner": true},
+        {"name": "systemProgram", "isMut": false, "isSigner": false}
+      ],
+      "args": [
+        {"name": "symbol", "type": "string"},
+        {"name": "priceUsd", "type": "u64"},
+        {"name": "confidenceBps", "type": "u16"},
+        {"name": "timestampUtc", "type": "i64"},
+        {"name": "ed25519Signature", "type": "[u8; 64]"}
+      ]
+    },
+    {
+      "name": "anchorBatteryPassport",
+      "accounts": [
+        {"name": "passportRecord", "isMut": true, "isSigner": false},
+        {"name": "oracleSigner", "isMut": false, "isSigner": true},
+        {"name": "systemProgram", "isMut": false, "isSigner": false}
+      ],
+      "args": [
+        {"name": "passportId", "type": "string"},
+        {"name": "merkleRoot", "type": "[u8; 32]"},
+        {"name": "iraFeocPassed", "type": "bool"},
+        {"name": "eudrPassed", "type": "bool"}
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "PriceFeedAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {"name": "symbol", "type": "string"},
+          {"name": "priceUsd", "type": "u64"},
+          {"name": "confidenceBps", "type": "u16"},
+          {"name": "lastUpdatedUtc", "type": "i64"}
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "address": "21ZR1QCyAbNrRLs1iWEkdbNsfCFdJcy6ip9R2JxDbkTL",
+    "origin": "minerals-oracle-x402 / oracle-consumer",
+    "network": "solana-mainnet",
+    "chainId": 501
+  }
+}
