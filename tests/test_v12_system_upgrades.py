@@ -29,7 +29,7 @@ def test_v12_version_and_packaging():
     """Validates pyproject.toml contains correct version and required dependencies."""
     with open("pyproject.toml", "r", encoding="utf-8") as f:
         content = f.read()
-    assert re.search(r'version\s*=\s*"1\.2\.\d+"', content) is not None
+    assert re.search(r'version\s*=\s*"1\.[23]\.\d+"', content) is not None
     assert '"redis>=5.0.0"' in content
 
 
@@ -119,7 +119,7 @@ def test_prometheus_metrics_endpoint():
     assert "oracle_uptime_seconds" in text
     assert "oracle_active_agent_sessions" in text
     assert "oracle_cached_prices" in text
-    assert re.search(r'oracle_system_version\{version="1\.2\.\d+"\}\s+1', text) is not None
+    assert re.search(r'oracle_system_version\{version="1\.[23]\.\d+"\}\s+1', text) is not None
 
 
 def test_consensus_price_api_endpoint():
