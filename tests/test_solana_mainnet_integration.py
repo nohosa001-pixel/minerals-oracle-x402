@@ -72,8 +72,10 @@ def test_x402_challenge_solana():
 
 def test_solana_signature_verification_and_anti_replay():
     """Verify Solana Base58 transaction signature verification and anti-replay protection."""
-    # Base58 signature: 88 characters
-    test_sig = "5VerBQQuJYvHiU1fXb6Vd99Q3aP3h6k6yqgXfCjE288jC2jVn8P6wM7g8k8R7K8L2wM4pQ6k6yqgXfCjE288jC2"
+    import secrets
+    # Base58 signature: exactly 88 characters (54 prefix + 34 random)
+    rand_chars = "".join(secrets.choice("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz") for _ in range(34))
+    test_sig = "5VerBQQuJYvHiU1fXb6Vd99Q3aP3h6k6yqgXfCjE288jC2jVn8P6wM" + rand_chars
 
     # 1. Invalid signature character rejection
     bad_sig = "0OIl_invalid_base58_characters!!!"

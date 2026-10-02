@@ -131,7 +131,7 @@ Exposed Tools (32 Agent Tools Available):
 - `verify_lithium_origin` / `verify_nickel_origin` / `verify_cobalt_origin` / `verify_copper_origin` / `verify_silver_origin`: Single mineral origin pipelines.
 - `optimize_mineral_trade_route`: Autonomous landed cost arbitrage ($/MT) and chokepoint bypass decision signal.
 - `propose_a2a_trade_deal` / `dual_sign_trade_deal`: Bilateral trade agreement negotiation and dual-signing.
-- `get_mineral_prices` / `calculate_trade_tariffs`: Spot quotes and tariff resolution.
+- `get_compliance_status` / `calculate_trade_tariffs`: Real-time compliance status and bilateral trade tariff resolution.
 
 ---
 

@@ -994,16 +994,30 @@ class SecurityGateClient:
         validity_seconds: int = 3600,
         **kwargs
     ) -> Tuple[str, int, str, str, int]:
-        j_id = job_id_hex or kwargs.get("job_id") or ("job_" + hashlib.sha256(str(time.time()).encode()).hexdigest()[:16])
+        raw_jid = str(job_id_hex or kwargs.get("job_id") or ("job_" + hashlib.sha256(str(time.time()).encode()).hexdigest()))
+        if len(raw_jid) == 64 and all(c in "0123456789abcdefABCDEF" for c in raw_jid):
+            j_id = raw_jid.lower()
+        else:
+            j_id = hashlib.sha256(raw_jid.encode()).hexdigest()
+
         d_val = domain if domain is not None else kwargs.get("domain_id", 4)
         if isinstance(d_val, str):
             d_val = 3 if "EUDR" in d_val else 4
-        t_hash = truth_hash_hex or kwargs.get("truth_hash") or ""
-        if not t_hash and "query_payload" in kwargs:
-            t_hash = hashlib.sha256(str(kwargs["query_payload"]).encode()).hexdigest()
-        r_hash = recipients_hash_hex or kwargs.get("recipients_hash") or ""
-        if not r_hash and "client_identity" in kwargs:
-            r_hash = hashlib.sha256(str(kwargs["client_identity"]).encode()).hexdigest()
+
+        raw_thash = str(truth_hash_hex or kwargs.get("truth_hash") or "")
+        if len(raw_thash) == 64 and all(c in "0123456789abcdefABCDEF" for c in raw_thash):
+            t_hash = raw_thash.lower()
+        else:
+            payload_str = str(kwargs.get("query_payload", raw_thash or "solana_conflict_minerals_truth"))
+            t_hash = hashlib.sha256(payload_str.encode()).hexdigest()
+
+        raw_rhash = str(recipients_hash_hex or kwargs.get("recipients_hash") or "")
+        if len(raw_rhash) == 64 and all(c in "0123456789abcdefABCDEF" for c in raw_rhash):
+            r_hash = raw_rhash.lower()
+        else:
+            client_str = str(kwargs.get("client_identity", raw_rhash or os.getenv("SOLANA_WALLET_ADDRESS", "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp")))
+            r_hash = hashlib.sha256(client_str.encode()).hexdigest()
+
         v_sec = validity_seconds or kwargs.get("validity_seconds", 3600)
         return j_id, int(d_val), t_hash, r_hash, int(v_sec)
 
