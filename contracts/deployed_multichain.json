@@ -96,6 +96,36 @@
           "settlementToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
         }
       }
+    },
+    "solana": {
+      "chain_name": "solana",
+      "chainId": 501,
+      "display_name": "Solana Mainnet-Beta",
+      "rpc_url": "https://api.mainnet-beta.solana.com",
+      "explorer_url": "https://solscan.io",
+      "status": "active",
+      "usdc_token": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "permit2": "None (SPL Token Program)",
+      "contracts": {
+        "AgentPaymentVault": {
+          "address": "7oZ16YaazQzN6z5uA1nAZWD9oGUDXyvHwXGJLFYyWi3y",
+          "explorer_link": "https://solscan.io/account/7oZ16YaazQzN6z5uA1nAZWD9oGUDXyvHwXGJLFYyWi3y",
+          "program_type": "Anchor/BPF"
+        },
+        "MineralsOracleConsumer": {
+          "address": "21ZR1QCyAbNrRLs1iWEkdbNsfCFdJcy6ip9R2JxDbkTL",
+          "explorer_link": "https://solscan.io/account/21ZR1QCyAbNrRLs1iWEkdbNsfCFdJcy6ip9R2JxDbkTL",
+          "primarySymbol": "Cu",
+          "program_type": "Anchor/BPF"
+        },
+        "MineralTradeEscrow": {
+          "address": "AGR3W3R9pKxnuZGYrpaggfkbMKVrjoniLaGvi1voBFSC",
+          "creator": "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp",
+          "explorer_link": "https://solscan.io/account/AGR3W3R9pKxnuZGYrpaggfkbMKVrjoniLaGvi1voBFSC",
+          "standard": "Solana-UniversalEscrowCore",
+          "settlementToken": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+        }
+      }
     }
   }
 }
