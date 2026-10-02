@@ -65,7 +65,7 @@ To get verified tags, official labels, and logo displays on Solscan (e.g., displ
 
 - **Solscan Support / Verification Portal**: [https://forms.solscan.io/](https://forms.solscan.io/) or [https://solscan.io/contact-us](https://solscan.io/contact-us)
 
-### Pre-Filled Submission Details:
+### Pre-Filled Submission Details
 
 ```yaml
 Project Name: Minerals Oracle x402
@@ -99,6 +99,7 @@ Compliance & Audits:
 ## 4. Verification Checklist & Testing
 
 Once uploaded, verify on Solscan:
+
 1. Search `AGR3W3R9pKxnuZGYrpaggfkbMKVrjoniLaGvi1voBFSC` on [solscan.io](https://solscan.io).
 2. Check that the program shows "Anchor Program: universal_escrow_core".
 3. Check that the instructions list shows:

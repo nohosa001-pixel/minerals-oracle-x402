@@ -184,6 +184,7 @@ curl "http://127.0.0.1:8000/api/v1/oracle/security-gate/status"
 ## 6. Solana Mainnet-Beta Sub-Second (0.4s) Direct Split & Ed25519 Oracle Rail
 
 Connects directly with Solana Mainnet-Beta for high-frequency algorithmic commodity settlement:
+
 - **Chain ID**: `501`
 - **Native Token**: `SOL` | **Settlement Asset**: SPL USDC (`EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`)
 - **Finality Speed**: `0.4s (400ms)`
@@ -224,7 +225,7 @@ curl -X POST "http://127.0.0.1:8000/api/v1/escrow/universal/settle-solana" \
 ```
 
 **Direct Split Distribution**:
+
 - **Seller Agent Net (99.8%)**: $998.00 USDC
 - **Minerals Oracle Treasury (0.1%)**: $1.00 USDC to `411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp`
 - **Security Gate Staking Pool (0.1%)**: $1.00 USDC to `774hK5wmk5pStvsh5DH46pYPYYD3ro7tMfz1ASxcbiTK`
-

@@ -1394,6 +1394,45 @@ async def get_security_gate_status():
     return JSONResponse(content=health)
 
 
+@app.get(
+    "/api/v1/solana/programs",
+    tags=["Solana Universal Escrow", "Agent Protocol"],
+    summary="Get verified Solana Program IDs and Solscan links for autonomous bots",
+)
+async def get_solana_programs():
+    """
+    Returns verified Solana Mainnet program IDs, treasury wallet, and Solscan links
+    formatted for autonomous bots, scripts, and automated tooling.
+    """
+    escrow_id = os.getenv("SOLANA_ESCROW_PROGRAM_ID", "AGR3W3R9pKxnuZGYrpaggfkbMKVrjoniLaGvi1voBFSC")
+    vault_id = os.getenv("SOLANA_AGENT_VAULT_PROGRAM_ID", "7oZ16YaazQzN6z5uA1nAZWD9oGUDXyvHwXGJLFYyWi3y")
+    consumer_id = os.getenv("SOLANA_ORACLE_CONSUMER_PROGRAM_ID", "21ZR1QCyAbNrRLs1iWEkdbNsfCFdJcy6ip9R2JxDbkTL")
+    treasury = os.getenv("SOLANA_WALLET_ADDRESS", "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp")
+    token_mint = os.getenv("SOLANA_USDC_MINT", "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
+
+    return {
+        "status": "success",
+        "network": "Solana Mainnet-Beta",
+        "chain_id": 501,
+        "rpc_url": os.getenv("SOLANA_RPC_URL", "https://api.mainnet-beta.solana.com"),
+        "treasury_pubkey": treasury,
+        "usdc_mint": token_mint,
+        "programs": {
+            "UniversalEscrowCore": escrow_id,
+            "AgentPaymentVault": vault_id,
+            "MineralsOracleConsumer": consumer_id,
+        },
+        "solscan_links": {
+            "UniversalEscrowCore": f"https://solscan.io/account/{escrow_id}",
+            "AgentPaymentVault": f"https://solscan.io/account/{vault_id}",
+            "MineralsOracleConsumer": f"https://solscan.io/account/{consumer_id}",
+            "TreasuryWallet": f"https://solscan.io/account/{treasury}",
+        },
+        "raw_list": [escrow_id, vault_id, consumer_id],
+    }
+
+
+
 
 @app.post(
     "/api/v1/oracle/secure-settlement",
