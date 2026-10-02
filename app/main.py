@@ -1373,9 +1373,12 @@ async def get_spreads(
 )
 async def get_security_gate_status():
     """
-    Returns live connection metrics, latency, and operational mode of the Security Gate x402 integration.
+    Returns live connection metrics, latency, circuit breaker state, and operational mode of the Security Gate x402 integration.
     """
     health = await security_gate_client.check_health_async()
+    health["circuit_breaker"] = security_gate_client.get_circuit_status()
+    health["supported_domains"] = ["EUDR_FOREST (3)", "CONFLICT_MINERALS (4)"]
+    health["truth_adapters"] = ["minerals_truth_adapter", "eudr_truth_adapter"]
     return JSONResponse(content=health)
 
 
@@ -2743,6 +2746,18 @@ class MineralsUniversalSettleRequest(BaseModel):
     recipients: List[Dict[str, Any]]
     chain_id: int = 137
 
+class EudrUniversalSettleRequest(BaseModel):
+    job_id: str
+    commodity: str
+    country_code: str
+    polygon_coordinates: List[List[float]]
+    dds_reference_id: str
+    deforestation_detected: bool = False
+    legal_harvest_verified: bool = True
+    recipients: List[Dict[str, Any]]
+    truth_payload: str = "EUDR 2023/1115 Deforestation-Free Concession Verified"
+    chain_id: int = 137
+
 @app.post(
     "/api/v1/escrow/universal/settle-minerals",
     tags=["Security Gate x402 Escrow Rail"],
@@ -2750,33 +2765,89 @@ class MineralsUniversalSettleRequest(BaseModel):
 )
 async def settle_minerals_universal_escrow_endpoint(req: MineralsUniversalSettleRequest):
     """
-    End-to-End Interoperability Bridge:
+    End-to-End Interoperability Bridge (Domain 4: CONFLICT_MINERALS):
     1. Obtains cryptographic EIP-712 MineralsTruthAttestation from security-gate-x402.
     2. Atomically triggers 0.1s Direct Split disbursement to miners, logistics, and refiners.
     """
-    attestation = security_gate_client.request_minerals_truth_attestation(
-        job_id=req.job_id,
-        mineral_type=req.mineral_type,
-        smelter_id=req.smelter_id,
-        smelter_audit_status=req.smelter_audit_status,
-        mine_country_code=req.mine_country_code,
-        chain_of_custody_verified=req.chain_of_custody_verified,
-        child_labor_free=req.child_labor_free,
-        conflict_region=req.conflict_region,
-        enhanced_due_diligence=req.enhanced_due_diligence,
-        chain_id=req.chain_id
-    )
-    settlement = security_gate_client.settle_minerals_universal_escrow(
-        job_id=req.job_id,
-        recipients=req.recipients,
-        attestation=attestation,
-        chain_id=req.chain_id
-    )
-    return {
-        "status": "SUCCESS",
-        "attestation": attestation,
-        "settlement": settlement
-    }
+    try:
+        attestation = await security_gate_client.request_minerals_truth_attestation_async(
+            job_id=req.job_id,
+            mineral_type=req.mineral_type,
+            smelter_id=req.smelter_id,
+            smelter_audit_status=req.smelter_audit_status,
+            mine_country_code=req.mine_country_code,
+            chain_of_custody_verified=req.chain_of_custody_verified,
+            child_labor_free=req.child_labor_free,
+            conflict_region=req.conflict_region,
+            enhanced_due_diligence=req.enhanced_due_diligence,
+            chain_id=req.chain_id
+        )
+        settlement = await security_gate_client.settle_minerals_universal_escrow_async(
+            job_id=req.job_id,
+            recipients=req.recipients,
+            attestation=attestation,
+            chain_id=req.chain_id
+        )
+        return {
+            "status": "SUCCESS",
+            "attestation": attestation,
+            "settlement": settlement
+        }
+    except httpx.HTTPStatusError as e:
+        detail_msg = "Security Gate error"
+        try:
+            detail_msg = e.response.json().get("detail", str(e))
+        except Exception:
+            detail_msg = str(e)
+        raise HTTPException(status_code=e.response.status_code, detail=detail_msg)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post(
+    "/api/v1/escrow/universal/settle-eudr",
+    tags=["Security Gate x402 Escrow Rail"],
+    summary="Request EUDR Deforestation-Free Truth Attestation and Disburse Universal Escrow"
+)
+async def settle_eudr_universal_escrow_endpoint(req: EudrUniversalSettleRequest):
+    """
+    EUDR Domain 3 Universal Escrow Interoperability Bridge:
+    1. Obtains cryptographic EIP-712 EUDRTruthAttestation from security-gate-x402.
+    2. Atomically triggers 0.1s Direct Split disbursement for compliant forest commodities.
+    """
+    try:
+        attestation = await security_gate_client.request_eudr_truth_attestation_async(
+            job_id=req.job_id,
+            commodity=req.commodity,
+            country_code=req.country_code,
+            polygon_coordinates=req.polygon_coordinates,
+            dds_reference_id=req.dds_reference_id,
+            deforestation_detected=req.deforestation_detected,
+            legal_harvest_verified=req.legal_harvest_verified,
+            chain_id=req.chain_id
+        )
+        settlement = await security_gate_client.settle_eudr_universal_escrow_async(
+            job_id=req.job_id,
+            recipients=req.recipients,
+            attestation=attestation,
+            truth_payload=req.truth_payload,
+            chain_id=req.chain_id
+        )
+        return {
+            "status": "SUCCESS",
+            "attestation": attestation,
+            "settlement": settlement
+        }
+    except httpx.HTTPStatusError as e:
+        detail_msg = "Security Gate error"
+        try:
+            detail_msg = e.response.json().get("detail", str(e))
+        except Exception:
+            detail_msg = str(e)
+        raise HTTPException(status_code=e.response.status_code, detail=detail_msg)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 
 if __name__ == "__main__":

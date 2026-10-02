@@ -16,6 +16,9 @@ This skill equips autonomous AI agents (Claude Desktop, Cursor, CrewAI, AutoGPT,
 | **Arbitrage Spreads** | `GET /api/v1/oracle/spreads` | Standard ($0.005 USDC) | Use `?format=compact` (88% reduction) |
 | **Scrap Yields** | `POST /api/v1/oracle/urban-mining/calculate` | Heavy ($0.010 USDC) | Rich JSON Breakdown |
 | **Real-Time Stream** | `GET /api/v1/oracle/stream` | Free Event-Stream | Zero-Polling Push |
+| **Security Gate Status** | `GET /api/v1/oracle/security-gate/status` | Free Telemetry | Zero-Trust Circuit Breaker & Domain Metrics |
+| **Minerals Escrow Rail** | `POST /api/v1/escrow/universal/settle-minerals` | Escrow Direct Split | Atomic Payouts + EIP-712 Attestation (Domain 4) |
+| **EUDR Escrow Rail** | `POST /api/v1/escrow/universal/settle-eudr` | Escrow Direct Split | Deforestation-Free Concession Payouts (Domain 3) |
 | **Instant Onboarding** | `POST /api/v1/agent/onboard` | Free (10 Free Queries) | 1-Click Provisioning |
 
 ---
@@ -127,3 +130,49 @@ Exposed Tools (32 Agent Tools Available):
 - `optimize_mineral_trade_route`: Autonomous landed cost arbitrage ($/MT) and chokepoint bypass decision signal.
 - `propose_a2a_trade_deal` / `dual_sign_trade_deal`: Bilateral trade agreement negotiation and dual-signing.
 - `get_mineral_prices` / `calculate_trade_tariffs`: Spot quotes and tariff resolution.
+
+---
+
+## 5. Security Gate x402 Universal Escrow & Truth Attestation Rail
+
+Minerals Oracle bridges directly with the deployed `agent-security-gate-x402` to provide cryptographic truth validation and atomic escrow settlement:
+
+### A. Conflict-Free Minerals Truth Settlement (Domain 4: CONFLICT_MINERALS)
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/v1/escrow/universal/settle-minerals" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "job_id": "job_minerals_lithium_001",
+    "mineral_type": "lithium",
+    "smelter_id": "CID001928",
+    "smelter_audit_status": "CONFORMANT",
+    "mine_country_code": "AU",
+    "chain_of_custody_verified": true,
+    "child_labor_free": true,
+    "recipients": [{"recipient": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "amount": 75000.0}]
+  }'
+```
+
+### B. Deforestation-Free Forest Concession Settlement (Domain 3: EUDR_FOREST)
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/v1/escrow/universal/settle-eudr" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "job_id": "job_eudr_timber_001",
+    "commodity": "timber",
+    "country_code": "ID",
+    "polygon_coordinates": [[-3.12, -60.02], [-3.12, -60.01], [-3.13, -60.01]],
+    "dds_reference_id": "EU-DDS-2026-ID-01",
+    "deforestation_detected": false,
+    "legal_harvest_verified": true,
+    "recipients": [{"recipient": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "amount": 50000.0}]
+  }'
+```
+
+### C. Live Security Gate Health & Circuit Breaker Telemetry
+
+```bash
+curl "http://127.0.0.1:8000/api/v1/oracle/security-gate/status"
+```

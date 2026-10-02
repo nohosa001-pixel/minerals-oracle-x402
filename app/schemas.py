@@ -216,6 +216,8 @@ class SecurityAttestation(BaseModel):
     compliance_standard: str = Field(default="EU_AI_ACT_2024_1689_ART50", description="Regulatory and safety compliance standard")
     dual_attestation_hash: str = Field(..., description="Cryptographic joint hash binding oracle digest & security passport")
     latency_ms: float = Field(..., description="Verification latency in milliseconds")
+    truth_hash: Optional[str] = Field(default=None, description="EIP-712 physical truth hash from Security Gate adapter")
+    verdict: Optional[str] = Field(default="PASSED", description="Attestation verification verdict: PASSED or FAILED")
 
 
 

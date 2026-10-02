@@ -456,6 +456,7 @@ class ComplianceEngine:
             sec_att = security_gate_client.generate_dual_attestation(
                 oracle_digest=digest_hash,
                 agent_address=req.agent_address,
+                truth_hash=digest_hash,
             )
         except Exception as e:
             logger.debug(f"Security gate optional ping: {e}")
