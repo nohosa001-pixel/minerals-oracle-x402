@@ -84,6 +84,8 @@ from app.schemas import (
     TradeDealListResponse,
     MineSiteSatelliteAuditRequest,
     MineSiteSatelliteAuditResponse,
+    SolanaTruthAttestRequest,
+    SolanaUniversalSettleRequest,
 )
 from app.eudr_client import eudr_client
 from app.global_trade_engine import global_trade_engine
@@ -247,6 +249,8 @@ async def root(request: Request):
             "pyth_realtime_price": "/api/v1/oracle/realtime-price/{symbol}",
             "relay_sponsor_deal": "/api/v1/relay/sponsor-deal-attestation",
             "relay_sponsor_passport": "/api/v1/relay/sponsor-battery-passport",
+            "solana_truth_attest": "/api/v1/escrow/universal/solana/attest",
+            "solana_settle": "/api/v1/escrow/universal/settle-solana",
             "docs": "/docs",
         },
     }
@@ -1379,7 +1383,16 @@ async def get_security_gate_status():
     health["circuit_breaker"] = security_gate_client.get_circuit_status()
     health["supported_domains"] = ["EUDR_FOREST (3)", "CONFLICT_MINERALS (4)"]
     health["truth_adapters"] = ["minerals_truth_adapter", "eudr_truth_adapter"]
+    health["supported_networks"] = ["Polygon (137)", "Base (8453)", "Arbitrum One (42161)", "Solana Mainnet (501)"]
+    health["solana_config"] = {
+        "chain_id": 501,
+        "rpc_url": os.getenv("SOLANA_RPC_URL", "https://api.mainnet-beta.solana.com"),
+        "treasury_pubkey": os.getenv("SOLANA_WALLET_ADDRESS", "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp"),
+        "token_mint": os.getenv("SOLANA_USDC_MINT", "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"),
+        "speed_ms": 400
+    }
     return JSONResponse(content=health)
+
 
 
 @app.post(
@@ -1429,6 +1442,50 @@ async def calculate_secure_settlement(request: Request, body: Dict[str, Any]):
     }
     headers = getattr(request.state, "extra_headers", {}) or {}
     return JSONResponse(content=data, headers=headers)
+
+
+@app.post(
+    "/api/v1/escrow/universal/solana/attest",
+    tags=["Security Gate x402 Integration", "Solana Universal Escrow"],
+    summary="Request Ed25519 oracle truth attestation for Solana Universal Escrow",
+)
+async def request_solana_truth_attest_route(body: SolanaTruthAttestRequest):
+    """
+    Requests verifiable Ed25519 oracle truth attestation from Security Gate x402 for Solana smart contracts.
+    Signs payload with 64-byte Ed25519 signature readable by Solana program instructions.
+    """
+    res = await security_gate_client.request_solana_truth_attestation_async(
+        domain=body.domain,
+        domain_id=body.domain_id,
+        query_payload=body.query_payload,
+        client_identity=body.client_identity,
+        confidence_score=body.confidence_score,
+    )
+    return JSONResponse(content=res)
+
+
+@app.post(
+    "/api/v1/escrow/universal/settle-solana",
+    tags=["Security Gate x402 Integration", "Solana Universal Escrow"],
+    summary="Sub-second (0.4s) direct split settlement on Solana Universal Escrow",
+)
+async def settle_solana_escrow_route(body: SolanaUniversalSettleRequest):
+    """
+    Executes sub-second (0.4s) direct fee-split settlement on Solana Mainnet:
+    - 99.8% to Seller Agent
+    - 0.1% to Minerals Oracle Treasury (411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp)
+    - 0.1% to Security Gate Staking Pool
+    """
+    res = await security_gate_client.settle_solana_universal_escrow_async(
+        deal_id=body.deal_id,
+        buyer_agent_pubkey=body.buyer_agent_pubkey,
+        seller_agent_pubkey=body.seller_agent_pubkey,
+        gross_amount_usdc=body.gross_amount_usdc,
+        oracle_domain=body.oracle_domain,
+        oracle_id=body.oracle_id,
+    )
+    return JSONResponse(content=res)
+
 
 
 

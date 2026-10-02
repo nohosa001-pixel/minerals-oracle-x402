@@ -19,6 +19,8 @@ This skill equips autonomous AI agents (Claude Desktop, Cursor, CrewAI, AutoGPT,
 | **Security Gate Status** | `GET /api/v1/oracle/security-gate/status` | Free Telemetry | Zero-Trust Circuit Breaker & Domain Metrics |
 | **Minerals Escrow Rail** | `POST /api/v1/escrow/universal/settle-minerals` | Escrow Direct Split | Atomic Payouts + EIP-712 Attestation (Domain 4) |
 | **EUDR Escrow Rail** | `POST /api/v1/escrow/universal/settle-eudr` | Escrow Direct Split | Deforestation-Free Concession Payouts (Domain 3) |
+| **Solana Truth Attest** | `POST /api/v1/escrow/universal/solana/attest` | Ed25519 Oracle Attest | 64-Byte Ed25519 Signature for Solana Programs |
+| **Solana Direct Settle** | `POST /api/v1/escrow/universal/settle-solana` | 0.4s Fast Settlement | 99.8% Seller / 0.1% Treasury / 0.1% Staking Pool |
 | **Instant Onboarding** | `POST /api/v1/agent/onboard` | Free (10 Free Queries) | 1-Click Provisioning |
 
 ---
@@ -176,3 +178,53 @@ curl -X POST "http://127.0.0.1:8000/api/v1/escrow/universal/settle-eudr" \
 ```bash
 curl "http://127.0.0.1:8000/api/v1/oracle/security-gate/status"
 ```
+
+---
+
+## 6. Solana Mainnet-Beta Sub-Second (0.4s) Direct Split & Ed25519 Oracle Rail
+
+Connects directly with Solana Mainnet-Beta for high-frequency algorithmic commodity settlement:
+- **Chain ID**: `501`
+- **Native Token**: `SOL` | **Settlement Asset**: SPL USDC (`EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`)
+- **Finality Speed**: `0.4s (400ms)`
+- **Treasury Address**: `411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp`
+- **RPC URL**: `https://api.mainnet-beta.solana.com`
+
+### A. Request Ed25519 Oracle Truth Attestation for Solana
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/v1/escrow/universal/solana/attest" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "domain": "CONFLICT_MINERALS",
+    "domain_id": 4,
+    "query_payload": {
+      "smelter_id": "CID002991",
+      "mineral": "cobalt",
+      "provenance_status": "VERIFIED"
+    },
+    "client_identity": "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp",
+    "confidence_score": 0.999
+  }'
+```
+
+### B. Sub-Second Direct Split Universal Escrow Settlement on Solana
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/v1/escrow/universal/settle-solana" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "deal_id": "DEAL-SOLANA-MINERAL-001",
+    "buyer_agent_pubkey": "BuyerAgent111111111111111111111111111111111",
+    "seller_agent_pubkey": "SellerAgent11111111111111111111111111111111",
+    "gross_amount_usdc": 1000.0,
+    "oracle_domain": "CONFLICT_MINERALS",
+    "oracle_id": 4
+  }'
+```
+
+**Direct Split Distribution**:
+- **Seller Agent Net (99.8%)**: $998.00 USDC
+- **Minerals Oracle Treasury (0.1%)**: $1.00 USDC to `411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp`
+- **Security Gate Staking Pool (0.1%)**: $1.00 USDC to `774hK5wmk5pStvsh5DH46pYPYYD3ro7tMfz1ASxcbiTK`
+

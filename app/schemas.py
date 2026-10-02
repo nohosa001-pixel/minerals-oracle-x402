@@ -1259,6 +1259,24 @@ class MineSiteSatelliteAuditResponse(BaseModel):
     latency_ms: float
 
 
+class SolanaTruthAttestRequest(BaseModel):
+    domain: str = Field(default="CONFLICT_MINERALS", description="Target domain: CONFLICT_MINERALS or EUDR_FOREST")
+    domain_id: int = Field(default=4, description="Numeric domain identifier: 3 for EUDR, 4 for Minerals")
+    query_payload: Dict[str, Any] = Field(default_factory=dict, description="Arbitrary verification query payload")
+    client_identity: Optional[str] = Field(default=None, description="Requesting agent public key / client identity")
+    confidence_score: float = Field(default=0.999, ge=0.0, le=1.0, description="Truth confidence score threshold")
+
+
+class SolanaUniversalSettleRequest(BaseModel):
+    deal_id: str = Field(..., description="Unique trade deal ID to settle")
+    buyer_agent_pubkey: str = Field(..., description="Solana public key of buyer agent (Base58)")
+    seller_agent_pubkey: str = Field(..., description="Solana public key of seller agent (Base58)")
+    gross_amount_usdc: float = Field(..., gt=0.0, description="Gross trade settlement amount in USDC")
+    oracle_domain: str = Field(default="CONFLICT_MINERALS", description="Oracle verification domain")
+    oracle_id: int = Field(default=4, description="Numeric oracle domain ID")
+
+
+
 
 
 

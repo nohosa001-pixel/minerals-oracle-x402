@@ -67,5 +67,9 @@ def test_multichain_networks_api_response():
     for chain in data["supported_chains"]:
         assert "payment_vault_address" in chain
         assert "oracle_consumer_address" in chain
-        assert chain["payment_vault_address"].startswith("0x")
-        assert chain["oracle_consumer_address"].startswith("0x")
+        if chain.get("chain_name") == "solana" or chain.get("chain_id") == 501:
+            assert len(chain["payment_vault_address"]) >= 32
+            assert len(chain["oracle_consumer_address"]) >= 32
+        else:
+            assert chain["payment_vault_address"].startswith("0x")
+            assert chain["oracle_consumer_address"].startswith("0x")

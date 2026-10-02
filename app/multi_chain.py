@@ -3,6 +3,7 @@ Multi-Chain Network Registry and Gasless Permit2 Configuration.
 Supports Polygon (137), Base (8453), and Arbitrum One (42161) for autonomous AI agent USDC settlements.
 """
 
+import os
 from typing import Dict, Any, Optional, List
 from enum import Enum
 from pydantic import BaseModel
@@ -12,6 +13,7 @@ class SupportedChain(str, Enum):
     POLYGON = "polygon"      # Chain ID 137
     BASE = "base"            # Chain ID 8453 (Coinbase L2)
     ARBITRUM = "arbitrum"    # Chain ID 42161 (Arbitrum One)
+    SOLANA = "solana"        # Chain ID 501 (Solana Mainnet-Beta)
 
 
 class ChainConfig(BaseModel):
@@ -28,7 +30,7 @@ class ChainConfig(BaseModel):
     speed_ms: int
 
 
-# Canonical USDC, Permit2, and deployed contract addresses across supported EVM networks
+# Canonical USDC, Permit2, and deployed contract addresses across supported networks
 CHAIN_REGISTRY: Dict[str, ChainConfig] = {
     SupportedChain.POLYGON.value: ChainConfig(
         chain_name="polygon",
@@ -69,11 +71,24 @@ CHAIN_REGISTRY: Dict[str, ChainConfig] = {
         is_gasless_supported=True,
         speed_ms=950,
     ),
+    SupportedChain.SOLANA.value: ChainConfig(
+        chain_name="solana",
+        chain_id=501,
+        display_name="Solana Mainnet",
+        usdc_address="EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",  # Native SPL USDC on Solana Mainnet
+        rpc_url=os.getenv("SOLANA_RPC_URL", "https://api.mainnet-beta.solana.com"),
+        explorer_url="https://solscan.io",
+        permit2_address="None",
+        payment_vault_address=os.getenv("SOLANA_AGENT_VAULT_PROGRAM_ID", "7oZ16YaazQzN6z5uA1nAZWD9oGUDXyvHwXGJLFYyWi3y"),
+        oracle_consumer_address=os.getenv("SOLANA_ORACLE_CONSUMER_PROGRAM_ID", "21ZR1QCyAbNrRLs1iWEkdbNsfCFdJcy6ip9R2JxDbkTL"),
+        is_gasless_supported=True,
+        speed_ms=400,
+    ),
 }
 
 
 def get_chain_config(chain_identifier: Any) -> ChainConfig:
-    """Resolves chain configuration by name ('polygon', 'base', 'arbitrum') or chain ID (137, 8453, 42161)."""
+    """Resolves chain configuration by name ('polygon', 'base', 'arbitrum', 'solana') or chain ID (137, 8453, 42161, 501)."""
     if isinstance(chain_identifier, int) or (isinstance(chain_identifier, str) and chain_identifier.isdigit()):
         c_id = int(chain_identifier)
         for cfg in CHAIN_REGISTRY.values():
@@ -81,6 +96,9 @@ def get_chain_config(chain_identifier: Any) -> ChainConfig:
                 return cfg
 
     clean_name = str(chain_identifier).lower().strip()
+    if clean_name in ["sol", "solana", "solana-mainnet", "501"]:
+        return CHAIN_REGISTRY[SupportedChain.SOLANA.value]
+
     if clean_name in CHAIN_REGISTRY:
         return CHAIN_REGISTRY[clean_name]
 
@@ -88,6 +106,23 @@ def get_chain_config(chain_identifier: Any) -> ChainConfig:
     return CHAIN_REGISTRY[SupportedChain.POLYGON.value]
 
 
+def resolve_chain_name(chain_identifier: Any) -> str:
+    """Returns the canonical chain name (e.g. 'solana', 'polygon', 'base', 'arbitrum')."""
+    cfg = get_chain_config(chain_identifier)
+    return cfg.chain_name
+
+
+def is_chain_supported(chain_identifier: Any) -> bool:
+    """Checks whether the given identifier maps to a registered chain."""
+    if isinstance(chain_identifier, int) or (isinstance(chain_identifier, str) and chain_identifier.isdigit()):
+        c_id = int(chain_identifier)
+        return any(cfg.chain_id == c_id for cfg in CHAIN_REGISTRY.values())
+    clean_name = str(chain_identifier).lower().strip()
+    return clean_name in CHAIN_REGISTRY or clean_name in ["sol", "solana", "solana-mainnet", "501"]
+
+
 def list_supported_chains() -> List[Dict[str, Any]]:
     """Returns a list of all supported payment networks."""
     return [cfg.model_dump() for cfg in CHAIN_REGISTRY.values()]
+
+
