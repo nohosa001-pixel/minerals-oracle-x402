@@ -26,11 +26,24 @@ class MineralType(str, Enum):
     LITHIUM_BLACK_MASS = "LITHIUM_BLACK_MASS"           # Shredded battery black mass containing lithium (US BIS regulated)
     NICKEL_COBALT_BLACK_MASS = "NICKEL_COBALT_BLACK_MASS" # Recycled Ni/Co black mass (US BIS export restricted)
     TUNGSTEN_SCRAP = "TUNGSTEN_SCRAP"                   # Recycled tungsten scrap (US BIS export restricted)
+    TUNGSTEN_APT = "TUNGSTEN_APT"                       # Western Ammonium Paratungstate 88.5% WO3 (Korea/Portugal/Canada)
+    RARE_EARTHS_NDPR = "RARE_EARTHS_NDPR"               # High-Purity 99.5% NdPr Oxide Magnet Grade (Australia/USA)
+    RECYCLED_BLACK_MASS = "RECYCLED_BLACK_MASS"         # Hydrometallurgical Recycled Battery Black Mass (USA/Germany)
 
     @classmethod
     def _missing_(cls, value: object):
         if isinstance(value, str):
             normalized = value.strip().upper().replace(" ", "_").replace("-", "_")
+            aliases = {
+                "TUNGSTEN": "TUNGSTEN_APT",
+                "W_APT": "TUNGSTEN_APT",
+                "APT": "TUNGSTEN_APT",
+                "NDPR": "RARE_EARTHS_NDPR",
+                "ND_PR": "RARE_EARTHS_NDPR",
+                "BLACK_MASS": "RECYCLED_BLACK_MASS",
+            }
+            if normalized in aliases:
+                normalized = aliases[normalized]
             for member in cls:
                 if member.value == normalized or member.name == normalized:
                     return member
@@ -49,6 +62,12 @@ class SourceCountry(str, Enum):
     USA = "USA"   # United States of America
     MEX = "MEX"   # Mexico (World #1 Silver Producer)
     PER = "PER"   # Peru (Top Copper & Silver Producer)
+    CAN = "CAN"   # Canada (Victoria, Cantung, Nechalacho)
+    PRT = "PRT"   # Portugal (Panasqueira Tungsten)
+    AGO = "AGO"   # Angola (Longonjo Rare Earths)
+    VNM = "VNM"   # Vietnam (Rare Earths & Tungsten)
+    KOR = "KOR"   # South Korea (Sangdong Tungsten)
+    DEU = "DEU"   # Germany (BASF Schwarzheide Battery Hub)
 
     @classmethod
     def _missing_(cls, value: object):
@@ -66,6 +85,12 @@ class SourceCountry(str, Enum):
                 "UNITED STATES": "USA", "US": "USA",
                 "MEXICO": "MEX", "MX": "MEX",
                 "PERU": "PER", "PE": "PER",
+                "CANADA": "CAN", "CA": "CAN",
+                "PORTUGAL": "PRT", "PT": "PRT",
+                "ANGOLA": "AGO", "AO": "AGO",
+                "VIETNAM": "VNM", "VN": "VNM",
+                "KOREA": "KOR", "SOUTH KOREA": "KOR", "KR": "KOR",
+                "GERMANY": "DEU", "DE": "DEU",
             }
             if v in country_aliases:
                 v = country_aliases[v]
@@ -1274,6 +1299,273 @@ class SolanaUniversalSettleRequest(BaseModel):
     gross_amount_usdc: float = Field(..., gt=0.0, description="Gross trade settlement amount in USDC")
     oracle_domain: str = Field(default="CONFLICT_MINERALS", description="Oracle verification domain")
     oracle_id: int = Field(default=4, description="Numeric oracle domain ID")
+
+
+# =====================================================================
+# 11. UPGRADE 1: RARE EARTHS, TUNGSTEN & RECYCLED BLACK MASS PIPELINES
+# =====================================================================
+
+class RareEarthsOriginVerifyRequest(BaseModel):
+    batch_id: str = Field(..., description="Unique lot/batch identifier")
+    tenement_id: str = Field(..., description="Concession/mine site ID (e.g., MT_WELD, MOUNTAIN_PASS, NECHALACHO, LONGONJO)")
+    latitude: float = Field(..., ge=-90.0, le=90.0, description="Centroid latitude of extraction site")
+    longitude: float = Field(..., ge=-180.0, le=180.0, description="Centroid longitude of extraction site")
+    ndpr_oxide_purity_pct: float = Field(default=99.5, ge=0.0, le=100.0, description="NdPr Oxide assay purity % (min 99.5%)")
+    thorium_uranium_radiation_ppm: float = Field(default=45.0, ge=0.0, description="Total Th+U radionuclide content in ppm (IAEA/Local safety limit <= 500 ppm)")
+    declared_china_origin_ratio: float = Field(default=0.0005, ge=0.0, le=1.0, description="Declared ratio of PRC-origin inputs (MOFCOM Notice 61 requires < 0.001 / 0.1%)")
+    source_country: SourceCountry = Field(default=SourceCountry.AUS, description="Jurisdiction of origin")
+    client_identity: Optional[str] = Field(default=None, description="Requesting agent public identity or address")
+
+
+class RareEarthsAuditVerdict(BaseModel):
+    is_compliant: bool
+    status: str
+    geofence_verified: bool
+    distance_to_concession_km: float
+    purity_certified: bool
+    radiation_safety_passed: bool
+    mofcom_china_content_passed: bool
+    china_content_ratio: float
+    mofcom_rule_d35_eligible: bool
+    confidence_score: float
+    reasons: List[str]
+
+
+class RareEarthsOriginVerifyResponse(BaseModel):
+    status: str = "success"
+    batch_id: str
+    audit_verdict: RareEarthsAuditVerdict
+    proof_hash: str
+    onchain_signature: Optional[str] = None
+    signed_by: Optional[str] = None
+    timestamp: str
+
+
+class TungstenOriginVerifyRequest(BaseModel):
+    batch_id: str = Field(..., description="Lot/batch ID of tungsten concentrate or APT")
+    tenement_id: str = Field(..., description="Concession ID (e.g., CANTUNG, IMA_PROJECT, PANASQUEIRA, SANGDONG)")
+    latitude: float = Field(..., ge=-90.0, le=90.0)
+    longitude: float = Field(..., ge=-180.0, le=180.0)
+    apt_wo3_grade_pct: float = Field(default=88.5, ge=0.0, le=100.0, description="Ammonium Paratungstate WO3 grade % (Std >= 88.5%)")
+    dodd_frank_conflict_free: bool = Field(default=True, description="Certified conflict-free under OECD Due Diligence")
+    ndaa_defense_procurement_eligible: bool = Field(default=True, description="Eligible under US NDAA Sec 848 non-covered nation procurement")
+    source_country: SourceCountry = Field(default=SourceCountry.CAN, description="Country of origin")
+    client_identity: Optional[str] = Field(default=None)
+
+
+class TungstenAuditVerdict(BaseModel):
+    is_compliant: bool
+    status: str
+    geofence_verified: bool
+    distance_to_concession_km: float
+    apt_grade_certified: bool
+    dodd_frank_passed: bool
+    ndaa_defense_eligible: bool
+    confidence_score: float
+    reasons: List[str]
+
+
+class TungstenOriginVerifyResponse(BaseModel):
+    status: str = "success"
+    batch_id: str
+    audit_verdict: TungstenAuditVerdict
+    proof_hash: str
+    onchain_signature: Optional[str] = None
+    signed_by: Optional[str] = None
+    timestamp: str
+
+
+class BlackMassOriginVerifyRequest(BaseModel):
+    batch_id: str = Field(..., description="Recycled black mass batch/lot identifier")
+    facility_id: str = Field(..., description="Hydrometallurgical/shredding facility ID")
+    latitude: float = Field(..., ge=-90.0, le=90.0)
+    longitude: float = Field(..., ge=-180.0, le=180.0)
+    nickel_content_pct: float = Field(default=22.5, ge=0.0, le=100.0, description="Recovered Nickel metal content %")
+    cobalt_content_pct: float = Field(default=8.5, ge=0.0, le=100.0, description="Recovered Cobalt metal content %")
+    lithium_content_pct: float = Field(default=4.2, ge=0.0, le=100.0, description="Recovered Lithium metal content %")
+    fluorine_impurity_ppm: float = Field(default=180.0, ge=0.0, description="Fluorine / PVDF residue in ppm (Threshold <= 500 ppm)")
+    bis_export_license_id: Optional[str] = Field(default=None, description="US BIS Export License Number (e.g. BIS-D123456)")
+    recycled_content_ratio: float = Field(default=0.98, ge=0.0, le=1.0, description="EU Battery Regulation 2023/1542 recycled mass ratio")
+    source_country: SourceCountry = Field(default=SourceCountry.USA)
+    client_identity: Optional[str] = Field(default=None)
+
+
+class BlackMassAuditVerdict(BaseModel):
+    is_compliant: bool
+    status: str
+    geofence_verified: bool
+    distance_to_facility_km: float
+    bis_license_verified: bool
+    recycled_content_compliant: bool
+    fluorine_safety_passed: bool
+    eu_battery_reg_eligible: bool
+    confidence_score: float
+    reasons: List[str]
+
+
+class BlackMassOriginVerifyResponse(BaseModel):
+    status: str = "success"
+    batch_id: str
+    audit_verdict: BlackMassAuditVerdict
+    proof_hash: str
+    onchain_signature: Optional[str] = None
+    signed_by: Optional[str] = None
+    timestamp: str
+
+
+# =====================================================================
+# 12. UPGRADE 2: REGULATORY ADVANCED ENGINE (CBAM MARKUP / IAA / BATTERY PASSPORT)
+# =====================================================================
+
+class CBAMMarkupPenaltyRequest(BaseModel):
+    import_year: int = Field(default=2026, ge=2026, le=2035, description="Year of customs entry into EU")
+    product_category: str = Field(default="STEEL_ALUMINUM_HYDROGEN", description="CBAM Annex I goods category")
+    tonnage: float = Field(..., gt=0.0, description="Metric tons of imported goods")
+    default_embedded_emissions_tco2_per_ton: float = Field(default=2.1, gt=0.0, description="EU Default emission factor tCO2e/t")
+    verified_scope1_2_emissions_tco2_per_ton: Optional[float] = Field(default=None, description="Accredited 3rd party verified specific emissions")
+    eu_allowance_price_eur: float = Field(default=85.0, gt=0.0, description="EUA carbon price in EUR/tCO2")
+
+
+class CBAMMarkupPenaltyResponse(BaseModel):
+    status: str = "success"
+    import_year: int
+    markup_penalty_rate: float
+    is_verified_exempt: bool
+    total_default_emissions_tco2: float
+    total_verified_emissions_tco2: Optional[float] = None
+    effective_emissions_billed_tco2: float
+    total_cbam_liability_eur: float
+    markup_penalty_surcharge_eur: float
+    savings_with_verified_report_eur: float
+    audit_advice: str
+
+
+class EUIndustrialActVerifyRequest(BaseModel):
+    component_type: str = Field(default="BATTERY_PACK", description="Vehicle/Clean energy component")
+    eu_domestic_value_share_pct: float = Field(..., ge=0.0, le=100.0, description="Percentage of EU domestic content/value add (Target >= 70%)")
+    eu_steel_domestic_share_pct: float = Field(default=55.0, ge=0.0, le=100.0, description="Percentage of crude steel from EU (Target >= 40%)")
+    local_assembly_location: str = Field(default="DEU", description="EU member state where final assembly occurs")
+
+
+class EUIndustrialActVerifyResponse(BaseModel):
+    status: str = "success"
+    component_type: str
+    iaa_70pct_threshold_passed: bool
+    steel_40pct_threshold_passed: bool
+    overall_subsidy_eligible: bool
+    compliance_score: float
+    statutory_citations: List[str]
+    proof_hash: str
+
+
+class BatteryPassportVCRequest(BaseModel):
+    battery_id: str = Field(..., description="Unique battery pack serial/DID (e.g. urn:uuid:...)")
+    chemistry: str = Field(default="NMC811", description="Battery chemistry: NMC811, LFP, NCMA")
+    rated_capacity_kwh: float = Field(..., gt=0.0, description="Rated energy capacity in kWh")
+    recycled_cobalt_pct: float = Field(default=16.0, ge=0.0, le=100.0, description="Recycled cobalt content %")
+    recycled_lithium_pct: float = Field(default=6.0, ge=0.0, le=100.0, description="Recycled lithium content %")
+    recycled_nickel_pct: float = Field(default=6.0, ge=0.0, le=100.0, description="Recycled nickel content %")
+    carbon_footprint_kg_co2_per_kwh: float = Field(default=68.5, gt=0.0, description="Total lifecycle footprint kg CO2e/kWh")
+    provenance_proof_hash: str = Field(..., description="A.GRID upstream mineral verification proof hash")
+
+
+class BatteryPassportVCResponse(BaseModel):
+    status: str = "success"
+    battery_id: str
+    vc_token: Dict[str, Any]
+    did_issuer: str
+    did_subject: str
+    qr_code_payload_uri: str
+    signature: str
+    issued_at: str
+
+
+# =====================================================================
+# 13. UPGRADE 3: LOGISTICS ORACLE BRIDGE (B/L, GPS & CUSTOMS BUNDLE)
+# =====================================================================
+
+class CustomsVerificationRequest(BaseModel):
+    tracking_type: str = Field(default="BOL", description="BOL (Bill of Lading) or CONTAINER")
+    tracking_number: str = Field(..., description="B/L or Container Number (e.g. MEDU1234567, MSKU9876543)")
+    carrier_code: str = Field(default="MSCU", description="Carrier SCAC code (e.g. MSCU, MAEU, CMAU, HLCU)")
+    port_of_loading: str = Field(..., description="UN/LOCODE port of loading (e.g. CLPRA, MYPKG, ZADUR)")
+    port_of_discharge: str = Field(..., description="UN/LOCODE port of discharge (e.g. NLRTM, DEHAM, KRPUS)")
+    departure_date: str = Field(..., description="Departure date (YYYY-MM-DD)")
+    arrival_date: Optional[str] = Field(default=None, description="Actual or estimated arrival date (YYYY-MM-DD)")
+    mineral_batch_id: str = Field(..., description="Associated A.GRID mineral batch identifier")
+    mine_coordinates: Tuple[float, float] = Field(..., description="(lat, lon) coordinates of extraction site")
+    gross_weight_kg: float = Field(..., gt=0.0, description="Cargo gross weight in kilograms")
+
+
+class CustomsVerificationResponse(BaseModel):
+    status: str = "success"
+    tracking_number: str
+    carrier_name: str
+    customs_clearance_eligible: bool
+    transit_plausibility_passed: bool
+    route_distance_nautical_miles: float
+    implied_speed_knots: float
+    spatial_mine_to_port_km: float
+    proof_hash: str
+    customs_clearance_bundle: Dict[str, Any]
+    onchain_signature: Optional[str] = None
+    issued_at: str
+
+
+class LogisticsTrackingStateRequest(BaseModel):
+    tracking_numbers: List[str] = Field(..., description="List of waybill or container tracking numbers")
+    carrier_hint: Optional[str] = Field(default=None, description="Optional carrier hint: CJ, HANJIN, DHL, FEDEX, MSC")
+
+
+class LogisticsTrackingStateResponse(BaseModel):
+    status: str = "success"
+    results: List[Dict[str, Any]]
+    total_queried: int
+    clean_schema_version: str = "v1.2.0"
+    timestamp: str
+
+
+# =====================================================================
+# 14. UPGRADE 4 & 5: ZK COMPLIANCE PROVER & PRIVACY ENGINE
+# =====================================================================
+
+class ZKComplianceProofRequest(BaseModel):
+    batch_id: str = Field(..., description="Batch identifier to generate private proof for")
+    secret_mine_latitude: float = Field(..., ge=-90.0, le=90.0, description="Private: Exact latitude of mine")
+    secret_mine_longitude: float = Field(..., ge=-180.0, le=180.0, description="Private: Exact longitude of mine")
+    secret_unit_cost_usd: float = Field(..., gt=0.0, description="Private: Production unit cost in USD")
+    secret_supplier_id: str = Field(..., description="Private: Internal supplier entity ID")
+    public_authorized_zone_root: str = Field(..., description="Public: Merkle root of approved mining concessions")
+    public_china_origin_ratio: float = Field(default=0.0004, ge=0.0, le=1.0, description="Public: Verified China origin content ratio (< 0.001)")
+    public_max_carbon_kg_co2: float = Field(default=100.0, gt=0.0, description="Public: Upper carbon bound limit")
+
+
+class ZKComplianceProofResponse(BaseModel):
+    status: str = "success"
+    batch_id: str
+    zk_proof: Dict[str, Any]
+    public_commitment: str
+    nullifier_hash: str
+    verification_key_id: str
+    is_valid_zero_knowledge_proof: bool
+    issued_at: str
+
+
+class ZKProofVerifyRequest(BaseModel):
+    zk_proof: Dict[str, Any]
+    public_commitment: str
+    nullifier_hash: str
+    public_authorized_zone_root: str
+    public_china_origin_ratio: float
+
+
+class ZKProofVerifyResponse(BaseModel):
+    status: str = "success"
+    is_valid: bool
+    reasons: List[str]
+    verifier_identity: str
+    verified_at: str
+
 
 
 

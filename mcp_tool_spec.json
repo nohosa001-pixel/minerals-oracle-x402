@@ -479,6 +479,101 @@
         "type": "object",
         "properties": {}
       }
+    },
+    {
+      "name": "verify_rare_earths_origin",
+      "description": "Verifies Rare Earth Elements (NdPr / Dy / Tb) provenance, Non-China GIS geofencing, IAEA radiation safety, and China MOFCOM Notice 61 '0.1% extraterritorial export control' compliance.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "batch_id": {"type": "string", "description": "Unique batch/lot identifier"},
+          "tenement_id": {"type": "string", "description": "Concession identifier (MT_WELD, MOUNTAIN_PASS, NECHALACHO, LONGONJO)"},
+          "latitude": {"type": "number", "description": "Extraction point latitude"},
+          "longitude": {"type": "number", "description": "Extraction point longitude"},
+          "ndpr_oxide_purity_pct": {"type": "number", "description": "NdPr Oxide assay purity % (>= 99.50%)"},
+          "thorium_uranium_radiation_ppm": {"type": "number", "description": "Thorium + Uranium radiation byproduct ppm (<= 500 ppm)"},
+          "declared_china_origin_ratio": {"type": "number", "description": "China origin content ratio (< 0.001 for 0.1% MOFCOM compliance)"},
+          "source_country": {"type": "string", "description": "Origin country code (AUS, USA, CAN, AGO)"}
+        },
+        "required": ["batch_id", "tenement_id", "latitude", "longitude", "ndpr_oxide_purity_pct", "thorium_uranium_radiation_ppm", "declared_china_origin_ratio", "source_country"]
+      }
+    },
+    {
+      "name": "verify_tungsten_origin",
+      "description": "Verifies Western Tungsten (APT) provenance, ASTM B783 WO3 grade (>= 88.5%), Dodd-Frank conflict-free status, and US NDAA Sec 848 defense procurement non-covered nation eligibility.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "batch_id": {"type": "string", "description": "Tungsten batch ID"},
+          "tenement_id": {"type": "string", "description": "Mine ID (CANTUNG, IMA_PROJECT, PANASQUEIRA, SANGDONG)"},
+          "latitude": {"type": "number"},
+          "longitude": {"type": "number"},
+          "apt_wo3_grade_pct": {"type": "number", "description": "WO3 grade % (>= 88.50%)"},
+          "dodd_frank_conflict_free": {"type": "boolean", "default": true},
+          "ndaa_defense_procurement_eligible": {"type": "boolean", "default": true},
+          "source_country": {"type": "string", "description": "Origin country (CAN, USA, PRT, KOR)"}
+        },
+        "required": ["batch_id", "tenement_id", "latitude", "longitude", "apt_wo3_grade_pct", "source_country"]
+      }
+    },
+    {
+      "name": "verify_black_mass_origin",
+      "description": "Verifies recycled battery black mass provenance, US Department of Commerce BIS export license validation, and EU Battery Regulation 2023/1542 recycled content thresholds.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "batch_id": {"type": "string"},
+          "facility_id": {"type": "string", "description": "Facility ID (ABTC_NEVADA, REDWOOD_MC_CARRAN, LI_CYCLE_ROCHESTER, BASF_SCHWARZHEIDE)"},
+          "latitude": {"type": "number"},
+          "longitude": {"type": "number"},
+          "nickel_content_pct": {"type": "number"},
+          "cobalt_content_pct": {"type": "number"},
+          "lithium_content_pct": {"type": "number"},
+          "fluorine_impurity_ppm": {"type": "number", "description": "Fluorine / PVDF impurity limit (<= 500 ppm)"},
+          "bis_export_license_id": {"type": "string", "description": "US Department of Commerce BIS Export License ID"},
+          "recycled_content_ratio": {"type": "number", "description": "Recycled content ratio (>= 0.85)"},
+          "source_country": {"type": "string", "description": "Origin country (USA, DEU)"}
+        },
+        "required": ["batch_id", "facility_id", "latitude", "longitude", "nickel_content_pct", "cobalt_content_pct", "lithium_content_pct", "fluorine_impurity_ppm", "bis_export_license_id", "recycled_content_ratio", "source_country"]
+      }
+    },
+    {
+      "name": "verify_customs_clearance",
+      "description": "Anchors physical ocean carrier Bill of Lading (B/L) to mineral extraction, analyzes inland distance and nautical speed plausibility, and issues automated Customs Clearance Proof Bundle.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tracking_type": {"type": "string", "enum": ["BOL", "CONTAINER"], "default": "BOL"},
+          "tracking_number": {"type": "string"},
+          "carrier_code": {"type": "string", "description": "Carrier code (MSCU, MAEU, CMAU, HLCU, COSU, ONEU)"},
+          "port_of_loading": {"type": "string", "description": "UN/LOCODE port of loading (e.g. CLPRA, KRPUS)"},
+          "port_of_discharge": {"type": "string", "description": "UN/LOCODE port of discharge (e.g. NLRTM, USLAX)"},
+          "departure_date": {"type": "string", "description": "YYYY-MM-DD"},
+          "arrival_date": {"type": "string", "description": "YYYY-MM-DD"},
+          "mineral_batch_id": {"type": "string"},
+          "mine_coordinates": {"type": "array", "items": {"type": "number"}, "description": "[latitude, longitude]"},
+          "gross_weight_kg": {"type": "number"}
+        },
+        "required": ["tracking_number", "carrier_code", "port_of_loading", "port_of_discharge", "departure_date", "arrival_date", "mineral_batch_id", "mine_coordinates", "gross_weight_kg"]
+      }
+    },
+    {
+      "name": "generate_zk_compliance_proof",
+      "description": "Generates a zero-knowledge compliance proof that shields exact extraction coordinates and unit production costs while mathematically proving concession validity and China content < 0.1%.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "batch_id": {"type": "string"},
+          "mineral_type": {"type": "string"},
+          "secret_mine_latitude": {"type": "number"},
+          "secret_mine_longitude": {"type": "number"},
+          "secret_supplier_id": {"type": "string"},
+          "secret_unit_cost_usd": {"type": "number"},
+          "public_china_origin_ratio": {"type": "number"},
+          "public_carbon_intensity_kg_co2": {"type": "number"}
+        },
+        "required": ["batch_id", "mineral_type", "secret_mine_latitude", "secret_mine_longitude", "secret_supplier_id", "secret_unit_cost_usd", "public_china_origin_ratio", "public_carbon_intensity_kg_co2"]
+      }
     }
   ]
 }

@@ -36,6 +36,13 @@
       "idl_file": "minerals_oracle_consumer.idl.json",
       "description": "Verifiable spot pricing and EU Battery Passport Merkle root consumer on Solana",
       "solscan_url": "https://solscan.io/account/21ZR1QCyAbNrRLs1iWEkdbNsfCFdJcy6ip9R2JxDbkTL"
+    },
+    {
+      "name": "DynamicTradeEscrow",
+      "program_id": "DynSxW8JCy6296toTYrdhJqnoxtMvf3CPmtSSFEyqNnz",
+      "idl_file": "dynamic_trade_escrow.idl.json",
+      "description": "Enterprise dynamic mark-to-market escrow with Pyth Network price feeds, tripartite customs clearance, and autonomous margin-call defense",
+      "solscan_url": "https://solscan.io/account/DynSxW8JCy6296toTYrdhJqnoxtMvf3CPmtSSFEyqNnz#anchorProgramIdl"
     }
   ],
   "compliance_standards": [

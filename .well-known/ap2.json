@@ -3,7 +3,7 @@
   "name": "minerals-oracle-x402",
   "display_name": "Critical Raw Minerals & Urban Mining Oracle",
   "description": "High-performance micro-oracle serving deterministic real-time prices, cross-exchange arbitrage spreads, and urban-mining scrap valuations for critical raw minerals (Silver, Platinum, Copper, Lithium, Nd/Dy Rare Earths).",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "protocol": "ap2",
   "homepage": "https://github.com/nohosa001-pixel/minerals-oracle-x402",
   "contact": {
@@ -69,6 +69,46 @@
       "method": "POST",
       "description": "Multi-satellite Sentinel-1/2 SAR radar deforestation (2020-12-31 cutoff), indigenous land protection, and TRACES-NT DDS reference generation.",
       "cost_usdc": 0.020
+    },
+    {
+      "id": "compliance:rare_earths",
+      "name": "Rare Earths Permanent Magnet Metal Origin",
+      "endpoint": "/api/v1/rare-earths/verify-origin",
+      "method": "POST",
+      "description": "Non-China GIS geofencing, NdPr 99.5% purity, IAEA radiation safety, and MOFCOM 0.1% extraterritorial export control defense.",
+      "cost_usdc": 0.005
+    },
+    {
+      "id": "compliance:tungsten",
+      "name": "Western Tungsten APT Origin & US NDAA 848",
+      "endpoint": "/api/v1/tungsten/verify-origin",
+      "method": "POST",
+      "description": "Western GIS geofencing, ASTM B783 WO3 88.5% grade, Dodd-Frank conflict-free audit, and US NDAA defense procurement eligibility.",
+      "cost_usdc": 0.005
+    },
+    {
+      "id": "compliance:black_mass",
+      "name": "Recycled Battery Black Mass & US BIS License",
+      "endpoint": "/api/v1/black-mass/verify-origin",
+      "method": "POST",
+      "description": "Hydrometallurgical recycling geofencing, US DOC BIS license check, and EU Battery Reg 85% recycled content verification.",
+      "cost_usdc": 0.005
+    },
+    {
+      "id": "logistics:customs_clearance",
+      "name": "Physical Logistics B/L Customs Clearance Bridge",
+      "endpoint": "/api/v1/logistics/customs-clearance-verify",
+      "method": "POST",
+      "description": "Ocean carrier B/L tracking, inland mine-to-port spatial analysis, vessel transit plausibility, and customs clearance bundle.",
+      "cost_usdc": 0.005
+    },
+    {
+      "id": "privacy:zk_compliance",
+      "name": "Zero-Knowledge Origin & Purity Prover",
+      "endpoint": "/api/v1/zk/compliance-proof/generate",
+      "method": "POST",
+      "description": "Blinds mine GPS coordinates and commercial costs while cryptographically proving concession inclusion and China content < 0.1%.",
+      "cost_usdc": 0.010
     }
   ],
   "supported_commodities": [

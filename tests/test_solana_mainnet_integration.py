@@ -81,17 +81,38 @@ def test_solana_signature_verification_and_anti_replay():
     bad_sig = "0OIl_invalid_base58_characters!!!"
     ok, reason = x402_verifier._verify_solana_onchain_tx(bad_sig, required_amount_usdc=0.05)
     assert ok is False
-    assert "Invalid Solana transaction signature format" in reason
+    assert reason is not None and "Invalid Solana transaction signature format" in reason
 
     # 2. Simulated successful verification
     with patch("httpx.Client.post") as mock_post:
+        treasury_sol = "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp"
+        usdc_mint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.json.return_value = {
             "jsonrpc": "2.0",
             "result": {
                 "slot": 240000000,
-                "meta": {"err": None, "fee": 5000},
+                "meta": {
+                    "err": None,
+                    "fee": 5000,
+                    "preTokenBalances": [
+                        {
+                            "accountIndex": 1,
+                            "mint": usdc_mint,
+                            "owner": treasury_sol,
+                            "uiTokenAmount": {"uiAmount": 10.0, "amount": "10000000", "decimals": 6}
+                        }
+                    ],
+                    "postTokenBalances": [
+                        {
+                            "accountIndex": 1,
+                            "mint": usdc_mint,
+                            "owner": treasury_sol,
+                            "uiTokenAmount": {"uiAmount": 10.05, "amount": "10050000", "decimals": 6}
+                        }
+                    ]
+                },
                 "transaction": {"signatures": [test_sig]}
             },
             "id": 1
@@ -100,12 +121,12 @@ def test_solana_signature_verification_and_anti_replay():
 
         ok, msg = x402_verifier._verify_solana_onchain_tx(test_sig, required_amount_usdc=0.05)
         assert ok is True
-        assert "tx:" in msg or "Solana" in msg
+        assert msg is not None and ("tx:" in msg or "Solana" in msg)
 
         # 3. Anti-replay test: same signature must now be rejected
         ok_replay, replay_msg = x402_verifier._verify_solana_onchain_tx(test_sig, required_amount_usdc=0.05)
         assert ok_replay is False
-        assert "already been redeemed" in replay_msg or "Replay attack" in replay_msg
+        assert replay_msg is not None and ("already been redeemed" in replay_msg or "Replay attack" in replay_msg)
 
 
 def test_solana_truth_attestation_sync_and_async():
@@ -253,3 +274,262 @@ def test_fastapi_solana_settle_endpoint():
     assert data["settlement_breakdown"]["seller_agent_net_usdc"] == 499.0
     assert data["settlement_breakdown"]["minerals_oracle_fee_usdc"] == 0.50
     assert data["settlement_breakdown"]["security_gate_staking_fee_usdc"] == 0.50
+
+
+def test_solana_spl_usdc_balance_diff_verification():
+    """Verify SPL USDC balance difference (preTokenBalances vs postTokenBalances) parsing."""
+    import secrets
+    rand_chars = "".join(secrets.choice("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz") for _ in range(34))
+    test_sig = "5VerBQQuJYvHiU1fXb6Vd99Q3aP3h6k6yqgXfCjE288jC2jVn8P6wM" + rand_chars
+    treasury_sol = "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp"
+    usdc_mint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+
+    # Case A: Treasury balance increased by 0.05 USDC -> PASS
+    with patch("httpx.Client.post") as mock_post:
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {
+            "jsonrpc": "2.0",
+            "result": {
+                "slot": 240000000,
+                "meta": {
+                    "err": None,
+                    "preTokenBalances": [
+                        {
+                            "accountIndex": 1,
+                            "mint": usdc_mint,
+                            "owner": treasury_sol,
+                            "uiTokenAmount": {"uiAmount": 10.0, "amount": "10000000", "decimals": 6}
+                        }
+                    ],
+                    "postTokenBalances": [
+                        {
+                            "accountIndex": 1,
+                            "mint": usdc_mint,
+                            "owner": treasury_sol,
+                            "uiTokenAmount": {"uiAmount": 10.05, "amount": "10050000", "decimals": 6}
+                        }
+                    ]
+                },
+                "transaction": {"signatures": [test_sig]}
+            },
+            "id": 1
+        }
+        mock_post.return_value = mock_resp
+
+        ok, msg = x402_verifier._verify_solana_onchain_tx(test_sig, required_amount_usdc=0.05)
+        assert ok is True
+        assert msg is not None and "tx:" in msg
+
+    # Case B: Insufficient amount transferred -> REJECT
+    rand_chars2 = "".join(secrets.choice("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz") for _ in range(34))
+    test_sig2 = "5VerBQQuJYvHiU1fXb6Vd99Q3aP3h6k6yqgXfCjE288jC2jVn8P6wM" + rand_chars2
+    with patch("httpx.Client.post") as mock_post:
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {
+            "jsonrpc": "2.0",
+            "result": {
+                "slot": 240000000,
+                "meta": {
+                    "err": None,
+                    "preTokenBalances": [
+                        {
+                            "accountIndex": 1,
+                            "mint": usdc_mint,
+                            "owner": treasury_sol,
+                            "uiTokenAmount": {"uiAmount": 10.0, "amount": "10000000", "decimals": 6}
+                        }
+                    ],
+                    "postTokenBalances": [
+                        {
+                            "accountIndex": 1,
+                            "mint": usdc_mint,
+                            "owner": treasury_sol,
+                            "uiTokenAmount": {"uiAmount": 10.001, "amount": "10001000", "decimals": 6}
+                        }
+                    ]
+                },
+                "transaction": {"signatures": [test_sig2]}
+            },
+            "id": 1
+        }
+        mock_post.return_value = mock_resp
+
+        ok, msg = x402_verifier._verify_solana_onchain_tx(test_sig2, required_amount_usdc=0.05)
+        assert ok is False
+        assert msg is not None and "No matching SPL USDC transfer" in msg
+
+
+def test_multi_rpc_failover_resilience():
+    """Verify Multi-RPC automatic failover when primary RPC is down or rate-limited."""
+    import secrets
+    rand_chars = "".join(secrets.choice("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz") for _ in range(34))
+    test_sig = "5VerBQQuJYvHiU1fXb6Vd99Q3aP3h6k6yqgXfCjE288jC2jVn8P6wM" + rand_chars
+
+    # 1st call fails (HTTP 429), 2nd call succeeds (HTTP 200)
+    mock_resp_fail = MagicMock()
+    mock_resp_fail.status_code = 429
+
+    treasury_sol = "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp"
+    usdc_mint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+    mock_resp_ok = MagicMock()
+    mock_resp_ok.status_code = 200
+    mock_resp_ok.json.return_value = {
+        "jsonrpc": "2.0",
+        "result": {
+            "slot": 240000001,
+            "meta": {
+                "err": None,
+                "preTokenBalances": [
+                    {
+                        "accountIndex": 1,
+                        "mint": usdc_mint,
+                        "owner": treasury_sol,
+                        "uiTokenAmount": {"uiAmount": 20.0, "amount": "20000000", "decimals": 6}
+                    }
+                ],
+                "postTokenBalances": [
+                    {
+                        "accountIndex": 1,
+                        "mint": usdc_mint,
+                        "owner": treasury_sol,
+                        "uiTokenAmount": {"uiAmount": 20.05, "amount": "20050000", "decimals": 6}
+                    }
+                ]
+            },
+            "transaction": {"signatures": [test_sig]}
+        },
+        "id": 1
+    }
+
+    with patch("httpx.Client.post", side_effect=[mock_resp_fail, mock_resp_ok]):
+        ok, msg = x402_verifier._verify_solana_onchain_tx(test_sig, required_amount_usdc=0.05)
+        assert ok is True
+        assert msg is not None and "tx:" in msg
+
+
+def test_solana_security_invariants_reject_empty_tokens_and_third_party():
+    """Security Invariant: Non-token transactions and third-party transfers MUST be rejected."""
+    import secrets
+    rand_chars = "".join(secrets.choice("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz") for _ in range(34))
+    test_sig = "5VerBQQuJYvHiU1fXb6Vd99Q3aP3h6k6yqgXfCjE288jC2jVn8P6wM" + rand_chars
+
+    # 1. Non-token transaction (e.g. 0 SOL transfer or memo) with empty token balances -> MUST BE REJECTED
+    with patch("httpx.Client.post") as mock_post:
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {
+            "jsonrpc": "2.0",
+            "result": {
+                "slot": 240000000,
+                "meta": {"err": None, "preTokenBalances": [], "postTokenBalances": []},
+                "transaction": {"signatures": [test_sig]}
+            },
+            "id": 1
+        }
+        mock_post.return_value = mock_resp
+        ok, reason = x402_verifier._verify_solana_onchain_tx(test_sig, required_amount_usdc=0.05)
+        assert ok is False
+        assert "No matching SPL USDC transfer" in str(reason)
+
+    # 2. Transfer to third party (attacker's friend) -> MUST BE REJECTED
+    rand_chars2 = "".join(secrets.choice("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz") for _ in range(34))
+    test_sig2 = "5VerBQQuJYvHiU1fXb6Vd99Q3aP3h6k6yqgXfCjE288jC2jVn8P6wM" + rand_chars2
+    attacker_friend = "SomeThirdPartyWallet11111111111111111111111"
+    usdc_mint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+
+    with patch("httpx.Client.post") as mock_post:
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {
+            "jsonrpc": "2.0",
+            "result": {
+                "slot": 240000000,
+                "meta": {
+                    "err": None,
+                    "preTokenBalances": [{"accountIndex": 2, "mint": usdc_mint, "owner": attacker_friend, "uiTokenAmount": {"uiAmount": 0.0}}],
+                    "postTokenBalances": [{"accountIndex": 2, "mint": usdc_mint, "owner": attacker_friend, "uiTokenAmount": {"uiAmount": 10.0}}]
+                },
+                "transaction": {
+                    "signatures": [test_sig2],
+                    "message": {
+                        "instructions": [
+                            {
+                                "parsed": {
+                                    "type": "transfer",
+                                    "info": {
+                                        "amount": "10000000",
+                                        "authority": "AttackerWallet",
+                                        "destination": "AttackerFriendTokenAccount",
+                                        "source": "AttackerTokenAccount"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "id": 1
+        }
+        mock_post.return_value = mock_resp
+        ok2, reason2 = x402_verifier._verify_solana_onchain_tx(test_sig2, required_amount_usdc=0.05)
+        assert ok2 is False
+        assert "No matching SPL USDC transfer" in str(reason2)
+
+
+def test_multichain_deployed_registry_strict_parity():
+    """Verify that multi_chain CHAIN_REGISTRY strictly matches deployed contracts and IDLs."""
+    from app.multi_chain import CHAIN_REGISTRY, SupportedChain
+
+    # 1. Base Contracts
+    base_cfg = CHAIN_REGISTRY[SupportedChain.BASE.value]
+    assert base_cfg.payment_vault_address == "0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d"
+    assert base_cfg.oracle_consumer_address == "0xe43a9C368808B2dfF139D27789C40A3C8F2282cF"
+
+    # 2. Arbitrum Contracts
+    arb_cfg = CHAIN_REGISTRY[SupportedChain.ARBITRUM.value]
+    assert arb_cfg.payment_vault_address == "0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d"
+    assert arb_cfg.oracle_consumer_address == "0xe43a9C368808B2dfF139D27789C40A3C8F2282cF"
+
+    # 3. Solana Contracts
+    sol_cfg = CHAIN_REGISTRY[SupportedChain.SOLANA.value]
+    assert sol_cfg.payment_vault_address == "7oZ16YaazQzN6z5uA1nAZWD9oGUDXyvHwXGJLFYyWi3y"
+    assert sol_cfg.oracle_consumer_address == "21ZR1QCyAbNrRLs1iWEkdbNsfCFdJcy6ip9R2JxDbkTL"
+
+
+def test_vault_manager_evm_and_solana_address_normalization():
+    """Verify VaultManager handles uppercase 0X, standard 0x, and Solana Base58 pubkeys robustly."""
+    from app.vault_manager import vault_manager
+
+    # 1. Lowercase vs Uppercase EVM address normalization
+    raw_evm = "0x" + "a" * 40
+    raw_evm_upper = "0X" + "a" * 40
+    acc1, _ = vault_manager.register_agent_onboarding("TestAgentEvm", agent_address=raw_evm)
+    acc2, _ = vault_manager.register_agent_onboarding("TestAgentEvmUpper", agent_address=raw_evm_upper)
+    assert acc1.agent_address == acc2.agent_address
+
+    # 2. Solana Base58 pubkey onboarding and retrieval
+    sol_addr = "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp"
+    acc_sol, s_key = vault_manager.register_agent_onboarding("TestAgentSol", agent_address=sol_addr)
+    assert acc_sol.agent_address == sol_addr
+
+    retrieved = vault_manager.get_account_by_address(sol_addr)
+    assert retrieved is not None
+    assert retrieved.agent_address == sol_addr
+
+    # 3. try_deduct using normalized address directly
+    ok, addr, bal = vault_manager.try_deduct(sol_addr, 0.005)
+    assert ok is True
+    assert addr == sol_addr
+
+
+def test_evm_tx_format_not_falsely_routed_to_solana():
+    """Verify that EVM transactions without 0x prefix or invalid length fail with EVM error, not Solana error."""
+    # 64-char hex without 0x on polygon
+    bad_evm_hex = "a" * 64
+    ok, err = x402_verifier.verify_onchain_tx(bad_evm_hex, chain_name="polygon")
+    assert ok is False
+    assert "Invalid EVM transaction hash format" in str(err)
+    assert "Solana" not in str(err)
+

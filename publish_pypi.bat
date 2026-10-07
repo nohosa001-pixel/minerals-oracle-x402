@@ -4,7 +4,7 @@ echo ========================================================
 echo   minerals-oracle-x402 PyPI Release Uploader
 echo ========================================================
 
-if not exist "dist\minerals_oracle_x402-1.0.0-py3-none-any.whl" (
+if not exist "dist\minerals_oracle_x402-1.3.0-py3-none-any.whl" (
     echo [ERROR] Distribution files not found in dist/. Running build...
     python -m build
 )

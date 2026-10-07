@@ -1,0 +1,261 @@
+{
+  "version": "2.0.0",
+  "name": "dynamic_trade_escrow",
+  "docs": [
+    "Enterprise dynamic escrow contract with Pyth Network real-time mark-to-market valuation,",
+    "tripartite multi-party release (Oracle Proof + Carrier B/L Arrival + Inspector Purity),",
+    "and autonomous margin-call defense for critical mineral commodities."
+  ],
+  "instructions": [
+    {
+      "name": "createDeal",
+      "docs": ["Initialize a new mark-to-market critical mineral trade deal with collateral deposit."],
+      "accounts": [
+        {"name": "escrowAccount", "isMut": true, "isSigner": true},
+        {"name": "buyerAgent", "isMut": true, "isSigner": true},
+        {"name": "buyerTokenAccount", "isMut": true, "isSigner": false},
+        {"name": "escrowTokenVault", "isMut": true, "isSigner": false},
+        {"name": "usdcMint", "isMut": false, "isSigner": false},
+        {"name": "tokenProgram", "isMut": false, "isSigner": false},
+        {"name": "systemProgram", "isMut": false, "isSigner": false},
+        {"name": "rent", "isMut": false, "isSigner": false}
+      ],
+      "args": [
+        {"name": "dealId", "type": "string"},
+        {"name": "sellerAgent", "type": "publicKey"},
+        {"name": "inspector", "type": "publicKey"},
+        {"name": "amountUsdc", "type": "u64"},
+        {"name": "collateralUsdc", "type": "u64"},
+        {"name": "pythPriceFeed", "type": "publicKey"},
+        {"name": "basePriceUsd", "type": "i64"},
+        {"name": "minCollateralRatioBps", "type": "u64"},
+        {"name": "durationSeconds", "type": "u64"}
+      ]
+    },
+    {
+      "name": "anchorOracleProof",
+      "docs": ["Anchors verifiable cryptographic proof of physical batch specs and customs clearance."],
+      "accounts": [
+        {"name": "escrowAccount", "isMut": true, "isSigner": false},
+        {"name": "oracleAuthority", "isMut": false, "isSigner": true}
+      ],
+      "args": [
+        {"name": "dealId", "type": "string"},
+        {"name": "proofHash", "type": "[u8; 32]"}
+      ]
+    },
+    {
+      "name": "confirmCarrierArrival",
+      "docs": ["Notifies arrival of shipment at destination port/terminal with bill of lading."],
+      "accounts": [
+        {"name": "escrowAccount", "isMut": true, "isSigner": false},
+        {"name": "carrierOrOracle", "isMut": false, "isSigner": true}
+      ],
+      "args": [
+        {"name": "dealId", "type": "string"}
+      ]
+    },
+    {
+      "name": "attestInspectorPurity",
+      "docs": ["Submits laboratory assay / metallurgic purity inspection results."],
+      "accounts": [
+        {"name": "escrowAccount", "isMut": true, "isSigner": false},
+        {"name": "inspectorOrOracle", "isMut": false, "isSigner": true}
+      ],
+      "args": [
+        {"name": "dealId", "type": "string"},
+        {"name": "purityPassed", "type": "bool"}
+      ]
+    },
+    {
+      "name": "clearCustoms",
+      "docs": ["Confirms tariff, duty, CBAM and export quota customs clearance."],
+      "accounts": [
+        {"name": "escrowAccount", "isMut": true, "isSigner": false},
+        {"name": "customsOrOracle", "isMut": false, "isSigner": true}
+      ],
+      "args": [
+        {"name": "dealId", "type": "string"}
+      ]
+    },
+    {
+      "name": "checkMarginCall",
+      "docs": ["Performs autonomous mark-to-market check against Pyth price feed."],
+      "accounts": [
+        {"name": "escrowAccount", "isMut": true, "isSigner": false},
+        {"name": "pythPriceAccount", "isMut": false, "isSigner": false}
+      ],
+      "args": [
+        {"name": "dealId", "type": "string"}
+      ]
+    },
+    {
+      "name": "topUpCollateral",
+      "docs": ["Allows buyer to deposit additional margin to defend position against margin call."],
+      "accounts": [
+        {"name": "escrowAccount", "isMut": true, "isSigner": false},
+        {"name": "buyerAgent", "isMut": true, "isSigner": true},
+        {"name": "buyerTokenAccount", "isMut": true, "isSigner": false},
+        {"name": "escrowTokenVault", "isMut": true, "isSigner": false},
+        {"name": "tokenProgram", "isMut": false, "isSigner": false}
+      ],
+      "args": [
+        {"name": "dealId", "type": "string"},
+        {"name": "topUpAmount", "type": "u64"}
+      ]
+    },
+    {
+      "name": "settleDeal",
+      "docs": ["Releases payout upon verification of Oracle Proof + Carrier B/L + Inspector Purity."],
+      "accounts": [
+        {"name": "escrowAccount", "isMut": true, "isSigner": false},
+        {"name": "escrowTokenVault", "isMut": true, "isSigner": false},
+        {"name": "sellerAgentTokenAccount", "isMut": true, "isSigner": false},
+        {"name": "buyerAgentTokenAccount", "isMut": true, "isSigner": false},
+        {"name": "mineralsOracleTreasury", "isMut": true, "isSigner": false},
+        {"name": "tokenProgram", "isMut": false, "isSigner": false}
+      ],
+      "args": [
+        {"name": "dealId", "type": "string"}
+      ]
+    },
+    {
+      "name": "disputeDeal",
+      "docs": ["Flags deal as disputed, pausing automatic payouts pending arbitration."],
+      "accounts": [
+        {"name": "escrowAccount", "isMut": true, "isSigner": false},
+        {"name": "disputerAgent", "isMut": false, "isSigner": true}
+      ],
+      "args": [
+        {"name": "dealId", "type": "string"}
+      ]
+    },
+    {
+      "name": "resolveDispute",
+      "docs": ["Executes arbitration split payout determined by governance/oracle authority."],
+      "accounts": [
+        {"name": "escrowAccount", "isMut": true, "isSigner": false},
+        {"name": "escrowTokenVault", "isMut": true, "isSigner": false},
+        {"name": "buyerAgentTokenAccount", "isMut": true, "isSigner": false},
+        {"name": "sellerAgentTokenAccount", "isMut": true, "isSigner": false},
+        {"name": "oracleAuthority", "isMut": false, "isSigner": true},
+        {"name": "tokenProgram", "isMut": false, "isSigner": false}
+      ],
+      "args": [
+        {"name": "dealId", "type": "string"},
+        {"name": "buyerPayout", "type": "u64"},
+        {"name": "sellerPayout", "type": "u64"}
+      ]
+    },
+    {
+      "name": "refundExpired",
+      "docs": ["Returns locked capital and margin if seller fails to fulfill conditions prior to expiry."],
+      "accounts": [
+        {"name": "escrowAccount", "isMut": true, "isSigner": false},
+        {"name": "escrowTokenVault", "isMut": true, "isSigner": false},
+        {"name": "buyerAgentTokenAccount", "isMut": true, "isSigner": false},
+        {"name": "tokenProgram", "isMut": false, "isSigner": false}
+      ],
+      "args": [
+        {"name": "dealId", "type": "string"}
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "DynamicDeal",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {"name": "dealId", "type": "string"},
+          {"name": "buyerAgent", "type": "publicKey"},
+          {"name": "sellerAgent", "type": "publicKey"},
+          {"name": "inspector", "type": "publicKey"},
+          {"name": "totalAmountUsdc", "type": "u64"},
+          {"name": "collateralDepositUsdc", "type": "u64"},
+          {"name": "pythPriceFeed", "type": "publicKey"},
+          {"name": "basePriceUsd", "type": "i64"},
+          {"name": "minCollateralRatioBps", "type": "u64"},
+          {"name": "oracleProofHash", "type": "[u8; 32]"},
+          {"name": "oracleProofVerified", "type": "bool"},
+          {"name": "carrierArrivalConfirmed", "type": "bool"},
+          {"name": "inspectorPurityPassed", "type": "bool"},
+          {"name": "expiryTimestamp", "type": "i64"},
+          {"name": "status", "type": "u8"}
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "DynamicDealCreated",
+      "fields": [
+        {"name": "dealId", "type": "string", "index": true},
+        {"name": "buyer", "type": "publicKey", "index": true},
+        {"name": "seller", "type": "publicKey", "index": true},
+        {"name": "amountUsdc", "type": "u64", "index": false},
+        {"name": "pythPriceFeed", "type": "publicKey", "index": false}
+      ]
+    },
+    {
+      "name": "OracleProofAnchored",
+      "fields": [
+        {"name": "dealId", "type": "string", "index": true},
+        {"name": "proofHash", "type": "[u8; 32]", "index": false}
+      ]
+    },
+    {
+      "name": "CarrierArrivalNotified",
+      "fields": [
+        {"name": "dealId", "type": "string", "index": true}
+      ]
+    },
+    {
+      "name": "InspectorAttested",
+      "fields": [
+        {"name": "dealId", "type": "string", "index": true},
+        {"name": "purityPassed", "type": "bool", "index": false}
+      ]
+    },
+    {
+      "name": "CustomsCleared",
+      "fields": [
+        {"name": "dealId", "type": "string", "index": true}
+      ]
+    },
+    {
+      "name": "DealSettled",
+      "fields": [
+        {"name": "dealId", "type": "string", "index": true},
+        {"name": "grossPayout", "type": "u64", "index": false}
+      ]
+    },
+    {
+      "name": "MarginCallTriggered",
+      "fields": [
+        {"name": "dealId", "type": "string", "index": true},
+        {"name": "currentPriceUsd", "type": "i64", "index": false},
+        {"name": "collateralDeficit", "type": "u64", "index": false}
+      ]
+    },
+    {
+      "name": "CollateralToppedUp",
+      "fields": [
+        {"name": "dealId", "type": "string", "index": true},
+        {"name": "additionalCollateral", "type": "u64", "index": false}
+      ]
+    }
+  ],
+  "errors": [
+    {"code": 6000, "name": "InvalidStatus", "msg": "Deal is not in the required status for this action."},
+    {"code": 6001, "name": "UnauthorizedCaller", "msg": "Caller is not authorized to attest or trigger settlement."},
+    {"code": 6002, "name": "MarginDeficit", "msg": "Collateral ratio fell below critical liquidation threshold."},
+    {"code": 6003, "name": "ExpiredDeal", "msg": "Deal expiration timestamp has passed."},
+    {"code": 6004, "name": "MissingCondition", "msg": "Tripartite conditions incomplete (Proof, Arrival, or Purity missing)."}
+  ],
+  "metadata": {
+    "address": "DynSxW8JCy6296toTYrdhJqnoxtMvf3CPmtSSFEyqNnz",
+    "origin": "anchor",
+    "standard": "DynamicTradeEscrow-PythMarkToMarket"
+  }
+}

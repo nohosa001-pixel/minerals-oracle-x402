@@ -49,10 +49,15 @@ def test_pathway_1_fastmcp_stdio_comprehensive():
     resp = process_mcp_request(list_req)
     assert resp is not None and "result" in resp
     tools = {t["name"]: t for t in resp["result"]["tools"]}
-    assert len(tools) == 32
+    assert len(tools) >= 32
     assert "eudr_satellite_mine_audit" in tools
     assert "verify_composite_battery_passport" in tools
     assert "propose_a2a_trade_deal" in tools
+    assert "verify_rare_earths_origin" in tools
+    assert "verify_tungsten_origin" in tools
+    assert "verify_black_mass_origin" in tools
+    assert "verify_customs_clearance" in tools
+    assert "generate_zk_compliance_proof" in tools
 
     # 2. Tool: eudr_satellite_mine_audit
     eudr_req = {
@@ -70,7 +75,7 @@ def test_pathway_1_fastmcp_stdio_comprehensive():
             }
         }
     }
-    eudr_res = process_mcp_request(eudr_req)
+    eudr_res = process_mcp_request(eudr_req) or {}
     assert "result" in eudr_res
     eudr_data = json.loads(eudr_res["result"]["content"][0]["text"])
     assert eudr_data["is_compliant"] is True
@@ -91,7 +96,8 @@ def test_pathway_1_fastmcp_stdio_comprehensive():
             }
         }
     }
-    reg_res = process_mcp_request(reg_req)
+    reg_res = process_mcp_request(reg_req) or {}
+    assert "result" in reg_res
     reg_data = json.loads(reg_res["result"]["content"][0]["text"])
     assert reg_data["status"] == "REGISTERED"
     session_key = reg_data["session_key"]
@@ -105,7 +111,8 @@ def test_pathway_1_fastmcp_stdio_comprehensive():
             "arguments": {"session_key": session_key}
         }
     }
-    bal_res = process_mcp_request(bal_req)
+    bal_res = process_mcp_request(bal_req) or {}
+    assert "result" in bal_res
     bal_data = json.loads(bal_res["result"]["content"][0]["text"])
     assert bal_data["balance_usdc"] == 1.50
 
@@ -124,7 +131,8 @@ def test_pathway_1_fastmcp_stdio_comprehensive():
             }
         }
     }
-    route_res = process_mcp_request(route_req)
+    route_res = process_mcp_request(route_req) or {}
+    assert "result" in route_res
     route_data = json.loads(route_res["result"]["content"][0]["text"])
     assert "optimal_corridor_id" in route_data or "status" in route_data
     assert "agent_decision" in route_data
@@ -162,7 +170,7 @@ def test_pathway_2_fastmcp_sse_transport():
     assert msg_resp.status_code == 200
     res = msg_resp.json()
     assert res["id"] == "sse-msg-01"
-    assert len(res["result"]["tools"]) == 32
+    assert len(res["result"]["tools"]) >= 32
 
 
 # =============================================================================

@@ -54,3 +54,5 @@ app/.kis_token_cache.json
 *.bak
 logs/
 scratch/
+*.db
+data/*.db

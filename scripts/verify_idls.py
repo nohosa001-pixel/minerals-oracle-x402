@@ -3,11 +3,13 @@ from pathlib import Path
 
 p = Path("contracts/verification/solana")
 idls = [
+    "dynamic_trade_escrow.idl.json",
     "universal_escrow_core.idl.json",
     "agent_payment_vault.idl.json",
     "minerals_oracle_consumer.idl.json",
     "solscan_metadata.json"
 ]
+
 
 print("=== Auditing IDL & Metadata JSON Files ===")
 for f in idls:

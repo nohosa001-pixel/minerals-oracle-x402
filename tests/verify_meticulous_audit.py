@@ -11,6 +11,12 @@ Runs deep audits covering:
 
 import sys
 import os
+
+# Ensure local project root is at the head of sys.path before importing app modules
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
 import time
 import json
 import httpx
@@ -149,11 +155,35 @@ def run_all_checks():
     # First attempt (with mock)
     from unittest.mock import patch, MagicMock
     with patch("httpx.Client.post") as mock_p:
+        treasury_sol = "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp"
+        usdc_mint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.json.return_value = {
             "jsonrpc": "2.0",
-            "result": {"slot": 100, "meta": {"err": None}, "transaction": {"signatures": [test_sig]}}
+            "result": {
+                "slot": 100,
+                "meta": {
+                    "err": None,
+                    "preTokenBalances": [
+                        {
+                            "accountIndex": 1,
+                            "mint": usdc_mint,
+                            "owner": treasury_sol,
+                            "uiTokenAmount": {"uiAmount": 10.0, "amount": "10000000", "decimals": 6}
+                        }
+                    ],
+                    "postTokenBalances": [
+                        {
+                            "accountIndex": 1,
+                            "mint": usdc_mint,
+                            "owner": treasury_sol,
+                            "uiTokenAmount": {"uiAmount": 10.05, "amount": "10050000", "decimals": 6}
+                        }
+                    ]
+                },
+                "transaction": {"signatures": [test_sig]}
+            }
         }
         mock_p.return_value = mock_resp
         ok_first, _ = x402_verifier._verify_solana_onchain_tx(test_sig, required_amount_usdc=0.05)
@@ -192,7 +222,7 @@ def run_all_checks():
     # -------------------------------------------------------------
     print("\n[6/6] Auditing Model Context Protocol (MCP) Tools...")
     mcp_list_req = {"jsonrpc": "2.0", "id": "mcp-1", "method": "tools/list", "params": {}}
-    mcp_resp = process_mcp_request(mcp_list_req)
+    mcp_resp = process_mcp_request(mcp_list_req) or {}
     tools = mcp_resp.get("result", {}).get("tools", [])
     log_test("MCP Tools Count >= 30", len(tools) >= 30, f"Found {len(tools)} tools registered")
 
@@ -206,7 +236,7 @@ def run_all_checks():
             "arguments": {}
         }
     }
-    exec_resp = process_mcp_request(mcp_exec_req)
+    exec_resp = process_mcp_request(mcp_exec_req) or {}
     has_content = "content" in exec_resp.get("result", {})
     log_test("MCP Tool Execution (get_compliance_status)", has_content, f"Content: {str(exec_resp.get('result', {}).get('content', ''))[:60]}...")
 

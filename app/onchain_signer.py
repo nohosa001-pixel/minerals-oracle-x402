@@ -358,6 +358,24 @@ class OnChainOracleSigner:
         sig_hex = signed.signature.hex()
         return sig_hex if sig_hex.startswith("0x") else "0x" + sig_hex
 
+    def get_address(self) -> str:
+        """Returns the checksummed Ethereum signer address."""
+        return self.signer_address
+
+    def sign_attestation(self, digest_hash: str) -> Tuple[str, str]:
+        """Signs an arbitrary 32-byte hex digest using ECDSA secp256k1."""
+        import hashlib
+        from eth_account.messages import encode_defunct
+        clean_digest = digest_hash if digest_hash.startswith("0x") else "0x" + digest_hash
+        if len(clean_digest) != 66:
+            clean_digest = "0x" + hashlib.sha256(digest_hash.encode("utf-8")).hexdigest()
+        signable = encode_defunct(hexstr=clean_digest)
+        signed = self.account.sign_message(signable)
+        sig_hex = signed.signature.hex()
+        if not sig_hex.startswith("0x"):
+            sig_hex = "0x" + sig_hex
+        return sig_hex, self.signer_address
+
 
 # Singleton oracle signer instance
 onchain_signer = OnChainOracleSigner()

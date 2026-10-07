@@ -32,6 +32,17 @@
           "explorer_link": "https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab",
           "standard": "ERC-MilestoneTradeEscrow",
           "settlementToken": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"
+        },
+        "DynamicTradeEscrow": {
+          "address": "0x3A863A2b1018B47FE79041FCDF56efEa3f8b978F",
+          "creator": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+          "creation_tx": "2bbc62d2b1d382c081ebd8cf035c1906094f70e973732534987e9adbefd06b51",
+          "blockNumber": 95093295,
+          "trustedOracle": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+          "pythOracle": "0xff1a0f4744e8582DF1aE09D5611b887B6a12925C",
+          "standard": "DynamicTradeEscrow-PythMarkToMarket",
+          "settlementToken": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+          "explorer_link": "https://polygonscan.com/address/0x3A863A2b1018B47FE79041FCDF56efEa3f8b978F"
         }
       }
     },
@@ -63,6 +74,17 @@
           "tx_link": "https://basescan.org/tx/d3ea506218425ef12b27061256bf342c58260407ee40efac4f609d2356ae205b",
           "standard": "ERC-MilestoneTradeEscrow",
           "settlementToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+        },
+        "DynamicTradeEscrow": {
+          "address": "0x54786360Db4582AEC2435E216479FD4ff093CB80",
+          "creator": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+          "creation_tx": "7768f715ec663550e7f0c553ac9f0d0f1249e25ad73519c28ddae1e28d8b2bd2",
+          "blockNumber": 52278155,
+          "trustedOracle": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+          "pythOracle": "0x8250f4aF4B972684F7b336503E2D6dFeDeB72416",
+          "standard": "DynamicTradeEscrow-PythMarkToMarket",
+          "settlementToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "explorer_link": "https://basescan.org/address/0x54786360Db4582AEC2435E216479FD4ff093CB80"
         }
       }
     },
@@ -94,6 +116,17 @@
           "tx_link": "https://arbiscan.io/tx/320fa60cb901f7290ad73b17446776661746b505e5a670c164d8011bd481eb50",
           "standard": "ERC-MilestoneTradeEscrow",
           "settlementToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+        },
+        "DynamicTradeEscrow": {
+          "address": "0x54786360Db4582AEC2435E216479FD4ff093CB80",
+          "creator": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+          "creation_tx": "460da830800ef8b8c404b6b1aa81d33885f8499721cda6699e85ac501e7954a8",
+          "blockNumber": 512451551,
+          "trustedOracle": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+          "pythOracle": "0xff1a0f4744e8582DF1aE09D5611b887B6a12925C",
+          "standard": "DynamicTradeEscrow-PythMarkToMarket",
+          "settlementToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+          "explorer_link": "https://arbiscan.io/address/0x54786360Db4582AEC2435E216479FD4ff093CB80"
         }
       }
     },
@@ -124,7 +157,17 @@
           "explorer_link": "https://solscan.io/account/AGR3W3R9pKxnuZGYrpaggfkbMKVrjoniLaGvi1voBFSC",
           "standard": "Solana-UniversalEscrowCore",
           "settlementToken": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+        },
+        "DynamicTradeEscrow": {
+          "address": "DynSxW8JCy6296toTYrdhJqnoxtMvf3CPmtSSFEyqNnz",
+          "creator": "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp",
+          "explorer_link": "https://solscan.io/account/DynSxW8JCy6296toTYrdhJqnoxtMvf3CPmtSSFEyqNnz#anchorProgramIdl",
+          "idl_file": "contracts/verification/solana/dynamic_trade_escrow.idl.json",
+          "standard": "DynamicTradeEscrow-PythMarkToMarket",
+          "settlementToken": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "program_type": "Anchor/BPF"
         }
+
       }
     }
   }

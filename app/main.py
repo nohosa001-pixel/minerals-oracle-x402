@@ -6,6 +6,7 @@ import os
 import time
 import secrets
 import hashlib
+import httpx
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
@@ -86,6 +87,26 @@ from app.schemas import (
     MineSiteSatelliteAuditResponse,
     SolanaTruthAttestRequest,
     SolanaUniversalSettleRequest,
+    RareEarthsOriginVerifyRequest,
+    RareEarthsOriginVerifyResponse,
+    TungstenOriginVerifyRequest,
+    TungstenOriginVerifyResponse,
+    BlackMassOriginVerifyRequest,
+    BlackMassOriginVerifyResponse,
+    CBAMMarkupPenaltyRequest,
+    CBAMMarkupPenaltyResponse,
+    EUIndustrialActVerifyRequest,
+    EUIndustrialActVerifyResponse,
+    BatteryPassportVCRequest,
+    BatteryPassportVCResponse,
+    CustomsVerificationRequest,
+    CustomsVerificationResponse,
+    LogisticsTrackingStateRequest,
+    LogisticsTrackingStateResponse,
+    ZKComplianceProofRequest,
+    ZKComplianceProofResponse,
+    ZKProofVerifyRequest,
+    ZKProofVerifyResponse,
 )
 from app.eudr_client import eudr_client
 from app.global_trade_engine import global_trade_engine
@@ -108,6 +129,12 @@ from app.cobalt_pipeline import cobalt_pipeline
 from app.copper_pipeline import copper_pipeline
 from app.silver_pipeline import silver_pipeline
 from app.composite_battery_pipeline import composite_battery_pipeline
+from app.rare_earths_pipeline import rare_earths_pipeline
+from app.tungsten_pipeline import tungsten_pipeline
+from app.black_mass_pipeline import black_mass_pipeline
+from app.regulatory_advanced_engine import regulatory_advanced_engine
+from app.logistics_bridge import logistics_bridge
+from app.zk_compliance_prover import zk_compliance_prover
 
 agent_session_vault = get_agent_session_vault()
 a2a_deal_engine = get_a2a_deal_engine()
@@ -185,7 +212,9 @@ async def require_x402_payment(request: Request, tier: PricingTier = PricingTier
         or request.query_params.get("chain")
         or "polygon"
     )
-    is_authorized, reason, extra_headers = x402_verifier.verify_request_payment(request, tier=tier)
+    is_authorized, reason, extra_headers = await asyncio.to_thread(
+        x402_verifier.verify_request_payment, request, tier=tier
+    )
     if not is_authorized:
         detail_msg = reason if (reason and ("Insufficient" in str(reason) or "not found" in str(reason))) else None
         return x402_verifier.build_402_response(tier=tier, chain_name=req_chain, custom_detail=detail_msg)
@@ -915,7 +944,8 @@ async def audit_mine_site_eudr(
     Connects with eudr-compliance-agent for multi-satellite radar (Sentinel-1/2 SAR) & Hansen GFC
     deforestation screening (2020-12-31 cutoff), indigenous land protection, and TRACES-NT DDS reference issuance.
     """
-    res = eudr_client.verify_mine_site_compliance(
+    res = await asyncio.to_thread(
+        eudr_client.verify_mine_site_compliance,
         latitude=body.latitude,
         longitude=body.longitude,
         country_code=body.country_code,
@@ -1120,6 +1150,306 @@ async def verify_silver_origin(
     headers = getattr(request.state, "extra_headers", {}) or {}
     result = silver_pipeline.verify_origin(body)
     return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+# =====================================================================
+# UPGRADE 1: RARE EARTHS, TUNGSTEN & RECYCLED BLACK MASS ENDPOINTS
+# =====================================================================
+
+@app.post(
+    "/api/v1/rare-earths/verify-origin",
+    response_model=RareEarthsOriginVerifyResponse,
+    tags=["Compliance Oracle"],
+    summary="Verify Non-China NdPr Rare Earths Provenance & MOFCOM 0.1% Rule (x402 Verified)",
+    responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
+)
+@app.post(
+    "/api/v1/oracle/verify/rare-earths",
+    response_model=RareEarthsOriginVerifyResponse,
+    tags=["Compliance Oracle"],
+    include_in_schema=False,
+)
+async def verify_rare_earths_origin(
+    request: Request,
+    body: RareEarthsOriginVerifyRequest,
+):
+    """
+    Dedicated Rare Earths Permanent Magnet Metal Provenance Pipeline:
+    - 1. Non-China GIS Geofencing (Mt Weld, Mountain Pass, Nechalacho, Longonjo)
+    - 2. NdPr Oxide Assay Purity (>= 99.50% sintered automotive magnet grade)
+    - 3. IAEA Thorium/Uranium Radionuclide Safety Audit (<= 500 ppm)
+    - 4. China MOFCOM Notice 61 '0.1% Rule' (D-35 Nov 10 threshold defense)
+    - 5. On-Chain Cryptographic Proof Hash & ECDSA Signature issuance
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = rare_earths_pipeline.verify_rare_earths_batch(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+@app.post(
+    "/api/v1/tungsten/verify-origin",
+    response_model=TungstenOriginVerifyResponse,
+    tags=["Compliance Oracle"],
+    summary="Verify Western Tungsten / APT Provenance & US NDAA Sec 848 (x402 Verified)",
+    responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
+)
+@app.post(
+    "/api/v1/oracle/verify/tungsten",
+    response_model=TungstenOriginVerifyResponse,
+    tags=["Compliance Oracle"],
+    include_in_schema=False,
+)
+async def verify_tungsten_origin(
+    request: Request,
+    body: TungstenOriginVerifyRequest,
+):
+    """
+    Dedicated Tungsten (Ammonium Paratungstate / Concentrate) Provenance Pipeline:
+    - 1. Western GIS Geofencing (Cantung, IMA Project, Panasqueira, Sangdong)
+    - 2. ASTM B783/ISO 10386 APT Grade Standards (WO3 >= 88.50%)
+    - 3. Dodd-Frank Sec 1502 / OECD Annex II Conflict-Free Certification
+    - 4. US NDAA Section 848 Defense Procurement Non-Covered Nation Eligibility
+    - 5. On-Chain Proof Hash & Signature issuance
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = tungsten_pipeline.verify_tungsten_batch(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+@app.post(
+    "/api/v1/black-mass/verify-origin",
+    response_model=BlackMassOriginVerifyResponse,
+    tags=["Compliance Oracle"],
+    summary="Verify Recycled Battery Black Mass & US BIS Export License (x402 Verified)",
+    responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
+)
+@app.post(
+    "/api/v1/oracle/verify/black-mass",
+    response_model=BlackMassOriginVerifyResponse,
+    tags=["Compliance Oracle"],
+    include_in_schema=False,
+)
+async def verify_black_mass_origin(
+    request: Request,
+    body: BlackMassOriginVerifyRequest,
+):
+    """
+    Dedicated Battery Black Mass Recycling Provenance Pipeline:
+    - 1. Accredited Hydrometallurgical Recycling GIS Geofencing (ABTC, Redwood, Li-Cycle, BASF)
+    - 2. US Department of Commerce BIS Export License Validation
+    - 3. EU Battery Regulation 2023/1542 Recycled Content Ratio (>= 85.0%)
+    - 4. Hazardous Fluorine / PVDF Binder Residue Limit (<= 500 ppm)
+    - 5. High-Purity Ni/Co/Li Recovery Certification & ECDSA On-Chain Attestation
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = black_mass_pipeline.verify_black_mass_batch(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+# =====================================================================
+# UPGRADE 2: REGULATORY ADVANCED ENGINE ENDPOINTS (CBAM / IAA / BATTERY PASSPORT)
+# =====================================================================
+
+@app.post(
+    "/api/v1/regulatory/cbam/markup-penalty",
+    response_model=CBAMMarkupPenaltyResponse,
+    tags=["Regulatory Advanced Oracle"],
+    summary="Calculate EU CBAM Statutory Mark-up Penalty (+10% to +30%) & Savings (x402 Verified)",
+    responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
+)
+async def calculate_cbam_markup_penalty(
+    request: Request,
+    body: CBAMMarkupPenaltyRequest,
+):
+    """
+    Calculates EU CBAM Statutory Default Mark-up Rates:
+    - 2026 Imports: +10% statutory mark-up penalty on unverified defaults
+    - 2027 Imports: +20% statutory mark-up penalty
+    - 2028+ Imports: +30% statutory mark-up penalty
+    - Quantifies EUR liability and immediate savings achieved with 3rd-party Scope 1/2 verification.
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = regulatory_advanced_engine.calculate_cbam_markup_penalty(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+@app.post(
+    "/api/v1/regulatory/iaa/verify-domestic-share",
+    response_model=EUIndustrialActVerifyResponse,
+    tags=["Regulatory Advanced Oracle"],
+    summary="Verify EU Industrial Accelerator Act (IAA) 70% Domestic Content & Subsidy Eligibility",
+    responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
+)
+async def verify_eu_industrial_act(
+    request: Request,
+    body: EUIndustrialActVerifyRequest,
+):
+    """
+    Evaluates compliance against the EU Industrial Accelerator Act (IAA):
+    - Requires >= 70% EU domestic value-add for clean vehicle components
+    - Requires >= 40% EU green crude steel content
+    - Generates statutory subsidy eligibility audit and cryptographic proof hash.
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = regulatory_advanced_engine.verify_eu_industrial_act(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+@app.post(
+    "/api/v1/battery/passport-vc/issue",
+    response_model=BatteryPassportVCResponse,
+    tags=["Regulatory Advanced Oracle"],
+    summary="Issue W3C Verifiable Credential (VC) EU Battery Passport (x402 Verified)",
+    responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
+)
+async def issue_battery_passport_vc(
+    request: Request,
+    body: BatteryPassportVCRequest,
+):
+    """
+    Issues W3C-standard Digital Product Passport (DPP) Verifiable Credential:
+    - Cryptographically binds upstream mineral proof hash, recycled Co/Li/Ni content, and carbon footprint.
+    - Emits W3C JSON-LD VC with EcdsaSecp256k1RecoverySignature2020 and QR code visualization URI.
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = regulatory_advanced_engine.generate_battery_passport_vc(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+# =====================================================================
+# UPGRADE 3: LOGISTICS ORACLE BRIDGE (B/L, GPS & CUSTOMS BUNDLE)
+# =====================================================================
+
+@app.post(
+    "/api/v1/logistics/customs-clearance-verify",
+    response_model=CustomsVerificationResponse,
+    tags=["Logistics Oracle"],
+    summary="Anchor Bill of Lading (B/L) to Mineral Extraction & Issue Customs Clearance Bundle",
+    responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
+)
+async def verify_customs_clearance(
+    request: Request,
+    body: CustomsVerificationRequest,
+):
+    """
+    Physical Logistics & Mineral Customs Verification Bridge:
+    - 1. Multimodal Carrier B/L & Container tracking verification (MSC, Maersk, CMA CGM, Hapag-Lloyd)
+    - 2. Spatial Inland Mine-to-Port-of-Loading (POL) distance analysis
+    - 3. Port-of-Loading to Port-of-Discharge (POD) nautical distance & vessel speed plausibility engine
+    - 4. Automated Customs Clearance Proof Bundle issuance for Green Channel clearance
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = logistics_bridge.verify_customs_clearance(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+@app.post(
+    "/api/v1/logistics/clean-tracking-feed",
+    response_model=LogisticsTrackingStateResponse,
+    tags=["Logistics Oracle"],
+    summary="Normalized Multi-Carrier Tracking Feed (Express & Ocean Containers)",
+    responses={402: {"description": "Payment Required (0.02 USDC on Polygon)"}},
+)
+async def get_clean_tracking_feed(
+    request: Request,
+    body: LogisticsTrackingStateRequest,
+):
+    """
+    Cleanweb Tracking Engine for Autonomous Trade Agents:
+    - Ingests multiple heterogeneous tracking numbers (CJ, Hanjin, DHL, FedEx, Ocean Containers).
+    - Normalizes raw web states into a single, reliable canonical JSON schema with zero CAPTCHA blockers.
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = logistics_bridge.get_clean_tracking_feed(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+# =====================================================================
+# UPGRADE 4 & 5: ZK COMPLIANCE PROVER & PRIVACY ENGINE ENDPOINTS
+# =====================================================================
+
+@app.post(
+    "/api/v1/zk/compliance-proof/generate",
+    response_model=ZKComplianceProofResponse,
+    tags=["Privacy & ZK Oracle"],
+    summary="Generate Zero-Knowledge Origin & Purity Proof (Shield GPS & Costs)",
+    responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
+)
+async def generate_zk_compliance_proof(
+    request: Request,
+    body: ZKComplianceProofRequest,
+):
+    """
+    Privacy-Preserving Zero-Knowledge Compliance Engine:
+    - Blinds exact extraction GPS coordinates, supplier internal identity, and commercial production costs.
+    - Generates Groth16/Plonk zero-knowledge proof proving Merkle root concession inclusion and China content < 0.1%.
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = zk_compliance_prover.generate_zk_compliance_proof(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+@app.post(
+    "/api/v1/zk/compliance-proof/verify",
+    response_model=ZKProofVerifyResponse,
+    tags=["Privacy & ZK Oracle"],
+    summary="Verify Zero-Knowledge Compliance Proof (Public Auditor / Customs Verifier)",
+    responses={402: {"description": "Payment Required (0.02 USDC on Polygon)"}},
+)
+async def verify_zk_compliance_proof(
+    request: Request,
+    body: ZKProofVerifyRequest,
+):
+    """
+    Public Verifier for Zero-Knowledge Compliance Attestations:
+    - Enables customs authorities and trading counterparties to mathematically verify compliance with zero data leakage.
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = zk_compliance_prover.verify_zk_proof(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+
 
 
 @app.post(

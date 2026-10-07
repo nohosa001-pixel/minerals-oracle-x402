@@ -18,14 +18,18 @@ The international minerals and battery supply chain has reached an inflection po
 4. **Dynamic Legal Synchronization**: Mining laws, export restrictions, and ESG standards evolve continuously. The oracle maintains live monitoring across 10+ mining jurisdictions and 14 regulatory traps, updating versioned regulatory logic graphs in real time.
 5. **Zero-Knowledge Proof (ZKP) Confidentiality**: Critical trade secrets (unit pricing, gross margins, supplier identity) remain blinded via off-chain hashing, while mathematical proofs of 100% statutory and environmental compliance are publicly attested on Polygon.
 
-### 1.2 Market Valuation Baselines (2026-09-16 PM Reference)
+### 1.2 Market Valuation Baselines (2026-10-07 AM Reference & Historical Baselines)
 
 The oracle calibrates physical collateral valuation and mass balance loss thresholds against live global commodity benchmarks:
 
-- **Gold ($4,300 ~ $4,320 / oz spot, Dec Futures $4,350 ~ $4,360, +1.00%)**: Robust support confirmed in the $4,300~$4,357 range immediately ahead of the September FOMC statement and dot-plot (SEP) release. Market is pricing in a 25bp rate hike with over 90% probability; downside firmly anchored by Middle East / Strait of Hormuz risks, currency debasement hedging against the US $11T debt rollover burden, and persistent physical bullion accumulation by central banks including the PBOC.
-- **Silver ($64.00 ~ $64.30 / oz spot, Dec Futures $64.897, 2-day rally)**: Sustained rebound above the $64.1~$64.89 mark following a 5-week low. Supported by an acute 3-nation physical supply disruption representing 40.9% of global mining (Mexico Terronera community blockade suspension, Peru June output down 9.0%, Chile Los Pelambres blizzard suspension and -5.2% guidance cut) coupled with 6 consecutive years of structural physical deficit driven by N-Type TOPCon solar PV cells and automotive electronics demand.
-- **Copper ($6.39 ~ $6.54 / lb, LME ~$14,100 / t, +0.88%)**: Rebounding above $14,000/t following temporary profit-taking from US refined metal tariff delays. Floor firmly reinforced by Codelco's July production dropping an additional 5% YoY, US Jan-Jul cumulative imports surging to 1.12Mt, LME warehouse stock depletion, and unabated demand from AI data centers and high-voltage direct current (HVDC) power grid expansions.
-- **Lithium Carbonate (146,750 ~ 156,500 RMB / t, +96.68% YoY)**: Resilient bottom breakout maintained at +96% above prior-year lows, driven by robust battery energy storage systems (BESS) installation growth.
+- **Gold ($4,158 ~ $4,169 / oz spot, +0.4% ~ +0.6%)**: Robust rebound following treasury yield stabilization and central bank physical bullion accumulation; solid hedge against the $10T global debt expansion. (Prior 2026-09-16 reference: $4,300 ~ $4,320/oz).
+- **Silver ($61.34 ~ $61.42 / oz spot, +0.47%)**: Solid consolidation above $61.30/oz, underpinned by N-Type TOPCon/HJT solar PV cell paste demand, automotive electronics, and a 6-year persistent structural physical deficit. (Prior 2026-09-16 reference: $64.00 ~ $64.30/oz).
+- **Copper ($6.61 ~ $6.66 / lb, LME ~$14,430 / t, +0.32% ~ +0.5%)**: Sustained breakout targeting $6.65/lb immediately ahead of China's Golden Week reopening; supported by critically low Shanghai bonded stocks (43kt) and IEA 2035 30% structural deficit forecast. (Prior 2026-09-16 reference: $6.39 ~ $6.54/lb, LME ~$14,100/t).
+- **Lithium Carbonate (145,500 ~ 155,000 RMB / t)**: Stable floor maintained during China holiday, backed by US Q2 BESS installations surging to a record 20.2 GWh.
+- **Strategic & Defense Minerals (2026-10-07)**:
+  - **Neodymium-Praseodymium (NdPr)**: $68.50 ~ $72.00 / kg (+0.7%) ahead of China MOFCOM 0.1% extraterritorial export control deadline (2026-11-10, D-34).
+  - **Antimony (Sb 99.65%)**: $25,500 ~ $27,000 / t (firm defense munitions & flame-retardant demand).
+  - **Tungsten (APT)**: $380 ~ $420 / mtu (surging 6x YTD from aerospace/defense demand).
 
 ---
 

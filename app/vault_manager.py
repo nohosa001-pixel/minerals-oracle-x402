@@ -121,6 +121,23 @@ class VaultManager:
             self._save_to_disk()
             return acc
 
+    @staticmethod
+    def _normalize_address(raw_addr: Optional[str]) -> Optional[str]:
+        """Normalizes EVM address (checksummed 0x...) or Solana Base58 pubkey."""
+        if not raw_addr or not isinstance(raw_addr, str):
+            return None
+        clean = raw_addr.strip()
+        if not clean:
+            return None
+        try:
+            return Web3.to_checksum_address(clean)
+        except Exception:
+            pass
+        b58_chars = set("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
+        if 32 <= len(clean) <= 44 and all(c in b58_chars for c in clean):
+            return clean
+        return None
+
     def register_agent_onboarding(
         self,
         agent_name: str,
@@ -128,13 +145,13 @@ class VaultManager:
         initial_trial_balance_usdc: float = 0.05,
     ) -> Tuple[AgentVaultAccount, str]:
         """
-        Self-serve onboarding for autonomous AI agents.
+        Self-serve onboarding for autonomous AI agents (EVM and Solana supported).
         Assigns an agent session key and seeds an initial free trial balance (e.g. 0.05 USDC = 10 Standard queries).
         """
-        if not agent_address or not agent_address.startswith("0x") or len(agent_address) != 42:
-            agent_address = "0x" + hashlib.sha256(f"{agent_name}_{time.time()}_{secrets.token_hex(8)}".encode()).hexdigest()[:40]
-
-        chk_addr = Web3.to_checksum_address(agent_address)
+        chk_addr = self._normalize_address(agent_address)
+        if not chk_addr:
+            synth_addr = "0x" + hashlib.sha256(f"{agent_name}_{time.time()}_{secrets.token_hex(8)}".encode()).hexdigest()[:40]
+            chk_addr = Web3.to_checksum_address(synth_addr)
         now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         session_key = f"agent_session_{secrets.token_hex(16)}"
 
@@ -161,8 +178,10 @@ class VaultManager:
         return acc, session_key
 
     def get_account_by_address(self, agent_address: str) -> Optional[AgentVaultAccount]:
-        """Retrieves vault account by wallet address."""
-        chk_addr = Web3.to_checksum_address(agent_address)
+        """Retrieves vault account by EVM or Solana wallet address."""
+        chk_addr = self._normalize_address(agent_address)
+        if not chk_addr:
+            return None
         with self._lock:
             return self._accounts.get(chk_addr)
 
@@ -182,13 +201,8 @@ class VaultManager:
         """
         now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         with self._lock:
-            # Check by session key first
-            addr = self._session_index.get(identifier)
-            if not addr and identifier.startswith("0x"):
-                try:
-                    addr = Web3.to_checksum_address(identifier)
-                except Exception:
-                    addr = None
+            # Check by session key first, then by normalized wallet address
+            addr = self._session_index.get(identifier) or self._normalize_address(identifier)
 
             if not addr or addr not in self._accounts:
                 return False, "Vault account not found", 0.0
@@ -227,16 +241,11 @@ class VaultManager:
             raise ValueError("Deposit amount must be strictly positive.")
 
         with self._lock:
-            addr = self._session_index.get(identifier)
-            if not addr and identifier.startswith("0x"):
-                try:
-                    addr = Web3.to_checksum_address(identifier)
-                except Exception:
-                    addr = None
+            addr = self._session_index.get(identifier) or self._normalize_address(identifier)
 
         if not addr:
             # Auto-onboard if not found
-            acc, _ = self.register_agent_onboarding(agent_name="AgentDepositor", agent_address=identifier if identifier.startswith("0x") else None, initial_trial_balance_usdc=0.0)
+            acc, _ = self.register_agent_onboarding(agent_name="AgentDepositor", agent_address=identifier, initial_trial_balance_usdc=0.0)
             addr = acc.agent_address
 
         acc = self.deposit(addr, amount_usdc)

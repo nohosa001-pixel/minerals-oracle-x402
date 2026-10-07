@@ -693,7 +693,204 @@ class A2ATradeDealEngine:
                 "next_action": "Buyer agent must approve USDC allowance to escrow_contract_address, then broadcast calldata to target contract.",
             }
 
+    def build_dynamic_escrow_deposit_calldata(
+        self,
+        deal_id: str,
+        inspector_address: Optional[str] = None,
+        collateral_deposit_usdc: float = 0.0,
+        pyth_price_id: Optional[str] = None,
+        base_price_usd: Optional[float] = None,
+        min_collateral_ratio_bps: int = 11000,
+        escrow_contract_address: Optional[str] = None,
+        chain_name: str = "polygon",
+    ) -> Dict[str, Any]:
+        """
+        Generates smart contract execution payload for buyer AI agent to lock funds in DynamicTradeEscrow.sol.
+        Enables Pyth Network real-time mark-to-market valuation, tripartite release, and autonomous margin-call defense.
+        Supports Polygon, Base, and Arbitrum registered deployments.
+        """
+        with self._lock:
+            record = self._deals.get(deal_id)
+            if not record:
+                raise DealNotFoundError(f"Trade deal '{deal_id}' not found.")
+            if record["status"] != "DUAL_SIGNED_CONFIRMED":
+                raise InvalidDealStateError(
+                    f"Deal '{deal_id}' is in status '{record['status']}', expected 'DUAL_SIGNED_CONFIRMED'."
+                )
+
+            spec: TradeDealSpec = record["spec"] if isinstance(record["spec"], TradeDealSpec) else TradeDealSpec(**record["spec"])
+
+            target_contract = escrow_contract_address
+            if not target_contract:
+                try:
+                    reg_path = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) / "contracts" / "deployed_multichain.json"
+                    if reg_path.exists():
+                        with open(reg_path, "r", encoding="utf-8") as f:
+                            reg_data = json.load(f)
+                            target_contract = reg_data.get("networks", {}).get(chain_name.lower(), {}).get("contracts", {}).get("DynamicTradeEscrow", {}).get("address")
+                except Exception:
+                    pass
+
+            if not target_contract:
+                dynamic_defaults = {
+                    "polygon": "0x7a34e0C17E3F1c7283B4645229C8B72fF8f161c9",
+                    "base": "0x5C890F570b5C527F38a6a6873523B2f52B6E3245",
+                    "arbitrum": "0x98D2E9528D8A7bF8278E6cfbBf90bcfc70C716B1",
+                }
+                target_contract = dynamic_defaults.get(chain_name.lower(), "0x7a34e0C17E3F1c7283B4645229C8B72fF8f161c9")
+
+            total_amount_usdc_units = int(round(spec.total_deal_value_usd * 1_000_000))
+            collateral_units = int(round(collateral_deposit_usdc * 1_000_000))
+            deal_id_bytes = Web3.keccak(text=deal_id)
+
+            seller_address = Web3.to_checksum_address(spec.seller_agent_address)
+            buyer_address = Web3.to_checksum_address(spec.buyer_agent_address)
+            inspector = Web3.to_checksum_address(inspector_address or os.getenv("ORACLE_TREASURY_WALLET", "0xA185B43fDD19619f99952AAed6eabf1029bF36a1"))
+
+            # Pyth Price ID (bytes32) - defaults to Commodity Feed identifier
+            if pyth_price_id and pyth_price_id.startswith("0x") and len(pyth_price_id) == 66:
+                pyth_id_bytes = bytes.fromhex(pyth_price_id[2:])
+            else:
+                comm_name = getattr(spec, "commodity", "Cu")
+                comm_str = comm_name.value if hasattr(comm_name, "value") else str(comm_name)
+                pyth_id_bytes = Web3.keccak(text=pyth_price_id or f"PYTH_{comm_str}_USD")
+
+            # Base Price (8 decimals, int64)
+            unit_price = base_price_usd if base_price_usd is not None else getattr(spec, "unit_price_usd_per_ton", 6610.0)
+            base_price_int64 = int(round(unit_price * 100_000_000))
+
+            duration_seconds = 14 * 86400
+            if spec.expires_at_utc:
+                try:
+                    expires_dt = datetime.fromisoformat(spec.expires_at_utc.replace("Z", "+00:00"))
+                    diff = int((expires_dt - datetime.now(timezone.utc)).total_seconds())
+                    if diff >= 60:
+                        duration_seconds = diff
+                except Exception:
+                    pass
+
+            selector = Web3.keccak(text="createDynamicDeal(bytes32,address,address,uint256,uint256,bytes32,int64,uint256,uint256)")[:4]
+
+            from eth_abi import encode
+            encoded_params = encode(
+                ["bytes32", "address", "address", "uint256", "uint256", "bytes32", "int64", "uint256", "uint256"],
+                [
+                    deal_id_bytes,
+                    seller_address,
+                    inspector,
+                    total_amount_usdc_units,
+                    collateral_units,
+                    pyth_id_bytes,
+                    base_price_int64,
+                    min_collateral_ratio_bps,
+                    duration_seconds,
+                ]
+            )
+            calldata = "0x" + (selector + encoded_params).hex()
+
+            return {
+                "deal_id": deal_id,
+                "escrow_type": "dynamic",
+                "escrow_contract_address": Web3.to_checksum_address(target_contract),
+                "total_deal_amount_usdc": spec.total_deal_value_usd,
+                "collateral_deposit_usdc": collateral_deposit_usdc,
+                "total_required_deposit_usdc": spec.total_deal_value_usd + collateral_deposit_usdc,
+                "seller_agent_address": seller_address,
+                "buyer_agent_address": buyer_address,
+                "inspector_address": inspector,
+                "pyth_price_id": "0x" + pyth_id_bytes.hex(),
+                "base_price_usd_8dec": base_price_int64,
+                "min_collateral_ratio_bps": min_collateral_ratio_bps,
+                "duration_seconds": duration_seconds,
+                "function_signature": "createDynamicDeal(bytes32,address,address,uint256,uint256,bytes32,int64,uint256,uint256)",
+                "calldata": calldata,
+                "next_action": "Buyer agent approves USDC allowance for (totalAmount + collateralDeposit), then broadcasts createDynamicDeal calldata.",
+            }
+
+    def build_solana_dynamic_escrow_instruction(
+        self,
+        deal_id: str,
+        collateral_deposit_usdc: float = 0.0,
+        pyth_price_feed: Optional[str] = None,
+        base_price_usd: Optional[float] = None,
+        min_collateral_ratio_bps: int = 11000,
+        inspector_pubkey: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Builds the Anchor instruction parameters for DynamicTradeEscrow.createDeal on Solana Mainnet (Chain ID 501).
+        Program ID: DynSxW8JCy6296toTYrdhJqnoxtMvf3CPmtSSFEyqNnz.
+        """
+        with self._lock:
+            record = self._deals.get(deal_id)
+            if not record:
+                raise DealNotFoundError(f"Trade deal '{deal_id}' not found.")
+
+            spec: TradeDealSpec = record["spec"]
+            total_amount_units = int(round(spec.total_deal_value_usd * 1_000_000))
+            collateral_units = int(round(collateral_deposit_usdc * 1_000_000))
+
+            unit_price = base_price_usd if base_price_usd is not None else getattr(spec, "unit_price_usd_per_ton", 6610.0)
+            base_price_int64 = int(round(unit_price * 100_000_000))
+
+            duration_seconds = 14 * 86400
+            if spec.expires_at_utc:
+                try:
+                    expires_dt = datetime.fromisoformat(spec.expires_at_utc.replace("Z", "+00:00"))
+                    diff = int((expires_dt - datetime.now(timezone.utc)).total_seconds())
+                    if diff >= 60:
+                        duration_seconds = diff
+                except Exception:
+                    pass
+
+            program_id = "DynSxW8JCy6296toTYrdhJqnoxtMvf3CPmtSSFEyqNnz"
+            pyth_feed = pyth_price_feed or "EdVCdQsbCDnvokWiLTVfdc2b9YPLRBVT69LL7ahAo28c"  # Pyth Solana Cu Feed
+            treasury = os.getenv("SOLANA_WALLET_ADDRESS", "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp")
+            inspector = inspector_pubkey or treasury
+
+            # Anchor 8-byte instruction discriminator: sha256("global:createDeal")[:8]
+            discriminator = hashlib.sha256(b"global:createDeal").digest()[:8]
+
+            accounts = [
+                {"name": "escrowAccount", "isMut": True, "isSigner": True},
+                {"name": "buyerAgent", "isMut": True, "isSigner": True, "pubkey": spec.buyer_agent_address},
+                {"name": "buyerTokenAccount", "isMut": True, "isSigner": False},
+                {"name": "escrowTokenVault", "isMut": True, "isSigner": False},
+                {"name": "usdcMint", "isMut": False, "isSigner": False, "pubkey": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"},
+                {"name": "tokenProgram", "isMut": False, "isSigner": False, "pubkey": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"},
+                {"name": "systemProgram", "isMut": False, "isSigner": False, "pubkey": "11111111111111111111111111111111"},
+                {"name": "rent", "isMut": False, "isSigner": False, "pubkey": "SysvarRent111111111111111111111111111111111"}
+            ]
+
+            return {
+                "deal_id": deal_id,
+                "chain": "solana",
+                "chain_id": 501,
+                "escrow_type": "dynamic",
+                "program_id": program_id,
+                "instruction_name": "createDeal",
+                "discriminator_hex": "0x" + discriminator.hex(),
+                "accounts": accounts,
+                "args": {
+                    "deal_id": deal_id,
+                    "seller_agent": spec.seller_agent_address,
+                    "inspector": inspector,
+                    "amount_usdc_units": total_amount_units,
+                    "collateral_usdc_units": collateral_units,
+                    "pyth_price_feed": pyth_feed,
+                    "base_price_usd_8dec": base_price_int64,
+                    "min_collateral_ratio_bps": min_collateral_ratio_bps,
+                    "duration_seconds": duration_seconds
+                },
+                "total_deal_amount_usdc": spec.total_deal_value_usd,
+                "collateral_deposit_usdc": collateral_deposit_usdc,
+                "total_required_deposit_usdc": spec.total_deal_value_usd + collateral_deposit_usdc,
+                "solscan_program_url": f"https://solscan.io/account/{program_id}",
+                "solscan_idl_tab": f"https://solscan.io/account/{program_id}#anchorProgramIdl",
+                "next_action": "Buyer agent signs Anchor Transaction with buyerAgent keypair and broadcasts to Solana Mainnet RPC."
+            }
+
 
 def get_a2a_deal_engine() -> A2ATradeDealEngine:
     return A2ATradeDealEngine()
+
 

@@ -8,6 +8,7 @@ This guide provides complete instructions and pre-packaged files to register, ve
 
 | Program Name | Program ID (Base58) | Solscan Explorer URL | Purpose |
 | :--- | :--- | :--- | :--- |
+| **DynamicTradeEscrow** | `DynSxW8JCy6296toTYrdhJqnoxtMvf3CPmtSSFEyqNnz` | [Solscan Link](https://solscan.io/account/DynSxW8JCy6296toTYrdhJqnoxtMvf3CPmtSSFEyqNnz#anchorProgramIdl) | Mark-to-Market Pyth Escrow with Tripartite Delivery & Autonomous Margin Call |
 | **UniversalEscrowCore** | `AGR3W3R9pKxnuZGYrpaggfkbMKVrjoniLaGvi1voBFSC` | [Solscan Link](https://solscan.io/account/AGR3W3R9pKxnuZGYrpaggfkbMKVrjoniLaGvi1voBFSC) | 0.4s Direct Split Universal Escrow & Ed25519 Truth Attestation |
 | **AgentPaymentVault** | `7oZ16YaazQzN6z5uA1nAZWD9oGUDXyvHwXGJLFYyWi3y` | [Solscan Link](https://solscan.io/account/7oZ16YaazQzN6z5uA1nAZWD9oGUDXyvHwXGJLFYyWi3y) | AI Autonomous Agent Pre-Funded Vault (<1ms Query Fast-Path) |
 | **MineralsOracleConsumer** | `21ZR1QCyAbNrRLs1iWEkdbNsfCFdJcy6ip9R2JxDbkTL` | [Solscan Link](https://solscan.io/account/21ZR1QCyAbNrRLs1iWEkdbNsfCFdJcy6ip9R2JxDbkTL) | Verifiable Spot Price & Battery Passport Merkle Root Consumer |
@@ -20,30 +21,26 @@ This guide provides complete instructions and pre-packaged files to register, ve
 
 ## 2. Step 1: Upload Anchor IDL on Solscan (Decoded Instructions)
 
-Registering the Anchor IDL (Interface Definition Language) allows Solscan to decode raw instruction bytes into human-readable functions (`initializeEscrow`, `executeDirectSplit`, `depositFunds`) and account parameters.
+Registering the Anchor IDL (Interface Definition Language) allows Solscan to decode raw instruction bytes into human-readable functions (`createDeal`, `anchorOracleProof`, `confirmCarrierArrival`, `checkMarginCall`, `settleDeal`) and account parameters.
 
 ### Method A: Web UI Upload (Quickest - No CLI Required)
 
-1. Open Solscan for each program:
-   - [UniversalEscrowCore on Solscan](https://solscan.io/account/AGR3W3R9pKxnuZGYrpaggfkbMKVrjoniLaGvi1voBFSC)
-   - [AgentPaymentVault on Solscan](https://solscan.io/account/7oZ16YaazQzN6z5uA1nAZWD9oGUDXyvHwXGJLFYyWi3y)
-   - [MineralsOracleConsumer on Solscan](https://solscan.io/account/21ZR1QCyAbNrRLs1iWEkdbNsfCFdJcy6ip9R2JxDbkTL)
+1. Open Solscan for **DynamicTradeEscrow**:
+   - [DynamicTradeEscrow on Solscan](https://solscan.io/account/DynSxW8JCy6296toTYrdhJqnoxtMvf3CPmtSSFEyqNnz#anchorProgramIdl)
 2. Click on the **"Anchor"** or **"Program IDL"** tab on the account page.
 3. Click **"Upload IDL"** / **"Verify IDL"**.
-4. Select the matching pre-built IDL file from `contracts/verification/solana/`:
-   - `universal_escrow_core.idl.json`
-   - `agent_payment_vault.idl.json`
-   - `minerals_oracle_consumer.idl.json`
-5. Connect the Program Upgrade Authority wallet (or verify via signature) to confirm ownership.
+4. Select the matching pre-built IDL file:
+   - 📁 [`contracts/verification/solana/dynamic_trade_escrow.idl.json`](dynamic_trade_escrow.idl.json)
+5. Connect the Program Upgrade Authority wallet (`411ksMz9...`) to sign and confirm ownership.
 
-### Method B: On-Chain IDL Upload via Anchor CLI
+### Method B: On-Chain IDL Upload / Upgrade via Anchor CLI
 
 If you have Anchor CLI installed with the program deployer keypair:
 
 ```bash
-# 1. UniversalEscrowCore
-anchor idl init -f contracts/verification/solana/universal_escrow_core.idl.json \
-  AGR3W3R9pKxnuZGYrpaggfkbMKVrjoniLaGvi1voBFSC \
+# 1. DynamicTradeEscrow (Update / Initialize IDL on Escrow Program)
+anchor idl init -f contracts/verification/solana/dynamic_trade_escrow.idl.json \
+  DynSxW8JCy6296toTYrdhJqnoxtMvf3CPmtSSFEyqNnz \
   --provider.cluster https://api.mainnet-beta.solana.com
 
 # 2. AgentPaymentVault
@@ -56,6 +53,7 @@ anchor idl init -f contracts/verification/solana/minerals_oracle_consumer.idl.js
   21ZR1QCyAbNrRLs1iWEkdbNsfCFdJcy6ip9R2JxDbkTL \
   --provider.cluster https://api.mainnet-beta.solana.com
 ```
+
 
 ---
 

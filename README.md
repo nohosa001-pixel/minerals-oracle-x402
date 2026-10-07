@@ -141,6 +141,44 @@ flowchart TD
 - **N-Type TOPCon Solar Standard (Trap 16)**: Enforces ultra-pure $\ge 99.99\%$ silver powder certification for next-gen solar PV metallization paste.
 - **Security & LBMA Assurance**: Defends against cartel-tainted artisanal extraction and validates LBMA Good Delivery refiner accreditation.
 
+#### 🧲 Western Rare Earths & MOFCOM 0.1% Defense (`app/rare_earths_pipeline.py`)
+
+- **Non-China Geofencing**: Validates primary Western NdPr producers (Lynas Mt Weld, MP Materials Mountain Pass, Vital Nechalacho, Pensana Longonjo).
+- **China MOFCOM Notice 61 '0.1% Rule' (D-35 Nov 10 Rule)**: Enforces strict $<0.100\%$ PRC input ratio threshold to prevent extraterritorial export embargoes.
+- **High-Purity & Radiation Safety**: Certifies $\ge 99.5\%$ NdPr oxide assay purity and verifies Th+U radionuclide limits ($\le 500\text{ ppm}$).
+
+#### 🛡️ Western Tungsten & Defense NDAA Pipeline (`app/tungsten_pipeline.py`)
+
+- **Western Geofencing**: Validates key deposits (NATC Cantung, American Tungsten IMA Project, Almonty Panasqueira, Sangdong).
+- **NDAA Sec 848 Defense Procurement**: Certifies non-covered nation origin for US Department of Defense and semiconductor fabrication.
+- **APT Grade Standard**: Verifies ASTM B783/ISO 10386 Ammonium Paratungstate grade ($\text{WO}_3 \ge 88.5\%$) and 3TG conflict-free status.
+
+#### ♻️ Recycled Battery Black Mass Pipeline (`app/black_mass_pipeline.py`)
+
+- **US BIS Export License Enforcement**: Validates Department of Commerce export authorizations (ABTC, Redwood Materials, Li-Cycle, BASF).
+- **EU Battery Reg 2023/1542**: Verifies recycled mass content ratio ($\ge 85.0\%$) and hazardous fluorine residue safety ($\le 500\text{ ppm}$).
+
+---
+
+### 2.5 Advanced 2026/2027 Regulatory, Logistics & ZK Privacy Upgrades
+
+1. **EU CBAM Statutory Mark-up Penalty Engine (`app/regulatory_advanced_engine.py`)**:
+   - Calculates mandatory statutory default mark-up surcharges: **2026: +10%**, **2027: +20%**, **2028: +30%**.
+   - Quantifies exact EUR liability and immediate savings achieved with 3rd-party Scope 1/2 verified reports.
+2. **EU Industrial Accelerator Act (IAA) & W3C Battery Passport VC (`app/regulatory_advanced_engine.py`)**:
+   - Evaluates $\ge 70\%$ EU domestic content and $\ge 40\%$ green steel content for clean vehicle subsidies.
+   - Issues W3C-standard JSON-LD Digital Product Passport (DPP) Verifiable Credentials with on-chain ECDSA signatures.
+3. **Logistics Oracle Bridge (`app/logistics_bridge.py`)**:
+   - Anchors multimodal Bill of Lading (B/L) and container numbers to mineral concessions.
+   - Evaluates Port-of-Loading (POL) to Port-of-Discharge (POD) maritime speed/transit plausibility and inland mine-to-port spatial distance.
+   - Issues **Customs Clearance Proof Bundles** for accelerated green-channel port clearance.
+4. **Pyth Dynamic Escrow Smart Contract (`contracts/DynamicTradeEscrow.sol`)**:
+   - Dynamic real-time LTV mark-to-market valuation via Pyth price feeds with automated margin-call protection.
+   - Tripartite conditional settlement: Oracle Proof Hash + Carrier B/L Arrival + Independent Laboratory Assay.
+5. **Zero-Knowledge Privacy Compliance Prover (`app/zk_compliance_prover.py`)**:
+   - Shields exact mine coordinates, supplier IDs, and unit production costs.
+   - Emits Groth16/Plonk zero-knowledge proofs mathematically proving concession Merkle inclusion and China origin $< 0.1\%$.
+
 ---
 
 ### 3. Autonomous Agent Operations Terminal & Telemetry HUD
@@ -226,7 +264,7 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-### 2. Run Tests (173 Automated Tests - 100% Passing)
+### 2. Run Tests (278 Automated Tests - 100% Passing)
 
 ```bash
 # Run full regression suite
@@ -236,14 +274,18 @@ pytest tests/
 ### 3. Launch Local Server & Web Observatory
 
 ```bash
+# Option A: Built-in CLI runner
+minerals-oracle-x402
+
+# Option B: Uvicorn development server
 uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 Navigate to:
 
-- **Korean Core Node**: [http://localhost:8000/ko](http://localhost:8000/ko)
-- **Global English Node**: [http://localhost:8000/](http://localhost:8000/)
-- **API Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Autonomous Agent Observatory Console**: [http://localhost:8000/dashboard](http://localhost:8000/dashboard)
+- **Interactive OpenAPI Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Model Context Protocol (MCP) Tools**: [http://localhost:8000/mcp/tools](http://localhost:8000/mcp/tools)
 
 ---
 

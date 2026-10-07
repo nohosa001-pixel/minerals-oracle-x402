@@ -21,7 +21,7 @@ from app.schemas import PaymentChallenge, PricingTier, PaymentReceipt
 from app.vault_manager import vault_manager
 from app.enterprise_manager import enterprise_manager
 from app.onchain_signer import onchain_signer
-from app.multi_chain import CHAIN_REGISTRY, get_chain_config, SupportedChain, list_supported_chains
+from app.multi_chain import CHAIN_REGISTRY, get_chain_config, SupportedChain, list_supported_chains, get_all_rpc_urls
 
 # Load environment variables from .env file
 load_dotenv()
@@ -548,53 +548,145 @@ class X402Verifier:
             if not all(c in b58_chars for c in clean_sig) or len(clean_sig) < 80 or len(clean_sig) > 92:
                 return False, "Invalid Solana transaction signature format (expected 88-character Base58 string)"
 
-        # 1. Anti-Replay Protection
+        # 1. Anti-Replay Protection & Concurrent Double-Spending Prevention
         from app.distributed_store import distributed_store
-        if distributed_store.is_hash_redeemed(sig_lower) or sig_lower in _REDEEMED_TX_HASHES:
-            return False, f"Replay attack blocked: Solana Transaction {clean_sig[:12]}... has already been redeemed"
+        with distributed_store.acquire_lock(f"tx_verify:{sig_lower}", timeout_seconds=8.0) as acquired:
+            if not acquired:
+                return False, f"Transaction verification already in progress for Solana Transaction {clean_sig[:12]}... Please retry shortly."
+            if distributed_store.is_hash_redeemed(sig_lower) or sig_lower in _REDEEMED_TX_HASHES:
+                return False, f"Replay attack blocked: Solana Transaction {clean_sig[:12]}... has already been redeemed"
 
-        # 2. Automated Testing / Sandbox Bypass Guarantee
-        if ALLOW_DEV_BYPASS or is_mock_test:
-            distributed_store.mark_hash_redeemed(sig_lower)
-            _REDEEMED_TX_HASHES[sig_lower] = time.time()
-            _save_redeemed_txs()
-            treasury_sol = os.getenv("SOLANA_WALLET_ADDRESS", "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp")
-            return True, f"tx:{clean_sig}:solana:{treasury_sol}"
-
-        # 3. Live Solana RPC Query
-        solana_rpc = os.getenv("SOLANA_RPC_URL", "https://api.mainnet-beta.solana.com")
-        try:
-            with httpx.Client(timeout=4.0) as client:
-                resp = client.post(
-                    solana_rpc,
-                    json={
-                        "jsonrpc": "2.0",
-                        "id": 1,
-                        "method": "getTransaction",
-                        "params": [
-                            clean_sig,
-                            {"encoding": "jsonParsed", "commitment": "confirmed", "maxSupportedTransactionVersion": 0}
-                        ]
-                    }
-                )
-                if resp.status_code != 200:
-                    return False, f"Solana RPC error ({resp.status_code}) querying transaction {clean_sig[:12]}..."
-
-                data = resp.json()
-                res = data.get("result")
-                if not res:
-                    return False, f"Solana transaction {clean_sig[:12]}... not confirmed on Solana Mainnet"
-
-                meta = res.get("meta") or {}
-                if meta.get("err") is not None:
-                    return False, f"Solana transaction {clean_sig[:12]}... failed or reverted: {meta.get('err')}"
-
+            # 2. Automated Testing / Sandbox Bypass Guarantee
+            if ALLOW_DEV_BYPASS or is_mock_test:
                 distributed_store.mark_hash_redeemed(sig_lower)
                 _REDEEMED_TX_HASHES[sig_lower] = time.time()
                 _save_redeemed_txs()
-                return True, f"tx:{clean_sig}:solana:VerifiedSolanaAgent"
-        except Exception as e:
-            return False, f"Failed querying Solana Mainnet RPC: {str(e)}"
+                treasury_sol = os.getenv("SOLANA_WALLET_ADDRESS", "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp")
+                return True, f"tx:{clean_sig}:solana:{treasury_sol}"
+
+            # 3. Live Solana Multi-RPC Failover Query
+            solana_rpcs = get_all_rpc_urls("solana")
+            last_rpc_err = "No RPC contacted"
+            res = None
+
+            for rpc_url in solana_rpcs:
+                try:
+                    with httpx.Client(timeout=4.0) as client:
+                        resp = client.post(
+                            rpc_url,
+                            json={
+                                "jsonrpc": "2.0",
+                                "id": 1,
+                                "method": "getTransaction",
+                                "params": [
+                                    clean_sig,
+                                    {"encoding": "jsonParsed", "commitment": "confirmed", "maxSupportedTransactionVersion": 0}
+                                ]
+                            }
+                        )
+                        if resp.status_code == 200:
+                            data = resp.json()
+                            if "result" in data:
+                                res = data.get("result")
+                                if res:
+                                    break
+                        last_rpc_err = f"RPC {rpc_url} returned HTTP {resp.status_code}"
+                except Exception as e:
+                    last_rpc_err = f"Failed querying {rpc_url}: {str(e)}"
+                    continue
+
+            if not res:
+                return False, f"Solana transaction {clean_sig[:12]}... not confirmed on Solana Mainnet ({last_rpc_err})"
+
+            meta = res.get("meta") or {}
+            if meta.get("err") is not None:
+                return False, f"Solana transaction {clean_sig[:12]}... failed or reverted: {meta.get('err')}"
+
+            # 4. Rigorous SPL Token Transfer Verification (USDC balance diff & strict recipient check)
+            target_treasury = os.getenv("SOLANA_WALLET_ADDRESS", "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp")
+            target_mint = os.getenv("SOLANA_USDC_MINT", "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
+
+            found_valid_transfer = False
+            payer_wallet = "VerifiedSolanaAgent"
+
+            pre_token_balances = meta.get("preTokenBalances") or []
+            post_token_balances = meta.get("postTokenBalances") or []
+
+            tx_obj = res.get("transaction") or {}
+            msg_obj = tx_obj.get("message") or {}
+            acc_keys = msg_obj.get("accountKeys") or []
+
+            # Track known treasury-owned token accounts from token balance entries and account keys
+            known_treasury_token_accounts = {target_treasury}
+            for tb in (pre_token_balances + post_token_balances):
+                if isinstance(tb, dict) and tb.get("owner") == target_treasury:
+                    idx = tb.get("accountIndex")
+                    if idx is not None and isinstance(idx, int) and 0 <= idx < len(acc_keys):
+                        ak = acc_keys[idx]
+                        pub = ak.get("pubkey") if isinstance(ak, dict) else str(ak)
+                        if pub:
+                            known_treasury_token_accounts.add(pub)
+
+            # Strategy A: Check net positive balance delta on target_treasury USDC accounts
+            if pre_token_balances or post_token_balances:
+                pre_by_idx = {b.get("accountIndex"): b for b in pre_token_balances if isinstance(b, dict)}
+                for post_b in post_token_balances:
+                    if not isinstance(post_b, dict):
+                        continue
+                    mint = post_b.get("mint")
+                    owner = post_b.get("owner", "")
+                    if mint != target_mint:
+                        continue
+                    if owner == target_treasury:
+                        idx = post_b.get("accountIndex")
+                        pre_amt = 0.0
+                        if idx in pre_by_idx:
+                            ui_amt = pre_by_idx[idx].get("uiTokenAmount", {})
+                            pre_amt = float(ui_amt.get("uiAmount") or 0.0)
+                        post_ui = post_b.get("uiTokenAmount", {})
+                        post_amt = float(post_ui.get("uiAmount") or 0.0)
+                        delta = post_amt - pre_amt
+                        if delta >= (required_amount_usdc * 0.99):
+                            found_valid_transfer = True
+                            # Attempt to resolve payer from token balances with negative delta
+                            for pre_b in pre_token_balances:
+                                if isinstance(pre_b, dict) and pre_b.get("mint") == target_mint:
+                                    p_owner = pre_b.get("owner")
+                                    if p_owner and p_owner != target_treasury:
+                                        payer_wallet = p_owner
+                                        break
+                            break
+
+            # Strategy B: Instruction-level check fallback (STRICT destination and mint verification)
+            if not found_valid_transfer:
+                instructions = msg_obj.get("instructions") or []
+                for ix in instructions:
+                    parsed = ix.get("parsed") if isinstance(ix, dict) else None
+                    if isinstance(parsed, dict):
+                        info = parsed.get("info") or {}
+                        ix_type = parsed.get("type")
+                        if ix_type in ("transfer", "transferChecked"):
+                            dest = str(info.get("destination", ""))
+                            # SECURITY INVARIANT: Destination MUST be the treasury wallet or a treasury-owned token account
+                            if dest in known_treasury_token_accounts:
+                                if ix_type == "transferChecked":
+                                    ix_mint = info.get("mint")
+                                    if ix_mint and ix_mint != target_mint:
+                                        continue
+                                amt_units = float(info.get("amount") or info.get("tokenAmount", {}).get("uiAmount") or 0.0)
+                                amt_usdc = amt_units / 1e6 if ix_type == "transfer" else float(info.get("tokenAmount", {}).get("uiAmount") or (amt_units / 1e6))
+                                if amt_usdc >= (required_amount_usdc * 0.99):
+                                    found_valid_transfer = True
+                                    payer_wallet = info.get("authority", payer_wallet)
+                                    break
+
+            if not found_valid_transfer:
+                return False, f"No matching SPL USDC transfer (>= {required_amount_usdc} USDC) to Solana treasury {target_treasury[:12]}... found in transaction {clean_sig[:12]}..."
+
+            distributed_store.mark_hash_redeemed(sig_lower)
+            _REDEEMED_TX_HASHES[sig_lower] = time.time()
+            _save_redeemed_txs()
+            return True, f"tx:{clean_sig}:solana:{payer_wallet}"
 
     def verify_onchain_tx(
         self,
@@ -612,8 +704,17 @@ class X402Verifier:
         clean_tx = tx_hash.strip()
         chain_clean = str(chain_name).lower().strip()
 
-        # Route Solana Mainnet transactions
-        if chain_clean in ["solana", "sol", "501", "solana-mainnet"] or (not clean_tx.startswith("0x") and len(clean_tx) >= 64):
+        # Route Solana Mainnet transactions vs EVM transactions cleanly
+        is_solana_chain = chain_clean in ["solana", "sol", "501", "solana-mainnet"]
+        is_solana_sig = not clean_tx.startswith("0x") and (
+            80 <= len(clean_tx) <= 92
+            or clean_tx.startswith("SOLANA_MOCK")
+            or clean_tx.startswith("solana_")
+            or clean_tx == "SOLANA_TEST_VALID_SIG_2026"
+        )
+        is_evm_chain = chain_clean in ["polygon", "base", "arbitrum", "137", "8453", "42161", "matic"]
+
+        if is_solana_chain or (not is_evm_chain and is_solana_sig):
             return self._verify_solana_onchain_tx(clean_tx, required_amount_usdc)
 
         if len(clean_tx) != 66 or not clean_tx.startswith("0x"):
@@ -621,94 +722,105 @@ class X402Verifier:
 
         tx_lower = clean_tx.lower()
 
-        # 1. Anti-Replay Protection
+        # 1. Anti-Replay Protection & Concurrent Double-Spending Prevention
         from app.distributed_store import distributed_store
-        if distributed_store.is_hash_redeemed(tx_lower) or tx_lower in _REDEEMED_TX_HASHES:
-            return False, f"Replay attack blocked: Transaction {clean_tx[:12]}... has already been redeemed"
+        with distributed_store.acquire_lock(f"tx_verify:{tx_lower}", timeout_seconds=8.0) as acquired:
+            if not acquired:
+                return False, f"Transaction verification already in progress for {clean_tx[:12]}... Please retry shortly."
+            if distributed_store.is_hash_redeemed(tx_lower) or tx_lower in _REDEEMED_TX_HASHES:
+                return False, f"Replay attack blocked: Transaction {clean_tx[:12]}... has already been redeemed"
 
-        # 2. Automated Testing / Sandbox Bypass Guarantee
-        is_test_env = (
-            "PYTEST_CURRENT_TEST" in os.environ
-            or ALLOW_DEV_BYPASS
-            or clean_tx.startswith("0xMOCK")
-            or clean_tx.startswith("0x" + "a" * 10)
-            or clean_tx.startswith("0x" + "b" * 10)
-            or clean_tx.startswith("0x" + "f" * 10)
-            or clean_tx == "0xTEST_VALID_HASH_2026"
-        )
-        if is_test_env:
+            # 2. Automated Testing / Sandbox Bypass Guarantee
+            is_test_env = (
+                "PYTEST_CURRENT_TEST" in os.environ
+                or ALLOW_DEV_BYPASS
+                or clean_tx.startswith("0xMOCK")
+                or clean_tx.startswith("0x" + "a" * 10)
+                or clean_tx.startswith("0x" + "b" * 10)
+                or clean_tx.startswith("0x" + "f" * 10)
+                or clean_tx == "0xTEST_VALID_HASH_2026"
+            )
+            if is_test_env:
+                distributed_store.mark_hash_redeemed(tx_lower)
+                _REDEEMED_TX_HASHES[tx_lower] = time.time()
+                _save_redeemed_txs()
+                return True, f"tx:{clean_tx}:{chain_name}:0xMockAuthorizedAgent"
+
+            # 3. Live Multi-RPC Failover Query & Receipt Verification
+            chain_cfg = get_chain_config(chain_name)
+            candidate_rpcs = get_all_rpc_urls(chain_name)
+            receipt = None
+            last_err = "No RPC connected"
+
+            for rpc_url in candidate_rpcs:
+                try:
+                    w3 = Web3(Web3.HTTPProvider(rpc_url, request_kwargs={"timeout": 3.0}))
+                    receipt = w3.eth.get_transaction_receipt(cast(Any, clean_tx))
+                    if receipt:
+                        break
+                except Exception as e:
+                    last_err = str(e)
+                    continue
+
+            if not receipt:
+                return False, f"On-chain transaction receipt not found on {chain_cfg.display_name} across RPC endpoints: {last_err}"
+
+            status_val = receipt.get("status")
+            if status_val != 1:
+                return False, f"Transaction {clean_tx[:12]}... reverted or failed on {chain_cfg.display_name}"
+
+            # 4. ERC-20 Transfer Event Verification (USDC)
+            # ERC-20 Transfer(address indexed from, address indexed to, uint256 value)
+            TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+            target_treasury = self.recipient_wallet.lower()
+            target_vault = chain_cfg.payment_vault_address.lower()
+            usdc_contract = chain_cfg.usdc_address.lower()
+
+            found_valid_transfer = False
+            payer_address = "0xVerifiedOnChainAgent"
+
+            logs = receipt.get("logs", [])
+            for log in logs:
+                contract_addr = log.get("address", "").lower()
+                if contract_addr != usdc_contract:
+                    continue
+
+                topics = log.get("topics", [])
+                if len(topics) >= 3:
+                    t0 = topics[0].hex() if hasattr(topics[0], "hex") else str(topics[0])
+                    if not t0.startswith("0x"):
+                        t0 = "0x" + t0
+
+                    if t0.lower() == TRANSFER_TOPIC:
+                        t1 = topics[1].hex() if hasattr(topics[1], "hex") else str(topics[1])
+                        t2 = topics[2].hex() if hasattr(topics[2], "hex") else str(topics[2])
+                        from_addr = "0x" + t1[-40:]
+                        to_addr = ("0x" + t2[-40:]).lower()
+
+                        if to_addr in (target_treasury, target_vault):
+                            raw_data = log.get("data", "0x0")
+                            data_hex = raw_data.hex() if hasattr(raw_data, "hex") else str(raw_data)
+                            if data_hex.startswith("0x"):
+                                data_hex = data_hex[2:]
+                            value_units = int(data_hex, 16) if data_hex else 0
+                            value_usdc = value_units / 1e6  # 6 decimals
+
+                            if value_usdc >= (required_amount_usdc * 0.99):
+                                found_valid_transfer = True
+                                try:
+                                    payer_address = Web3.to_checksum_address(from_addr)
+                                except Exception:
+                                    payer_address = from_addr
+                                break
+
+            if not found_valid_transfer:
+                return False, f"No matching USDC transfer (>= {required_amount_usdc} USDC) to treasury {self.recipient_wallet} found in tx {clean_tx[:12]}..."
+
+            # Mark redeemed to prevent duplicate use across memory, disk, and distributed cluster
             distributed_store.mark_hash_redeemed(tx_lower)
             _REDEEMED_TX_HASHES[tx_lower] = time.time()
             _save_redeemed_txs()
-            return True, f"tx:{clean_tx}:{chain_name}:0xMockAuthorizedAgent"
-
-        # 3. Live RPC Query & Receipt Verification
-        chain_cfg = get_chain_config(chain_name)
-        try:
-            w3 = Web3(Web3.HTTPProvider(chain_cfg.rpc_url, request_kwargs={"timeout": 3.0}))
-            receipt = w3.eth.get_transaction_receipt(cast(Any, clean_tx))
-        except Exception as e:
-            return False, f"On-chain transaction receipt not found on {chain_cfg.display_name}: {str(e)}"
-
-        if not receipt:
-            return False, f"Transaction {clean_tx[:12]}... not confirmed on {chain_cfg.display_name}"
-
-        status_val = receipt.get("status")
-        if status_val != 1:
-            return False, f"Transaction {clean_tx[:12]}... reverted or failed on {chain_cfg.display_name}"
-
-        # 4. ERC-20 Transfer Event Verification (USDC)
-        # ERC-20 Transfer(address indexed from, address indexed to, uint256 value)
-        TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
-        target_treasury = self.recipient_wallet.lower()
-        target_vault = chain_cfg.payment_vault_address.lower()
-        usdc_contract = chain_cfg.usdc_address.lower()
-
-        found_valid_transfer = False
-        payer_address = "0xVerifiedOnChainAgent"
-
-        logs = receipt.get("logs", [])
-        for log in logs:
-            contract_addr = log.get("address", "").lower()
-            if contract_addr != usdc_contract:
-                continue
-
-            topics = log.get("topics", [])
-            if len(topics) >= 3:
-                t0 = topics[0].hex() if hasattr(topics[0], "hex") else str(topics[0])
-                if not t0.startswith("0x"):
-                    t0 = "0x" + t0
-
-                if t0.lower() == TRANSFER_TOPIC:
-                    t1 = topics[1].hex() if hasattr(topics[1], "hex") else str(topics[1])
-                    t2 = topics[2].hex() if hasattr(topics[2], "hex") else str(topics[2])
-                    from_addr = "0x" + t1[-40:]
-                    to_addr = ("0x" + t2[-40:]).lower()
-
-                    if to_addr in (target_treasury, target_vault):
-                        raw_data = log.get("data", "0x0")
-                        data_hex = raw_data.hex() if hasattr(raw_data, "hex") else str(raw_data)
-                        if data_hex.startswith("0x"):
-                            data_hex = data_hex[2:]
-                        value_units = int(data_hex, 16) if data_hex else 0
-                        value_usdc = value_units / 1e6  # 6 decimals
-
-                        if value_usdc >= (required_amount_usdc * 0.99):
-                            found_valid_transfer = True
-                            try:
-                                payer_address = Web3.to_checksum_address(from_addr)
-                            except Exception:
-                                payer_address = from_addr
-                            break
-
-        if not found_valid_transfer:
-            return False, f"No matching USDC transfer (>= {required_amount_usdc} USDC) to treasury {self.recipient_wallet} found in tx {clean_tx[:12]}..."
-
-        # Mark redeemed to prevent duplicate use across memory, disk, and distributed cluster
-        distributed_store.mark_hash_redeemed(tx_lower)
-        _REDEEMED_TX_HASHES[tx_lower] = time.time()
-        _save_redeemed_txs()
-        return True, f"tx:{clean_tx}:{chain_name}:{payer_address}"
+            return True, f"tx:{clean_tx}:{chain_name}:{payer_address}"
 
     def _is_valid_nonce(self, nonce: str) -> bool:
         with _NONCE_LOCK:
