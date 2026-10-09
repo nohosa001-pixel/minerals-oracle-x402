@@ -293,8 +293,9 @@ class X402Verifier:
         }
         _, _, float_cost = self.get_tier_cost(tier)
 
-        # 1. Check development bypass header
-        if request.headers.get("X-Dev-Bypass") == "true":
+        # 1. Check development bypass header (Strictly gated by ALLOW_DEV_BYPASS or PYTEST environment)
+        is_dev_allowed = ALLOW_DEV_BYPASS or ("PYTEST_CURRENT_TEST" in os.environ)
+        if is_dev_allowed and request.headers.get("X-Dev-Bypass") == "true":
             receipt = self.issue_payment_receipt("0xDevBypassAuthorizedAgent", tier, chain_cfg.chain_name, payload_digest)
             extra_headers["X-Receipt-ID"] = receipt.receipt_id
             return True, "dev-bypass-authorized", extra_headers
@@ -395,7 +396,23 @@ class X402Verifier:
         
         referer = request.headers.get("referer", "")
         sec_fetch_site = request.headers.get("sec-fetch-site", "")
-        if ("/dashboard" in referer or "/playground" in referer or sec_fetch_site == "same-origin") and not skip_trial:
+        
+        # Security Hardening: Validate that referer originates from the same host or trusted local origin
+        host_header = (request.headers.get("host") or "").split(":")[0].lower()
+        is_same_host_referer = False
+        if referer:
+            from urllib.parse import urlparse
+            ref_parsed = urlparse(referer)
+            ref_host = (ref_parsed.hostname or "").lower()
+            if ref_host in (host_header, "localhost", "127.0.0.1", "testserver") and ref_host != "":
+                is_same_host_referer = True
+
+        is_legit_dashboard = (
+            (is_same_host_referer and ("/dashboard" in referer.lower() or "/playground" in referer.lower()))
+            or (sec_fetch_site == "same-origin" and is_same_host_referer)
+        )
+
+        if is_legit_dashboard and not skip_trial:
             extra_headers.update({
                 "X-Dashboard-Access": "granted",
                 "X-Oracle-Network": f"{chain_cfg.display_name}-{chain_cfg.chain_id}",
