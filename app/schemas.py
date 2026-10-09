@@ -65,6 +65,7 @@ class SourceCountry(str, Enum):
     CAN = "CAN"   # Canada (Victoria, Cantung, Nechalacho)
     PRT = "PRT"   # Portugal (Panasqueira Tungsten)
     AGO = "AGO"   # Angola (Longonjo Rare Earths)
+    ZMB = "ZMB"   # Zambia (Copperbelt Copper, Cobalt, Nickel)
     VNM = "VNM"   # Vietnam (Rare Earths & Tungsten)
     KOR = "KOR"   # South Korea (Sangdong Tungsten)
     DEU = "DEU"   # Germany (BASF Schwarzheide Battery Hub)
@@ -88,6 +89,7 @@ class SourceCountry(str, Enum):
                 "CANADA": "CAN", "CA": "CAN",
                 "PORTUGAL": "PRT", "PT": "PRT",
                 "ANGOLA": "AGO", "AO": "AGO",
+                "ZAMBIA": "ZMB", "ZM": "ZMB",
                 "VIETNAM": "VNM", "VN": "VNM",
                 "KOREA": "KOR", "SOUTH KOREA": "KOR", "KR": "KOR",
                 "GERMANY": "DEU", "DE": "DEU",
@@ -1327,6 +1329,7 @@ class RareEarthsAuditVerdict(BaseModel):
     mofcom_china_content_passed: bool
     china_content_ratio: float
     mofcom_rule_d35_eligible: bool
+    dfars_2027_compliant: bool = True
     confidence_score: float
     reasons: List[str]
 

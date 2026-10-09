@@ -19,6 +19,13 @@ from app.security_gate_client import security_gate_client
 client = TestClient(app)
 
 
+@pytest.fixture(autouse=True)
+def reset_security_gate_circuit():
+    security_gate_client.reset_circuit()
+    yield
+    security_gate_client.reset_circuit()
+
+
 def test_request_minerals_truth_attestation_payload():
     """Verify security_gate_client requests valid minerals truth attestation."""
     fake_response = {

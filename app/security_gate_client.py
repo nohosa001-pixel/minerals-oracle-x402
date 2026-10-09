@@ -59,6 +59,13 @@ class SecurityGateClient:
                 logger.info("Security Gate Circuit Breaker restored to CLOSED")
                 self._circuit_state = "CLOSED"
 
+    def reset_circuit(self):
+        """Forces the circuit breaker back to CLOSED state and clears failure counter."""
+        with self._lock:
+            self._failure_count = 0
+            self._circuit_state = "CLOSED"
+            self._circuit_open_until = 0.0
+
     def record_failure(self, err: Exception):
         """Records failed remote communication, potentially tripping the circuit."""
         with self._lock:

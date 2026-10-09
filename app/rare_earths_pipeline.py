@@ -56,6 +56,15 @@ CANONICAL_RARE_EARTHS_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "region": "Huambo, Angola",
         "country": "AGO",
     },
+    "NOLANS": {
+        "canonical_name": "Arafura Nolans Rare Earths Project",
+        "operator": "Arafura Rare Earths Ltd (Australian Integrated Refinery)",
+        "coordinates": (-22.580, 133.240),
+        "concession_id": "AUS-NT-NOLANS-01",
+        "max_geofence_radius_km": 30.0,
+        "region": "Northern Territory, Australia",
+        "country": "AUS",
+    },
 }
 
 
@@ -142,6 +151,16 @@ class RareEarthsPipeline:
                 "Safe from Chinese MOFCOM extraterritorial export restrictions."
             )
 
+        # 5. US DoD DFARS 2027 Mandate (100% Non-China, Russia, DPRK, Iran from Jan 1, 2027)
+        dfars_2027_compliant = (request.declared_china_origin_ratio == 0.0)
+        if dfars_2027_compliant:
+            reasons.append("US DoD DFARS 2027 Certified: 100% non-covered-nation permanent magnet raw material.")
+        else:
+            reasons.append(
+                f"DFARS 2027 Advisory: Contains {request.declared_china_origin_ratio * 100:.3f}% covered-nation inputs. "
+                "Non-compliant for US Defense procurement effective Jan 1, 2027."
+            )
+
         status = "COMPLIANT_CERTIFIED" if is_compliant else "NON_COMPLIANT_REJECTED"
         confidence_score = 0.99 if is_compliant else 0.40
 
@@ -155,6 +174,7 @@ class RareEarthsPipeline:
             mofcom_china_content_passed=mofcom_china_content_passed,
             china_content_ratio=round(request.declared_china_origin_ratio, 6),
             mofcom_rule_d35_eligible=mofcom_china_content_passed,
+            dfars_2027_compliant=dfars_2027_compliant,
             confidence_score=confidence_score,
             reasons=reasons,
         )

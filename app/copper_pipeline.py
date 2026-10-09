@@ -74,6 +74,24 @@ CANONICAL_COPPER_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "region": "Arequipa, Peru",
         "country": "PER",
     },
+    "KANSANSHI": {
+        "canonical_name": "First Quantum Kansanshi Copper Mine",
+        "operator": "First Quantum Minerals / ZCCM-IH (Zambia Copperbelt / US Pact)",
+        "coordinates": (-12.095, 26.425),
+        "concession_id": "ZMB-NWP-KANSAN-01",
+        "max_geofence_radius_km": 30.0,
+        "region": "North-Western Province, Zambia",
+        "country": "ZMB",
+    },
+    "SENTINEL": {
+        "canonical_name": "Kalumbila Sentinel Copper Mine",
+        "operator": "First Quantum Minerals (Zambia Copperbelt)",
+        "coordinates": (-12.977, 25.132),
+        "concession_id": "ZMB-NWP-SENT-01",
+        "max_geofence_radius_km": 30.0,
+        "region": "North-Western Province, Zambia",
+        "country": "ZMB",
+    },
 }
 
 
