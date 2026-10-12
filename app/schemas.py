@@ -69,6 +69,10 @@ class SourceCountry(str, Enum):
     VNM = "VNM"   # Vietnam (Rare Earths & Tungsten)
     KOR = "KOR"   # South Korea (Sangdong Tungsten)
     DEU = "DEU"   # Germany (BASF Schwarzheide Battery Hub)
+    GRL = "GRL"   # Greenland (Sarfartoq Rare Earths)
+    EST = "EST"   # Estonia (Silmet 2.0 EU CRMA Magnet Refinery)
+    KAZ = "KAZ"   # Kazakhstan (Bakuta Tungsten / DFC LOI)
+    ESP = "ESP"   # Spain (Orión Critical Minerals / Alconchel)
 
     @classmethod
     def _missing_(cls, value: object):
@@ -93,6 +97,10 @@ class SourceCountry(str, Enum):
                 "VIETNAM": "VNM", "VN": "VNM",
                 "KOREA": "KOR", "SOUTH KOREA": "KOR", "KR": "KOR",
                 "GERMANY": "DEU", "DE": "DEU",
+                "GREENLAND": "GRL", "GL": "GRL",
+                "ESTONIA": "EST", "EE": "EST",
+                "KAZAKHSTAN": "KAZ", "KZ": "KAZ",
+                "SPAIN": "ESP", "ES": "ESP",
             }
             if v in country_aliases:
                 v = country_aliases[v]

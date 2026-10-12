@@ -92,6 +92,15 @@ CANONICAL_COPPER_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "region": "North-Western Province, Zambia",
         "country": "ZMB",
     },
+    "CENTINELA": {
+        "canonical_name": "Minera Centinela Open-Pit Copper Complex",
+        "operator": "Antofagasta Minerals (70%) / Marubeni (30%)",
+        "coordinates": (-22.923, -69.255),
+        "concession_id": "AMSA-CEN-01",
+        "max_geofence_radius_km": 25.0,
+        "region": "Antofagasta, Chile",
+        "country": "CHL",
+    },
 }
 
 

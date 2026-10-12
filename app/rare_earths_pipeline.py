@@ -65,6 +65,24 @@ CANONICAL_RARE_EARTHS_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "region": "Northern Territory, Australia",
         "country": "AUS",
     },
+    "SARFARTOQ": {
+        "canonical_name": "Greenland Mines Sarfartoq Carbonatite Complex",
+        "operator": "Greenland Mines (Transatlantic Silmet 2.0 Supply Link)",
+        "coordinates": (66.500, -51.250),
+        "concession_id": "GRL-QEQ-SARF-01",
+        "max_geofence_radius_km": 30.0,
+        "region": "Qeqqata, Greenland",
+        "country": "GRL",
+    },
+    "SILMET": {
+        "canonical_name": "Neo Performance Materials Silmet 2.0 Refinery",
+        "operator": "Neo Performance Materials (EU CRMA Strategic Project)",
+        "coordinates": (59.395, 27.764),
+        "concession_id": "EST-SIL-SILMET-01",
+        "max_geofence_radius_km": 20.0,
+        "region": "Ida-Viru, Estonia",
+        "country": "EST",
+    },
 }
 
 

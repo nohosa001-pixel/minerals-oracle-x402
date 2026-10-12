@@ -55,6 +55,15 @@ CANONICAL_TUNGSTEN_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "region": "Gangwon-do, South Korea",
         "country": "KOR",
     },
+    "BAKUTA": {
+        "canonical_name": "Bakuta Tungsten Project",
+        "operator": "Jiaxin International / US DFC $700M LOI Consortium",
+        "coordinates": (43.467, 78.433),
+        "concession_id": "KAZ-ALM-BAKUTA-01",
+        "max_geofence_radius_km": 25.0,
+        "region": "Almaty Region, Kazakhstan",
+        "country": "KAZ",
+    },
 }
 
 
