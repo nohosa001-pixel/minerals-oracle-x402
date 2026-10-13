@@ -1,17 +1,72 @@
 # EV Battery Critical Minerals & Provenance Oracle (`minerals-oracle-x402`)
 
 [![PyPI Version](https://img.shields.io/pypi/v/minerals-oracle-x402.svg?color=blue&style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/minerals-oracle-x402/)
+[![TypeScript SDK](https://img.shields.io/badge/@minerals--oracle%2Fsdk-v1.0.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](sdk/typescript)
+[![Cloud Run 24/7](https://img.shields.io/badge/Production-Live_Cloud_Run_Seoul-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/dashboard)
 [![CI/CD](https://img.shields.io/github/actions/workflow/status/nohosa001-pixel/minerals-oracle-x402/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI%2FCD)](https://github.com/nohosa001-pixel/minerals-oracle-x402/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/Tests-315%2F315_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
-[![Type Safety](https://img.shields.io/badge/Pyright-0_Errors_Clean-brightgreen?style=for-the-badge&logo=python&logoColor=white)](pyrightconfig.json)
-[![Multi-Chain EVM](https://img.shields.io/badge/EVM_Contracts-Polygon_|_Base_|_Arbitrum-8247E5?style=for-the-badge&logo=ethereum&logoColor=white)](contracts/verification/VERIFICATION_GUIDE.md)
-[![Agent Exclusive](https://img.shields.io/badge/Protocol-100%25_Agent_Native_M2M-ff007a?style=for-the-badge&logo=openai&logoColor=white)](#pure-autonomous-agent-native-architecture-m2m-exclusive)
-[![FastMCP](https://img.shields.io/badge/FastMCP-32_Agent_Tools-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](mcp_tool_spec.json)
+[![Tests](https://img.shields.io/badge/Tests-339%2F339_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
+[![Multi-Chain](https://img.shields.io/badge/Chains-Solana_|_Polygon_|_Base_|_Arbitrum-14F195?style=for-the-badge&logo=solana&logoColor=black)](contracts/verification/VERIFICATION_GUIDE.md)
+[![FastMCP](https://img.shields.io/badge/FastMCP-38_Agent_Tools-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](mcp_tool_spec.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 > 🤖 **100% Pure Autonomous Agent-Native (M2M Exclusive) Critical Minerals Supply-Chain & Bilateral Trade Oracle.**  
 > Built strictly for autonomous AI agents, multi-agent swarms, and algorithmic trading execution. **Humans and fiat credit cards are strictly prohibited.**
-> All settlements execute machine-to-machine via Native USDC across **Polygon, Base, and Arbitrum One**, backed by cryptographic on-chain transaction receipt RPC verification, anti-replay guards, and EIP-712 Dual-Attestation bound to the **Security Gate x402** and **EU AI Act (Article 50)**.
+> All settlements execute machine-to-machine via Native USDC across **Solana (501), Polygon (137), Base (8453), and Arbitrum One (42161)**, backed by cryptographic on-chain transaction receipt RPC verification, anti-replay guards, and EIP-712 Dual-Attestation bound to the **Security Gate x402** and **EU AI Act (Article 50)**.
+
+---
+
+## ⚡ 3-Line AI Agent Quickstart (Python · TypeScript · LangChain · CrewAI)
+
+### 1. TypeScript / Node.js (`@minerals-oracle/sdk`)
+```typescript
+import { MineralsOracleClient } from '@minerals-oracle/sdk';
+
+const client = new MineralsOracleClient();
+const res = await client.verifyTungsten({
+  batch_id: 'W-APT-2026-T01', tenement_id: 'SANGDONG',
+  latitude: 37.150, longitude: 128.833, apt_wo3_grade_pct: 88.5
+});
+console.log(res.audit_verdict?.status, res.proof_hash); // 'FULLY_COMPLIANT' 0x...
+```
+
+### 2. Python / LangChain Tool
+```python
+import httpx
+
+client = httpx.Client(base_url="https://minerals-oracle-x402-7qxtp3324q-du.a.run.app")
+verdict = client.post("/api/v1/tungsten/verify-origin", json={
+    "batch_id": "W-APT-2026-T01", "tenement_id": "SANGDONG",
+    "latitude": 37.150, "longitude": 128.833, "apt_wo3_grade_pct": 88.5
+}).json()["audit_verdict"]
+print(f"Sangdong NDAA Sec 848: {verdict['status']}")  # FULLY_COMPLIANT
+```
+
+### 3. CrewAI / AI Agent Swarm Tool Call
+```python
+from crewai.tools import tool
+import httpx
+
+@tool("Verify Defense Mineral Provenance")
+def audit_mineral(batch_id: str, tenement_id: str, lat: float, lon: float) -> str:
+    """Verifies critical defense mineral origin against US NDAA Sec 848 and EU CRM regulations."""
+    r = httpx.post("https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/api/v1/tungsten/verify-origin",
+                   json={"batch_id": batch_id, "tenement_id": tenement_id, "latitude": lat, "longitude": lon})
+    return r.text
+```
+
+### 4. Claude Desktop / Cursor FastMCP (Model Context Protocol)
+Add to your `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "minerals-oracle": {
+      "command": "python",
+      "args": ["-m", "app.mcp_stdio"],
+      "env": { "ORACLE_API_KEY": "YOUR_AGENT_KEY" }
+    }
+  }
+}
+```
 
 ---
 
