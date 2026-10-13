@@ -25,6 +25,7 @@ from app.schemas import (
     TradeDealVerifyRequest,
     RareEarthsOriginVerifyRequest,
     TungstenOriginVerifyRequest,
+    NiobiumScandiumOriginVerifyRequest,
     BlackMassOriginVerifyRequest,
     CustomsVerificationRequest,
     ZKComplianceProofRequest,
@@ -37,6 +38,7 @@ from app.vault_manager import vault_manager
 from app.x402_verifier import x402_verifier
 from app.rare_earths_pipeline import rare_earths_pipeline
 from app.tungsten_pipeline import tungsten_pipeline
+from app.niobium_scandium_pipeline import niobium_scandium_pipeline
 from app.black_mass_pipeline import black_mass_pipeline
 from app.logistics_bridge import logistics_bridge
 from app.zk_compliance_prover import zk_compliance_prover
@@ -683,6 +685,26 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
                             "source_country": {"type": "string", "description": "Origin country (CAN, USA, PRT, KOR)"}
                         },
                         "required": ["batch_id", "tenement_id", "latitude", "longitude", "apt_wo3_grade_pct", "source_country"]
+                    }
+                },
+                {
+                    "name": "verify_niobium_scandium_origin",
+                    "description": "Verifies Western/Allied Niobium (Ferroniobium FeNb 65%) and Scandium Oxide (Sc2O3 99.5%) provenance, ASTM A550 assay standards, US NDAA Sec 848 defense eligibility, and US DOE Title XVII & EXIM loan guarantee pre-qualification.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "batch_id": {"type": "string", "description": "Niobium/Scandium batch ID"},
+                            "tenement_id": {"type": "string", "description": "Mine ID (ELK_CREEK, ARAXA, NIOBEC)"},
+                            "latitude": {"type": "number"},
+                            "longitude": {"type": "number"},
+                            "commodity_type": {"type": "string", "enum": ["FERRONIOBIUM", "SCANDIUM_OXIDE"], "default": "FERRONIOBIUM"},
+                            "fe_nb_grade_pct": {"type": "number", "description": "FeNb grade % (ASTM A550 >= 65.0%)", "default": 65.0},
+                            "sc2o3_purity_pct": {"type": "number", "description": "Sc2O3 purity % (>= 99.50%)", "default": 99.5},
+                            "doe_exim_loan_eligible": {"type": "boolean", "default": True},
+                            "ndaa_defense_procurement_eligible": {"type": "boolean", "default": True},
+                            "source_country": {"type": "string", "description": "Origin country (USA, BRA, CAN)"}
+                        },
+                        "required": ["batch_id", "tenement_id", "latitude", "longitude", "source_country"]
                     }
                 },
                 {
@@ -1383,6 +1405,15 @@ def handle_tool_call(req_id: Any, name: str, arguments: Dict[str, Any]) -> Dict[
         elif name == "verify_tungsten_origin":
             req_model = TungstenOriginVerifyRequest(**arguments)
             data = tungsten_pipeline.verify_tungsten_batch(req_model).model_dump()
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"content": [{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}]}
+            }
+
+        elif name == "verify_niobium_scandium_origin":
+            req_model = NiobiumScandiumOriginVerifyRequest(**arguments)
+            data = niobium_scandium_pipeline.verify_origin(req_model).model_dump()
             return {
                 "jsonrpc": "2.0",
                 "id": req_id,

@@ -613,6 +613,26 @@
         },
         "required": ["batch_id", "facility_id", "latitude", "longitude", "nickel_content_pct", "cobalt_content_pct", "lithium_content_pct", "bis_export_license_id", "source_country"]
       }
+    },
+    {
+      "name": "verify_niobium_scandium_origin",
+      "description": "Verifies Western/Allied Niobium (Ferroniobium FeNb 65%) and Scandium Oxide (Sc2O3 99.5%) provenance, ASTM A550 assay standards, US NDAA Sec 848 defense eligibility, and US DOE Title XVII & EXIM loan guarantee pre-qualification.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "batch_id": {"type": "string", "description": "Niobium/Scandium batch ID"},
+          "tenement_id": {"type": "string", "description": "Mine ID (ELK_CREEK, ARAXA, NIOBEC)"},
+          "latitude": {"type": "number"},
+          "longitude": {"type": "number"},
+          "commodity_type": {"type": "string", "enum": ["FERRONIOBIUM", "SCANDIUM_OXIDE"], "default": "FERRONIOBIUM"},
+          "fe_nb_grade_pct": {"type": "number", "description": "FeNb grade % (ASTM A550 >= 65.0%)", "default": 65.0},
+          "sc2o3_purity_pct": {"type": "number", "description": "Sc2O3 purity % (>= 99.50%)", "default": 99.5},
+          "doe_exim_loan_eligible": {"type": "boolean", "default": true},
+          "ndaa_defense_procurement_eligible": {"type": "boolean", "default": true},
+          "source_country": {"type": "string", "description": "Origin country (USA, BRA, CAN)"}
+        },
+        "required": ["batch_id", "tenement_id", "latitude", "longitude", "source_country"]
+      }
     }
   ]
 }

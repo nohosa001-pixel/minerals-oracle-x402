@@ -91,6 +91,8 @@ from app.schemas import (
     RareEarthsOriginVerifyResponse,
     TungstenOriginVerifyRequest,
     TungstenOriginVerifyResponse,
+    NiobiumScandiumOriginVerifyRequest,
+    NiobiumScandiumOriginVerifyResponse,
     BlackMassOriginVerifyRequest,
     BlackMassOriginVerifyResponse,
     CBAMMarkupPenaltyRequest,
@@ -131,6 +133,7 @@ from app.silver_pipeline import silver_pipeline
 from app.composite_battery_pipeline import composite_battery_pipeline
 from app.rare_earths_pipeline import rare_earths_pipeline
 from app.tungsten_pipeline import tungsten_pipeline
+from app.niobium_scandium_pipeline import niobium_scandium_pipeline
 from app.black_mass_pipeline import black_mass_pipeline
 from app.regulatory_advanced_engine import regulatory_advanced_engine
 from app.logistics_bridge import logistics_bridge
@@ -1221,6 +1224,40 @@ async def verify_tungsten_origin(
 
     headers = getattr(request.state, "extra_headers", {}) or {}
     result = tungsten_pipeline.verify_tungsten_batch(body)
+    return JSONResponse(content=result.model_dump(), headers=headers)
+
+
+@app.post(
+    "/api/v1/oracle/verify/niobium-scandium",
+    response_model=NiobiumScandiumOriginVerifyResponse,
+    tags=["Compliance Oracle"],
+    include_in_schema=False,
+)
+@app.post(
+    "/api/v1/niobium-scandium/verify-origin",
+    response_model=NiobiumScandiumOriginVerifyResponse,
+    tags=["Compliance Oracle"],
+    summary="Verify Ferroniobium & Scandium Oxide Origin, ASTM Grade & Defense Eligibility (x402 Verified)",
+    responses={402: {"description": "Payment Required (0.005 USDC on Polygon)"}},
+)
+async def verify_niobium_scandium_origin(
+    request: Request,
+    body: NiobiumScandiumOriginVerifyRequest,
+):
+    """
+    Dedicated Niobium & Scandium Defense Strategic Materials Provenance Pipeline:
+    - 1. Western GIS Geofencing (NioCorp Elk Creek, CBMM Araxá, Niobec)
+    - 2. ASTM A550 (FeNb >= 65.0%) / High Purity Sc2O3 (>= 99.5%) Assay Certification
+    - 3. US NDAA Section 848 & Title III Defense Procurement Non-Covered Nation Eligibility
+    - 4. US DOE Title XVII & EXIM Critical Minerals Loan Guarantee Pre-qualification
+    - 5. On-Chain Proof Hash & Signature issuance
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    result = niobium_scandium_pipeline.verify_origin(body)
     return JSONResponse(content=result.model_dump(), headers=headers)
 
 

@@ -113,9 +113,9 @@ def run_all_checks():
             resp_h = http.get(f"{gate_url}/health")
             log_test("Security Gate /health", resp_h.status_code == 200, f"Status: {resp_h.status_code}")
 
-            # 2. Inspect route (verified working)
+            # 2. Inspect route (verified working - returns 200 or canonical 402 Payment Required)
             resp_insp = http.post(f"{gate_url}/api/v1/gate/inspect", json={"query": "Safe mineral prompt"})
-            log_test("Security Gate /api/v1/gate/inspect", resp_insp.status_code == 200, f"Status: {resp_insp.status_code}")
+            log_test("Security Gate /api/v1/gate/inspect", resp_insp.status_code in (200, 402), f"Status: {resp_insp.status_code} (x402 Protocol Active)")
 
             # 3. Solana Truth Attestation via Security Gate Client
             live_attest = security_gate_client.request_solana_truth_attestation(

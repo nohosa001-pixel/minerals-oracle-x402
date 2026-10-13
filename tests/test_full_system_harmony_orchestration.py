@@ -233,13 +233,14 @@ def test_end_to_end_full_system_harmony():
 
     # -------------------------------------------------------------
     print("[HARMONY STEP 6] Multi-Chain & Model Context Protocol (MCP) Unified Execution...")
-    # MCP tools/list discovers complete 37-tool suite
+    # MCP tools/list discovers complete 38-tool suite
     mcp_list_resp = process_mcp_request({"jsonrpc": "2.0", "id": "mcp-h1", "method": "tools/list"})
     assert mcp_list_resp is not None
     mcp_tools = {t["name"]: t for t in mcp_list_resp["result"]["tools"]}
-    assert len(mcp_tools) == 37
+    assert len(mcp_tools) == 38
     assert "verify_rare_earths_origin" in mcp_tools
     assert "verify_tungsten_origin" in mcp_tools
+    assert "verify_niobium_scandium_origin" in mcp_tools
     assert "verify_black_mass_origin" in mcp_tools
     assert "verify_customs_clearance" in mcp_tools
     assert "generate_zk_compliance_proof" in mcp_tools

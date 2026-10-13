@@ -29,6 +29,8 @@ class MineralType(str, Enum):
     TUNGSTEN_APT = "TUNGSTEN_APT"                       # Western Ammonium Paratungstate 88.5% WO3 (Korea/Portugal/Canada)
     RARE_EARTHS_NDPR = "RARE_EARTHS_NDPR"               # High-Purity 99.5% NdPr Oxide Magnet Grade (Australia/USA)
     RECYCLED_BLACK_MASS = "RECYCLED_BLACK_MASS"         # Hydrometallurgical Recycled Battery Black Mass (USA/Germany)
+    FERRONIOBIUM = "FERRONIOBIUM"                       # High-Strength Defense Grade Ferroniobium FeNb 65% (USA/Brazil/Canada)
+    SCANDIUM_OXIDE = "SCANDIUM_OXIDE"                   # Aerospace & SOFC High Purity 99.5% Sc2O3 (USA/Australia)
 
     @classmethod
     def _missing_(cls, value: object):
@@ -41,6 +43,11 @@ class MineralType(str, Enum):
                 "NDPR": "RARE_EARTHS_NDPR",
                 "ND_PR": "RARE_EARTHS_NDPR",
                 "BLACK_MASS": "RECYCLED_BLACK_MASS",
+                "NIOBIUM": "FERRONIOBIUM",
+                "FENB": "FERRONIOBIUM",
+                "FE_NB": "FERRONIOBIUM",
+                "SCANDIUM": "SCANDIUM_OXIDE",
+                "SC2O3": "SCANDIUM_OXIDE",
             }
             if normalized in aliases:
                 normalized = aliases[normalized]
@@ -1380,6 +1387,43 @@ class TungstenOriginVerifyResponse(BaseModel):
     status: str = "success"
     batch_id: str
     audit_verdict: TungstenAuditVerdict
+    proof_hash: str
+    onchain_signature: Optional[str] = None
+    signed_by: Optional[str] = None
+    timestamp: str
+
+
+class NiobiumScandiumOriginVerifyRequest(BaseModel):
+    batch_id: str = Field(..., description="Lot/batch ID of Ferroniobium alloy or Scandium Oxide")
+    tenement_id: str = Field(..., description="Concession/Facility ID (e.g., ELK_CREEK, ARAXA, NIOBEC)")
+    latitude: float = Field(..., ge=-90.0, le=90.0)
+    longitude: float = Field(..., ge=-180.0, le=180.0)
+    commodity_type: MineralType = Field(default=MineralType.FERRONIOBIUM, description="FERRONIOBIUM or SCANDIUM_OXIDE")
+    fe_nb_grade_pct: float = Field(default=65.0, ge=0.0, le=100.0, description="Ferroniobium Nb content % (ASTM A550 Std >= 65.0%)")
+    sc2o3_purity_pct: float = Field(default=99.5, ge=0.0, le=100.0, description="Scandium Oxide Sc2O3 purity % (Std >= 99.5%)")
+    doe_exim_loan_eligible: bool = Field(default=True, description="Certified eligible for US DOE Title XVII & EXIM critical minerals lending")
+    ndaa_defense_procurement_eligible: bool = Field(default=True, description="Compliant with US NDAA Sec 848 defense procurement (non-covered nation)")
+    source_country: SourceCountry = Field(default=SourceCountry.USA, description="Country of origin")
+    client_identity: Optional[str] = Field(default=None)
+
+
+class NiobiumScandiumAuditVerdict(BaseModel):
+    is_compliant: bool
+    status: str
+    geofence_verified: bool
+    distance_to_concession_km: float
+    grade_assay_certified: bool
+    defense_procurement_eligible: bool
+    doe_exim_loan_eligible: bool
+    confidence_score: float
+    reasons: List[str]
+
+
+class NiobiumScandiumOriginVerifyResponse(BaseModel):
+    status: str = "success"
+    batch_id: str
+    commodity_type: str
+    audit_verdict: NiobiumScandiumAuditVerdict
     proof_hash: str
     onchain_signature: Optional[str] = None
     signed_by: Optional[str] = None
