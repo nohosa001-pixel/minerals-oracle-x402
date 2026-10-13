@@ -24,12 +24,15 @@ import {
 export class MineralsOracleClient {
   private readonly baseUrl: string;
   private readonly apiKey?: string;
+  private readonly vaultKey?: string;
   private readonly devBypass: boolean;
   private readonly timeoutMs: number;
 
   constructor(config: ClientConfig = {}) {
     this.baseUrl = config.baseUrl?.replace(/\/$/, '') || 'https://minerals-oracle-x402-7qxtp3324q-du.a.run.app';
-    this.apiKey = config.apiKey;
+    const env = (typeof globalThis !== 'undefined' ? (globalThis as any).process?.env : undefined) || {};
+    this.apiKey = config.apiKey || env.ORACLE_API_KEY;
+    this.vaultKey = config.vaultKey || env.ORACLE_VAULT_KEY;
     this.devBypass = config.devBypass ?? true;
     this.timeoutMs = config.timeoutMs ?? 15000;
   }
@@ -43,6 +46,9 @@ export class MineralsOracleClient {
 
     if (this.apiKey) {
       headers['X-API-Key'] = this.apiKey;
+    }
+    if (this.vaultKey) {
+      headers['X-Agent-Vault-Key'] = this.vaultKey;
     }
     if (this.devBypass) {
       headers['X-Dev-Bypass'] = 'true';
@@ -173,9 +179,48 @@ export class MineralsOracleClient {
    * A2A Autonomous Trade: Seller proposes bilateral mineral agreement
    */
   async proposeTradeDeal(input: TradeDealProposeInput): Promise<TradeDealAttestation> {
+    let payload: Record<string, any>;
+    if (input.spec) {
+      payload = {
+        spec: input.spec,
+        seller_signature: input.seller_signature
+      };
+    } else {
+      const commodity = input.commodity || input.commodity_type || 'COPPER_CATHODE';
+      const volumeTons = input.volume_tons ?? input.quantity_metric_tons ?? 100.0;
+      const unitPrice = input.unit_price_usd_per_ton ?? input.unit_price_usd ?? 9000.0;
+      const totalValue = input.total_deal_value_usd ?? (volumeTons * unitPrice);
+      const dealId = input.deal_id || `DEAL-SDK-${Date.now()}`;
+      const eblId = input.ebl_document_id || input.ebl_document_hash || `EBL-${dealId}`;
+      const sellerAddr = input.seller_agent_address || '0x1111111111111111111111111111111111111111';
+      const buyerAddr = input.buyer_agent_address || '0x2222222222222222222222222222222222222222';
+      const createdAt = input.created_at_utc || new Date().toISOString();
+
+      payload = {
+        spec: {
+          deal_id: dealId,
+          commodity,
+          volume_tons: volumeTons,
+          unit_price_usd_per_ton: unitPrice,
+          total_deal_value_usd: totalValue,
+          origin_country: input.origin_country || 'CHL',
+          destination_country: input.destination_country || 'USA',
+          feoc_cleared: input.feoc_cleared ?? true,
+          mass_balance_cleared: input.mass_balance_cleared ?? true,
+          ebl_document_id: eblId,
+          buyer_agent_address: buyerAddr,
+          seller_agent_address: sellerAddr,
+          settlement_currency: input.settlement_currency || 'USDC',
+          projected_savings_usd: input.projected_savings_usd || 0.0,
+          created_at_utc: createdAt
+        },
+        seller_signature: input.seller_signature
+      };
+    }
+
     return this.request<TradeDealAttestation>('/api/v1/a2a/deals/propose', {
       method: 'POST',
-      body: JSON.stringify(input)
+      body: JSON.stringify(payload)
     });
   }
 
@@ -183,9 +228,14 @@ export class MineralsOracleClient {
    * A2A Autonomous Trade: Buyer dual-signs agreement, triggering Oracle cryptographic seal
    */
   async dualSignTradeDeal(input: TradeDealDualSignInput): Promise<TradeDealAttestation> {
+    const payload = {
+      deal_id: input.deal_id,
+      buyer_signature: input.buyer_signature,
+      buyer_agent_address: input.buyer_agent_address || '0x2222222222222222222222222222222222222222'
+    };
     return this.request<TradeDealAttestation>('/api/v1/a2a/deals/dual-sign', {
       method: 'POST',
-      body: JSON.stringify(input)
+      body: JSON.stringify(payload)
     });
   }
 
@@ -202,10 +252,21 @@ export class MineralsOracleClient {
    * Build live on-chain deposit calldata for Polygon, Base, Arbitrum, or Solana
    */
   async getEscrowCalldata(dealId: string, chain: SupportedChain = 'polygon'): Promise<EscrowCalldataResponse> {
-    return this.request<EscrowCalldataResponse>(
+    const data = await this.request<any>(
       `/api/v1/a2a/deals/${encodeURIComponent(dealId)}/escrow-calldata?chain=${chain}`,
       { method: 'GET' }
     );
+    const chainIds: Record<SupportedChain, number> = {
+      polygon: 137,
+      base: 8453,
+      arbitrum: 42161,
+      solana: 501
+    };
+    return {
+      chain,
+      chain_id: data.chain_id || chainIds[chain] || 137,
+      ...data
+    };
   }
 
   /**

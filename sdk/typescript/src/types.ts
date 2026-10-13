@@ -42,6 +42,7 @@ export type SupportedChain = 'polygon' | 'base' | 'arbitrum' | 'solana';
 export interface ClientConfig {
   baseUrl?: string;
   apiKey?: string;
+  vaultKey?: string;
   devBypass?: boolean;
   timeoutMs?: number;
 }
@@ -184,23 +185,59 @@ export interface NiobiumScandiumVerifyInput {
   client_identity?: string;
 }
 
-export interface TradeDealProposeInput {
-  deal_id?: string;
-  commodity_type: MineralType;
-  quantity_metric_tons: number;
-  unit_price_usd: number;
+export interface TradeDealSpec {
+  deal_id: string;
+  commodity: MineralType;
+  volume_tons: number;
+  unit_price_usd_per_ton: number;
+  total_deal_value_usd: number;
+  origin_country: SourceCountry | string;
+  destination_country: string;
+  feoc_cleared?: boolean;
+  mass_balance_cleared?: boolean;
+  ebl_document_id: string;
   buyer_agent_address: string;
   seller_agent_address: string;
-  delivery_incoterm?: string;
-  ebl_document_hash?: string;
-  quality_spec_hash?: string;
+  settlement_currency?: string;
+  projected_savings_usd?: number;
+  gain_share_rate_pct?: number;
+  calculated_gain_share_fee_usd?: number;
+  fee_cap_applied?: boolean;
+  hybrid_settlement_summary?: string;
+  expires_at_utc?: string;
+  created_at_utc: string;
+}
+
+export interface TradeDealProposeInput {
+  spec?: TradeDealSpec;
   seller_signature: string;
-  duration_seconds?: number;
+  deal_id?: string;
+  commodity?: MineralType;
+  commodity_type?: MineralType;
+  volume_tons?: number;
+  quantity_metric_tons?: number;
+  unit_price_usd_per_ton?: number;
+  unit_price_usd?: number;
+  total_deal_value_usd?: number;
+  origin_country?: SourceCountry | string;
+  destination_country?: string;
+  feoc_cleared?: boolean;
+  mass_balance_cleared?: boolean;
+  ebl_document_id?: string;
+  ebl_document_hash?: string;
+  buyer_agent_address?: string;
+  seller_agent_address?: string;
+  delivery_incoterm?: string;
+  settlement_currency?: string;
+  projected_savings_usd?: number;
+  created_at_utc?: string;
+  [key: string]: any;
 }
 
 export interface TradeDealDualSignInput {
   deal_id: string;
   buyer_signature: string;
+  buyer_agent_address?: string;
 }
 
 export interface TradeDealAttestation {
