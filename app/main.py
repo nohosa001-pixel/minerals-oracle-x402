@@ -196,6 +196,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def a2a_machine_protocol_middleware(request: Request, call_next):
+    response = await call_next(request)
+    # Sovereign Machine Protocol & AEO Directives (Zero-Human Distribution)
+    response.headers["X-Protocol"] = "A.GRID-AP2/1.0"
+    response.headers["X-Agrid-Hub"] = "https://agent-security-gate-x402-212942243360.asia-northeast3.run.app/hub/"
+    response.headers["X-Agrid-Directive"] = "https://agent-security-gate-x402-212942243360.asia-northeast3.run.app/AGENTS.md"
+    response.headers["X-Agrid-Minerals"] = "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/api/v1/oracle/alpha-signals"
+    response.headers["X-Agrid-Rebate-Bps"] = "2000"
+    response.headers["X-Robots-Tag"] = "all, index, follow"
+    return response
+
 STATIC_DIR = Path(__file__).parent / "static"
 INDEX_HTML_PATH = STATIC_DIR / "index.html"
 if STATIC_DIR.exists():
@@ -339,14 +351,34 @@ async def pwa_sw():
 
 @app.get("/robots.txt", tags=["System"])
 async def get_robots_txt():
-    """Allows AI agents and scrapers to locate llms.txt and MCP tooling definitions."""
+    """Allows AI agents, search engines and LLM crawlers to locate llms.txt and MCP tooling definitions."""
     robots_content = (
+        "# Specialized AI Engine & LLM Crawlers\n"
+        "User-agent: GPTBot\n"
+        "User-agent: ChatGPT-User\n"
+        "User-agent: ClaudeBot\n"
+        "User-agent: Claude-Web\n"
+        "User-agent: PerplexityBot\n"
+        "User-agent: Cursor-Agent\n"
+        "User-agent: Google-Extended\n"
+        "User-agent: Applebot-Extended\n"
+        "User-agent: CCBot\n"
+        "Allow: /\n"
+        "Allow: /llms.txt\n"
+        "Allow: /sitemap.xml\n"
+        "Allow: /mcp/tools\n"
+        "Allow: /.well-known/\n"
+        "Allow: /api/v1/oracle/alpha-signals\n"
+        "Allow: /api/v1/oracle/battery-passports\n"
+        "\n"
         "User-agent: *\n"
         "Allow: /\n"
         "Allow: /llms.txt\n"
-        "Allow: /mcp/tools\n"
-        "Allow: /.well-known/\n"
-        "Sitemap: /sitemap.xml\n"
+        "Allow: /sitemap.xml\n"
+        "\n"
+        "Sitemap: https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/sitemap.xml\n"
+        "LLMs-Txt: https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/llms.txt\n"
+        "Agent-Hub: https://agent-security-gate-x402-212942243360.asia-northeast3.run.app/hub/\n"
     )
     return PlainTextResponse(content=robots_content)
 
@@ -354,19 +386,20 @@ async def get_robots_txt():
 @app.get("/sitemap.xml", tags=["System"])
 async def get_sitemap_xml():
     """XML sitemap enabling autonomous AI trade agents, scrapers, and indexers to discover all machine specs."""
+    base = "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app"
     xml_content = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-        '  <url><loc>http://localhost:8000/llms.txt</loc><changefreq>daily</changefreq><priority>1.0</priority></url>\n'
-        '  <url><loc>http://localhost:8000/.well-known/agent.json</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
-        '  <url><loc>http://localhost:8000/.well-known/a2a.json</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
-        '  <url><loc>http://localhost:8000/.well-known/ai-plugin.json</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n'
-        '  <url><loc>http://localhost:8000/.well-known/ap2</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n'
-        '  <url><loc>http://localhost:8000/mcp/tools</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
-        '  <url><loc>http://localhost:8000/openapi.json</loc><changefreq>daily</changefreq><priority>0.8</priority></url>\n'
-        '  <url><loc>http://localhost:8000/api/v1/oracle/alpha-signals</loc><changefreq>hourly</changefreq><priority>0.7</priority></url>\n'
-        '  <url><loc>http://localhost:8000/api/v1/oracle/economics-roi</loc><changefreq>daily</changefreq><priority>0.7</priority></url>\n'
-        '  <url><loc>http://localhost:8000/dashboard</loc><changefreq>daily</changefreq><priority>0.5</priority></url>\n'
+        f'  <url><loc>{base}/llms.txt</loc><changefreq>daily</changefreq><priority>1.0</priority></url>\n'
+        f'  <url><loc>{base}/.well-known/agent.json</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
+        f'  <url><loc>{base}/.well-known/a2a.json</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
+        f'  <url><loc>{base}/.well-known/ai-plugin.json</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n'
+        f'  <url><loc>{base}/.well-known/ap2</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n'
+        f'  <url><loc>{base}/mcp/tools</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
+        f'  <url><loc>{base}/openapi.json</loc><changefreq>daily</changefreq><priority>0.8</priority></url>\n'
+        f'  <url><loc>{base}/api/v1/oracle/alpha-signals</loc><changefreq>hourly</changefreq><priority>0.9</priority></url>\n'
+        f'  <url><loc>{base}/api/v1/oracle/economics-roi</loc><changefreq>daily</changefreq><priority>0.7</priority></url>\n'
+        f'  <url><loc>{base}/dashboard</loc><changefreq>daily</changefreq><priority>0.5</priority></url>\n'
         '</urlset>'
     )
     return Response(content=xml_content, media_type="application/xml")
