@@ -101,6 +101,15 @@ CANONICAL_COPPER_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "region": "Antofagasta, Chile",
         "country": "CHL",
     },
+    "VALLE_CENTRAL": {
+        "canonical_name": "Minera Valle Central Copper Tailings Operation",
+        "operator": "Amerigo Resources Ltd / Minera Valle Central (MVC)",
+        "coordinates": (-34.170, -70.650),
+        "concession_id": "CHL-OHI-MVC-01",
+        "max_geofence_radius_km": 25.0,
+        "region": "O'Higgins Region, Chile",
+        "country": "CHL",
+    },
 }
 
 

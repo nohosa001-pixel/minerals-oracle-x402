@@ -24,7 +24,7 @@ from app.onchain_signer import onchain_signer
 CANONICAL_NIOBIUM_SCANDIUM_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
     "ELK_CREEK": {
         "canonical_name": "NioCorp Elk Creek Critical Minerals Project",
-        "operator": "NioCorp Developments Ltd (NASDAQ: NB / US DOE & EXIM Strategic Site)",
+        "operator": "NioCorp Developments Ltd (NASDAQ: NB / Traxys 100% Commercial Offtake / US DOE & EXIM Strategic Site)",
         "coordinates": (40.274, -96.183),
         "concession_id": "USA-NE-ELKCREEK-01",
         "max_geofence_radius_km": 25.0,

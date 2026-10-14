@@ -83,6 +83,33 @@ CANONICAL_RARE_EARTHS_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "region": "Ida-Viru, Estonia",
         "country": "EST",
     },
+    "HYPROMAG_USA": {
+        "canonical_name": "HyproMag USA Rare Earth Magnet Recycling Hub",
+        "operator": "CoTec Holdings / HyproMag USA (Fort Worth Industrial Power Agreement)",
+        "coordinates": (32.755, -97.330),
+        "concession_id": "USA-TX-HYPRO-01",
+        "max_geofence_radius_km": 25.0,
+        "region": "Fort Worth, Texas, USA",
+        "country": "USA",
+    },
+    "HYPROMAG_DEU": {
+        "canonical_name": "HyproMag GmbH Permanent Magnet Processing Facility",
+        "operator": "HyproMag GmbH (EU CRMA Strategic Project)",
+        "coordinates": (48.775, 9.182),
+        "concession_id": "DEU-BW-HYPRO-01",
+        "max_geofence_radius_km": 20.0,
+        "region": "Baden-Württemberg, Germany",
+        "country": "DEU",
+    },
+    "NARRABURRA": {
+        "canonical_name": "Narraburra Rare Earths Project",
+        "operator": "Matrix Critical Minerals / Orbit Resources (ASX IPO)",
+        "coordinates": (-34.250, 147.500),
+        "concession_id": "AUS-NSW-NARRA-01",
+        "max_geofence_radius_km": 30.0,
+        "region": "New South Wales, Australia",
+        "country": "AUS",
+    },
 }
 
 

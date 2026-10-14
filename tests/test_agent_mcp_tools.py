@@ -184,7 +184,30 @@ def test_machine_sitemap_discovery():
     assert resp.status_code == 200
     assert resp.headers["content-type"] == "application/xml"
     content = resp.text
-    assert "<loc>http://localhost:8000/llms.txt</loc>" in content
-    assert "<loc>http://localhost:8000/.well-known/agent.json</loc>" in content
-    assert "<loc>http://localhost:8000/.well-known/a2a.json</loc>" in content
-    assert "<loc>http://localhost:8000/mcp/tools</loc>" in content
+    assert "/llms.txt</loc>" in content
+    assert "/.well-known/agent.json</loc>" in content
+    assert "/.well-known/a2a.json</loc>" in content
+    assert "/mcp/tools</loc>" in content
+    assert "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app" in content
+
+
+def test_machine_robots_and_a2a_protocol_headers():
+    """Verify /robots.txt directives and sovereign machine protocol middleware headers."""
+    resp = client.get("/robots.txt")
+    assert resp.status_code == 200
+    assert resp.headers["content-type"].startswith("text/plain")
+    txt = resp.text
+    assert "GPTBot" in txt
+    assert "ClaudeBot" in txt
+    assert "PerplexityBot" in txt
+    assert "Sitemap: https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/sitemap.xml" in txt
+    assert "LLMs-Txt: https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/llms.txt" in txt
+
+    # Check A2A / A.GRID Sovereign Machine Protocol response headers
+    assert resp.headers.get("X-Protocol") == "A.GRID-AP2/1.0"
+    assert "agent-security-gate-x402" in resp.headers.get("X-Agrid-Hub", "")
+    assert "AGENTS.md" in resp.headers.get("X-Agrid-Directive", "")
+    assert "alpha-signals" in resp.headers.get("X-Agrid-Minerals", "")
+    assert resp.headers.get("X-Agrid-Rebate-Bps") == "2000"
+    assert resp.headers.get("X-Robots-Tag") == "all, index, follow"
+

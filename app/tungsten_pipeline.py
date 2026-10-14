@@ -64,6 +64,15 @@ CANONICAL_TUNGSTEN_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "region": "Almaty Region, Kazakhstan",
         "country": "KAZ",
     },
+    "LENTUNG": {
+        "canonical_name": "Lentung High-Grade Skarn Tungsten Project",
+        "operator": "Rackla Metals Inc (Yukon / NWT Border Skarn Mineralization)",
+        "coordinates": (63.500, -130.500),
+        "concession_id": "CAN-YUK-LENTUNG-01",
+        "max_geofence_radius_km": 30.0,
+        "region": "Yukon / Northwest Territories, Canada",
+        "country": "CAN",
+    },
 }
 
 
