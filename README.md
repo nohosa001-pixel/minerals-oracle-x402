@@ -1,7 +1,7 @@
 # EV Battery Critical Minerals & Provenance Oracle (`minerals-oracle-x402`)
 
 [![PyPI Version](https://img.shields.io/pypi/v/minerals-oracle-x402.svg?color=blue&style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/minerals-oracle-x402/)
-[![TypeScript SDK](https://img.shields.io/badge/@minerals--oracle%2Fsdk-v1.0.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](sdk/typescript)
+[![TypeScript SDK](https://img.shields.io/badge/npm-minerals--oracle--x402-3178C6?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/minerals-oracle-x402)
 [![Cloud Run 24/7](https://img.shields.io/badge/Production-Live_Cloud_Run_Seoul-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/dashboard)
 [![CI/CD](https://img.shields.io/github/actions/workflow/status/nohosa001-pixel/minerals-oracle-x402/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI%2FCD)](https://github.com/nohosa001-pixel/minerals-oracle-x402/actions/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/Tests-365%2F365_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
@@ -17,10 +17,10 @@
 
 ## ⚡ 3-Line AI Agent Quickstart (Python · TypeScript · LangChain · CrewAI)
 
-### 1. TypeScript / Node.js (`@minerals-oracle/sdk`)
+### 1. TypeScript / Node.js (`minerals-oracle-x402`)
 
 ```typescript
-import { MineralsOracleClient } from '@minerals-oracle/sdk';
+import { MineralsOracleClient } from 'minerals-oracle-x402';
 
 const client = new MineralsOracleClient();
 const res = await client.verifyTungsten({

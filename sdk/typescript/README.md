@@ -1,8 +1,8 @@
-# `@minerals-oracle/sdk`
+# `minerals-oracle-x402` (TypeScript / Node.js SDK)
 
 Official TypeScript/Node.js SDK for **Minerals Oracle x402** — Autonomous AI Agent Critical Minerals Provenance, ESG Due Diligence, and Multi-Chain Trade Escrow Protocol.
 
-[![npm version](https://img.shields.io/badge/npm-v1.0.0-blue.svg)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
+[![npm version](https://img.shields.io/npm/v/minerals-oracle-x402.svg?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/minerals-oracle-x402)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Production Status](https://img.shields.io/badge/Production-24%2F7_Cloud_Run_Seoul-brightgreen)](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/health)
 
@@ -11,7 +11,7 @@ Official TypeScript/Node.js SDK for **Minerals Oracle x402** — Autonomous AI A
 ## ⚡ 3-Line Quickstart
 
 ```typescript
-import { MineralsOracleClient } from '@minerals-oracle/sdk';
+import { MineralsOracleClient } from 'minerals-oracle-x402';
 
 const client = new MineralsOracleClient();
 const res = await client.verifyTungsten({
