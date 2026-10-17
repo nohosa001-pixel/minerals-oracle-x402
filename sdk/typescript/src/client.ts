@@ -275,4 +275,14 @@ export class MineralsOracleClient {
   async getMCPTools(): Promise<Record<string, any>> {
     return this.request<Record<string, any>>('/mcp/tools', { method: 'GET' });
   }
+
+  /**
+   * Harmonized Collaborator Flow: Single-call end-to-end autonomous trade execution
+   */
+  async harmonizeTradeFlow(input: Record<string, any>): Promise<Record<string, any>> {
+    return this.request<Record<string, any>>('/api/v1/trade/harmonize-flow', {
+      method: 'POST',
+      body: JSON.stringify(input)
+    });
+  }
 }
