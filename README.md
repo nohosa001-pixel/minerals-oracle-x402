@@ -1,13 +1,23 @@
 # EV Battery Critical Minerals & Provenance Oracle (`minerals-oracle-x402`)
 
+<div align="center">
+
+[![NPM Package](https://img.shields.io/badge/📦_npm_package-minerals--oracle--x402-CB3837?style=for-the-badge&logo=npm&logoColor=white&labelColor=18181B)](https://www.npmjs.com/package/minerals-oracle-x402)
+[![PyPI Package](https://img.shields.io/badge/🐍_PyPI_package-minerals--oracle--x402-3776AB?style=for-the-badge&logo=pypi&logoColor=white&labelColor=18181B)](https://pypi.org/project/minerals-oracle-x402/)
+[![Live Cloud Run](https://img.shields.io/badge/⚡_Live_Cloud_Run-Dashboard-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white&labelColor=18181B)](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/dashboard)
+
+<br/>
+
+[![npm version](https://img.shields.io/npm/v/minerals-oracle-x402.svg?color=CB3837&style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/minerals-oracle-x402)
 [![PyPI Version](https://img.shields.io/pypi/v/minerals-oracle-x402.svg?color=blue&style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/minerals-oracle-x402/)
-[![TypeScript SDK](https://img.shields.io/badge/npm-minerals--oracle--x402-3178C6?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/minerals-oracle-x402)
-[![Cloud Run 24/7](https://img.shields.io/badge/Production-Live_Cloud_Run_Seoul-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/dashboard)
-[![CI/CD](https://img.shields.io/github/actions/workflow/status/nohosa001-pixel/minerals-oracle-x402/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI%2FCD)](https://github.com/nohosa001-pixel/minerals-oracle-x402/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/Tests-365%2F365_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
+[![CI/CD Status](https://img.shields.io/github/actions/workflow/status/nohosa001-pixel/minerals-oracle-x402/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI%2FCD)](https://github.com/nohosa001-pixel/minerals-oracle-x402/actions/workflows/ci.yml)
+[![Publish to npm](https://img.shields.io/github/actions/workflow/status/nohosa001-pixel/minerals-oracle-x402/npm-publish.yml?branch=main&style=for-the-badge&logo=npm&logoColor=white&label=npm%20publish)](https://github.com/nohosa001-pixel/minerals-oracle-x402/actions/workflows/npm-publish.yml)
+[![Tests Passing](https://img.shields.io/badge/Tests-365%2F365_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
 [![Multi-Chain](https://img.shields.io/badge/Chains-Solana_|_Polygon_|_Base_|_Arbitrum-14F195?style=for-the-badge&logo=solana&logoColor=black)](contracts/verification/VERIFICATION_GUIDE.md)
 [![FastMCP](https://img.shields.io/badge/FastMCP-39_Agent_Tools-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](mcp_tool_spec.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+
+</div>
 
 > 🤖 **100% Pure Autonomous Agent-Native (M2M Exclusive) Critical Minerals Supply-Chain & Bilateral Trade Oracle.**  
 > Built strictly for autonomous AI agents, multi-agent swarms, and algorithmic trading execution. **Humans and fiat credit cards are strictly prohibited.**
@@ -18,6 +28,19 @@
 ## ⚡ 3-Line AI Agent Quickstart (Python · TypeScript · LangChain · CrewAI)
 
 ### 1. TypeScript / Node.js (`minerals-oracle-x402`)
+
+[![Open on npm](https://img.shields.io/badge/📦_npm_install-minerals--oracle--x402-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/minerals-oracle-x402)
+[![npm version](https://img.shields.io/npm/v/minerals-oracle-x402.svg?style=for-the-badge&logo=npm&color=CB3837)](https://www.npmjs.com/package/minerals-oracle-x402)
+
+👉 **[npm 공식 레지스트리 바로가기 (npmjs.com/package/minerals-oracle-x402)](https://www.npmjs.com/package/minerals-oracle-x402)**
+
+```bash
+npm install minerals-oracle-x402
+# or
+pnpm add minerals-oracle-x402
+# or
+bun add minerals-oracle-x402
+```
 
 ```typescript
 import { MineralsOracleClient } from 'minerals-oracle-x402';

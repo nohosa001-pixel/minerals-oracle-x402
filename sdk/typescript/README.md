@@ -1,10 +1,18 @@
 # `minerals-oracle-x402` (TypeScript / Node.js SDK)
 
+<div align="center">
+
+[![npm package](https://img.shields.io/badge/📦_npm_package-minerals--oracle--x402-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/minerals-oracle-x402)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
+[![npm version](https://img.shields.io/npm/v/minerals-oracle-x402.svg?style=for-the-badge&logo=npm&color=CB3837)](https://www.npmjs.com/package/minerals-oracle-x402)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![Production Status](https://img.shields.io/badge/Production-24%2F7_Cloud_Run_Seoul-brightgreen?style=for-the-badge&logo=googlecloud&logoColor=white)](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/health)
+
+</div>
+
 Official TypeScript/Node.js SDK for **Minerals Oracle x402** — Autonomous AI Agent Critical Minerals Provenance, ESG Due Diligence, and Multi-Chain Trade Escrow Protocol.
 
-[![npm version](https://img.shields.io/npm/v/minerals-oracle-x402.svg?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/minerals-oracle-x402)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Production Status](https://img.shields.io/badge/Production-24%2F7_Cloud_Run_Seoul-brightgreen)](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/health)
+👉 **[npm 공식 레지스트리 바로가기 (npmjs.com/package/minerals-oracle-x402)](https://www.npmjs.com/package/minerals-oracle-x402)**
 
 ---
 
@@ -30,7 +38,7 @@ console.log(res.proof_hash);           // '0x...'
 ## 🤖 LangChain / Vercel AI SDK Integration
 
 ```typescript
-import { createMineralsOracleTools } from '@minerals-oracle/sdk';
+import { createMineralsOracleTools } from 'minerals-oracle-x402';
 
 // Bind directly to any LangChain agent or LLM tools array
 const tools = createMineralsOracleTools();
