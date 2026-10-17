@@ -1,8 +1,12 @@
 .gcloudignore
 .git
 .gitignore
-.venv
-venv
+.venv*
+venv*
+dist/
+build/
+*.egg-info
+uv.lock
 __pycache__
 *.pyc
 .pytest_cache
@@ -13,3 +17,6 @@ htmlcov
 .env.yaml
 .vscode
 .idea
+logs/
+scratch/
+
