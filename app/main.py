@@ -3066,6 +3066,68 @@ async def invoke_mcp_tool(request: Request, tool_call: MCPToolCallRequest):
         data = onchain_signer.sign_price_feed(symbol, 100.0)
         return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2)}])
 
+    elif name == "eudr_satellite_mine_audit":
+        try:
+            lat = float(args.get("latitude", 0.0))
+            lon = float(args.get("longitude", 0.0))
+            cc = str(args.get("country_code", "ID"))
+            area = float(args.get("area_hectares", 10.0))
+            cid = args.get("concession_id")
+            audit_res = eudr_client.verify_mine_site_compliance(
+                latitude=lat, longitude=lon, country_code=cc, area_hectares=area, concession_id=cid
+            )
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(audit_res, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error running EUDR satellite audit: {str(e)}"}], isError=True)
+
+    elif name == "verify_rare_earths_origin":
+        try:
+            req_model = RareEarthsOriginVerifyRequest(**args)
+            data = rare_earths_pipeline.verify_rare_earths_batch(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying rare earths origin: {str(e)}"}], isError=True)
+
+    elif name == "verify_tungsten_origin":
+        try:
+            req_model = TungstenOriginVerifyRequest(**args)
+            data = tungsten_pipeline.verify_tungsten_batch(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying tungsten origin: {str(e)}"}], isError=True)
+
+    elif name == "verify_niobium_scandium_origin":
+        try:
+            req_model = NiobiumScandiumOriginVerifyRequest(**args)
+            data = niobium_scandium_pipeline.verify_origin(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying niobium/scandium origin: {str(e)}"}], isError=True)
+
+    elif name == "verify_black_mass_origin":
+        try:
+            req_model = BlackMassOriginVerifyRequest(**args)
+            data = black_mass_pipeline.verify_black_mass_batch(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying black mass origin: {str(e)}"}], isError=True)
+
+    elif name == "verify_customs_clearance":
+        try:
+            req_model = CustomsVerificationRequest(**args)
+            data = logistics_bridge.verify_customs_clearance(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error verifying customs clearance: {str(e)}"}], isError=True)
+
+    elif name == "generate_zk_compliance_proof":
+        try:
+            req_model = ZKComplianceProofRequest(**args)
+            data = zk_compliance_prover.generate_zk_compliance_proof(req_model).model_dump()
+            return MCPToolCallResponse(content=[{"type": "text", "text": json.dumps(data, indent=2, ensure_ascii=False)}])
+        except Exception as e:
+            return MCPToolCallResponse(content=[{"type": "text", "text": f"Error generating ZK compliance proof: {str(e)}"}], isError=True)
+
     else:
         return MCPToolCallResponse(
             content=[{"type": "text", "text": f"Unknown tool: '{name}'"}],

@@ -9,33 +9,46 @@ export type MineralType =
   | 'NICKEL_MHP'
   | 'COBALT_HYDROXIDE'
   | 'COPPER_CATHODE'
+  | 'COPPER_CONCENTRATE'
+  | 'SILVER_DORE'
+  | 'SILVER_POWDER_SOLAR_PV'
   | 'NATURAL_GRAPHITE'
   | 'SYNTHETIC_GRAPHITE'
+  | 'MANGANESE_SULFATE'
+  | 'NEODYMIUM_DYSPROSIUM'
+  | 'ANTIMONY_TRIOXIDE'
   | 'TUNGSTEN_APT'
+  | 'TUNGSTEN_SCRAP'
   | 'RARE_EARTHS_NDPR'
   | 'FERRONIOBIUM'
   | 'SCANDIUM_OXIDE'
-  | 'SILVER_DORE'
-  | 'RECYCLED_BLACK_MASS';
+  | 'RECYCLED_BLACK_MASS'
+  | 'LITHIUM_BLACK_MASS'
+  | 'NICKEL_COBALT_BLACK_MASS';
 
 export type SourceCountry =
   | 'AUS'
   | 'IDN'
   | 'COD'
   | 'CHL'
+  | 'ARG'
   | 'PER'
   | 'MEX'
   | 'KOR'
   | 'USA'
   | 'CAN'
   | 'PRT'
+  | 'AGO'
   | 'GRL'
   | 'EST'
   | 'KAZ'
   | 'BRA'
   | 'ZMB'
   | 'ESP'
-  | 'ZAF';
+  | 'ZAF'
+  | 'CHN'
+  | 'DEU'
+  | 'VNM';
 
 export type SupportedChain = 'polygon' | 'base' | 'arbitrum' | 'solana';
 
