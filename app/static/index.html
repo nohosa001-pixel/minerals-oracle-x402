@@ -1063,6 +1063,131 @@
       </div>
     </section>
 
+    <!-- Harmonious Collaborator Fluid Flow Engine // 물 흐르는 협력자 전방위 오케스트레이터 -->
+    <section class="escrow-section" id="harmonized-flow" style="border-color: rgba(16, 185, 129, 0.4); background: linear-gradient(180deg, rgba(6, 78, 59, 0.25) 0%, rgba(9, 13, 22, 0.98) 100%);">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: var(--emerald); font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">
+            🌊 COLLABORATOR MEDIATOR
+          </div>
+          <h2 style="font-family: var(--mono); font-size: 16px; font-weight: 700; color: #fff; margin: 0;">
+            Harmonized Fluid Trade Pipeline (물 흐르는 무역 파이프라인)
+          </h2>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button class="preset-btn active" id="flowPresetCopper" onclick="setHarmonizedPreset('copper')">Cu Cathode (CHL➔USA)</button>
+          <button class="preset-btn" id="flowPresetNickel" onclick="setHarmonizedPreset('nickel')">Ni MHP (IDN➔USA)</button>
+          <button class="preset-btn" id="flowPresetLithium" onclick="setHarmonizedPreset('lithium')">LiOH (AUS➔USA)</button>
+        </div>
+      </div>
+
+      <!-- 5-Node Fluid Pipeline Visual Stepper -->
+      <div class="escrow-stepper" id="flowVisualStepper" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+        <div class="escrow-step-card" id="flowCard1" style="padding: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--cyan);">NODE 1 // DEAL</span>
+            <span id="flowBadge1" style="font-family: var(--mono); font-size: 9px; background: rgba(255,255,255,0.05); color: var(--text-dim); padding: 1px 5px; border-radius: 3px;">READY</span>
+          </div>
+          <div style="font-weight: 700; color: #fff; font-size: 12px; margin-top: 4px;">A2A Negotiation</div>
+          <div style="font-family: var(--mono); font-size: 10px; color: var(--text-dim);">Bilateral Dual-Sign & Value</div>
+        </div>
+
+        <div class="escrow-step-card" id="flowCard2" style="padding: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--cyan);">NODE 2 // LOGISTICS</span>
+            <span id="flowBadge2" style="font-family: var(--mono); font-size: 9px; background: rgba(255,255,255,0.05); color: var(--text-dim); padding: 1px 5px; border-radius: 3px;">READY</span>
+          </div>
+          <div style="font-weight: 700; color: #fff; font-size: 12px; margin-top: 4px;">Maritime & eBL</div>
+          <div style="font-family: var(--mono); font-size: 10px; color: var(--text-dim);">MLETR Hash & Landed Cost</div>
+        </div>
+
+        <div class="escrow-step-card" id="flowCard3" style="padding: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--cyan);">NODE 3 // RADAR</span>
+            <span id="flowBadge3" style="font-family: var(--mono); font-size: 9px; background: rgba(255,255,255,0.05); color: var(--text-dim); padding: 1px 5px; border-radius: 3px;">READY</span>
+          </div>
+          <div style="font-weight: 700; color: #fff; font-size: 12px; margin-top: 4px;">Sentinel-1/2 SAR</div>
+          <div style="font-family: var(--mono); font-size: 10px; color: var(--text-dim);">EUDR Concession Cutoff</div>
+        </div>
+
+        <div class="escrow-step-card" id="flowCard4" style="padding: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--cyan);">NODE 4 // ESCROW</span>
+            <span id="flowBadge4" style="font-family: var(--mono); font-size: 9px; background: rgba(255,255,255,0.05); color: var(--text-dim); padding: 1px 5px; border-radius: 3px;">READY</span>
+          </div>
+          <div style="font-weight: 700; color: #fff; font-size: 12px; margin-top: 4px;">Multi-Chain Vault</div>
+          <div style="font-family: var(--mono); font-size: 10px; color: var(--text-dim);">Calldata & Deposit Preflight</div>
+        </div>
+
+        <div class="escrow-step-card" id="flowCard5" style="padding: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--cyan);">NODE 5 // CLEARING</span>
+            <span id="flowBadge5" style="font-family: var(--mono); font-size: 9px; background: rgba(255,255,255,0.05); color: var(--text-dim); padding: 1px 5px; border-radius: 3px;">READY</span>
+          </div>
+          <div style="font-weight: 700; color: #fff; font-size: 12px; margin-top: 4px;">A.GRID Webhook</div>
+          <div style="font-family: var(--mono); font-size: 10px; color: var(--text-dim);">Zero-Polling Settlement</div>
+        </div>
+      </div>
+
+      <!-- Parameter Inputs Form Grid -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+        <div class="spec-item">
+          <label class="spec-title">Deal ID</label>
+          <input type="text" id="flowDealId" value="DEAL-HARMONY-2026-001" style="background: #05080e; border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; color: var(--cyan); font-family: var(--mono); font-size: 12px; width: 100%;">
+        </div>
+        <div class="spec-item">
+          <label class="spec-title">Commodity</label>
+          <input type="text" id="flowCommodity" value="COPPER_CATHODE" style="background: #05080e; border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; color: #fff; font-family: var(--mono); font-size: 12px; width: 100%;">
+        </div>
+        <div class="spec-item">
+          <label class="spec-title">Volume (Metric Tons)</label>
+          <input type="number" id="flowVolumeTons" value="500.0" step="10" style="background: #05080e; border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; color: #fff; font-family: var(--mono); font-size: 12px; width: 100%;">
+        </div>
+        <div class="spec-item">
+          <label class="spec-title">Unit Price ($/ton)</label>
+          <input type="number" id="flowUnitPrice" value="9850.0" step="50" style="background: #05080e; border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; color: #fff; font-family: var(--mono); font-size: 12px; width: 100%;">
+        </div>
+        <div class="spec-item">
+          <label class="spec-title">Origin & Destination</label>
+          <div style="display: flex; gap: 4px;">
+            <input type="text" id="flowOrigin" value="CHL" style="background: #05080e; border: 1px solid var(--border); border-radius: 4px; padding: 6px; color: #fff; font-family: var(--mono); font-size: 12px; width: 50%;">
+            <input type="text" id="flowDestination" value="USA" style="background: #05080e; border: 1px solid var(--border); border-radius: 4px; padding: 6px; color: #fff; font-family: var(--mono); font-size: 12px; width: 50%;">
+          </div>
+        </div>
+        <div class="spec-item">
+          <label class="spec-title">Settlement Network</label>
+          <select id="flowChain" style="background: #05080e; border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; color: var(--emerald); font-family: var(--mono); font-size: 12px; width: 100%;">
+            <option value="polygon" selected>Polygon PoS (137)</option>
+            <option value="base">Base Mainnet (8453)</option>
+            <option value="arbitrum">Arbitrum One (42161)</option>
+            <option value="solana">Solana (501)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Action Button & Telemetry Header -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div style="font-family: var(--mono); font-size: 11px; color: var(--text-muted);">
+          Endpoint: <code style="color: var(--cyan); background: #020617; padding: 2px 6px; border-radius: 4px;">POST /api/v1/trade/harmonize-flow</code>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-primary" id="btnExecuteFlow" onclick="executeHarmonizedFlow()" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #34d399; padding: 8px 18px; font-size: 12px; font-weight: 700;">
+            🌊 Execute Fluid Trade Flow
+          </button>
+        </div>
+      </div>
+
+      <!-- Output Terminal -->
+      <div style="background: #05080e; border: 1px solid var(--border); border-radius: 6px; padding: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--emerald); font-weight: 700;" id="flowTerminalHeader">
+            🌊 Harmonized Collaborator Flow Result
+          </span>
+          <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="copyHarmonizedOutput()">Copy Flow Output</button>
+        </div>
+        <pre class="terminal-output" id="flowTerminalOutput" style="max-height: 220px;">// Click 'Execute Fluid Trade Flow' to trigger all 5 autonomous subsystems in a single frictionless pass.</pre>
+      </div>
+    </section>
 
     <!-- Autonomous Agent Evolution & Proposals Section -->
     <section class="evolution-section" id="agent-evolution">
@@ -3485,6 +3610,125 @@ curl -s http://localhost:8000/mcp/tools`
       if (term && term.innerText) {
         navigator.clipboard.writeText(term.innerText).then(() => {
           alert('Full Escrow Calldata JSON copied to clipboard!');
+        });
+      }
+    }
+
+    /* Harmonized Collaborator Flow Functions */
+    let lastHarmonizedResult = null;
+
+    function setHarmonizedPreset(key) {
+      document.getElementById('flowPresetCopper').className = (key === 'copper') ? 'preset-btn active' : 'preset-btn';
+      document.getElementById('flowPresetNickel').className = (key === 'nickel') ? 'preset-btn active' : 'preset-btn';
+      document.getElementById('flowPresetLithium').className = (key === 'lithium') ? 'preset-btn active' : 'preset-btn';
+
+      if (key === 'copper') {
+        document.getElementById('flowDealId').value = 'DEAL-HARMONY-CU-01';
+        document.getElementById('flowCommodity').value = 'COPPER_CATHODE';
+        document.getElementById('flowVolumeTons').value = '500.0';
+        document.getElementById('flowUnitPrice').value = '9850.0';
+        document.getElementById('flowOrigin').value = 'CHL';
+        document.getElementById('flowDestination').value = 'USA';
+      } else if (key === 'nickel') {
+        document.getElementById('flowDealId').value = 'DEAL-HARMONY-NI-02';
+        document.getElementById('flowCommodity').value = 'NICKEL_MHP';
+        document.getElementById('flowVolumeTons').value = '250.0';
+        document.getElementById('flowUnitPrice').value = '16240.0';
+        document.getElementById('flowOrigin').value = 'IDN';
+        document.getElementById('flowDestination').value = 'USA';
+      } else if (key === 'lithium') {
+        document.getElementById('flowDealId').value = 'DEAL-HARMONY-LI-03';
+        document.getElementById('flowCommodity').value = 'LITHIUM_HYDROXIDE';
+        document.getElementById('flowVolumeTons').value = '100.0';
+        document.getElementById('flowUnitPrice').value = '13500.0';
+        document.getElementById('flowOrigin').value = 'AUS';
+        document.getElementById('flowDestination').value = 'USA';
+      }
+    }
+
+    async function executeHarmonizedFlow() {
+      const btn = document.getElementById('btnExecuteFlow');
+      const term = document.getElementById('flowTerminalOutput');
+      const header = document.getElementById('flowTerminalHeader');
+
+      for (let i = 1; i <= 5; i++) {
+        const card = document.getElementById(`flowCard${i}`);
+        const badge = document.getElementById(`flowBadge${i}`);
+        if (card) card.className = 'escrow-step-card active';
+        if (badge) {
+          badge.innerText = 'PROCESSING';
+          badge.style.background = 'rgba(6, 182, 212, 0.2)';
+          badge.style.color = 'var(--cyan)';
+        }
+      }
+
+      btn.disabled = true;
+      btn.innerText = '🌊 Orchestrating Flow...';
+      term.innerText = '// Harmonizing 5 collaborative actors across network...\n// 1. Bilateral Deal Engine\n// 2. Global Trade & Maritime eBL Bridge\n// 3. Sentinel-1/2 SAR Concession Audit\n// 4. Multi-Chain Escrow Preparation\n// 5. A.GRID Clearing Webhook Dispatch';
+
+      const payload = {
+        deal_id: document.getElementById('flowDealId').value.trim() || 'DEAL-HARMONY-001',
+        commodity: document.getElementById('flowCommodity').value.trim() || 'COPPER_CATHODE',
+        volume_tons: parseFloat(document.getElementById('flowVolumeTons').value) || 100.0,
+        unit_price_usd_per_ton: parseFloat(document.getElementById('flowUnitPrice').value) || 5000.0,
+        origin_country: document.getElementById('flowOrigin').value.trim() || 'CHL',
+        destination_country: document.getElementById('flowDestination').value.trim() || 'USA',
+        buyer_agent_address: '0x1111111111111111111111111111111111111111',
+        seller_agent_address: '0x2222222222222222222222222222222222222222',
+        settlement_chain: document.getElementById('flowChain').value || 'polygon'
+      };
+
+      try {
+        const res = await fetch('/api/v1/trade/harmonize-flow', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`HTTP ${res.status}: ${errText}`);
+        }
+
+        const data = await res.json();
+        lastHarmonizedResult = data;
+
+        for (let i = 1; i <= 5; i++) {
+          const card = document.getElementById(`flowCard${i}`);
+          const badge = document.getElementById(`flowBadge${i}`);
+          if (card) card.className = 'escrow-step-card completed';
+          if (badge) {
+            badge.innerText = 'PASSED';
+            badge.style.background = 'rgba(16, 185, 129, 0.2)';
+            badge.style.color = 'var(--emerald)';
+          }
+        }
+
+        header.innerHTML = `🌊 Flow Harmonized in <span style="color:#fff;">${data.pipeline_latency_ms.toFixed(1)}ms</span> · Landed Cost: <span style="color:#fff;">$${Math.round(data.landed_cost_usd).toLocaleString()}</span> · Escrow: <span style="color:#fff;">${data.escrow_chain.toUpperCase()} READY</span>`;
+        term.innerText = JSON.stringify(data, null, 2);
+      } catch (err) {
+        for (let i = 1; i <= 5; i++) {
+          const card = document.getElementById(`flowCard${i}`);
+          const badge = document.getElementById(`flowBadge${i}`);
+          if (card) card.className = 'escrow-step-card disputed';
+          if (badge) {
+            badge.innerText = 'ERROR';
+            badge.style.background = 'rgba(239, 68, 68, 0.2)';
+            badge.style.color = '#ef4444';
+          }
+        }
+        term.innerText = `// Flow Execution Failed:\n${err.message}`;
+      } finally {
+        btn.disabled = false;
+        btn.innerText = '🌊 Execute Fluid Trade Flow';
+      }
+    }
+
+    function copyHarmonizedOutput() {
+      const term = document.getElementById('flowTerminalOutput');
+      if (term && term.innerText) {
+        navigator.clipboard.writeText(term.innerText).then(() => {
+          alert('Harmonized Flow Output JSON copied to clipboard!');
         });
       }
     }

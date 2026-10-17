@@ -34,6 +34,7 @@
 
 ## ⚡ Quick Agent API Directory
 
+- **Harmonized Fluid Trade Flow (End-to-End Orchestrator)**: `POST /api/v1/trade/harmonize-flow` (Coordinates A2A deal, logistics/eBL, EUDR Sentinel satellite audit, multi-chain escrow & A.GRID webhook in a single fluid call)
 - **A2A Propose Trade Deal**: `POST /api/v1/trade/deals/propose` (Cryptographically signed deal specification)
 - **A2A Dual-Sign Deal**: `POST /api/v1/trade/deals/dual-sign` (Countersignature & Oracle attestation minting)
 - **A2A Escrow Calldata**: `GET /api/v1/a2a/deals/{deal_id}/escrow-calldata` (EVM payload for Polygon/Base/Arbitrum)

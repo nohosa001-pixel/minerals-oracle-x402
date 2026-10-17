@@ -595,6 +595,28 @@
         },
         "required": ["batch_id", "tenement_id", "latitude", "longitude", "source_country"]
       }
+    },
+    {
+      "name": "harmonize_trade_flow",
+      "description": "Fluidly orchestrates an end-to-end critical mineral trade flow ('like flowing water') across A2A deal negotiation, maritime logistics & eBL verification, EUDR Sentinel-1/2 satellite concession audit, multi-chain escrow preparation (Polygon/Base/Arbitrum/Solana), and A.GRID clearing webhook dispatch.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "deal_id": {"type": "string", "description": "Unique trade deal identifier"},
+          "commodity": {"type": "string", "description": "Mineral commodity (e.g. COPPER_CATHODE, NICKEL_MHP, LITHIUM_HYDROXIDE, SILVER_DORE)"},
+          "volume_tons": {"type": "number", "minimum": 0.001, "description": "Cargo volume in metric tons"},
+          "unit_price_usd_per_ton": {"type": "number", "minimum": 0.01, "description": "Agreed unit price in USD per ton"},
+          "origin_country": {"type": "string", "description": "Source origin country code (e.g. CHL, IDN, AUS, COD, ARG, BRA)"},
+          "destination_country": {"type": "string", "default": "USA", "description": "Importer destination jurisdiction (USA, EU, KOR, etc.)"},
+          "buyer_agent_address": {"type": "string", "description": "Autonomous buyer agent wallet address"},
+          "seller_agent_address": {"type": "string", "description": "Autonomous seller agent wallet address"},
+          "ebl_document_id": {"type": "string", "description": "Optional UNCITRAL MLETR Electronic Bill of Lading ID"},
+          "carrier_code": {"type": "string", "default": "MSCU", "description": "Ocean carrier code"},
+          "concession_id": {"type": "string", "description": "Optional mining concession ID for EUDR satellite screening"},
+          "settlement_chain": {"type": "string", "enum": ["polygon", "base", "arbitrum", "solana"], "default": "polygon", "description": "Target settlement network"}
+        },
+        "required": ["deal_id", "commodity", "volume_tons", "unit_price_usd_per_ton", "origin_country", "buyer_agent_address", "seller_agent_address"]
+      }
     }
   ]
 }
