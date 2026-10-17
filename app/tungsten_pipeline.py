@@ -73,6 +73,15 @@ CANONICAL_TUNGSTEN_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "region": "Yukon / Northwest Territories, Canada",
         "country": "CAN",
     },
+    "NUI_PHAO": {
+        "canonical_name": "Nui Phao Polymetallic Tungsten Mine",
+        "operator": "Masan High-Tech Materials (EU-Vietnam Strategic Mineral Hub)",
+        "coordinates": (21.608, 105.748),
+        "concession_id": "VNM-TN-NUIPHAO-01",
+        "max_geofence_radius_km": 25.0,
+        "region": "Thai Nguyen Province, Vietnam",
+        "country": "VNM",
+    },
 }
 
 

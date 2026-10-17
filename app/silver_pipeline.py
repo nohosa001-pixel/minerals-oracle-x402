@@ -65,6 +65,15 @@ CANONICAL_SILVER_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "region": "Coquimbo, Chile",
         "country": "CHL",
     },
+    "BLACK_DIAMOND": {
+        "canonical_name": "Lodestar Minerals Black Diamond Silver Project",
+        "operator": "Lodestar Minerals Limited (ASX: LSR)",
+        "coordinates": (-25.150, 115.800),
+        "concession_id": "AUS-WA-LSR-01",
+        "max_geofence_radius_km": 25.0,
+        "region": "Gascoyne / Murchison, Western Australia",
+        "country": "AUS",
+    },
 }
 
 

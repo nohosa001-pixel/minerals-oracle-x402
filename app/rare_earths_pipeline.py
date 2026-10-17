@@ -110,6 +110,24 @@ CANONICAL_RARE_EARTHS_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "region": "New South Wales, Australia",
         "country": "AUS",
     },
+    "DONG_PAO": {
+        "canonical_name": "Dong Pao Rare Earths Mine",
+        "operator": "Vimico / Vietnam Rare Earth JSC (EU-Vietnam Strategic Supply Partnership)",
+        "coordinates": (22.283, 103.500),
+        "concession_id": "VNM-LC-DONGPAO-01",
+        "max_geofence_radius_km": 25.0,
+        "region": "Lai Chau Province, Vietnam",
+        "country": "VNM",
+    },
+    "BARDY_SE": {
+        "canonical_name": "North American Niobium Bardy SE Rare Earth Target",
+        "operator": "North American Niobium Inc (CSE: NIOB Airborne Geophysics Target)",
+        "coordinates": (49.350, -70.150),
+        "concession_id": "CAN-QC-BARDY-01",
+        "max_geofence_radius_km": 30.0,
+        "region": "Saguenay-Lac-Saint-Jean, Quebec, Canada",
+        "country": "CAN",
+    },
 }
 
 

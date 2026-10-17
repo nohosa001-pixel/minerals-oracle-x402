@@ -49,6 +49,15 @@ CANONICAL_NIOBIUM_SCANDIUM_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "region": "Quebec, Canada",
         "country": "CAN",
     },
+    "BARDY_SE": {
+        "canonical_name": "North American Niobium Bardy SE Niobium Prospect",
+        "operator": "North American Niobium Inc (CSE: NIOB Airborne Geophysics Anomaly)",
+        "coordinates": (49.350, -70.150),
+        "concession_id": "CAN-QC-BARDY-01",
+        "max_geofence_radius_km": 30.0,
+        "region": "Saguenay-Lac-Saint-Jean, Quebec, Canada",
+        "country": "CAN",
+    },
 }
 
 

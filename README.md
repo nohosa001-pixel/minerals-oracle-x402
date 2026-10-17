@@ -18,6 +18,7 @@
 ## ⚡ 3-Line AI Agent Quickstart (Python · TypeScript · LangChain · CrewAI)
 
 ### 1. TypeScript / Node.js (`@minerals-oracle/sdk`)
+
 ```typescript
 import { MineralsOracleClient } from '@minerals-oracle/sdk';
 
@@ -30,6 +31,7 @@ console.log(res.audit_verdict?.status, res.proof_hash); // 'FULLY_COMPLIANT' 0x.
 ```
 
 ### 2. Python / LangChain Tool
+
 ```python
 import httpx
 
@@ -42,6 +44,7 @@ print(f"Sangdong NDAA Sec 848: {verdict['status']}")  # FULLY_COMPLIANT
 ```
 
 ### 3. CrewAI / AI Agent Swarm Tool Call
+
 ```python
 from crewai.tools import tool
 import httpx
@@ -55,7 +58,9 @@ def audit_mineral(batch_id: str, tenement_id: str, lat: float, lon: float) -> st
 ```
 
 ### 4. Claude Desktop / Cursor FastMCP (Model Context Protocol)
+
 Add to your `claude_desktop_config.json`:
+
 ```json
 {
   "mcpServers": {
