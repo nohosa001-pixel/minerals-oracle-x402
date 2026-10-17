@@ -1667,6 +1667,7 @@
               <option value="ELK_CREEK" selected>Elk Creek (NioCorp Developments / USA)</option>
               <option value="ARAXA">Araxá (CBMM / Brazil)</option>
               <option value="NIOBEC">Niobec (Magris Resources / Canada)</option>
+              <option value="BARDY_SE">Bardy SE (North American Niobium / Canada / CAN)</option>
             </select>
           </div>
           <div class="field-row">
@@ -1796,6 +1797,7 @@
               <option value="MEX">Mexico (MEX)</option>
               <option value="ZMB">Zambia (ZMB)</option>
               <option value="ESP">Spain (ESP)</option>
+              <option value="VNM">Vietnam (VNM)</option>
             </select>
           </div>
         </div>
@@ -1952,9 +1954,15 @@
               <option value="LITHIUM">LITHIUM</option>
               <option value="COBALT">COBALT</option>
               <option value="NICKEL">NICKEL</option>
-              <option value="GRAPHITE">GRAPHITE</option>
+              <option value="COPPER">COPPER</option>
+              <option value="SILVER">SILVER</option>
+              <option value="TUNGSTEN">TUNGSTEN</option>
               <option value="RARE_EARTHS">RARE_EARTHS</option>
+              <option value="NIOBIUM">NIOBIUM</option>
+              <option value="SCANDIUM">SCANDIUM</option>
+              <option value="GRAPHITE">GRAPHITE</option>
               <option value="MANGANESE">MANGANESE</option>
+              <option value="BLACK_MASS">BLACK_MASS</option>
             </select>
           </div>
         </div>
@@ -3042,12 +3050,14 @@ curl -s http://localhost:8000/mcp/tools`
       const coordMap = {
         'ELK_CREEK': [40.288, -96.184],
         'ARAXA': [-19.648, -46.942],
-        'NIOBEC': [48.532, -71.155]
+        'NIOBEC': [48.532, -71.155],
+        'BARDY_SE': [49.350, -70.150]
       };
       const countryMap = {
         'ELK_CREEK': 'USA',
         'ARAXA': 'BRA',
-        'NIOBEC': 'CAN'
+        'NIOBEC': 'CAN',
+        'BARDY_SE': 'CAN'
       };
 
       const coords = coordMap[mine] || [40.288, -96.184];
