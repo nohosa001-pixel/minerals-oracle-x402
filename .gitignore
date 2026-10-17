@@ -56,3 +56,8 @@ logs/
 scratch/
 *.db
 data/*.db
+
+# Node / TypeScript SDK
+node_modules/
+sdk/typescript/node_modules/
+*.tsbuildinfo

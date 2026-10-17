@@ -3,12 +3,27 @@
   "version": "1.5.0",
   "description": "Official TypeScript/Node.js SDK for Minerals Oracle x402 - Autonomous Agent Critical Minerals Provenance & M2M Trade Protocol",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsc"
+    "build": "tsup",
+    "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"",
+    "test": "node --test test/client.test.js",
+    "prepublishOnly": "npm run build && npm run test"
   },
   "keywords": [
     "critical-minerals",
@@ -27,9 +42,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nohosa001-pixel/minerals-oracle-x402.git"
+    "url": "git+https://github.com/nohosa001-pixel/minerals-oracle-x402.git",
+    "directory": "sdk/typescript"
   },
   "devDependencies": {
+    "tsup": "^8.5.1",
     "typescript": "^5.4.0"
   }
 }
