@@ -18,6 +18,7 @@ from __future__ import annotations
 import time
 import hashlib
 import json
+import asyncio
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
 
@@ -127,6 +128,8 @@ class CollaboratorMediator:
         self.signer = onchain_signer
         self.security_gate = security_gate_client
         self.webhooks = webhook_manager
+        self._recent_events: List[Dict[str, Any]] = []
+        self._listeners: List[asyncio.Queue] = []
 
     def flow_deal_to_settlement(self, req: HarmonizedTradeFlowRequest) -> HarmonizedTradeFlowResult:
         """
@@ -247,7 +250,7 @@ class CollaboratorMediator:
 
         latency_ms = round((time.perf_counter() - t0) * 1000.0, 2)
 
-        return HarmonizedTradeFlowResult(
+        result = HarmonizedTradeFlowResult(
             status="FLOW_HARMONIZED",
             deal_id=req.deal_id,
             commodity=req.commodity,
@@ -270,6 +273,49 @@ class CollaboratorMediator:
             harmonized_audit_hash=audit_hash,
             timestamp_utc=now_utc,
         )
+
+        self.record_event("DEAL_FLOW_HARMONIZED", result.model_dump())
+        return result
+
+    def record_event(self, event_type: str, data: Dict[str, Any]) -> None:
+        """Records an event and broadcasts to any active SSE listeners."""
+        evt = {
+            "event_type": event_type,
+            "data": data,
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        }
+        self._recent_events.append(evt)
+        if len(self._recent_events) > 100:
+            self._recent_events = self._recent_events[-100:]
+
+        # Broadcast to active queues
+        dead = []
+        for q in self._listeners:
+            try:
+                q.put_nowait(evt)
+            except Exception:
+                dead.append(q)
+        for d in dead:
+            if d in self._listeners:
+                self._listeners.remove(d)
+
+    def get_recent_events(self, deal_id: Optional[str] = None, limit: int = 20) -> List[Dict[str, Any]]:
+        """Retrieves recent events, optionally filtered by deal_id."""
+        evts = self._recent_events
+        if deal_id:
+            evts = [e for e in evts if e.get("data", {}).get("deal_id") == deal_id]
+        return evts[-limit:]
+
+    def subscribe_events(self) -> asyncio.Queue:
+        """Subscribes an asyncio Queue to live trade events."""
+        q: asyncio.Queue = asyncio.Queue()
+        self._listeners.append(q)
+        return q
+
+    def unsubscribe_events(self, q: asyncio.Queue) -> None:
+        """Removes an asyncio Queue from active listeners."""
+        if q in self._listeners:
+            self._listeners.remove(q)
 
 
 # Global singleton mediator instance

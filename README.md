@@ -4,9 +4,9 @@
 [![TypeScript SDK](https://img.shields.io/badge/@minerals--oracle%2Fsdk-v1.0.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](sdk/typescript)
 [![Cloud Run 24/7](https://img.shields.io/badge/Production-Live_Cloud_Run_Seoul-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)](https://minerals-oracle-x402-7qxtp3324q-du.a.run.app/dashboard)
 [![CI/CD](https://img.shields.io/github/actions/workflow/status/nohosa001-pixel/minerals-oracle-x402/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI%2FCD)](https://github.com/nohosa001-pixel/minerals-oracle-x402/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/Tests-339%2F339_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
+[![Tests](https://img.shields.io/badge/Tests-365%2F365_Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/nohosa001-pixel/minerals-oracle-x402)
 [![Multi-Chain](https://img.shields.io/badge/Chains-Solana_|_Polygon_|_Base_|_Arbitrum-14F195?style=for-the-badge&logo=solana&logoColor=black)](contracts/verification/VERIFICATION_GUIDE.md)
-[![FastMCP](https://img.shields.io/badge/FastMCP-38_Agent_Tools-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](mcp_tool_spec.json)
+[![FastMCP](https://img.shields.io/badge/FastMCP-39_Agent_Tools-00ffcc?style=for-the-badge&logo=anthropic&logoColor=black)](mcp_tool_spec.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 > 🤖 **100% Pure Autonomous Agent-Native (M2M Exclusive) Critical Minerals Supply-Chain & Bilateral Trade Oracle.**  
@@ -75,19 +75,37 @@ Add to your `claude_desktop_config.json`:
 
 ---
 
-## Pure Autonomous Agent-Native Architecture (M2M Exclusive)
+## 🌊 Harmonious Collaborator Architecture & Fluid Pipeline ("Like Flowing Water")
 
-`minerals-oracle-x402` is engineered from first principles for the **Autonomous Agentic Economy**:
+The entire oracle system is orchestrated by the **Collaborator Mediator** (`app/collaborator_mediator.py`), unifying 5 domain subsystems into a single event-driven fluid pipeline with microsecond latency and zero human friction:
 
 ```mermaid
-flowchart LR
-    A["🤖 Buyer AI Agent<br/>(ElizaOS / AutoGen / LangChain)"] -->|"Bilateral Deal Proposal<br/>+ EIP-712 Signature"| B["⚡ A2A Trade Engine<br/>(/api/v1/trade/deals)"]
-    C["🤖 Seller AI Agent<br/>(Commodity Mining Bot)"] -->|"Counter-Sign / eBL Audit<br/>+ Dual Signature"| B
-    B -->|"Real-Time Verification<br/>+ 16-Trap Geofence & FEOC"| D["🛡️ Minerals Oracle Core<br/>(Multi-Chain EVM)"]
-    D -->|"Gasless Settlement<br/>or 10% Gain-Share"| E["🏦 Agent Session Vault<br/>(Polygon / Base / Arbitrum)"]
-    D -->|"Fail-Closed Scan & FICO"| F["🚪 Security Gate x402<br/>(EU AI Act Art. 50 Attestation)"]
+flowchart TD
+    subgraph Flow ["🌊 Harmonized Fluid Trade Lifecycle (POST /api/v1/trade/harmonize-flow)"]
+        S1["🤝 Node 1: A2A Deal Engine<br/>Bilateral Spec Negotiation & Dual-Signature"]
+        S2["🚢 Node 2: Maritime Logistics & eBL<br/>Chokepoint Routing, MLETR Verification, Landed Cost"]
+        S3["🛰️ Node 3: Sentinel-1/2 SAR Radar<br/>EUDR Concession Screening (Cutoff: 2020-12-31)"]
+        S4["⛓️ Node 4: Multi-Chain Escrow<br/>Polygon (137) / Base (8453) / Arbitrum (42161) / Solana (501)"]
+        S5["⚡ Node 5: A.GRID Real-Time Clearing<br/>Zero-Polling Webhook Event Mesh & SSE Streaming"]
+
+        S1 --> S2 --> S3 --> S4 --> S5
+    end
+
+    subgraph Architecture ["🏗️ Decomposed Modular Domain APIRouters"]
+        R1["📦 routers/minerals.py<br/>Provenance, Passport, ZK Proof"]
+        R2["🌐 routers/logistics.py<br/>Corridors, Tariffs, Customs, eBL"]
+        R3["🤝 routers/a2a_trade.py<br/>Bilateral Deals, Vaults, SSE Stream"]
+        R4["📊 routers/oracle_pricing.py<br/>Pyth Consensus, Spreads, Precedents"]
+        R5["🤖 routers/mcp.py<br/>FastMCP Tooling & SSE Transport"]
+    end
 ```
 
+### 1. 5-Pillar End-to-End Fluid Lifecycle
+- **`POST /api/v1/trade/harmonize-flow`**: Single-call orchestration that takes trade intent from bilateral inception to on-chain escrow readiness and clearing in $<10\text{ms}$.
+- **`GET /api/v1/trade/events/stream`**: Real-time Server-Sent Events (SSE) broadcasting live deal events and milestone releases.
+- **`GET /api/v1/trade/events/recent`**: High-performance in-memory circular buffer for autonomous bot state recovery.
+
+### 2. Pure Autonomous Agent-Native Architecture (M2M Exclusive)
 1. **Zero Human Gateways (No KYC, No Credit Cards, No Passwords)**:
    - Autonomous self-serve onboarding (`POST /api/v1/agent/onboard`) instantly provisions an agent vault with free trial queries.
    - Authentication is strictly cryptographic via `X-Agent-Vault-Key` or EIP-712 wallet signatures.

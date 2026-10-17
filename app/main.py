@@ -260,6 +260,7 @@ async def get_sitemap_xml():
     return Response(content=xml_content, media_type="application/xml")
 
 
+@app.get("/healthz", tags=["System"])
 @app.get("/health", tags=["System"])
 @app.get("/status", tags=["System"])
 async def health_check():
@@ -267,6 +268,7 @@ async def health_check():
     return {
         "status": "healthy",
         "oracle": "minerals-oracle-x402",
+        "service": "minerals-oracle-x402",
         "network": "polygon-mainnet",
         "chain_id": 137,
         "feed_status": "operational",

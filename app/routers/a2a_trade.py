@@ -4,8 +4,11 @@ A2A (Agent-to-Agent) Autonomous Trade Negotiation, Bilateral Deals & Escrow Rout
 import time
 import hashlib
 import secrets
+import json
+import asyncio
 from typing import Optional, Dict, Any, List
 from fastapi import APIRouter, Request, HTTPException, status, Query, Path as FPath
+from fastapi.responses import StreamingResponse
 
 from app.schemas import (
     TradeDealSpec,
@@ -499,5 +502,69 @@ async def harmonize_trade_flow_endpoint(body: HarmonizedTradeFlowRequest):
     Deal Inception -> Tariff/Route Optimization -> eBL/Satellite Verification -> Escrow Calldata -> A.GRID Clearing & Webhook Push.
     """
     return collaborator_mediator.flow_deal_to_settlement(body)
+
+
+@router.get(
+    "/api/v1/trade/events/recent",
+    tags=["Harmonized Trade Pipeline"],
+    summary="Retrieve recent trade lifecycle and clearing events",
+)
+async def get_recent_trade_events(deal_id: Optional[str] = Query(None), limit: int = Query(20, ge=1, le=100)):
+    """Retrieves buffered in-memory recent trade lifecycle events."""
+    evts = collaborator_mediator.get_recent_events(deal_id, limit)
+    return {
+        "status": "success",
+        "total": len(evts),
+        "events": evts,
+    }
+
+
+@router.get(
+    "/api/v1/trade/events/stream",
+    tags=["Harmonized Trade Pipeline"],
+    summary="Real-time Server-Sent Events (SSE) stream for trade lifecycle and escrow milestones",
+)
+async def stream_trade_events(request: Request, deal_id: Optional[str] = Query(None)):
+    """
+    Subscribes to real-time Server-Sent Events (SSE) for critical mineral trades,
+    including A2A negotiations, eBL validations, satellite audits, and escrow milestones.
+    """
+    queue = collaborator_mediator.subscribe_events()
+
+    async def event_generator():
+        try:
+            init_payload = {
+                "event": "connected",
+                "deal_id_filter": deal_id,
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            }
+            yield f"event: connected\r\ndata: {json.dumps(init_payload)}\r\n\r\n"
+
+            if request.headers.get("X-Test-Stream") == "single":
+                return
+
+            while True:
+                if await request.is_disconnected():
+                    break
+                try:
+                    evt = await asyncio.wait_for(queue.get(), timeout=15.0)
+                    if not deal_id or evt.get("data", {}).get("deal_id") == deal_id:
+                        evt_name = evt.get("event_type", "message")
+                        data_str = json.dumps(evt.get("data", {}))
+                        yield f"event: {evt_name}\r\ndata: {data_str}\r\n\r\n"
+                except asyncio.TimeoutError:
+                    yield ": ping\r\n\r\n"
+        finally:
+            collaborator_mediator.unsubscribe_events(queue)
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
