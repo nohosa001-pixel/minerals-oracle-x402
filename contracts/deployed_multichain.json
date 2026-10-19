@@ -25,13 +25,8 @@
           "primarySymbol": "Cu"
         },
         "MineralTradeEscrow": {
-          "address": "0x1270ddebad0ca90070342336a581eaACBA2060Ab",
-          "creator": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
-          "creation_tx": "d36a8e9e3ff4b65ee3c35797179bfc46b8c16f510bf4cc9a1b3ec74dbf102fb9",
-          "blockNumber": 94253020,
-          "explorer_link": "https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab",
-          "standard": "ERC-MilestoneTradeEscrow",
-          "settlementToken": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"
+          "address": "0x8eB40eF1f032dd66CD54c6e1D0C29980C31d5E57",
+          "explorer_link": "https://polygonscan.com/address/0x8eB40eF1f032dd66CD54c6e1D0C29980C31d5E57"
         },
         "DynamicTradeEscrow": {
           "address": "0x3A863A2b1018B47FE79041FCDF56efEa3f8b978F",
@@ -57,23 +52,17 @@
       "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
       "contracts": {
         "AgentPaymentVault": {
-          "address": "0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d",
-          "explorer_link": "https://basescan.org/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d"
+          "address": "0x8eB40eF1f032dd66CD54c6e1D0C29980C31d5E57",
+          "explorer_link": "https://basescan.org/address/0x8eB40eF1f032dd66CD54c6e1D0C29980C31d5E57"
         },
         "MineralsOracleConsumer": {
-          "address": "0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
-          "explorer_link": "https://basescan.org/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
+          "address": "0xF0A781372cd7E32485603823390c791495140ca9",
+          "explorer_link": "https://basescan.org/address/0xF0A781372cd7E32485603823390c791495140ca9",
           "primarySymbol": "Cu"
         },
         "MineralTradeEscrow": {
-          "address": "0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638",
-          "creator": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
-          "creation_tx": "d3ea506218425ef12b27061256bf342c58260407ee40efac4f609d2356ae205b",
-          "blockNumber": 51647878,
-          "explorer_link": "https://basescan.org/address/0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638",
-          "tx_link": "https://basescan.org/tx/d3ea506218425ef12b27061256bf342c58260407ee40efac4f609d2356ae205b",
-          "standard": "ERC-MilestoneTradeEscrow",
-          "settlementToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+          "address": "0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68",
+          "explorer_link": "https://basescan.org/address/0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68"
         },
         "DynamicTradeEscrow": {
           "address": "0x54786360Db4582AEC2435E216479FD4ff093CB80",
@@ -99,23 +88,17 @@
       "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
       "contracts": {
         "AgentPaymentVault": {
-          "address": "0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d",
-          "explorer_link": "https://arbiscan.io/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d"
+          "address": "0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372",
+          "explorer_link": "https://arbiscan.io/address/0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372"
         },
         "MineralsOracleConsumer": {
-          "address": "0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
-          "explorer_link": "https://arbiscan.io/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
+          "address": "0x75F36e1682f283feBfB683dD40e93785715cE404",
+          "explorer_link": "https://arbiscan.io/address/0x75F36e1682f283feBfB683dD40e93785715cE404",
           "primarySymbol": "Cu"
         },
         "MineralTradeEscrow": {
-          "address": "0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638",
-          "creator": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
-          "creation_tx": "320fa60cb901f7290ad73b17446776661746b505e5a670c164d8011bd481eb50",
-          "blockNumber": 507801945,
-          "explorer_link": "https://arbiscan.io/address/0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638",
-          "tx_link": "https://arbiscan.io/tx/320fa60cb901f7290ad73b17446776661746b505e5a670c164d8011bd481eb50",
-          "standard": "ERC-MilestoneTradeEscrow",
-          "settlementToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+          "address": "0x1884025dD7E510a4490533eC46A362fCb08D3822",
+          "explorer_link": "https://arbiscan.io/address/0x1884025dD7E510a4490533eC46A362fCb08D3822"
         },
         "DynamicTradeEscrow": {
           "address": "0x54786360Db4582AEC2435E216479FD4ff093CB80",
@@ -167,7 +150,6 @@
           "settlementToken": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
           "program_type": "Anchor/BPF"
         }
-
       }
     }
   }
