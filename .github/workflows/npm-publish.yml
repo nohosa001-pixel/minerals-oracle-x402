@@ -23,10 +23,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
+
+      - name: Upgrade npm to latest
+        run: npm install -g npm@latest
 
       - name: Install and Build SDK
         working-directory: sdk/typescript
@@ -37,8 +40,6 @@ jobs:
 
       - name: Publish package to npm
         working-directory: sdk/typescript
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           PKG_VERSION=$(node -p "require('./package.json').version")
           PKG_NAME=$(node -p "require('./package.json').name")
@@ -49,11 +50,5 @@ jobs:
             exit 0
           fi
 
-          if [ -n "$NODE_AUTH_TOKEN" ]; then
-            echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-            echo "Publishing $PKG_NAME@$PKG_VERSION to npm using NPM_TOKEN..."
-            npm publish --access public --provenance
-          else
-            echo "Publishing $PKG_NAME@$PKG_VERSION to npm with provenance via OIDC..."
-            npm publish --access public --provenance
-          fi
+          echo "Publishing $PKG_NAME@$PKG_VERSION to npm (with provenance via OIDC)..."
+          npm publish --access public --provenance
