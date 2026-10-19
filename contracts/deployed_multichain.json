@@ -26,7 +26,9 @@
         },
         "MineralTradeEscrow": {
           "address": "0xd1F37196A1fe73Caa89ce7f4a58D6Fe49FD47655",
-          "explorer_link": "https://polygonscan.com/address/0xd1F37196A1fe73Caa89ce7f4a58D6Fe49FD47655"
+          "explorer_link": "https://polygonscan.com/address/0xd1F37196A1fe73Caa89ce7f4a58D6Fe49FD47655",
+          "standard": "ERC-MilestoneTradeEscrow",
+          "settlementToken": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"
         },
         "DynamicTradeEscrow": {
           "address": "0x3A863A2b1018B47FE79041FCDF56efEa3f8b978F",
@@ -62,7 +64,9 @@
         },
         "MineralTradeEscrow": {
           "address": "0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68",
-          "explorer_link": "https://basescan.org/address/0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68"
+          "explorer_link": "https://basescan.org/address/0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68",
+          "standard": "ERC-MilestoneTradeEscrow",
+          "settlementToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
         },
         "DynamicTradeEscrow": {
           "address": "0x54786360Db4582AEC2435E216479FD4ff093CB80",
@@ -98,7 +102,9 @@
         },
         "MineralTradeEscrow": {
           "address": "0x1884025dD7E510a4490533eC46A362fCb08D3822",
-          "explorer_link": "https://arbiscan.io/address/0x1884025dD7E510a4490533eC46A362fCb08D3822"
+          "explorer_link": "https://arbiscan.io/address/0x1884025dD7E510a4490533eC46A362fCb08D3822",
+          "standard": "ERC-MilestoneTradeEscrow",
+          "settlementToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
         },
         "DynamicTradeEscrow": {
           "address": "0x54786360Db4582AEC2435E216479FD4ff093CB80",

@@ -111,21 +111,21 @@ def test_escrow_calldata_generation_and_api(client):
     poly_calldata = deal_engine.build_escrow_deposit_calldata(deal_id, chain_name="polygon")
     assert poly_calldata["deal_id"] == deal_id
     assert poly_calldata["required_usdc_units"] == 700000000000
-    assert poly_calldata["escrow_contract_address"].lower() == "0x1270ddebad0ca90070342336a581eaACBA2060Ab".lower()
+    assert poly_calldata["escrow_contract_address"].lower() == "0xd1F37196A1fe73Caa89ce7f4a58D6Fe49FD47655".lower()
 
     # Calling escrow calldata for Base
     base_calldata = deal_engine.build_escrow_deposit_calldata(deal_id, chain_name="base")
-    assert base_calldata["escrow_contract_address"].lower() == "0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638".lower()
+    assert base_calldata["escrow_contract_address"].lower() == "0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68".lower()
 
     # Calling escrow calldata for Arbitrum
     arb_calldata = deal_engine.build_escrow_deposit_calldata(deal_id, chain_name="arbitrum")
-    assert arb_calldata["escrow_contract_address"].lower() == "0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638".lower()
+    assert arb_calldata["escrow_contract_address"].lower() == "0x1884025dD7E510a4490533eC46A362fCb08D3822".lower()
 
     # Calling via FastAPI route with query parameter
     resp_base = client.get(f"/api/v1/a2a/deals/{deal_id}/escrow-calldata?chain_name=base")
     assert resp_base.status_code == 200
     data_base = resp_base.json()
-    assert data_base["escrow_contract_address"].lower() == "0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638".lower()
+    assert data_base["escrow_contract_address"].lower() == "0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68".lower()
     assert data_base["function_signature"] == "createEscrow(bytes32,address,uint256,bytes32,uint256)"
 
     # Test non-existent deal 404

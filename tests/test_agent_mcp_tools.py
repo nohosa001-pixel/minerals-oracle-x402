@@ -167,7 +167,7 @@ def test_mcp_get_trade_escrow_calldata():
     assert "result" in stdio_resp
     res_data = json.loads(stdio_resp["result"]["content"][0]["text"])
     assert res_data["deal_id"] == deal_id
-    assert res_data["escrow_contract_address"].lower() == "0x1270ddebad0ca90070342336a581eaACBA2060Ab".lower()
+    assert res_data["escrow_contract_address"].lower() == "0xd1F37196A1fe73Caa89ce7f4a58D6Fe49FD47655".lower()
     assert res_data["function_signature"] == "createEscrow(bytes32,address,uint256,bytes32,uint256)"
 
     # 4. Call via REST POST /mcp/invoke
@@ -183,7 +183,7 @@ def test_mcp_get_trade_escrow_calldata():
     http_res_obj = http_resp.json()
     assert not http_res_obj["isError"]
     http_data = json.loads(http_res_obj["content"][0]["text"])
-    assert http_data["escrow_contract_address"].lower() == "0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638".lower()
+    assert http_data["escrow_contract_address"].lower() == "0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68".lower()
 
 
 def test_machine_sitemap_discovery():

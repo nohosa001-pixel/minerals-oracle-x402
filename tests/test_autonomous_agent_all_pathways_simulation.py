@@ -375,7 +375,7 @@ def test_pathway_5_a2a_bilateral_deal_and_dual_sign_lifecycle():
     assert "calldata" in calldata
     assert calldata["calldata"].startswith("0x")
     assert calldata["function_signature"] == "createEscrow(bytes32,address,uint256,bytes32,uint256)"
-    assert calldata["escrow_contract_address"] == "0x1270ddebad0ca90070342336a581eaACBA2060Ab"
+    assert calldata["escrow_contract_address"].lower() == "0xd1F37196A1fe73Caa89ce7f4a58D6Fe49FD47655".lower()
 
 
 # =============================================================================
