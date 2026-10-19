@@ -16,17 +16,17 @@
       "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
       "contracts": {
         "AgentPaymentVault": {
-          "address": "0xb44Bc2Acdd156cE08b549A00a3102e4B01276654",
-          "explorer_link": "https://polygonscan.com/address/0xb44Bc2Acdd156cE08b549A00a3102e4B01276654"
+          "address": "0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68",
+          "explorer_link": "https://polygonscan.com/address/0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68"
         },
         "MineralsOracleConsumer": {
-          "address": "0x835d01534a5D2e63D52636Fafb1019f889d1E66B",
-          "explorer_link": "https://polygonscan.com/address/0x835d01534a5D2e63D52636Fafb1019f889d1E66B",
+          "address": "0x5F565115441188b5dCa06539615Fc154BC7f3028",
+          "explorer_link": "https://polygonscan.com/address/0x5F565115441188b5dCa06539615Fc154BC7f3028",
           "primarySymbol": "Cu"
         },
         "MineralTradeEscrow": {
-          "address": "0x8eB40eF1f032dd66CD54c6e1D0C29980C31d5E57",
-          "explorer_link": "https://polygonscan.com/address/0x8eB40eF1f032dd66CD54c6e1D0C29980C31d5E57"
+          "address": "0xd1F37196A1fe73Caa89ce7f4a58D6Fe49FD47655",
+          "explorer_link": "https://polygonscan.com/address/0xd1F37196A1fe73Caa89ce7f4a58D6Fe49FD47655"
         },
         "DynamicTradeEscrow": {
           "address": "0x3A863A2b1018B47FE79041FCDF56efEa3f8b978F",
