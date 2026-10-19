@@ -115,6 +115,9 @@ def test_api_secure_settlement_catches_injection(client):
         json=payload,
         headers={"X-Dev-Bypass": "true"}
     )
-    assert resp.status_code == 400
-    assert "Security Gate Alert" in resp.json()["detail"]
+    assert resp.status_code in (400, 403)
+    if resp.status_code == 403:
+        assert resp.json().get("error") == "SECURITY_GATE_VIOLATION"
+    else:
+        assert "Security Gate Alert" in resp.json()["detail"]
 

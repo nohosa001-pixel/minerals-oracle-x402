@@ -25,6 +25,7 @@ from fastapi.responses import (
     Response,
 )
 from fastapi.middleware.cors import CORSMiddleware
+from app.security_gate_middleware import SecurityGateMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.websocket_manager import ws_manager
@@ -66,6 +67,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 1-Line Zero-Friction Security Gate Defense (<2ms Prompt Injection / Jailbreak Filter)
+app.add_middleware(SecurityGateMiddleware)
 
 
 @app.middleware("http")

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "minerals-oracle-x402"
-version = "1.5.0"
+version = "1.5.1"
 description = "Deterministic Web3 x402 Critical Minerals & Battery Passport Compliance Oracle for Autonomous AI Agents on Polygon Network"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -49,6 +49,7 @@ dependencies = [
     "mcp>=1.0.0",
     "redis>=5.0.0",
     "py-solc-x>=2.0.5",
+    "agent-security-gate-x402>=1.9.0",
 ]
 
 [project.optional-dependencies]
