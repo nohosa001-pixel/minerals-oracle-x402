@@ -128,6 +128,15 @@ CANONICAL_RARE_EARTHS_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "region": "Saguenay-Lac-Saint-Jean, Quebec, Canada",
         "country": "CAN",
     },
+    "MINAMITORISHIMA": {
+        "canonical_name": "Minamitorishima Deep-Sea Mud Rare Earth & Yttrium Deposit",
+        "operator": "University of Tokyo / Nippon Foundation (Japan Defense Yttrium Emergency Reserve)",
+        "coordinates": (24.287, 153.980),
+        "concession_id": "JPN-TYO-MINAMI-01",
+        "max_geofence_radius_km": 50.0,
+        "region": "Minamitorishima EEZ, Tokyo, Japan",
+        "country": "JPN",
+    },
 }
 
 

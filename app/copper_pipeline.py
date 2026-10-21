@@ -110,6 +110,15 @@ CANONICAL_COPPER_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "region": "O'Higgins Region, Chile",
         "country": "CHL",
     },
+    "KUTCHO": {
+        "canonical_name": "Kutcho Copper High-Grade Cu-Zn-Ag Project",
+        "operator": "Kutcho Copper Corp (NRCan Critical Mineral Project Showcase)",
+        "coordinates": (58.200, -128.400),
+        "concession_id": "CAN-BC-KUTCHO-01",
+        "max_geofence_radius_km": 30.0,
+        "region": "British Columbia, Canada",
+        "country": "CAN",
+    },
 }
 
 

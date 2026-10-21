@@ -31,6 +31,9 @@ class MineralType(str, Enum):
     RECYCLED_BLACK_MASS = "RECYCLED_BLACK_MASS"         # Hydrometallurgical Recycled Battery Black Mass (USA/Germany)
     FERRONIOBIUM = "FERRONIOBIUM"                       # High-Strength Defense Grade Ferroniobium FeNb 65% (USA/Brazil/Canada)
     SCANDIUM_OXIDE = "SCANDIUM_OXIDE"                   # Aerospace & SOFC High Purity 99.5% Sc2O3 (USA/Australia)
+    INDIUM_INGOT = "INDIUM_INGOT"                       # High-Purity Ingot for EUV Semiconductor (USA/Canada)
+    GALLIUM_METAL = "GALLIUM_METAL"                     # Semiconductor Grade 6N-7N Gallium (USA/Japan)
+    YTTRIUM_OXIDE = "YTTRIUM_OXIDE"                     # Heavy Rare Earth Missile/Laser Grade Y2O3 (Australia/USA/Japan)
 
     @classmethod
     def _missing_(cls, value: object):
@@ -48,6 +51,12 @@ class MineralType(str, Enum):
                 "FE_NB": "FERRONIOBIUM",
                 "SCANDIUM": "SCANDIUM_OXIDE",
                 "SC2O3": "SCANDIUM_OXIDE",
+                "INDIUM": "INDIUM_INGOT",
+                "IN": "INDIUM_INGOT",
+                "GALLIUM": "GALLIUM_METAL",
+                "GA": "GALLIUM_METAL",
+                "YTTRIUM": "YTTRIUM_OXIDE",
+                "Y2O3": "YTTRIUM_OXIDE",
             }
             if normalized in aliases:
                 normalized = aliases[normalized]
@@ -80,6 +89,7 @@ class SourceCountry(str, Enum):
     EST = "EST"   # Estonia (Silmet 2.0 EU CRMA Magnet Refinery)
     KAZ = "KAZ"   # Kazakhstan (Bakuta Tungsten / DFC LOI)
     ESP = "ESP"   # Spain (Orión Critical Minerals / Alconchel)
+    JPN = "JPN"   # Japan (Defense Yttrium / Semiconductor Advanced Materials)
 
     @classmethod
     def _missing_(cls, value: object):
@@ -108,6 +118,7 @@ class SourceCountry(str, Enum):
                 "ESTONIA": "EST", "EE": "EST",
                 "KAZAKHSTAN": "KAZ", "KZ": "KAZ",
                 "SPAIN": "ESP", "ES": "ESP",
+                "JAPAN": "JPN", "JP": "JPN",
             }
             if v in country_aliases:
                 v = country_aliases[v]
