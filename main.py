@@ -6,6 +6,12 @@ Main entry point for Minerals Oracle MCP Server & Web API.
 """
 import os
 import sys
+from pathlib import Path
+
+# Ensure project root is first in sys.path so local app/ package takes precedence
+_PROJECT_ROOT = str(Path(__file__).resolve().parent)
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
 
 from app.mcp_stdio import main as stdio_main
 
