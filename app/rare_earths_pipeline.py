@@ -137,6 +137,33 @@ CANONICAL_RARE_EARTHS_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "region": "Minamitorishima EEZ, Tokyo, Japan",
         "country": "JPN",
     },
+    "ESTELLE_ALASKA": {
+        "canonical_name": "Estelle Critical Minerals Antimony & Gold Project",
+        "operator": "Nova Minerals Ltd (US DoD Title III / Port MacKenzie Rail Corridor)",
+        "coordinates": (61.930, -152.020),
+        "concession_id": "USA-AK-ESTELLE-01",
+        "max_geofence_radius_km": 40.0,
+        "region": "Matanuska-Susitna Borough, Alaska, USA",
+        "country": "USA",
+    },
+    "ANZOB_TAJIKISTAN": {
+        "canonical_name": "Anzob Antimony-Mercury & Strategic Minerals Mining Complex",
+        "operator": "CJSC Anzob / Comsup Commodities (US-Central Asia Strategic Mineral Corridor)",
+        "coordinates": (39.060, 68.860),
+        "concession_id": "TJK-SUG-ANZOB-01",
+        "max_geofence_radius_km": 35.0,
+        "region": "Sughd Province, Tajikistan",
+        "country": "TJK",
+    },
+    "DOE_PILOT_PLANT": {
+        "canonical_name": "US DOE Critical Materials Pilot Refining Facility",
+        "operator": "US Department of Energy / National Laboratories (Solvent Extraction & Membrane Separation)",
+        "coordinates": (42.027, -93.647),
+        "concession_id": "USA-DOE-PILOT-01",
+        "max_geofence_radius_km": 25.0,
+        "region": "Iowa / National Innovation Network, USA",
+        "country": "USA",
+    },
 }
 
 

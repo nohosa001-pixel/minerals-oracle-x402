@@ -34,6 +34,8 @@ class MineralType(str, Enum):
     INDIUM_INGOT = "INDIUM_INGOT"                       # High-Purity Ingot for EUV Semiconductor (USA/Canada)
     GALLIUM_METAL = "GALLIUM_METAL"                     # Semiconductor Grade 6N-7N Gallium (USA/Japan)
     YTTRIUM_OXIDE = "YTTRIUM_OXIDE"                     # Heavy Rare Earth Missile/Laser Grade Y2O3 (Australia/USA/Japan)
+    ANTIMONY_INGOT = "ANTIMONY_INGOT"                   # 99.65% Defense Ingot (Alaska Estelle / Australia Costerfield)
+    ALUMINIUM_INGOT = "ALUMINIUM_INGOT"                 # High-Purity LME Grade Primary Aluminium Ingot (CBAM & Low-Carbon PPA)
 
     @classmethod
     def _missing_(cls, value: object):
@@ -57,6 +59,13 @@ class MineralType(str, Enum):
                 "GA": "GALLIUM_METAL",
                 "YTTRIUM": "YTTRIUM_OXIDE",
                 "Y2O3": "YTTRIUM_OXIDE",
+                "ANTIMONY": "ANTIMONY_INGOT",
+                "SB": "ANTIMONY_INGOT",
+                "ANTIMONY_INGOT": "ANTIMONY_INGOT",
+                "ALUMINIUM": "ALUMINIUM_INGOT",
+                "ALUMINUM": "ALUMINIUM_INGOT",
+                "AL": "ALUMINIUM_INGOT",
+                "ALUMINIUM_INGOT": "ALUMINIUM_INGOT",
             }
             if normalized in aliases:
                 normalized = aliases[normalized]
@@ -90,6 +99,10 @@ class SourceCountry(str, Enum):
     KAZ = "KAZ"   # Kazakhstan (Bakuta Tungsten / DFC LOI)
     ESP = "ESP"   # Spain (Orión Critical Minerals / Alconchel)
     JPN = "JPN"   # Japan (Defense Yttrium / Semiconductor Advanced Materials)
+    AUT = "AUT"   # Austria (Wolfsberg Lithium / European Lithium / Critical Metals)
+    TJK = "TJK"   # Tajikistan (Central Asian Antimony & Strategic Minerals Corridor)
+    UZB = "UZB"   # Uzbekistan (Central Asian Strategic Minerals Partnership)
+    GIN = "GIN"   # Guinea (Boké Bauxite & Critical Minerals Corridor)
 
     @classmethod
     def _missing_(cls, value: object):
@@ -119,6 +132,10 @@ class SourceCountry(str, Enum):
                 "KAZAKHSTAN": "KAZ", "KZ": "KAZ",
                 "SPAIN": "ESP", "ES": "ESP",
                 "JAPAN": "JPN", "JP": "JPN",
+                "AUSTRIA": "AUT", "AT": "AUT",
+                "TAJIKISTAN": "TJK", "TJ": "TJK",
+                "UZBEKISTAN": "UZB", "UZ": "UZB",
+                "GUINEA": "GIN", "GN": "GIN",
             }
             if v in country_aliases:
                 v = country_aliases[v]

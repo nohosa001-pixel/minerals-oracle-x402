@@ -61,7 +61,17 @@ WA_LITHIUM_TENEMENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         "minedex_tenement_id": "M45/050",
         "max_geofence_radius_km": 15.0,
         "region": "Pilbara, Western Australia",
-    }
+        "country": "AU",
+    },
+    "WOLFSBERG": {
+        "canonical_name": "Wolfsberg Lithium Project",
+        "operator": "Critical Metals Corp / European Lithium Ltd",
+        "coordinates": (46.840, 14.840),
+        "minedex_tenement_id": "AUT-CAR-WOLFSBERG-01",
+        "max_geofence_radius_km": 25.0,
+        "region": "Carinthia, Austria",
+        "country": "AUT",
+    },
 }
 
 
@@ -78,7 +88,7 @@ def haversine_distance_km(coord1: Tuple[float, float], coord2: Tuple[float, floa
 
 class LithiumProvenancePipeline:
     """
-    Autonomous verification engine for Australian Spodumene supply-chain provenance.
+    Autonomous verification engine for Australian & Transatlantic Spodumene supply-chain provenance.
     """
 
     def match_known_tenement(self, mine_name: str) -> Optional[Dict[str, Any]]:
@@ -86,6 +96,8 @@ class LithiumProvenancePipeline:
         for key, data in WA_LITHIUM_TENEMENT_REGISTRY.items():
             if key in norm or norm in key or data["canonical_name"].upper() in norm:
                 return data
+        if "WOLFSBERG" in norm or "EUROPEAN_LITHIUM" in norm or "CRITICAL_METALS" in norm:
+            return WA_LITHIUM_TENEMENT_REGISTRY["WOLFSBERG"]
         # Fallback: Greenbushes default if lithium mine
         if "GREENBUSHES" in norm:
             return WA_LITHIUM_TENEMENT_REGISTRY["GREENBUSHES"]
@@ -97,7 +109,7 @@ class LithiumProvenancePipeline:
         defenses: List[str] = []
 
         # -----------------------------------------------------------------
-        # 1. Geofencing & WA MINEDEX Tenement Verification
+        # 1. Geofencing & WA MINEDEX / EU CRMA Tenement Verification
         # -----------------------------------------------------------------
         matched_tenement = self.match_known_tenement(req.mine_name)
         if matched_tenement:
@@ -106,11 +118,13 @@ class LithiumProvenancePipeline:
             allowed_radius = matched_tenement["max_geofence_radius_km"]
             geofence_passed = dist_km <= allowed_radius
             tenement_id = req.minedex_tenement_id or matched_tenement["minedex_tenement_id"]
+            origin_country = matched_tenement.get("country", req.mine_country or "AU")
         else:
             # Unknown mine: measure against Greenbushes as reference
             dist_km = haversine_distance_km((req.coordinates[0], req.coordinates[1]), (-33.864, 116.006))
             geofence_passed = dist_km <= 25.0
             tenement_id = req.minedex_tenement_id or "WA-PENDING-TENEMENT"
+            origin_country = req.mine_country or "AU"
 
         if not geofence_passed:
             score -= 35.0
@@ -196,11 +210,12 @@ class LithiumProvenancePipeline:
         digest_hash = "0x" + hashlib.sha256(digest_input.encode("utf-8")).hexdigest()
 
         onchain_proof = None
+        source_ctry = "AUT" if origin_country in ("AUT", "AT") else ("AUS" if origin_country in ("AU", "AUS") else origin_country)
         try:
             onchain_proof = onchain_signer.sign_compliance_verdict(
                 lot_id=req.trace_id,
                 mineral_type="LITHIUM_HYDROXIDE",
-                source_country="AUS",
+                source_country=source_ctry,
                 score=int(final_score * 10),
                 is_compliant=ira_compliant and crma_origin_eligible,
                 digest_hash=digest_hash,
@@ -214,7 +229,7 @@ class LithiumProvenancePipeline:
             product=req.product,
             extraction_origin=ExtractionOriginEvidence(
                 mine_name=matched_tenement["canonical_name"] if matched_tenement else req.mine_name,
-                country="AU",
+                country=origin_country,
                 minedex_tenement_id=tenement_id,
                 coordinates=req.coordinates,
                 geofence_distance_km=round(dist_km, 2),
