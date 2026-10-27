@@ -34,6 +34,7 @@ load_dotenv(PROJECT_ROOT / ".env")
 
 from scripts.generate_daily_market_briefing import generate_market_briefing
 from scripts.generate_daily_eudr_briefing import generate_eudr_briefing
+from scripts.dispatch_telegram_daily_briefing import dispatch_daily_reports_to_telegram
 
 
 def send_telegram_alert(summary_text: str):
@@ -94,7 +95,13 @@ def execute_full_daily_intelligence_cycle(target_date: Optional[datetime.date] =
     else:
         print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] [EUDR] Report already exists: {eudr_report_path.name}")
 
-    # 3. Optional A.GRID Ops Clearing Dispatch
+    # 3. Automatic Telegram Delivery
+    try:
+        dispatch_daily_reports_to_telegram(target_date)
+    except Exception as exc:
+        print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] [Telegram] Dispatch notice: {exc}")
+
+    # 4. Optional A.GRID Ops Clearing Dispatch
     try:
         from app.agrid_ops_client import dispatch_clearing_event_background
         dispatch_clearing_event_background(
