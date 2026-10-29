@@ -1,0 +1,12 @@
+{
+  "pid": 4088,
+  "mode": "daemon",
+  "last_heartbeat_utc": "2026-10-29T05:17:26.192603+00:00",
+  "cycle": 1,
+  "current_day": 1,
+  "overall_readiness": 86.11,
+  "threats_neutralized": 3,
+  "working_memory_count": 1,
+  "episodic_memory_count": 2,
+  "status": "RUNNING"
+}
