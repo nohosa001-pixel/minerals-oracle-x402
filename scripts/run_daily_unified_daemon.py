@@ -118,40 +118,81 @@ def execute_full_daily_intelligence_cycle(target_date: Optional[datetime.date] =
     print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] <<< Unified Intelligence Cycle Complete for {iso_date}.\n")
 
 
+import ctypes
+
+
+def disable_windows_quick_edit():
+    """Disables QuickEdit mode in Windows console to prevent accidental click freeze."""
+    if os.name != "nt":
+        return
+    try:
+        kernel32 = ctypes.windll.kernel32
+        h_stdin = kernel32.GetStdHandle(-10)  # STD_INPUT_HANDLE = -10
+        mode = ctypes.c_uint32()
+        if kernel32.GetConsoleMode(h_stdin, ctypes.byref(mode)):
+            ENABLE_QUICK_EDIT_MODE = 0x0040
+            new_mode = mode.value & ~ENABLE_QUICK_EDIT_MODE
+            kernel32.SetConsoleMode(h_stdin, new_mode)
+    except Exception:
+        pass
+
+
+def catchup_missing_briefings(days_back: int = 2, force_now: bool = False):
+    """Scans past N days and today; automatically generates any missing reports."""
+    today = datetime.date.today()
+    reports_dir = PROJECT_ROOT / "docs" / "reports"
+    for d in range(days_back, -1, -1):
+        target_date = today - datetime.timedelta(days=d)
+        iso_date = target_date.strftime("%Y-%m-%d")
+        market_file = reports_dir / f"{iso_date}_market_briefing.md"
+        eudr_file = reports_dir / f"{iso_date}_eudr_briefing.md"
+        if force_now or not market_file.exists() or not eudr_file.exists():
+            print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] [Catch-up] Missing briefing(s) for {iso_date}. Generating...", flush=True)
+            try:
+                execute_full_daily_intelligence_cycle(target_date)
+            except Exception as exc:
+                print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] [ERROR] Cycle failed for {iso_date}: {exc}", file=sys.stderr, flush=True)
+        else:
+            print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] [Audit] {iso_date} briefings verified present.", flush=True)
+
+
 def main():
+    disable_windows_quick_edit()
+
     parser = argparse.ArgumentParser(description="Autonomous 24/7 Unified Intelligence Daemon")
     parser.add_argument("--time", type=str, default="09:00", help="Daily execution time (HH:MM 24h, default: 09:00)")
     parser.add_argument("--now", action="store_true", help="Force execute immediately on startup regardless of existing files")
+    parser.add_argument("--catchup-days", type=int, default=2, help="Number of past days to check for missing reports (default: 2)")
     args = parser.parse_args()
 
-    print("=" * 80)
-    print("  MINERALS & EUDR ORACLE X402 AUTONOMOUS UNIFIED INTELLIGENCE DAEMON")
-    print(f"  Target Schedule: Daily at {args.time} KST")
-    print("  Engine: Google Gemini 3.8 Flash with Live Google Search Grounding")
-    print("=" * 80)
+    print("=" * 80, flush=True)
+    print("  MINERALS & EUDR ORACLE X402 AUTONOMOUS UNIFIED INTELLIGENCE DAEMON", flush=True)
+    print(f"  Target Schedule: Daily at {args.time} KST", flush=True)
+    print(f"  Catch-up Window: Past {args.catchup_days} days", flush=True)
+    print("  Engine: Google Gemini 3.8 Flash with Live Google Search Grounding", flush=True)
+    print("=" * 80, flush=True)
 
-    # Initial check on launch: ensure today's reports are present
-    today = datetime.date.today()
-    reports_dir = PROJECT_ROOT / "docs" / "reports"
-    market_exists = (reports_dir / f"{today.strftime('%Y-%m-%d')}_market_briefing.md").exists()
-    eudr_exists = (reports_dir / f"{today.strftime('%Y-%m-%d')}_eudr_briefing.md").exists()
-
-    if args.now or not market_exists or not eudr_exists:
-        print(f"[Startup] Today's briefings check: Market={market_exists}, EUDR={eudr_exists}. Running maintenance...")
-        execute_full_daily_intelligence_cycle(today)
-    else:
-        print(f"[Startup] Today's briefings ({today.strftime('%Y-%m-%d')}) are already present and up to date.")
+    # Initial retrospective audit on launch
+    catchup_missing_briefings(days_back=args.catchup_days, force_now=args.now)
 
     # Register daily schedule
     schedule.every().day.at(args.time).do(execute_full_daily_intelligence_cycle)
 
-    print(f"[Daemon] Scheduled daily run set to {args.time} KST.")
-    print(f"[Daemon] Active and listening in background... (Press Ctrl+C to stop)")
+    print(f"[Daemon] Scheduled daily run set to {args.time} KST.", flush=True)
+    print(f"[Daemon] Active and listening in background with anti-freeze protection... (Press Ctrl+C to stop)", flush=True)
 
+    last_catchup_check = time.time()
     while True:
         schedule.run_pending()
+
+        # Periodic audit every 30 minutes in case system woke from sleep/hibernate
+        if time.time() - last_catchup_check > 1800:
+            last_catchup_check = time.time()
+            catchup_missing_briefings(days_back=1)
+
         time.sleep(30)
 
 
 if __name__ == "__main__":
     main()
+

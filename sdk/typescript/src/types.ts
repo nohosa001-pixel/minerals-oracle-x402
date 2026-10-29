@@ -24,7 +24,12 @@ export type MineralType =
   | 'SCANDIUM_OXIDE'
   | 'RECYCLED_BLACK_MASS'
   | 'LITHIUM_BLACK_MASS'
-  | 'NICKEL_COBALT_BLACK_MASS';
+  | 'NICKEL_COBALT_BLACK_MASS'
+  | 'INDIUM_INGOT'
+  | 'GALLIUM_METAL'
+  | 'YTTRIUM_OXIDE'
+  | 'ANTIMONY_INGOT'
+  | 'ALUMINIUM_INGOT';
 
 export type SourceCountry =
   | 'AUS'
@@ -48,7 +53,12 @@ export type SourceCountry =
   | 'ZAF'
   | 'CHN'
   | 'DEU'
-  | 'VNM';
+  | 'VNM'
+  | 'JPN'
+  | 'AUT'
+  | 'TJK'
+  | 'UZB'
+  | 'GIN';
 
 export type SupportedChain = 'polygon' | 'base' | 'arbitrum' | 'solana';
 
