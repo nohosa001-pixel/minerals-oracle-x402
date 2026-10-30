@@ -1,6 +1,6 @@
 {
   "name": "minerals-oracle-x402",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "description": "Official TypeScript/Node.js SDK for Minerals Oracle x402 - Autonomous Agent Critical Minerals Provenance & M2M Trade Protocol",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

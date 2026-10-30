@@ -293,3 +293,89 @@ export interface EscrowCalldataResponse {
   calldata: string;
   next_action: string;
 }
+
+
+// ============================================================================
+// ElizaOS Brain & Security Gate x402 4-Tier Bridge Types
+// ============================================================================
+
+export interface BrainPerceptionInput {
+  caller_agent_id: string;
+  stimulus_text: string;
+  session_id?: string;
+  origin_country?: SourceCountry | string;
+}
+
+export interface BrainPerceptionResponse {
+  is_safe: boolean;
+  decision: 'INGESTED_TO_BRAIN' | 'BLOCKED_BY_SECURITY_GATE';
+  memory_poisoning_prevented?: boolean;
+  threat_fingerprint?: string;
+  threats?: string[];
+  memory_id?: string;
+  working_memory_count?: number;
+  readiness_score?: number;
+  [key: string]: any;
+}
+
+export interface BrainExecutionInput {
+  agent_id?: string;
+  deal_id: string;
+  mineral_type: MineralType | string;
+  product_name: string;
+  declared_grade_pct: number;
+  declared_tonnage: number;
+  origin_country: SourceCountry | string;
+  destination_port?: string;
+  recipient_wallet: string;
+  trade_value_usdc?: number;
+  action_intent?: string;
+}
+
+export interface BrainExecutionResponse {
+  status: 'APPROVED_AND_EXECUTED' | 'REJECTED_METALLURGICAL_ANOMALY' | 'BLOCKED_BY_POLICY';
+  is_executable: boolean;
+  deal_id: string;
+  mineral_fact_check: {
+    is_plausible: boolean;
+    product: string;
+    grade_pct: number;
+    declared_tonnage: number;
+    reason?: string;
+  };
+  sub_account?: {
+    ephemeral_public_key: string;
+    micro_cap_limit_usd: number;
+    balance_usd: number;
+    single_use: boolean;
+    expires_at_utc: string;
+  };
+  ai_act_compliance?: {
+    eu_ai_act_art50_watermark: string;
+    synthetically_generated: boolean;
+    watermarked_at_utc: string;
+  };
+  eip712_attestation?: {
+    verifying_contract: string;
+    deal_hash: string;
+    signature_preview: string;
+  };
+  rwa_yield_vault?: {
+    eligible: boolean;
+    asset: string;
+    target_apy_pct: number;
+    transit_escrow_yield_usd: number;
+  };
+  brain_readiness_score: number;
+  [key: string]: any;
+}
+
+export interface BrainDiagnosticsResponse {
+  agent_identity: string;
+  provider_identity: string;
+  readiness_score: number;
+  working_memory_count: number;
+  episodic_memory_count: number;
+  immune_threats_neutralized: number;
+  threat_fingerprints: string[];
+}

@@ -18,7 +18,12 @@ import {
   TradeDealDualSignInput,
   TradeDealAttestation,
   EscrowCalldataResponse,
-  SupportedChain
+  SupportedChain,
+  BrainPerceptionInput,
+  BrainPerceptionResponse,
+  BrainExecutionInput,
+  BrainExecutionResponse,
+  BrainDiagnosticsResponse
 } from './types';
 
 export class MineralsOracleClient {
@@ -283,6 +288,45 @@ export class MineralsOracleClient {
     return this.request<Record<string, any>>('/api/v1/trade/harmonize-flow', {
       method: 'POST',
       body: JSON.stringify(input)
+    });
+  }
+
+  /**
+   * ElizaOS Brain & Security Gate x402: Inbound Perception Shield & Injection Filter
+   */
+  async brainPerceive(input: BrainPerceptionInput): Promise<BrainPerceptionResponse> {
+    return this.request<BrainPerceptionResponse>('/api/v1/brain/perceive', {
+      method: 'POST',
+      body: JSON.stringify(input)
+    });
+  }
+
+  /**
+   * ElizaOS Brain & Security Gate x402: Outbound Execution, Watermark & Ephemeral Air-Gap
+   */
+  async brainExecute(input: BrainExecutionInput): Promise<BrainExecutionResponse> {
+    return this.request<BrainExecutionResponse>('/api/v1/brain/execute', {
+      method: 'POST',
+      body: JSON.stringify(input)
+    });
+  }
+
+  /**
+   * ElizaOS Brain & Security Gate x402: Multi-Tier Memory & Immune Diagnostics
+   */
+  async getBrainDiagnostics(): Promise<BrainDiagnosticsResponse> {
+    return this.request<BrainDiagnosticsResponse>('/api/v1/brain/diagnostics', {
+      method: 'GET'
+    });
+  }
+
+  /**
+   * ElizaOS Brain: Ingest Daily Market & EUDR Intelligence
+   */
+  async absorbBrainIntelligence(content: string, date: string): Promise<Record<string, any>> {
+    return this.request<Record<string, any>>('/api/v1/brain/absorb-intelligence', {
+      method: 'POST',
+      body: JSON.stringify({ content, date })
     });
   }
 }
