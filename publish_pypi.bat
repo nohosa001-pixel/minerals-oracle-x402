@@ -1,17 +1,17 @@
 @echo off
 setlocal
 echo ========================================================
-echo   minerals-oracle-x402 PyPI Release Uploader
+echo   minerals-oracle-x402 v1.6.0 PyPI Release Uploader
 echo ========================================================
 
-if not exist "dist\minerals_oracle_x402-1.5.0-py3-none-any.whl" (
-    echo [ERROR] Distribution files not found in dist/. Running build...
-    python -m build
+if not exist "dist\minerals_oracle_x402-1.6.0-py3-none-any.whl" (
+    echo [*] Distribution files not found in dist/. Running build...
+    uv build
 )
 
 echo.
 echo [1/2] Verifying package with Twine...
-python -m twine check dist/*
+python -m twine check dist\minerals_oracle_x402-1.6.0*
 if errorlevel 1 (
     echo [ERROR] Twine verification failed.
     pause
@@ -20,7 +20,6 @@ if errorlevel 1 (
 
 echo.
 echo [2/2] Ready to upload to PyPI.
-echo Run the following command with your PyPI token:
-echo python -m twine upload dist/* -u __token__ -p ^<YOUR_PYPI_API_TOKEN^>
+powershell -ExecutionPolicy Bypass -File publish_pypi.ps1
 echo.
 pause

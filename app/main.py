@@ -38,6 +38,7 @@ from app.routers.logistics import router as logistics_router
 from app.routers.a2a_trade import router as a2a_trade_router
 from app.routers.oracle_pricing import router as oracle_pricing_router
 from app.routers.mcp import router as mcp_router, _MCP_SSE_SESSIONS
+from app.routers.brain import router as brain_router
 
 
 @asynccontextmanager
@@ -153,6 +154,9 @@ async def root(request: Request):
             "relay_sponsor_deal": "/api/v1/relay/sponsor-deal-attestation",
             "relay_sponsor_passport": "/api/v1/relay/sponsor-battery-passport",
             "solana_truth_attest": "/api/v1/escrow/universal/solana/attest",
+            "brain_perceive": "/api/v1/brain/perceive",
+            "brain_execute": "/api/v1/brain/execute",
+            "brain_diagnostics": "/api/v1/brain/diagnostics",
             "solana_settle": "/api/v1/escrow/universal/settle-solana",
             "docs": "/docs",
         },
@@ -608,3 +612,4 @@ app.include_router(logistics_router)
 app.include_router(a2a_trade_router)
 app.include_router(oracle_pricing_router)
 app.include_router(mcp_router)
+app.include_router(brain_router)

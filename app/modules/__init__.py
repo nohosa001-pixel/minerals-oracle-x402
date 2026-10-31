@@ -11,6 +11,7 @@ from app.modules.elizaos_brain_security_bridge import (
     BrainPerceptionRequest,
     BrainExecutionRequest
 )
+from app.modules.copernicus_eudr_bridge import CopernicusEUDRBridge
 
 __all__ = [
     "AgentSecurityGateAdapter",
@@ -18,4 +19,5 @@ __all__ = [
     "ElizaOSBrainSecurityBridge",
     "BrainPerceptionRequest",
     "BrainExecutionRequest",
+    "CopernicusEUDRBridge",
 ]

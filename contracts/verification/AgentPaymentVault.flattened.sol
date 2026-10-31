@@ -30,6 +30,7 @@ contract AgentPaymentVault {
     event AgentDeposited(address indexed agent, uint256 amountUsdc, uint256 newBalance);
     event AgentWithdrawn(address indexed agent, uint256 amountUsdc, uint256 remainingBalance);
     event BatchSettled(uint256 totalUsdcSettled, uint256 agentCount, bytes32 batchDigest);
+    event EphemeralBatchSettled(uint256 totalUsdcSettled, uint256 subAccountCount, bytes32 auditDigest);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner permitted");
@@ -117,6 +118,41 @@ contract AgentPaymentVault {
     /**
      * @notice Returns current available balance for an agent in USDC units (e.g. 10.50 USDC -> 10500000).
      */
+    /**
+     * @notice Oracle operator settles ephemeral sub-account micro-billings ($1~$5 micro-cap).
+     * @param subAccounts Array of single-use ephemeral agent addresses.
+     * @param amounts Array of micro-consumption USDC amounts.
+     * @param treasury Destination treasury wallet for oracle earnings.
+     * @param auditDigest Cryptographic proof hash of off-chain zero-leakage executions.
+     */
+    function settleEphemeralSubAccountBatch(
+        address[] calldata subAccounts,
+        uint256[] calldata amounts,
+        address treasury,
+        bytes32 auditDigest
+    ) external onlyOperator {
+        require(subAccounts.length == amounts.length, "Arrays length mismatch");
+        require(treasury != address(0), "Invalid treasury address");
+
+        uint256 totalSettled = 0;
+        for (uint256 i = 0; i < subAccounts.length; i++) {
+            address subAccount = subAccounts[i];
+            uint256 amount = amounts[i];
+            if (agentBalances[subAccount] >= amount) {
+                agentBalances[subAccount] -= amount;
+                totalConsumed[subAccount] += amount;
+                totalSettled += amount;
+            }
+        }
+
+        if (totalSettled > 0) {
+            bool success = usdcToken.transfer(treasury, totalSettled);
+            require(success, "Treasury transfer failed");
+        }
+
+        emit EphemeralBatchSettled(totalSettled, subAccounts.length, auditDigest);
+    }
+
     function getBalance(address agent) external view returns (uint256) {
         return agentBalances[agent];
     }

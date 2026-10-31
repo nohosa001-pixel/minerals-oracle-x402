@@ -57,7 +57,21 @@ class ElizaOSBrainSecurityBridge:
     _working_memory: List[Dict[str, Any]] = []
     _episodic_memory: List[Dict[str, Any]] = []
     _immune_memory: Dict[str, Dict[str, Any]] = {}  # sha256 -> Threat profile
-    _readiness_score: float = 85.84  # Continuously ascends with training cycles
+    _readiness_score: float = 87.69  # Initialized and escalates with training cycles
+
+    @classmethod
+    def _init_score_from_heartbeat(cls):
+        try:
+            import json
+            from pathlib import Path
+            project_root = Path(__file__).resolve().parent.parent.parent
+            hb_path = project_root / "data" / "minerals_brain_30day_heartbeat.json"
+            if hb_path.exists():
+                data = json.loads(hb_path.read_text(encoding="utf-8"))
+                if "overall_readiness" in data:
+                    cls._readiness_score = max(cls._readiness_score, float(data["overall_readiness"]))
+        except Exception:
+            pass
 
     # Global Port & Smelter Risk Heuristics (Learned episodic preferences)
     _PORT_INSPECTION_HEURISTICS: Dict[str, Dict[str, Any]] = {
