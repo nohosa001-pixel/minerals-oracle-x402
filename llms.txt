@@ -34,6 +34,9 @@
 
 ## ⚡ Quick Agent API Directory
 
+- **ElizaOS Brain Inbound Perception Shield**: `POST /api/v1/brain/perceive` (OWASP prompt injection/AST guard & adversarial immune memory encoding)
+- **ElizaOS Brain Outbound Sovereign Execution**: `POST /api/v1/brain/execute` (Metallurgical NLI bounds, EU AI Act Art. 50 watermark, ephemeral sub-account & RWA USDY yield)
+- **ElizaOS Brain Cognitive Diagnostics**: `GET /api/v1/brain/diagnostics` (Real-time 90.89%+ readiness score, working/episodic memory & immune stats)
 - **Harmonized Fluid Trade Flow (End-to-End Orchestrator)**: `POST /api/v1/trade/harmonize-flow` (Coordinates A2A deal, logistics/eBL, EUDR Sentinel satellite audit, multi-chain escrow & A.GRID webhook in a single fluid call)
 - **A2A Propose Trade Deal**: `POST /api/v1/trade/deals/propose` (Cryptographically signed deal specification)
 - **A2A Dual-Sign Deal**: `POST /api/v1/trade/deals/dual-sign` (Countersignature & Oracle attestation minting)
