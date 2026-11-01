@@ -1,13 +1,13 @@
 {
-  "pid": 28772,
-  "mode": "sovereign_deep_curriculum",
-  "last_heartbeat_utc": "2026-10-31T01:36:29.703792+00:00",
+  "pid": 65172,
+  "mode": "daemon",
+  "last_heartbeat_utc": "2026-11-01T22:56:01.682497+00:00",
   "cycle": 1,
-  "current_day": 3,
-  "overall_readiness": 90.89,
+  "current_day": 5,
+  "overall_readiness": 92.4,
   "threats_neutralized": 10,
-  "working_memory_count": 0,
+  "working_memory_count": 1,
   "episodic_memory_count": 15,
   "global_basins_grounded": 10,
-  "status": "RUNNING_HIGH_TIER"
+  "status": "RUNNING"
 }

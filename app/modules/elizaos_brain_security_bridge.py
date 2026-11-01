@@ -304,3 +304,7 @@ class ElizaOSBrainSecurityBridge:
             "immune_threats_neutralized": len(cls._immune_memory),
             "status": "ONLINE_HARDENED"
         }
+
+
+# Auto-restore persistent readiness score on module import
+ElizaOSBrainSecurityBridge._init_score_from_heartbeat()

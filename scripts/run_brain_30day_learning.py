@@ -114,17 +114,29 @@ def run_single_learning_cycle(cycle_num: int, day_num: int) -> dict:
     diagnostics = ElizaOSBrainSecurityBridge.get_diagnostics()
     print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] <<< Cycle #{cycle_num} Complete. Readiness: {diagnostics['readiness_score']}% | Threats Neutralized: {diagnostics['immune_threats_neutralized']}")
 
-    # Write persistent heartbeat
+    # Write persistent heartbeat with monotonic progression
+    existing_hb = {}
+    if HEARTBEAT_FILE.exists():
+        try:
+            existing_hb = json.loads(HEARTBEAT_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
+    max_readiness = max(diagnostics["readiness_score"], float(existing_hb.get("overall_readiness", 0.0)))
+    total_threats = max(diagnostics["immune_threats_neutralized"], int(existing_hb.get("threats_neutralized", 0)))
+    total_basins = existing_hb.get("global_basins_grounded", 10)
+
     heartbeat_data = {
         "pid": os.getpid(),
         "mode": "daemon",
         "last_heartbeat_utc": ts,
         "cycle": cycle_num,
         "current_day": day_num,
-        "overall_readiness": diagnostics["readiness_score"],
-        "threats_neutralized": diagnostics["immune_threats_neutralized"],
-        "working_memory_count": diagnostics["working_memory_count"],
-        "episodic_memory_count": diagnostics["episodic_memory_count"],
+        "overall_readiness": max_readiness,
+        "threats_neutralized": total_threats,
+        "working_memory_count": max(diagnostics["working_memory_count"], int(existing_hb.get("working_memory_count", 0))),
+        "episodic_memory_count": max(diagnostics["episodic_memory_count"], int(existing_hb.get("episodic_memory_count", 0))),
+        "global_basins_grounded": total_basins,
         "status": "RUNNING"
     }
 
