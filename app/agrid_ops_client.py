@@ -62,16 +62,17 @@ def dispatch_clearing_event_background(
 ):
     """Fire-and-forget background dispatcher."""
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            loop.create_task(report_clearing_event_async(
-                operation=operation,
-                amount_usdc=amount_usdc,
-                caller_agent_id=caller_agent_id,
-                chain=chain,
-                tx_hash=tx_hash,
-                is_a2a_delegation=is_a2a_delegation,
-                target_service=target_service,
-            ))
+        loop = asyncio.get_running_loop()
+        loop.create_task(report_clearing_event_async(
+            operation=operation,
+            amount_usdc=amount_usdc,
+            caller_agent_id=caller_agent_id,
+            chain=chain,
+            tx_hash=tx_hash,
+            is_a2a_delegation=is_a2a_delegation,
+            target_service=target_service,
+        ))
+    except RuntimeError:
+        pass
     except Exception as e:
         logger.debug(f"Failed to dispatch background clearing event: {e}")
