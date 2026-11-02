@@ -58,9 +58,11 @@ This guide provides everything required to verify and publicly display **`AgentP
 
 ### Polygon - Contract D: `TradeFinanceSettlementEngine.sol`
 
-* **Status**: ✅ **Registered on Multi-Chain Registry & Verification Ready**
-* **Deployed Address**: [`0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372`](https://polygonscan.com/address/0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372#code)
-* **Direct Verification URL**: [https://polygonscan.com/verifyContract?a=0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372](https://polygonscan.com/verifyContract?a=0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372)
+* **Status**: ✅ **Live On-Chain Deployed & Gas Paid by Creator**
+* **Deployed Address**: [`0x1dD725fB4860e1e9E00aA887F4bda5acD3789d10`](https://polygonscan.com/address/0x1dD725fB4860e1e9E00aA887F4bda5acD3789d10#code)
+* **Creation Tx**: [`0x09e995feb09ae1f22f9b947604e81c889df159fdeddd96c0fd08139d655f4627`](https://polygonscan.com/tx/0x09e995feb09ae1f22f9b947604e81c889df159fdeddd96c0fd08139d655f4627)
+* **Gas Paid**: `0.284443 POL`
+* **Direct Verification URL**: [https://polygonscan.com/verifyContract?a=0x1dD725fB4860e1e9E00aA887F4bda5acD3789d10](https://polygonscan.com/verifyContract?a=0x1dD725fB4860e1e9E00aA887F4bda5acD3789d10)
 * **Source File**: [`contracts/verification/TradeFinanceSettlementEngine.flattened.sol`](TradeFinanceSettlementEngine.flattened.sol)
 * **Constructor Arguments**:
   * `_usdcAddress` (Polygon Native USDC): `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`
@@ -108,9 +110,11 @@ This guide provides everything required to verify and publicly display **`AgentP
 
 ### Base - Contract D: `TradeFinanceSettlementEngine.sol`
 
-* **Status**: ✅ **Registered on Multi-Chain Registry & Verification Ready**
-* **Deployed Address**: [`0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28`](https://basescan.org/address/0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28#code)
-* **Direct Verification URL**: [https://basescan.org/verifyContract?a=0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28](https://basescan.org/verifyContract?a=0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28)
+* **Status**: ✅ **Live On-Chain Deployed & Gas Paid by Creator**
+* **Deployed Address**: [`0x9462587838fb8436C286AC9E04AAb6D42Eaf6D93`](https://basescan.org/address/0x9462587838fb8436C286AC9E04AAb6D42Eaf6D93#code)
+* **Creation Tx**: [`0x2b06d6cc192fc7c49115f7825534c07390faf4ee80b03110cb8d9de54b3f6b06`](https://basescan.org/tx/0x2b06d6cc192fc7c49115f7825534c07390faf4ee80b03110cb8d9de54b3f6b06)
+* **Gas Paid**: `0.000016 ETH`
+* **Direct Verification URL**: [https://basescan.org/verifyContract?a=0x9462587838fb8436C286AC9E04AAb6D42Eaf6D93](https://basescan.org/verifyContract?a=0x9462587838fb8436C286AC9E04AAb6D42Eaf6D93)
 * **Source File**: [`contracts/verification/TradeFinanceSettlementEngine.flattened.sol`](TradeFinanceSettlementEngine.flattened.sol)
 * **Constructor Arguments**:
   * `_usdcAddress` (Base Native USDC): `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
@@ -158,9 +162,11 @@ This guide provides everything required to verify and publicly display **`AgentP
 
 ### Arbitrum - Contract D: `TradeFinanceSettlementEngine.sol`
 
-* **Status**: ✅ **Registered on Multi-Chain Registry & Verification Ready**
-* **Deployed Address**: [`0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28`](https://arbiscan.io/address/0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28#code)
-* **Direct Verification URL**: [https://arbiscan.io/verifyContract?a=0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28](https://arbiscan.io/verifyContract?a=0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28)
+* **Status**: ✅ **Live On-Chain Deployed & Gas Paid by Creator**
+* **Deployed Address**: [`0x402E95B6aE9BBD26A227A1AE2aC7f52E14E1A314`](https://arbiscan.io/address/0x402E95B6aE9BBD26A227A1AE2aC7f52E14E1A314#code)
+* **Creation Tx**: [`0xe46dfd1ea0e6d62f33295b1ba1bcfb64b82c97abebebe2073cd7b28dc128e585`](https://arbiscan.io/tx/0xe46dfd1ea0e6d62f33295b1ba1bcfb64b82c97abebebe2073cd7b28dc128e585)
+* **Gas Paid**: `0.000033 ETH`
+* **Direct Verification URL**: [https://arbiscan.io/verifyContract?a=0x402E95B6aE9BBD26A227A1AE2aC7f52E14E1A314](https://arbiscan.io/verifyContract?a=0x402E95B6aE9BBD26A227A1AE2aC7f52E14E1A314)
 * **Source File**: [`contracts/verification/TradeFinanceSettlementEngine.flattened.sol`](TradeFinanceSettlementEngine.flattened.sol)
 * **Constructor Arguments**:
   * `_usdcAddress` (Arbitrum Native USDC): `0xaf88d065e77c8cC2239327C5EDb3A432268e5831`

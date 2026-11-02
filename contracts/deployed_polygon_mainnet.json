@@ -11,6 +11,21 @@
     "CleanWebOracleVerifier": "0x5eE3C093D8D473670A5F67306d75316123A019a9",
     "DynamicTradeEscrow": "0x3A863A2b1018B47FE79041FCDF56efEa3f8b978F",
     "AgentComplianceRegistry": "0x984C25Ff74fE9bAb094D1F60085b0Ced8eA0f2e9",
-    "TradeFinanceSettlementEngine": "0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372"
+    "TradeFinanceSettlementEngine": "0x1dD725fB4860e1e9E00aA887F4bda5acD3789d10"
+  },
+  "contracts_metadata": {
+    "TradeFinanceSettlementEngine": {
+      "address": "0x1dD725fB4860e1e9E00aA887F4bda5acD3789d10",
+      "creator": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+      "creation_tx": "09e995feb09ae1f22f9b947604e81c889df159fdeddd96c0fd08139d655f4627",
+      "blockNumber": 96591217,
+      "gas_used": 1091127,
+      "gas_fee_paid": "0.284443 POL",
+      "trustedOracle": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+      "protocolTreasury": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+      "standard": "TradeFinanceSettlementEngine-EUDR-Umpire-v1",
+      "protocolFeeBps": 15,
+      "settlementToken": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"
+    }
   }
 }

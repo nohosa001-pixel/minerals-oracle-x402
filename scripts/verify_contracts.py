@@ -35,7 +35,7 @@ NETWORKS = {
             "AgentPaymentVault": "0xb44Bc2Acdd156cE08b549A00a3102e4B01276654",
             "MineralsOracleConsumer": "0x835d01534a5D2e63D52636Fafb1019f889d1E66B",
             "DynamicTradeEscrow": "0x3A863A2b1018B47FE79041FCDF56efEa3f8b978F",
-            "TradeFinanceSettlementEngine": "0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372"
+            "TradeFinanceSettlementEngine": "0x1dD725fB4860e1e9E00aA887F4bda5acD3789d10"
         }
     },
     "base": {
@@ -50,7 +50,7 @@ NETWORKS = {
             "AgentPaymentVault": "0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d",
             "MineralsOracleConsumer": "0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
             "DynamicTradeEscrow": "0x54786360Db4582AEC2435E216479FD4ff093CB80",
-            "TradeFinanceSettlementEngine": "0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28"
+            "TradeFinanceSettlementEngine": "0x9462587838fb8436C286AC9E04AAb6D42Eaf6D93"
         }
     },
     "arbitrum": {
@@ -65,7 +65,7 @@ NETWORKS = {
             "AgentPaymentVault": "0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d",
             "MineralsOracleConsumer": "0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
             "DynamicTradeEscrow": "0x54786360Db4582AEC2435E216479FD4ff093CB80",
-            "TradeFinanceSettlementEngine": "0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28"
+            "TradeFinanceSettlementEngine": "0x402E95B6aE9BBD26A227A1AE2aC7f52E14E1A314"
         }
     }
 }
