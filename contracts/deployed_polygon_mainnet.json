@@ -2,6 +2,7 @@
   "chain_id": 137,
   "chain_name": "Polygon Mainnet",
   "deployer": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+  "creator": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
   "contracts": {
     "AgentPaymentVault": "0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68",
     "MineralsOracleConsumer": "0x5F565115441188b5dCa06539615Fc154BC7f3028",
