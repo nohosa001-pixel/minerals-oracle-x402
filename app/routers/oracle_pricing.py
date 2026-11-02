@@ -32,6 +32,7 @@ from app.gasless_relayer import (
     gasless_relayer,
     SponsoredDealAttestationRequest,
     SponsoredPassportMintRequest,
+    MultiChainBroadcastRequest,
     GaslessRelayResponse,
 )
 from app.eudr_client import eudr_client
@@ -561,11 +562,33 @@ async def get_relayer_info_route():
         "status": "ACTIVE",
         "relayer_address": gasless_relayer.relayer_address,
         "chain_id": gasless_relayer.chain_id,
-        "network": "Polygon Mainnet",
+        "network": "Polygon Mainnet (Multi-Chain Enabled)",
+        "supported_networks": ["Polygon (137)", "Base (8453)", "Arbitrum One (42161)"],
         "contract_address": gasless_relayer.contract_address,
-        "sponsored_operations": ["A2A_DEAL_ATTESTATION_ANCHOR", "BATTERY_PASSPORT_MINT"],
+        "sponsored_operations": ["A2A_DEAL_ATTESTATION_ANCHOR", "BATTERY_PASSPORT_MINT", "MULTICHAIN_GAS_SPONSOR"],
         "max_sponsored_gas_pol": 0.05,
     }
+
+
+@router.get("/api/v1/relay/multichain/gas-balances", tags=["On-Chain Smart Contract Binding"])
+async def get_multichain_gas_balances_route():
+    """
+    Returns real-time native gas balances (POL, ETH) across Polygon, Base, and Arbitrum
+    ensuring autonomous agents can pay gas fees across all 3 networks.
+    """
+    return gasless_relayer.get_multichain_gas_balances()
+
+
+@router.post("/api/v1/relay/multichain/pay-gas-and-broadcast", tags=["On-Chain Smart Contract Binding"])
+async def pay_gas_and_broadcast_route(body: MultiChainBroadcastRequest):
+    """
+    Directly broadcasts on-chain transaction paying gas in native tokens (POL / ETH)
+    from deployer / creator wallet.
+    """
+    try:
+        return gasless_relayer.pay_and_broadcast_transaction(body)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
 
 
 # =====================================================================
