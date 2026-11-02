@@ -332,3 +332,20 @@ def test_agrid_total_cost_orchestrator():
     # Verify A.GRID Central sync telemetry
     assert report["agrid_central_ledger_sync"]["status"] == "DISPATCHED_TO_AGRID_OPS_HQ"
     assert report["sovereign_market_verdict"]["position"] == "PEERLESS_MONOPOLISTIC_CLEARINGHOUSE"
+
+
+def test_autonomous_evolution_substrate():
+    from app.modules.autonomous_evolution_substrate import AutonomousEvolutionSubstrate
+
+    maturity = AutonomousEvolutionSubstrate.evaluate_evolutionary_maturity()
+    assert maturity["substrate_identity"] == "urn:agrid:autonomous-evolution-substrate:v1"
+
+    metrics = maturity["evolution_metrics"]
+    assert metrics["curriculum_day"] >= 5
+    assert metrics["cognitive_readiness_score"] >= 90.0
+    assert metrics["evolutionary_crystallization_index"] > 80.0
+    assert metrics["self_evolution_state"] == "AUTONOMOUSLY_EVOLVING_ACTIVE"
+
+    permeation = maturity["societal_permeation_attributes"]
+    assert permeation["visibility_mode"] == "SUBTERRANEAN_ZERO_FOOTPRINT"
+    assert "cryptographic_substrate_digest" in permeation

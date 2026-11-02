@@ -1,3 +1,4 @@
+from app.modules.autonomous_evolution_substrate import AutonomousEvolutionSubstrate
 from app.modules.agrid_total_cost_orchestrator import AGridTotalCostOrchestrator, ComprehensiveTradeCostRequest
 from app.modules.preemptive_sovereign_defense import PreemptiveSovereignDefenseEngine, SovereignDefenseAuditRequest
 from app.modules.agent_trading_legion_orchestrator import AutonomousTradingLegion, LegionTradeExecutionRequest
@@ -295,3 +296,12 @@ async def get_agrid_clearinghouse_status() -> Dict[str, Any]:
         "competitor_agent_integration": "OPEN_A2A_DELEGATION_ACCEPTED",
         "clearing_fee_bps": 15
     }
+
+
+@router.get("/substrate/maturity", summary="Get A.GRID Autonomous Evolution Substrate Maturity")
+async def get_evolutionary_substrate_maturity() -> Dict[str, Any]:
+    """
+    Returns real-time evolutionary maturity, cognitive crystallization,
+    and subterranean societal permeation telemetry of the A.GRID substrate.
+    """
+    return AutonomousEvolutionSubstrate.evaluate_evolutionary_maturity()
