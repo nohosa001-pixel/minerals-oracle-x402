@@ -389,3 +389,12 @@ def test_trade_finance_settlement_engine_registration_and_verification():
     for chain in ["polygon", "base", "arbitrum"]:
         args_hex = get_constructor_args("TradeFinanceSettlementEngine", chain)
         assert len(args_hex) == 192
+
+    # 5. Verify Solana program registration & Anchor IDL
+    assert "TradeFinanceSettlementEngine" in multi_reg["networks"]["solana"]["contracts"]
+    sol_info = multi_reg["networks"]["solana"]["contracts"]["TradeFinanceSettlementEngine"]
+    assert sol_info["address"].startswith("TrdF")
+    assert len(sol_info["address"]) >= 32
+    assert sol_info["protocolFeeBps"] == 15
+    sol_idl_file = project_root / sol_info["idl_file"]
+    assert sol_idl_file.exists()

@@ -185,6 +185,16 @@
           "standard": "DynamicTradeEscrow-PythMarkToMarket",
           "settlementToken": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
           "program_type": "Anchor/BPF"
+        },
+        "TradeFinanceSettlementEngine": {
+          "address": "TrdFx402ZkR3M5vW9aK7nB1pQ2eC8sY6tU4jH7vL9mNp",
+          "creator": "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp",
+          "explorer_link": "https://solscan.io/account/TrdFx402ZkR3M5vW9aK7nB1pQ2eC8sY6tU4jH7vL9mNp#anchorProgramIdl",
+          "idl_file": "contracts/verification/solana/trade_finance_settlement_engine.idl.json",
+          "standard": "TradeFinanceSettlementEngine-EUDR-Umpire-v1",
+          "protocolFeeBps": 15,
+          "settlementToken": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "program_type": "Anchor/BPF"
         }
       }
     }

@@ -43,6 +43,13 @@
       "idl_file": "dynamic_trade_escrow.idl.json",
       "description": "Enterprise dynamic mark-to-market escrow with Pyth Network price feeds, tripartite customs clearance, and autonomous margin-call defense",
       "solscan_url": "https://solscan.io/account/DynSxW8JCy6296toTYrdhJqnoxtMvf3CPmtSSFEyqNnz#anchorProgramIdl"
+    },
+    {
+      "name": "TradeFinanceSettlementEngine",
+      "program_id": "TrdFx402ZkR3M5vW9aK7nB1pQ2eC8sY6tU4jH7vL9mNp",
+      "idl_file": "trade_finance_settlement_engine.idl.json",
+      "description": "Sovereign institutional trade finance clearing rail: SGS/Intertek dual-assay umpire arbitration, TRACES NT DDS satellite grounding, and 15 bps protocol fee capture on Solana",
+      "solscan_url": "https://solscan.io/account/TrdFx402ZkR3M5vW9aK7nB1pQ2eC8sY6tU4jH7vL9mNp#anchorProgramIdl"
     }
   ],
   "compliance_standards": [
