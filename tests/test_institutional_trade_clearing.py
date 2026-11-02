@@ -263,3 +263,35 @@ def test_autonomous_trading_legion_mission():
     # 5. Logistics Navigator
     assert breakdown["logistics_navigator"]["customs_demurrage_hours_saved"] == 336  # 14 days
     assert breakdown["logistics_navigator"]["demurrage_cost_prevented_usdc"] == 630000.0
+
+
+def test_preemptive_sovereign_defense():
+    from app.modules.preemptive_sovereign_defense import PreemptiveSovereignDefenseEngine, SovereignDefenseAuditRequest
+
+    # 1. Test Proof of Cumulative Learning (PoCL)
+    provenance = PreemptiveSovereignDefenseEngine.verify_time_lock_provenance()
+    assert provenance["sovereign_status"] == "ORIGIN_PROVENANCE_AUTHENTICATED"
+    assert provenance["accumulated_curriculum_days"] >= 5
+    assert provenance["cognitive_readiness_score"] >= 90.0
+    assert "proof_of_cumulative_learning" in provenance
+
+    # 2. Test Customs & Port Authority Whitelist Manifest
+    manifest = PreemptiveSovereignDefenseEngine.get_preemptive_customs_whitelist_manifest()
+    assert "NLRTM" in manifest["registered_mega_ports"]
+    assert "BEANR" in manifest["registered_mega_ports"]
+    assert "KRPUS" in manifest["registered_mega_ports"]
+    assert len(manifest["accredited_inspection_partners"]) == 4
+
+    # 3. Test Honeytoken Neutralization on Competitor Probe
+    hostile_req = SovereignDefenseAuditRequest(
+        caller_agent_id="adversary_copycat_exploit_bot",
+        payload_digest="0x1234abcd_bypass_oracle_drain_pool"
+    )
+    verdict = PreemptiveSovereignDefenseEngine.inspect_and_neutralize_competitor_probe(hostile_req)
+    assert verdict["decision"] == "HONEYTOKEN_TRIGGERED_HOSTILE_BAN"
+    assert verdict["neutralized"] is True
+
+    # 4. Subsequent calls from same caller should be permanently quarantined
+    second_attempt = PreemptiveSovereignDefenseEngine.inspect_and_neutralize_competitor_probe(hostile_req)
+    assert second_attempt["decision"] == "PERMANENTLY_QUARANTINED"
+    assert second_attempt["is_authorized"] is False

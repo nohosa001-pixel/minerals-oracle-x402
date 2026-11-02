@@ -1,3 +1,4 @@
+from app.modules.preemptive_sovereign_defense import PreemptiveSovereignDefenseEngine, SovereignDefenseAuditRequest
 from app.modules.agent_trading_legion_orchestrator import AutonomousTradingLegion, LegionTradeExecutionRequest
 from app.modules.trade_exclusion_penalty_engine import TradeExclusionPenaltyEngine, TradeExclusionAuditRequest
 # -*- coding: utf-8 -*-
@@ -228,3 +229,30 @@ async def get_trading_legion_status() -> Dict[str, Any]:
         "protocol_toll_bps": 15,
         "swarm_status": "SOVEREIGN_TRADE_HEGEMONY_READY"
     }
+
+
+@router.get("/defense/time-lock-provenance", summary="Get Cryptographic Proof of Cumulative Learning")
+async def get_time_lock_provenance() -> Dict[str, Any]:
+    """
+    Returns mathematically verifiable Proof of Cumulative Learning (PoCL)
+    demonstrating our unforgeable 30-day time-series satellite learning advantage.
+    """
+    return PreemptiveSovereignDefenseEngine.verify_time_lock_provenance()
+
+
+@router.get("/defense/customs-whitelist", summary="Get Preemptive Customs & Port Authority Trust Manifest")
+async def get_customs_whitelist_manifest() -> Dict[str, Any]:
+    """
+    Returns the official Root Whitelist Manifest registered across Rotterdam, Antwerp,
+    Busan, Shanghai, and LA. Competitor copycats are rejected by default.
+    """
+    return PreemptiveSovereignDefenseEngine.get_preemptive_customs_whitelist_manifest()
+
+
+@router.post("/defense/audit-probe", summary="Inspect & Neutralize Hostile Competitor Probes")
+async def audit_and_neutralize_probe(req: SovereignDefenseAuditRequest) -> Dict[str, Any]:
+    """
+    Inspects incoming caller requests against the Honeytoken defense mesh.
+    Hostile reverse-engineering attempts are permanently quarantined.
+    """
+    return PreemptiveSovereignDefenseEngine.inspect_and_neutralize_competitor_probe(req)
