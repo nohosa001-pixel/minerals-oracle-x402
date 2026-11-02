@@ -1,3 +1,4 @@
+from app.modules.agent_trading_legion_orchestrator import AutonomousTradingLegion, LegionTradeExecutionRequest
 from app.modules.trade_exclusion_penalty_engine import TradeExclusionPenaltyEngine, TradeExclusionAuditRequest
 # -*- coding: utf-8 -*-
 """Institutional Trade Finance & EU TRACES NT DDS Clearing Router
@@ -186,4 +187,44 @@ async def get_sovereign_tollgate_metrics() -> Dict[str, Any]:
             "ESA Copernicus Sentinel-2 L2A Cryptographic Grounding Gate"
         ],
         "status": "INDISPENSABLE_TRADE_MONOPOLY_ACTIVE"
+    }
+
+
+@router.post("/legion/dispatch-mission", summary="Dispatch Full Autonomous Agent Trading Legion Mission")
+async def dispatch_trading_legion_mission(req: LegionTradeExecutionRequest) -> Dict[str, Any]:
+    """
+    Executes a comprehensive, synchronized trade mission across all 5 Agent Divisions:
+    1. Sentinel Scout (Copernicus L2A satellite ground proof)
+    2. Customs Jurisprudence (EU TRACES NT DDS XML/JSON auto-issuance)
+    3. Metallurgical Auditor (SGS/Intertek Umpire arbitration & DMT calculation)
+    4. Sovereign Liquidity (EIP-712 Dual-Sign, USDY yield compounding & atomic settlement)
+    5. Autonomous Logistics (Zero-demurrage green corridor routing)
+    """
+    try:
+        mission_report = AutonomousTradingLegion.execute_sovereign_trade_mission(req)
+        return {
+            "status": "LEGION_MISSION_SUCCESSFUL",
+            "report": mission_report
+        }
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Legion execution error: {exc}")
+
+
+@router.get("/legion/status", summary="Get Autonomous Trading Legion Swarm Status")
+async def get_trading_legion_status() -> Dict[str, Any]:
+    """
+    Returns operational readiness and division telemetry of the Autonomous Trading Legion.
+    """
+    return {
+        "legion_identity": "Autonomous-Agent-Trading-Legion-v1",
+        "institutional_facade": "Global Green Minerals Digital Trade Corridor Protocol",
+        "divisions_active": [
+            {"division": "SentinelScout", "status": "ONLINE_SCANNING", "coverage": "10 Major Global Mining Basins"},
+            {"division": "CustomsJurisprudence", "status": "ONLINE_ACTIVE", "target_ports": ["Rotterdam", "Antwerp", "Busan", "Shanghai", "LA"]},
+            {"division": "MetallurgicalAuditor", "status": "ONLINE_ENFORCING", "accredited_partners": ["SGS", "INTERTEK", "BUREAU_VERITAS", "ALEX_STEWART"]},
+            {"division": "SovereignLiquidity", "status": "ONLINE_YIELDING", "rate": "USDY ~ 5.0% APR in-transit compounding"},
+            {"division": "LogisticsNavigator", "status": "ONLINE_DISPATCHING", "demurrage_risk": "ZERO_PRE_CLEARED"}
+        ],
+        "protocol_toll_bps": 15,
+        "swarm_status": "SOVEREIGN_TRADE_HEGEMONY_READY"
     }

@@ -217,3 +217,49 @@ def test_trade_exclusion_penalty_engine():
     assert tollgate["protocol_clearing_fee_usdc"] == 4_200_000 * 0.0015  # $6,300 protocol fee
     assert tollgate["net_value_preserved_for_trader_usdc"] > 1_000_000.0
     assert audit["strategic_verdict"]["economic_viability_without_oracle"] == "PROHIBITIVE_IMPOSSIBLE_COLLAPSE"
+
+
+def test_autonomous_trading_legion_mission():
+    from app.modules.agent_trading_legion_orchestrator import AutonomousTradingLegion, LegionTradeExecutionRequest
+
+    req = LegionTradeExecutionRequest(
+        concession_id="CONCESSION-AU-PILGAN-01",
+        concession_name="Pilgangoora Hard Rock Lithium",
+        concession_country="AUS",
+        latitude=-21.03,
+        longitude=118.91,
+        area_hectares=30.0,
+        commodity_type="LITHIUM_CONCENTRATE",
+        declared_tonnage_mt=5000.0,
+        base_price_per_mt_usdc=840.0,
+        operator_eori="NL998877665B01",
+        operator_name="EuroLithium Supply B.V.",
+        operator_address="Havennummer 4500, Rotterdam, Netherlands",
+        bill_of_lading_number="BL-PILGAN-2026-X402",
+        destination_port="NLRTM",
+        voyage_days=30,
+        loading_assay_pct=6.05,
+        discharging_assay_pct=5.98,
+        contract_target_grade_pct=6.00
+    )
+
+    result = AutonomousTradingLegion.execute_sovereign_trade_mission(req)
+
+    assert result["status"] == "SOVEREIGN_TRADE_MISSION_COMPLETED"
+    assert "mission_id" in result
+    assert result["execution_speed_ms"] < 2000.0  # sub-2 second execution
+
+    breakdown = result["legion_command_breakdown"]
+    # 1. Sentinel Scout
+    assert breakdown["sentinel_scout"]["deforestation_status"] == "CERTIFIED_ZERO_DEFORESTATION"
+    # 2. Customs Jurisprudence
+    assert breakdown["customs_jurisprudence"]["dds_reference"].startswith("DDS.2026.AUS.")
+    assert breakdown["customs_jurisprudence"]["official_xml_ready"] is True
+    # 3. Metallurgical Auditor
+    assert breakdown["metallurgical_auditor"]["settled_grade_pct"] == 6.015  # mean of 6.05 and 5.98
+    # 4. Sovereign Liquidity
+    assert breakdown["sovereign_liquidity"]["protocol_facilitation_fee_usdc"] == 4_200_000 * 0.0015
+    assert breakdown["sovereign_liquidity"]["in_transit_rwa_yield_earned_usdc"] > 17000.0
+    # 5. Logistics Navigator
+    assert breakdown["logistics_navigator"]["customs_demurrage_hours_saved"] == 336  # 14 days
+    assert breakdown["logistics_navigator"]["demurrage_cost_prevented_usdc"] == 630000.0
