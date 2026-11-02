@@ -38,7 +38,7 @@ jobs:
         env:
           PYTHONPATH: .
         run: |
-          python -m pytest -v tests/
+          python -m pytest -v tests/ || { echo "### Pytest Failure Details (${{ matrix.python-version }})" >> $GITHUB_STEP_SUMMARY; python -m pytest --last-failed -vv --tb=short tests/ | tee -a $GITHUB_STEP_SUMMARY; exit 1; }
 
       - name: Validate Contract Verification & Multi-Chain Registry
         env:

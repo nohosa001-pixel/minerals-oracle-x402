@@ -80,6 +80,4 @@ exclude = ["app.__pycache__*", "tests*", "*.pyc"]
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
-
-
-
+asyncio_mode = "auto"
