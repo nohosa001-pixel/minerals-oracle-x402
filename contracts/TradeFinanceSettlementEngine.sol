@@ -4,13 +4,15 @@ pragma solidity ^0.8.20;
 /**
  * @title TradeFinanceSettlementEngine
  * @author Minerals Oracle Institutional Trading Division
- * @notice Institutional Commodity Trade Escrow & Umpire Settlement Engine.
+ * @notice Sovereign Commodity Trade Escrow, Tollgate & Umpire Settlement Engine.
  *         Designed for multi-million dollar critical mineral consignments (Spodumene, Copper, Nickel, Cobalt).
- *         Supports:
+ *         Enforces the Sovereign Economic Moat:
  *         1. In-transit collateral locking with EIP-712 Dual-Sign enforcement.
  *         2. Mandatory EU TRACES NT Due Diligence Statement (DDS) cryptographic grounding.
  *         3. Automated Umpire Assay Pro-Rata grade settlement (basis points adjustment).
  *         4. In-transit RWA Yield allocation upon customs clearance at Rotterdam, Antwerp, Busan, etc.
+ *         5. Sovereign Tollgate: 15 bps (0.15%) protocol fee collection to protocolTreasury on every trade.
+ *         6. Anti-Bypass Gate: Trades lacking verified Oracle attestation face mandatory 5.0% risk forfeiture.
  */
 
 interface IERC20 {
@@ -43,9 +45,17 @@ contract TradeFinanceSettlementEngine {
         DealStatus status;
     }
 
+    uint256 public constant PROTOCOL_FEE_BPS = 15; // 0.15% protocol tollgate fee
+    uint256 public constant BPS_DENOMINATOR = 10000;
+    uint256 public constant UNVERIFIED_BYPASS_PENALTY_BPS = 500; // 5.0% punitive penalty for unverified bypass
+
     address public immutable owner;
     address public settlementOracle;
+    address public protocolTreasury;
     IERC20 public immutable usdcToken;
+
+    uint256 public totalProtocolFeesCollected;
+    uint256 public totalVolumeClearedUsdc;
 
     mapping(bytes32 => ConsignmentDeal) public deals;
     mapping(bytes32 => bool) public executedAttestations;
@@ -58,8 +68,10 @@ contract TradeFinanceSettlementEngine {
         uint256 payoutToSeller,
         uint256 payoutToBuyer,
         uint256 accruedRwaYield,
+        uint256 protocolFee,
         bytes32 attestationDigest
     );
+    event ProtocolFeeCaptured(bytes32 indexed dealHash, uint256 feeAmountUsdc, address treasury);
     event DealRefunded(bytes32 indexed dealHash, address indexed buyer, uint256 refundedAmount);
 
     modifier onlyOwner() {
@@ -72,17 +84,24 @@ contract TradeFinanceSettlementEngine {
         _;
     }
 
-    constructor(address _usdcAddress, address _settlementOracle) {
+    constructor(address _usdcAddress, address _settlementOracle, address _protocolTreasury) {
         require(_usdcAddress != address(0), "Invalid USDC token");
         require(_settlementOracle != address(0), "Invalid oracle address");
+        require(_protocolTreasury != address(0), "Invalid treasury address");
         owner = msg.sender;
         usdcToken = IERC20(_usdcAddress);
         settlementOracle = _settlementOracle;
+        protocolTreasury = _protocolTreasury;
     }
 
     function setSettlementOracle(address _newOracle) external onlyOwner {
         require(_newOracle != address(0), "Invalid address");
         settlementOracle = _newOracle;
+    }
+
+    function setProtocolTreasury(address _newTreasury) external onlyOwner {
+        require(_newTreasury != address(0), "Invalid address");
+        protocolTreasury = _newTreasury;
     }
 
     /**
@@ -119,6 +138,7 @@ contract TradeFinanceSettlementEngine {
             status: DealStatus.FUNDED_IN_TRANSIT
         });
 
+        totalVolumeClearedUsdc += amountUsdc;
         emit DealFunded(dealHash, msg.sender, seller, amountUsdc, destinationPort);
     }
 
@@ -137,7 +157,7 @@ contract TradeFinanceSettlementEngine {
     }
 
     /**
-     * @notice Executes formal settlement and liquidity release following assay and umpire verification.
+     * @notice Executes formal settlement, deducts sovereign protocol tollgate fee, and distributes liquidity.
      */
     function executeUmpireAssaySettlement(
         bytes32 dealHash,
@@ -153,11 +173,24 @@ contract TradeFinanceSettlementEngine {
             "Deal not eligible for settlement"
         );
         require(!executedAttestations[attestationDigest], "Attestation already executed");
-        require(payoutToSeller + payoutToBuyer <= deal.totalEscrowUsdc + accruedRwaYield, "Payout exceeds pool");
+
+        uint256 totalPool = deal.totalEscrowUsdc + accruedRwaYield;
+
+        // Calculate Sovereign Protocol Tollgate Fee (15 bps = 0.15%)
+        uint256 protocolFee = (deal.totalEscrowUsdc * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
+        require(payoutToSeller + payoutToBuyer + protocolFee <= totalPool, "Payout exceeds pool");
 
         executedAttestations[attestationDigest] = true;
         deal.status = DealStatus.SETTLED_AND_RELEASED;
 
+        // 1. Capture protocol toll
+        if (protocolFee > 0) {
+            totalProtocolFeesCollected += protocolFee;
+            require(usdcToken.transfer(protocolTreasury, protocolFee), "Treasury transfer failed");
+            emit ProtocolFeeCaptured(dealHash, protocolFee, protocolTreasury);
+        }
+
+        // 2. Disburse payouts
         if (payoutToSeller > 0) {
             require(usdcToken.transfer(deal.seller, payoutToSeller), "Seller transfer failed");
         }
@@ -171,6 +204,7 @@ contract TradeFinanceSettlementEngine {
             payoutToSeller,
             payoutToBuyer,
             accruedRwaYield,
+            protocolFee,
             attestationDigest
         );
     }

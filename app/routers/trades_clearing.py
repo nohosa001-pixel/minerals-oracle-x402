@@ -1,3 +1,4 @@
+from app.modules.trade_exclusion_penalty_engine import TradeExclusionPenaltyEngine, TradeExclusionAuditRequest
 # -*- coding: utf-8 -*-
 """Institutional Trade Finance & EU TRACES NT DDS Clearing Router
 ==================================================================
@@ -147,4 +148,42 @@ async def get_institutional_specs() -> Dict[str, Any]:
         "eudr_regulation": "REGULATION_EU_2023_1115_EUDR",
         "customs_corridors": ["NLRTM (Rotterdam)", "BEANR (Antwerp)", "KRPUS (Busan)", "CNSHA (Shanghai)", "USLAX (Los Angeles)"],
         "in_transit_rwa_yield_source": "Ondo Short-Term US Treasury (USDY) ~5.0% APR"
+    }
+
+
+
+@router.post("/economic-moat/exclusion-cost-audit", summary="Audit Cost Explosion of Excluding Minerals Oracle")
+async def audit_trade_exclusion_penalties(req: TradeExclusionAuditRequest) -> Dict[str, Any]:
+    """
+    Quantifies the catastrophic cost penalties incurred if Minerals Oracle is bypassed
+    or excluded from a cross-border mineral transaction (demurrage, L/C spread, EUDR fine, legal dispute).
+    """
+    try:
+        audit_result = TradeExclusionPenaltyEngine.calculate_exclusion_cost_explosion(req)
+        return {
+            "status": "EXCLUSION_AUDIT_COMPLETED",
+            "audit_verdict": audit_result
+        }
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Exclusion audit error: {exc}")
+
+
+@router.get("/economic-moat/tollgate-metrics", summary="Get Sovereign Tollgate Monopoly Economics")
+async def get_sovereign_tollgate_metrics() -> Dict[str, Any]:
+    """
+    Returns operational economics of the Minerals Oracle Tollgate architecture.
+    """
+    return {
+        "tollgate_sovereign_identity": "Minerals-Oracle-X402-Sovereign-Tollkeeper",
+        "standard_protocol_toll_bps": 15,  # 0.15% of gross trade value
+        "unverified_bypass_penalty_bps": 500,  # 5.00% mandatory risk forfeiture
+        "in_transit_rwa_yield_retention_pct": 10.0,  # 10% performance fee on in-transit USDY yield
+        "minimum_exclusion_cost_multiplier": "15x - 40x",  # Trading without us costs 15x to 40x more
+        "enforcement_channels": [
+            "European Commission TRACES NT Customs Pre-Clearance Registry",
+            "SGS / Intertek Accredited Umpire Attestation Bridge",
+            "EIP-712 Smart Contract Settlement Engine (Polygon / Base)",
+            "ESA Copernicus Sentinel-2 L2A Cryptographic Grounding Gate"
+        ],
+        "status": "INDISPENSABLE_TRADE_MONOPOLY_ACTIVE"
     }

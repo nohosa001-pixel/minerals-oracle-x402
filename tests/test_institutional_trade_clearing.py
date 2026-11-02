@@ -186,3 +186,34 @@ def test_umpire_settlement_exceeding_tolerance_arbitration():
     total_payout = res["financial_clearing"]["payout_to_seller_usdc"] + res["financial_clearing"]["payout_to_buyer_usdc"]
     total_pool = req.escrow_deposit_usdc + res["financial_clearing"]["accrued_rwa_transit_yield_usdc"]
     assert abs(total_payout - total_pool) <= 1.0  # Allow for rounding cents
+
+
+
+def test_trade_exclusion_penalty_engine():
+    from app.modules.trade_exclusion_penalty_engine import TradeExclusionPenaltyEngine, TradeExclusionAuditRequest
+
+    req = TradeExclusionAuditRequest(
+        deal_id="MOAT-TEST-001",
+        commodity_type="LITHIUM_CONCENTRATE",
+        cargo_gross_value_usdc=4_200_000.0,
+        declared_tonnage_mt=5000.0,
+        origin_country="AUS",
+        destination_port="NLRTM",
+        maritime_voyage_days=35
+    )
+
+    audit = TradeExclusionPenaltyEngine.calculate_exclusion_cost_explosion(req)
+
+    # 1. Verify catastrophic breakdown
+    catastrophe = audit["exclusion_catastrophe_breakdown"]
+    assert catastrophe["vessel_anchorage_demurrage_usdc"] == 45000.0 * 14  # $630,000 demurrage
+    assert catastrophe["traditional_bank_lc_spread_usdc"] == 4_200_000 * 0.0125  # $52,500 L/C fee
+    assert catastrophe["forfeited_transit_treasury_yield_usdc"] > 20000.0  # ~$20,136 yield lost
+    assert catastrophe["total_exclusion_penalty_usdc"] > 1_000_000.0  # > $1M penalty on $4.2M cargo!
+    assert catastrophe["penalty_burden_as_pct_of_cargo"] >= 20.0  # >= 20% cost explosion!
+
+    # 2. Verify Tollgate Economics
+    tollgate = audit["minerals_oracle_tollgate_clearing"]
+    assert tollgate["protocol_clearing_fee_usdc"] == 4_200_000 * 0.0015  # $6,300 protocol fee
+    assert tollgate["net_value_preserved_for_trader_usdc"] > 1_000_000.0
+    assert audit["strategic_verdict"]["economic_viability_without_oracle"] == "PROHIBITIVE_IMPOSSIBLE_COLLAPSE"
