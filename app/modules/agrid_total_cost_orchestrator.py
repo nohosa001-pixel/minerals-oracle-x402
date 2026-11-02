@@ -161,3 +161,4 @@ class AGridTotalCostOrchestrator:
                 "cryptographic_attestation_digest": f"0x{digest}"
             }
         }
+

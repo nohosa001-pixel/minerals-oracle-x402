@@ -70,3 +70,4 @@ A moat built by **deep architectural indispensability** lasts for generations:
 ```
 
 *Written for the builders of the quiet foundation.*
+

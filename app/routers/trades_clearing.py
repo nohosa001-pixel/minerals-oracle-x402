@@ -1,9 +1,5 @@
-from app.modules.autonomous_evolution_substrate import AutonomousEvolutionSubstrate
-from app.modules.agrid_total_cost_orchestrator import AGridTotalCostOrchestrator, ComprehensiveTradeCostRequest
-from app.modules.preemptive_sovereign_defense import PreemptiveSovereignDefenseEngine, SovereignDefenseAuditRequest
-from app.modules.agent_trading_legion_orchestrator import AutonomousTradingLegion, LegionTradeExecutionRequest
-from app.modules.trade_exclusion_penalty_engine import TradeExclusionPenaltyEngine, TradeExclusionAuditRequest
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 """Institutional Trade Finance & EU TRACES NT DDS Clearing Router
 ==================================================================
 REST endpoints for global critical mineral trading desks:
@@ -11,8 +7,6 @@ REST endpoints for global critical mineral trading desks:
 - International Umpire Assay arbitration and pro-rata price adjustment.
 - EIP-712 Dual-Sign Escrow and in-transit RWA Yield clearing.
 """
-
-from __future__ import annotations
 
 from typing import Dict, Any, Optional
 from fastapi import APIRouter, HTTPException, Query, Response
@@ -24,7 +18,11 @@ from app.modules.umpire_assay_settlement import (
     CommercialSettlementRequest,
     InspectionCertificate
 )
-
+from app.modules.autonomous_evolution_substrate import AutonomousEvolutionSubstrate
+from app.modules.agrid_total_cost_orchestrator import AGridTotalCostOrchestrator, ComprehensiveTradeCostRequest
+from app.modules.preemptive_sovereign_defense import PreemptiveSovereignDefenseEngine, SovereignDefenseAuditRequest
+from app.modules.agent_trading_legion_orchestrator import AutonomousTradingLegion, LegionTradeExecutionRequest
+from app.modules.trade_exclusion_penalty_engine import TradeExclusionPenaltyEngine, TradeExclusionAuditRequest
 router = APIRouter(prefix="/api/v1/trade", tags=["Institutional Trade Clearing"])
 
 

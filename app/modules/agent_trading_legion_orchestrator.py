@@ -201,3 +201,4 @@ class AutonomousTradingLegion:
                 "sovereign_cryptographic_seal": f"0x{cryptographic_seal}"
             }
         }
+
