@@ -39,6 +39,7 @@ from app.routers.a2a_trade import router as a2a_trade_router
 from app.routers.oracle_pricing import router as oracle_pricing_router
 from app.routers.mcp import router as mcp_router, _MCP_SSE_SESSIONS
 from app.routers.brain import router as brain_router
+from app.routers.trades_clearing import router as trades_clearing_router
 
 
 @asynccontextmanager
@@ -613,3 +614,4 @@ app.include_router(a2a_trade_router)
 app.include_router(oracle_pricing_router)
 app.include_router(mcp_router)
 app.include_router(brain_router)
+app.include_router(trades_clearing_router)

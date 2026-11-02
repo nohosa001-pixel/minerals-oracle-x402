@@ -1,0 +1,150 @@
+# -*- coding: utf-8 -*-
+"""Institutional Trade Finance & EU TRACES NT DDS Clearing Router
+==================================================================
+REST endpoints for global critical mineral trading desks:
+- Official European Commission TRACES NT Due Diligence Statement (DDS) Generation (XML/JSON).
+- International Umpire Assay arbitration and pro-rata price adjustment.
+- EIP-712 Dual-Sign Escrow and in-transit RWA Yield clearing.
+"""
+
+from __future__ import annotations
+
+from typing import Dict, Any, Optional
+from fastapi import APIRouter, HTTPException, Query, Response
+from pydantic import BaseModel, Field
+
+from app.modules.traces_nt_dds_exporter import TRACESNTDDSExporter
+from app.modules.umpire_assay_settlement import (
+    InstitutionalUmpireSettlementEngine,
+    CommercialSettlementRequest,
+    InspectionCertificate
+)
+
+router = APIRouter(prefix="/api/v1/trade", tags=["Institutional Trade Clearing"])
+
+
+class DDSGenerationRequest(BaseModel):
+    operator_eori: str = Field(..., description="Importer EORI number (e.g. NL123456789)")
+    operator_name: str = Field(..., description="Commercial trading entity name")
+    operator_address: str = Field(..., description="Registered legal address")
+    operator_country: str = Field(..., description="Country ISO code (e.g. NL, BE, DE)")
+    commodity_type: str = Field(..., description="LITHIUM_HYDROXIDE, COPPER_CATHODE, SPODUMENE, etc.")
+    net_mass_kg: float = Field(..., gt=0, description="Consignment net weight in kilograms")
+    latitude: float = Field(..., description="Mine/Concession centroid latitude (WGS84)")
+    longitude: float = Field(..., description="Mine/Concession centroid longitude (WGS84)")
+    area_hectares: float = Field(default=25.0, gt=0, description="Total concession parcel area in hectares")
+    concession_id: str = Field(..., description="Official mining concession / tenement ID")
+    concession_name: str = Field(..., description="Commercial mine or salar name")
+    concession_country: str = Field(..., description="Origin country ISO code (e.g. CHL, AUS, IDN)")
+    bill_of_lading_number: str = Field(..., description="Maritime Bill of Lading (B/L) reference")
+    vessel_name: Optional[str] = Field("M/V PACIFIC MINERAL VOYAGER", description="Carrying vessel name")
+    destination_port_unlocode: str = Field(default="NLRTM", description="Entry UN/LOCODE (e.g. NLRTM, BEANR, KRPUS)")
+
+
+@router.post("/traces-nt/dds/generate", summary="Generate Official EU TRACES NT Due Diligence Statement")
+async def generate_traces_nt_dds(req: DDSGenerationRequest) -> Dict[str, Any]:
+    """
+    Generates an official EU TRACES NT Due Diligence Statement conforming to
+    Regulation (EU) 2023/1115 (EUDR). Cross-references Copernicus Sentinel-2 L2A
+    and Hansen GFC satellite baseline.
+    """
+    try:
+        dds_payload = TRACESNTDDSExporter.generate_due_diligence_statement(
+            operator_eori=req.operator_eori,
+            operator_name=req.operator_name,
+            operator_address=req.operator_address,
+            operator_country=req.operator_country,
+            commodity_type=req.commodity_type,
+            net_mass_kg=req.net_mass_kg,
+            latitude=req.latitude,
+            longitude=req.longitude,
+            area_hectares=req.area_hectares,
+            concession_id=req.concession_id,
+            concession_name=req.concession_name,
+            concession_country=req.concession_country,
+            bill_of_lading_number=req.bill_of_lading_number,
+            vessel_name=req.vessel_name,
+            destination_port_unlocode=req.destination_port_unlocode,
+        )
+        xml_content = TRACESNTDDSExporter.export_to_xml(dds_payload)
+
+        return {
+            "status": "DDS_GENERATED_SUCCESSFULLY",
+            "dds_reference_number": dds_payload["traces_nt_metadata"]["dds_reference_number"],
+            "customs_pre_clearance_status": dds_payload["traces_nt_metadata"]["customs_pre_clearance_status"],
+            "sha256_attestation_digest": dds_payload["cryptographic_proof"]["smart_contract_attestation_digest"],
+            "dds_json": dds_payload,
+            "xml_preview": xml_content[:1500] + "\n...[TRUNCATED FOR PREVIEW]..."
+        }
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"DDS generation error: {exc}")
+
+
+@router.post("/traces-nt/dds/export-xml", summary="Export Raw XML for TRACES NT Portal Upload")
+async def export_traces_nt_xml(req: DDSGenerationRequest):
+    """
+    Returns the raw, official W3C XML document ready for direct drag-and-drop
+    or REST API upload to the European Commission TRACES NT portal.
+    """
+    try:
+        dds_payload = TRACESNTDDSExporter.generate_due_diligence_statement(
+            operator_eori=req.operator_eori,
+            operator_name=req.operator_name,
+            operator_address=req.operator_address,
+            operator_country=req.operator_country,
+            commodity_type=req.commodity_type,
+            net_mass_kg=req.net_mass_kg,
+            latitude=req.latitude,
+            longitude=req.longitude,
+            area_hectares=req.area_hectares,
+            concession_id=req.concession_id,
+            concession_name=req.concession_name,
+            concession_country=req.concession_country,
+            bill_of_lading_number=req.bill_of_lading_number,
+            vessel_name=req.vessel_name,
+            destination_port_unlocode=req.destination_port_unlocode,
+        )
+        xml_content = TRACESNTDDSExporter.export_to_xml(dds_payload)
+        filename = f"{dds_payload['traces_nt_metadata']['dds_reference_number']}.xml"
+
+        return Response(
+            content=xml_content,
+            media_type="application/xml",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"XML Export error: {exc}")
+
+
+@router.post("/assay/umpire-settle", summary="Execute Multi-Assay & Umpire Commercial Settlement")
+async def execute_commercial_settlement(req: CommercialSettlementRequest) -> Dict[str, Any]:
+    """
+    Executes formal institutional commodity settlement between Loading & Discharging
+    inspection certificates (SGS, Intertek, Bureau Veritas), resolves Umpire arbitration,
+    applies metallurgical pro-rata pricing, and allocates in-transit RWA Treasury Yield.
+    """
+    try:
+        result = InstitutionalUmpireSettlementEngine.calculate_commercial_settlement(req)
+        return {
+            "status": "SETTLEMENT_CALCULATED_SUCCESSFULLY",
+            "clearing_verdict": result
+        }
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Settlement calculation error: {exc}")
+
+
+@router.get("/institutional/specs", summary="Get Institutional Settlement Specifications & Tolerances")
+async def get_institutional_specs() -> Dict[str, Any]:
+    """
+    Returns standard commodity tolerances, accepted CN tariff codes, and inspection benchmarks.
+    """
+    return {
+        "clearing_protocol": "Minerals-Oracle-X402-Institutional-Trade-v1",
+        "supported_commodities": list(TRACESNTDDSExporter.COMMODITY_CN_CODES.keys()),
+        "cn_tariff_mapping": TRACESNTDDSExporter.COMMODITY_CN_CODES,
+        "default_tolerances_pct": InstitutionalUmpireSettlementEngine.BENCHMARK_TOLERANCES,
+        "accredited_inspection_agencies": ["SGS", "INTERTEK", "BUREAU_VERITAS", "ALEX_STEWART"],
+        "eudr_regulation": "REGULATION_EU_2023_1115_EUDR",
+        "customs_corridors": ["NLRTM (Rotterdam)", "BEANR (Antwerp)", "KRPUS (Busan)", "CNSHA (Shanghai)", "USLAX (Los Angeles)"],
+        "in_transit_rwa_yield_source": "Ondo Short-Term US Treasury (USDY) ~5.0% APR"
+    }

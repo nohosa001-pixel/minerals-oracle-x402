@@ -1,10 +1,10 @@
 {
-  "pid": 65172,
+  "pid": 58476,
   "mode": "daemon",
-  "last_heartbeat_utc": "2026-11-01T22:56:01.682497+00:00",
+  "last_heartbeat_utc": "2026-11-02T00:02:57.741822+00:00",
   "cycle": 1,
   "current_day": 5,
-  "overall_readiness": 92.4,
+  "overall_readiness": 92.77,
   "threats_neutralized": 10,
   "working_memory_count": 1,
   "episodic_memory_count": 15,
