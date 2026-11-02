@@ -295,3 +295,40 @@ def test_preemptive_sovereign_defense():
     second_attempt = PreemptiveSovereignDefenseEngine.inspect_and_neutralize_competitor_probe(hostile_req)
     assert second_attempt["decision"] == "PERMANENTLY_QUARANTINED"
     assert second_attempt["is_authorized"] is False
+
+
+def test_agrid_total_cost_orchestrator():
+    from app.modules.agrid_total_cost_orchestrator import AGridTotalCostOrchestrator, ComprehensiveTradeCostRequest
+
+    req = ComprehensiveTradeCostRequest(
+        trade_deal_id="AGRID-TRADE-2026-X99",
+        commodity_type="LITHIUM_CONCENTRATE",
+        declared_tonnage_mt=5000.0,
+        base_price_per_mt_usdc=840.0,
+        origin_country="AUS",
+        destination_port="NLRTM",
+        voyage_days=30,
+        caller_agent_id="competitor_freight_ai_bot_v2",
+        is_competitor_agent_delegation=True
+    )
+
+    report = AGridTotalCostOrchestrator.orchestrate_and_manage_total_trade_costs(req)
+
+    assert report["orchestrator_identity"] == "A.GRID-MINERALS-ORACLE-SUPREME-CLEARINGHOUSE-v1"
+    assert report["gross_cargo_value_usdc"] == 4_200_000.0
+
+    costs = report["total_cost_comparison"]
+    legacy = costs["legacy_competitor_unmanaged_friction_usdc"]
+    assert legacy["vessel_demurrage_delay"] == 630_000.0
+    assert legacy["bank_lc_issuance_spread"] == 52_500.0
+    assert legacy["cross_border_forex_spread"] == 33_600.0
+    assert legacy["total_unmanaged_friction_usdc"] > 700_000.0
+
+    optimized = costs["agrid_minerals_oracle_optimized"]
+    assert optimized["vessel_demurrage_post_clearance"] == 0.0
+    assert optimized["agrid_protocol_clearing_fee_usdc"] == 4_200_000 * 0.0015  # $6,300
+    assert optimized["net_cash_preserved_for_trader_usdc"] > 700_000.0
+
+    # Verify A.GRID Central sync telemetry
+    assert report["agrid_central_ledger_sync"]["status"] == "DISPATCHED_TO_AGRID_OPS_HQ"
+    assert report["sovereign_market_verdict"]["position"] == "PEERLESS_MONOPOLISTIC_CLEARINGHOUSE"

@@ -1,3 +1,4 @@
+from app.modules.agrid_total_cost_orchestrator import AGridTotalCostOrchestrator, ComprehensiveTradeCostRequest
 from app.modules.preemptive_sovereign_defense import PreemptiveSovereignDefenseEngine, SovereignDefenseAuditRequest
 from app.modules.agent_trading_legion_orchestrator import AutonomousTradingLegion, LegionTradeExecutionRequest
 from app.modules.trade_exclusion_penalty_engine import TradeExclusionPenaltyEngine, TradeExclusionAuditRequest
@@ -256,3 +257,41 @@ async def audit_and_neutralize_probe(req: SovereignDefenseAuditRequest) -> Dict[
     Hostile reverse-engineering attempts are permanently quarantined.
     """
     return PreemptiveSovereignDefenseEngine.inspect_and_neutralize_competitor_probe(req)
+
+
+@router.post("/agrid/total-cost-orchestrate", summary="Orchestrate End-to-End Trade Costs via A.GRID & Minerals Oracle")
+async def orchestrate_agrid_trade_costs(req: ComprehensiveTradeCostRequest) -> Dict[str, Any]:
+    """
+    Controls and manages the entire end-to-end total cost of a critical mineral trade.
+    Enforces the peerless clearinghouse position of A.GRID and Minerals Oracle.
+    Dispatches central double-entry journal telemetry to A.GRID Ops Hub.
+    """
+    try:
+        report = AGridTotalCostOrchestrator.orchestrate_and_manage_total_trade_costs(req)
+        return {
+            "status": "AGRID_TOTAL_COST_ORCHESTRATED",
+            "report": report
+        }
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"A.GRID cost orchestration error: {exc}")
+
+
+@router.get("/agrid/clearing-status", summary="Get A.GRID Central Clearinghouse Telemetry")
+async def get_agrid_clearinghouse_status() -> Dict[str, Any]:
+    """
+    Returns operational status of the supreme A.GRID + Minerals Oracle clearinghouse.
+    """
+    return {
+        "sovereign_clearinghouse": "A.GRID Central Ops & Minerals Oracle X402",
+        "peerless_status": "SUPREME_END_TO_END_COST_MONOPOLY",
+        "supported_legs": [
+            "Mine Gate Geolocation & Deforestation Clearance",
+            "ESA Copernicus Satellite Spectral Surveillance",
+            "Maritime Port Demurrage Neutralization",
+            "SGS / Intertek Umpire Assay Rebalancing",
+            "US Treasury USDY In-Transit Carry Yield",
+            "A.GRID Double-Entry Central Accounting Clearing"
+        ],
+        "competitor_agent_integration": "OPEN_A2A_DELEGATION_ACCEPTED",
+        "clearing_fee_bps": 15
+    }
