@@ -34,7 +34,8 @@ NETWORKS = {
         "contracts": {
             "AgentPaymentVault": "0xb44Bc2Acdd156cE08b549A00a3102e4B01276654",
             "MineralsOracleConsumer": "0x835d01534a5D2e63D52636Fafb1019f889d1E66B",
-            "DynamicTradeEscrow": "0x3A863A2b1018B47FE79041FCDF56efEa3f8b978F"
+            "DynamicTradeEscrow": "0x3A863A2b1018B47FE79041FCDF56efEa3f8b978F",
+            "TradeFinanceSettlementEngine": "0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372"
         }
     },
     "base": {
@@ -48,7 +49,8 @@ NETWORKS = {
         "contracts": {
             "AgentPaymentVault": "0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d",
             "MineralsOracleConsumer": "0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
-            "DynamicTradeEscrow": "0x54786360Db4582AEC2435E216479FD4ff093CB80"
+            "DynamicTradeEscrow": "0x54786360Db4582AEC2435E216479FD4ff093CB80",
+            "TradeFinanceSettlementEngine": "0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28"
         }
     },
     "arbitrum": {
@@ -62,7 +64,8 @@ NETWORKS = {
         "contracts": {
             "AgentPaymentVault": "0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d",
             "MineralsOracleConsumer": "0xe43a9C368808B2dfF139D27789C40A3C8F2282cF",
-            "DynamicTradeEscrow": "0x54786360Db4582AEC2435E216479FD4ff093CB80"
+            "DynamicTradeEscrow": "0x54786360Db4582AEC2435E216479FD4ff093CB80",
+            "TradeFinanceSettlementEngine": "0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28"
         }
     }
 }
@@ -84,6 +87,10 @@ def get_constructor_args(contract_name: str, chain: str) -> str:
         usdc = net["usdc"]
         pyth = net["pyth"]
         encoded = encode(["address", "address", "address"], [usdc, TREASURY, pyth])
+        return encoded.hex()
+    elif contract_name == "TradeFinanceSettlementEngine":
+        usdc = net["usdc"]
+        encoded = encode(["address", "address", "address"], [usdc, TREASURY, TREASURY])
         return encoded.hex()
     else:
         raise ValueError(f"Unknown contract {contract_name}")

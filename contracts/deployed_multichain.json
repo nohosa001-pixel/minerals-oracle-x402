@@ -40,6 +40,16 @@
           "standard": "DynamicTradeEscrow-PythMarkToMarket",
           "settlementToken": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
           "explorer_link": "https://polygonscan.com/address/0x3A863A2b1018B47FE79041FCDF56efEa3f8b978F"
+        },
+        "TradeFinanceSettlementEngine": {
+          "address": "0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372",
+          "creator": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+          "trustedOracle": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+          "protocolTreasury": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+          "standard": "TradeFinanceSettlementEngine-EUDR-Umpire-v1",
+          "protocolFeeBps": 15,
+          "settlementToken": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+          "explorer_link": "https://polygonscan.com/address/0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372"
         }
       }
     },
@@ -78,6 +88,16 @@
           "standard": "DynamicTradeEscrow-PythMarkToMarket",
           "settlementToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
           "explorer_link": "https://basescan.org/address/0x54786360Db4582AEC2435E216479FD4ff093CB80"
+        },
+        "TradeFinanceSettlementEngine": {
+          "address": "0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28",
+          "creator": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+          "trustedOracle": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+          "protocolTreasury": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+          "standard": "TradeFinanceSettlementEngine-EUDR-Umpire-v1",
+          "protocolFeeBps": 15,
+          "settlementToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "explorer_link": "https://basescan.org/address/0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28"
         }
       }
     },
@@ -116,6 +136,16 @@
           "standard": "DynamicTradeEscrow-PythMarkToMarket",
           "settlementToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
           "explorer_link": "https://arbiscan.io/address/0x54786360Db4582AEC2435E216479FD4ff093CB80"
+        },
+        "TradeFinanceSettlementEngine": {
+          "address": "0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28",
+          "creator": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+          "trustedOracle": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+          "protocolTreasury": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+          "standard": "TradeFinanceSettlementEngine-EUDR-Umpire-v1",
+          "protocolFeeBps": 15,
+          "settlementToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+          "explorer_link": "https://arbiscan.io/address/0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28"
         }
       }
     },

@@ -354,3 +354,38 @@ def test_autonomous_evolution_substrate():
     permeation = maturity["societal_permeation_attributes"]
     assert permeation["visibility_mode"] == "SUBTERRANEAN_ZERO_FOOTPRINT"
     assert "cryptographic_substrate_digest" in permeation
+
+
+def test_trade_finance_settlement_engine_registration_and_verification():
+    from pathlib import Path
+    from scripts.verify_contracts import get_constructor_args, NETWORKS
+
+    project_root = Path(__file__).resolve().parent.parent
+
+    # 1. Verify contracts exist
+    contract_file = project_root / "contracts" / "TradeFinanceSettlementEngine.sol"
+    flattened_file = project_root / "contracts" / "verification" / "TradeFinanceSettlementEngine.flattened.sol"
+    assert contract_file.exists()
+    assert flattened_file.exists()
+
+    # 2. Verify deployed_polygon_mainnet.json registry
+    poly_reg_path = project_root / "contracts" / "deployed_polygon_mainnet.json"
+    with open(poly_reg_path, "r", encoding="utf-8") as f:
+        poly_reg = json.load(f)
+    assert "TradeFinanceSettlementEngine" in poly_reg["contracts"]
+    assert poly_reg["contracts"]["TradeFinanceSettlementEngine"].startswith("0x")
+
+    # 3. Verify deployed_multichain.json registry
+    multi_reg_path = project_root / "contracts" / "deployed_multichain.json"
+    with open(multi_reg_path, "r", encoding="utf-8") as f:
+        multi_reg = json.load(f)
+    for chain in ["polygon", "base", "arbitrum"]:
+        assert "TradeFinanceSettlementEngine" in multi_reg["networks"][chain]["contracts"]
+        c_info = multi_reg["networks"][chain]["contracts"]["TradeFinanceSettlementEngine"]
+        assert c_info["address"].startswith("0x")
+        assert c_info["protocolFeeBps"] == 15
+
+    # 4. Verify constructor encoding across chains (3 addresses = 3 * 32 = 96 bytes = 192 hex chars)
+    for chain in ["polygon", "base", "arbitrum"]:
+        args_hex = get_constructor_args("TradeFinanceSettlementEngine", chain)
+        assert len(args_hex) == 192

@@ -1,6 +1,6 @@
 # Smart Contract Verification & Public Explorer Guide
 
-This guide provides everything required to verify and publicly display **`AgentPaymentVault.sol`** and **`MineralsOracleConsumer.sol`** on block explorers (**Polygonscan**, **BaseScan**, **Arbiscan**).
+This guide provides everything required to verify and publicly display **`AgentPaymentVault.sol`**, **`MineralsOracleConsumer.sol`**, **`DynamicTradeEscrow.sol`**, and **`TradeFinanceSettlementEngine.sol`** on block explorers (**Polygonscan**, **BaseScan**, **Arbiscan**).
 
 ---
 
@@ -27,11 +27,6 @@ This guide provides everything required to verify and publicly display **`AgentP
 * **Constructor Arguments**:
   * `_usdcTokenAddress` (Polygon Native USDC): `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`
   * `_oracleOperator` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
-* **ABI-Encoded Constructor Arguments (HEX)**:
-
-```text
-0000000000000000000000003c499c542cef5e3811e1192ce70d8cc03d5c3359000000000000000000000000255f9991233f86b29db847c8d5b8cb9915e80dcf
-```
 
 ---
 
@@ -43,11 +38,8 @@ This guide provides everything required to verify and publicly display **`AgentP
 * **Source File**: [`contracts/verification/MineralsOracleConsumer.flattened.sol`](MineralsOracleConsumer.flattened.sol)
 * **Constructor Arguments**:
   * `_trustedOracleSigner` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
-* **ABI-Encoded Constructor Arguments (HEX)**:
 
-```text
-000000000000000000000000255f9991233f86b29db847c8d5b8cb9915e80dcf
-```
+---
 
 ### Polygon - Contract C: `DynamicTradeEscrow.sol`
 
@@ -61,10 +53,23 @@ This guide provides everything required to verify and publicly display **`AgentP
   * `_usdcToken` (Polygon Native USDC): `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`
   * `_trustedOracle` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
   * `_pythAddress` (Polygon Pyth Network): `0xff1a0f4744e8582DF1aE09D5611b887B6a12925C`
-* **ABI-Encoded Constructor Arguments (HEX)**:
+
+---
+
+### Polygon - Contract D: `TradeFinanceSettlementEngine.sol`
+
+* **Status**: ✅ **Registered on Multi-Chain Registry & Verification Ready**
+* **Deployed Address**: [`0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372`](https://polygonscan.com/address/0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372#code)
+* **Direct Verification URL**: [https://polygonscan.com/verifyContract?a=0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372](https://polygonscan.com/verifyContract?a=0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372)
+* **Source File**: [`contracts/verification/TradeFinanceSettlementEngine.flattened.sol`](TradeFinanceSettlementEngine.flattened.sol)
+* **Constructor Arguments**:
+  * `_usdcAddress` (Polygon Native USDC): `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`
+  * `_settlementOracle` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
+  * `_protocolTreasury` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
+* **Constructor Arguments (HEX)**:
 
 ```text
-0000000000000000000000003c499c542cef5e3811e1192ce70d8cc03d5c3359000000000000000000000000a185b43fdd19619f99952aaed6eabf1029bf36a1000000000000000000000000ff1a0f4744e8582df1ae09d5611b887b6a12925c
+0000000000000000000000003c499c542cef5e3811e1192ce70d8cc03d5c3359000000000000000000000000a185b43fdd19619f99952aaed6eabf1029bf36a1000000000000000000000000a185b43fdd19619f99952aaed6eabf1029bf36a1
 ```
 
 ---
@@ -76,21 +81,15 @@ This guide provides everything required to verify and publicly display **`AgentP
 * **Deployed Address**: [`0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d`](https://basescan.org/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d#code)
 * **Direct Verification URL**: [https://basescan.org/verifyContract?a=0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d](https://basescan.org/verifyContract?a=0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d)
 * **Native USDC Address**: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
-* **Constructor Arguments (HEX)**:
 
-```text
-000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000255f9991233f86b29db847c8d5b8cb9915e80dcf
-```
+---
 
 ### Base - Contract B: `MineralsOracleConsumer.sol`
 
 * **Deployed Address**: [`0xe43a9C368808B2dfF139D27789C40A3C8F2282cF`](https://basescan.org/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF#code)
 * **Direct Verification URL**: [https://basescan.org/verifyContract?a=0xe43a9C368808B2dfF139D27789C40A3C8F2282cF](https://basescan.org/verifyContract?a=0xe43a9C368808B2dfF139D27789C40A3C8F2282cF)
-* **Constructor Arguments (HEX)**:
 
-```text
-000000000000000000000000255f9991233f86b29db847c8d5b8cb9915e80dcf
-```
+---
 
 ### Base - Contract C: `DynamicTradeEscrow.sol`
 
@@ -104,10 +103,23 @@ This guide provides everything required to verify and publicly display **`AgentP
   * `_usdcToken` (Base Native USDC): `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
   * `_trustedOracle` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
   * `_pythAddress` (Base Pyth Network): `0x8250f4aF4B972684F7b336503E2D6dFeDeB72416`
+
+---
+
+### Base - Contract D: `TradeFinanceSettlementEngine.sol`
+
+* **Status**: ✅ **Registered on Multi-Chain Registry & Verification Ready**
+* **Deployed Address**: [`0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28`](https://basescan.org/address/0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28#code)
+* **Direct Verification URL**: [https://basescan.org/verifyContract?a=0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28](https://basescan.org/verifyContract?a=0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28)
+* **Source File**: [`contracts/verification/TradeFinanceSettlementEngine.flattened.sol`](TradeFinanceSettlementEngine.flattened.sol)
+* **Constructor Arguments**:
+  * `_usdcAddress` (Base Native USDC): `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
+  * `_settlementOracle` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
+  * `_protocolTreasury` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
 * **Constructor Arguments (HEX)**:
 
 ```text
-000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000a185b43fdd19619f99952aaed6eabf1029bf36a10000000000000000000000008250f4af4b972684f7b336503e2d6dfedeb72416
+000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000a185b43fdd19619f99952aaed6eabf1029bf36a1000000000000000000000000a185b43fdd19619f99952aaed6eabf1029bf36a1
 ```
 
 ---
@@ -119,21 +131,15 @@ This guide provides everything required to verify and publicly display **`AgentP
 * **Deployed Address**: [`0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d`](https://arbiscan.io/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d#code)
 * **Direct Verification URL**: [https://arbiscan.io/verifyContract?a=0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d](https://arbiscan.io/verifyContract?a=0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d)
 * **Native USDC Address**: `0xaf88d065e77c8cC2239327C5EDb3A432268e5831`
-* **Constructor Arguments (HEX)**:
 
-```text
-000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831000000000000000000000000255f9991233f86b29db847c8d5b8cb9915e80dcf
-```
+---
 
 ### Arbitrum - Contract B: `MineralsOracleConsumer.sol`
 
 * **Deployed Address**: [`0xe43a9C368808B2dfF139D27789C40A3C8F2282cF`](https://arbiscan.io/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF#code)
 * **Direct Verification URL**: [https://arbiscan.io/verifyContract?a=0xe43a9C368808B2dfF139D27789C40A3C8F2282cF](https://arbiscan.io/verifyContract?a=0xe43a9C368808B2dfF139D27789C40A3C8F2282cF)
-* **Constructor Arguments (HEX)**:
 
-```text
-000000000000000000000000255f9991233f86b29db847c8d5b8cb9915e80dcf
-```
+---
 
 ### Arbitrum - Contract C: `DynamicTradeEscrow.sol`
 
@@ -147,10 +153,23 @@ This guide provides everything required to verify and publicly display **`AgentP
   * `_usdcToken` (Arbitrum Native USDC): `0xaf88d065e77c8cC2239327C5EDb3A432268e5831`
   * `_trustedOracle` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
   * `_pythAddress` (Arbitrum Pyth Network): `0xff1a0f4744e8582DF1aE09D5611b887B6a12925C`
+
+---
+
+### Arbitrum - Contract D: `TradeFinanceSettlementEngine.sol`
+
+* **Status**: ✅ **Registered on Multi-Chain Registry & Verification Ready**
+* **Deployed Address**: [`0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28`](https://arbiscan.io/address/0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28#code)
+* **Direct Verification URL**: [https://arbiscan.io/verifyContract?a=0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28](https://arbiscan.io/verifyContract?a=0xAAde57ABf49A52bC2981Ff64dc54dE27d8c8Ac28)
+* **Source File**: [`contracts/verification/TradeFinanceSettlementEngine.flattened.sol`](TradeFinanceSettlementEngine.flattened.sol)
+* **Constructor Arguments**:
+  * `_usdcAddress` (Arbitrum Native USDC): `0xaf88d065e77c8cC2239327C5EDb3A432268e5831`
+  * `_settlementOracle` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
+  * `_protocolTreasury` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
 * **Constructor Arguments (HEX)**:
 
 ```text
-000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831000000000000000000000000a185b43fdd19619f99952aaed6eabf1029bf36a1000000000000000000000000ff1a0f4744e8582df1ae09d5611b887b6a12925c
+000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831000000000000000000000000a185b43fdd19619f99952aaed6eabf1029bf36a1000000000000000000000000a185b43fdd19619f99952aaed6eabf1029bf36a1
 ```
 
 ---
@@ -164,4 +183,5 @@ Run the automated verification helper:
 python scripts/verify_contracts.py --chain polygon
 python scripts/verify_contracts.py --chain base
 python scripts/verify_contracts.py --chain arbitrum
+python scripts/verify_contracts.py --chain all
 ```

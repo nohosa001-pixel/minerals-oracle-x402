@@ -9,6 +9,7 @@
     "CleanWebOracleConsumer": "0x4693a3644ac4E215Bed9ADb841212D4ee83D0675",
     "CleanWebOracleVerifier": "0x5eE3C093D8D473670A5F67306d75316123A019a9",
     "DynamicTradeEscrow": "0x3A863A2b1018B47FE79041FCDF56efEa3f8b978F",
-    "AgentComplianceRegistry": "0x984C25Ff74fE9bAb094D1F60085b0Ced8eA0f2e9"
+    "AgentComplianceRegistry": "0x984C25Ff74fE9bAb094D1F60085b0Ced8eA0f2e9",
+    "TradeFinanceSettlementEngine": "0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372"
   }
 }
