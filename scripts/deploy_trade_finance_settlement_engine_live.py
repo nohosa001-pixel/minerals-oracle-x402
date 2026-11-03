@@ -290,3 +290,4 @@ for k, v in deployment_results.items():
     print(f"  Tx Hash : {v['creation_tx']}")
     print(f"  Gas Paid: {v['gas_fee_paid']}")
     print(f"  Link    : {v['explorer_link']}")
+

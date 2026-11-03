@@ -23,7 +23,13 @@ import {
   BrainPerceptionResponse,
   BrainExecutionInput,
   BrainExecutionResponse,
-  BrainDiagnosticsResponse
+  BrainDiagnosticsResponse,
+  DDSGenerationRequest,
+  DDSGenerationResponse,
+  CommercialSettlementRequest,
+  CommercialSettlementResponse,
+  MultiChainGasBalancesResponse,
+  MULTICHAIN_DEPLOYED_CONTRACTS
 } from './types';
 
 export class MineralsOracleClient {
@@ -328,5 +334,41 @@ export class MineralsOracleClient {
       method: 'POST',
       body: JSON.stringify({ content, date })
     });
+  }
+
+  /**
+   * EU TRACES NT: Generate Official Due Diligence Statement (DDS)
+   */
+  async generateTracesNtDds(req: DDSGenerationRequest): Promise<DDSGenerationResponse> {
+    return this.request<DDSGenerationResponse>('/api/v1/trade/traces-nt/dds/generate', {
+      method: 'POST',
+      body: JSON.stringify(req)
+    });
+  }
+
+  /**
+   * Institutional Umpire Assay: Commercial Grade & In-Transit RWA Yield Settlement
+   */
+  async settleUmpireAssay(req: CommercialSettlementRequest): Promise<CommercialSettlementResponse> {
+    return this.request<CommercialSettlementResponse>('/api/v1/trade/assay/umpire-settle', {
+      method: 'POST',
+      body: JSON.stringify(req)
+    });
+  }
+
+  /**
+   * Multi-Chain Gas Solvency: Real-time native gas balances (POL, ETH) across Polygon, Base, and Arbitrum
+   */
+  async getMultiChainGasBalances(): Promise<MultiChainGasBalancesResponse> {
+    return this.request<MultiChainGasBalancesResponse>('/api/v1/relay/multichain/gas-balances', {
+      method: 'GET'
+    });
+  }
+
+  /**
+   * Returns canonical deployed multi-chain smart contract addresses
+   */
+  getDeployedContracts() {
+    return MULTICHAIN_DEPLOYED_CONTRACTS;
   }
 }

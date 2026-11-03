@@ -27,6 +27,16 @@ test('MineralsOracleClient exports and initialization (CJS)', (t) => {
   assert.strictEqual(typeof client.getEscrowCalldata, 'function');
   assert.strictEqual(typeof client.getMCPTools, 'function');
   assert.strictEqual(typeof client.harmonizeTradeFlow, 'function');
+  assert.strictEqual(typeof client.generateTracesNtDds, 'function');
+  assert.strictEqual(typeof client.settleUmpireAssay, 'function');
+  assert.strictEqual(typeof client.getMultiChainGasBalances, 'function');
+  assert.strictEqual(typeof client.getDeployedContracts, 'function');
+
+  const contracts = client.getDeployedContracts();
+  assert.strictEqual(contracts.polygon.tradeFinanceSettlementEngine, '0x1dD725fB4860e1e9E00aA887F4bda5acD3789d10');
+  assert.strictEqual(contracts.base.tradeFinanceSettlementEngine, '0x9462587838fb8436C286AC9E04AAb6D42Eaf6D93');
+  assert.strictEqual(contracts.arbitrum.tradeFinanceSettlementEngine, '0x402E95B6aE9BBD26A227A1AE2aC7f52E14E1A314');
+  assert.strictEqual(contracts.creator, '0xA185B43fDD19619f99952AAed6eabf1029bF36a1');
 });
 
 test('MineralsOracleClient exports and initialization (ESM)', async (t) => {

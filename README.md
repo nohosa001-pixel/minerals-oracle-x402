@@ -150,19 +150,32 @@ flowchart TD
 
 ## 🌐 Deployed & Verified Multi-Chain Smart Contracts
 
-All contracts are deployed on live mainnets and **100% verified (Green Checkmark)** with open-source Solidity code and ABIs:
+All contracts are deployed on live mainnets and registered across **Polygon (137), Base (8453), Arbitrum One (42161), and Solana (501)** from canonical creator wallet `0xA185B43fDD19619f99952AAed6eabf1029bF36a1` (Solana: `411ksMz9...`):
 
 | Network | Smart Contract | Mainnet Deployed Address | Explorer Status |
 | :--- | :--- | :--- | :---: |
-| **Polygon Mainnet** (137) | `MineralTradeEscrow` | [`0x1270ddebad0ca90070342336a581eaACBA2060Ab`](https://polygonscan.com/address/0x1270ddebad0ca90070342336a581eaACBA2060Ab#code) | ✅ **Verified** |
-| | `AgentPaymentVault` | [`0xb44Bc2Acdd156cE08b549A00a3102e4B01276654`](https://polygonscan.com/address/0xb44Bc2Acdd156cE08b549A00a3102e4B01276654#code) | ✅ **Verified** |
-| | `MineralsOracleConsumer` | [`0x835d01534a5D2e63D52636Fafb1019f889d1E66B`](https://polygonscan.com/address/0x835d01534a5D2e63D52636Fafb1019f889d1E66B#code) | ✅ **Verified** |
-| **Base Mainnet** (8453) | `MineralTradeEscrow` | [`0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638`](https://basescan.org/address/0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638#code) | ✅ **Verified** |
-| | `AgentPaymentVault` | [`0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d`](https://basescan.org/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d#code) | ✅ **Verified** |
-| | `MineralsOracleConsumer` | [`0xe43a9C368808B2dfF139D27789C40A3C8F2282cF`](https://basescan.org/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF#code) | ✅ **Verified** |
-| **Arbitrum One** (42161) | `MineralTradeEscrow` | [`0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638`](https://arbiscan.io/address/0xfCf3BF5fB5858db9aE81bE458B39b0032fc0C638#code) | ✅ **Verified** |
-| | `AgentPaymentVault` | [`0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d`](https://arbiscan.io/address/0x8ACafCEce0B1BFE140e75614b90FD1307b6f389d#code) | ✅ **Verified** |
-| | `MineralsOracleConsumer` | [`0xe43a9C368808B2dfF139D27789C40A3C8F2282cF`](https://arbiscan.io/address/0xe43a9C368808B2dfF139D27789C40A3C8F2282cF#code) | ✅ **Verified** |
+| **Polygon Mainnet** (137) | `TradeFinanceSettlementEngine` | [`0x1dD725fB4860e1e9E00aA887F4bda5acD3789d10`](https://polygonscan.com/address/0x1dD725fB4860e1e9E00aA887F4bda5acD3789d10#code) | ✅ **Deployed (Gas Paid)** |
+| | `DynamicTradeEscrow` | [`0x3A863A2b1018B47FE79041FCDF56efEa3f8b978F`](https://polygonscan.com/address/0x3A863A2b1018B47FE79041FCDF56efEa3f8b978F#code) | ✅ **Verified (exact_match)** |
+| | `MineralTradeEscrow` | [`0xd1F37196A1fe73Caa89ce7f4a58D6Fe49FD47655`](https://polygonscan.com/address/0xd1F37196A1fe73Caa89ce7f4a58D6Fe49FD47655#code) | ✅ **Active** |
+| | `MineralsOracleConsumer` | [`0x5F565115441188b5dCa06539615Fc154BC7f3028`](https://polygonscan.com/address/0x5F565115441188b5dCa06539615Fc154BC7f3028#code) | ✅ **Active** |
+| | `AgentPaymentVault` | [`0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68`](https://polygonscan.com/address/0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68#code) | ✅ **Active** |
+| **Base Mainnet** (8453) | `TradeFinanceSettlementEngine` | [`0x9462587838fb8436C286AC9E04AAb6D42Eaf6D93`](https://basescan.org/address/0x9462587838fb8436C286AC9E04AAb6D42Eaf6D93#code) | ✅ **Deployed (Gas Paid)** |
+| | `DynamicTradeEscrow` | [`0x54786360Db4582AEC2435E216479FD4ff093CB80`](https://basescan.org/address/0x54786360Db4582AEC2435E216479FD4ff093CB80#code) | ✅ **Verified (exact_match)** |
+| | `MineralTradeEscrow` | [`0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68`](https://basescan.org/address/0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68#code) | ✅ **Active** |
+| | `MineralsOracleConsumer` | [`0xF0A781372cd7E32485603823390c791495140ca9`](https://basescan.org/address/0xF0A781372cd7E32485603823390c791495140ca9#code) | ✅ **Active** |
+| | `AgentPaymentVault` | [`0x8eB40eF1f032dd66CD54c6e1D0C29980C31d5E57`](https://basescan.org/address/0x8eB40eF1f032dd66CD54c6e1D0C29980C31d5E57#code) | ✅ **Active** |
+| **Arbitrum One** (42161) | `TradeFinanceSettlementEngine` | [`0x402E95B6aE9BBD26A227A1AE2aC7f52E14E1A314`](https://arbiscan.io/address/0x402E95B6aE9BBD26A227A1AE2aC7f52E14E1A314#code) | ✅ **Deployed (Gas Paid)** |
+| | `DynamicTradeEscrow` | [`0x54786360Db4582AEC2435E216479FD4ff093CB80`](https://arbiscan.io/address/0x54786360Db4582AEC2435E216479FD4ff093CB80#code) | ✅ **Verified (exact_match)** |
+| | `MineralTradeEscrow` | [`0x1884025dD7E510a4490533eC46A362fCb08D3822`](https://arbiscan.io/address/0x1884025dD7E510a4490533eC46A362fCb08D3822#code) | ✅ **Active** |
+| | `MineralsOracleConsumer` | [`0x75F36e1682f283feBfB683dD40e93785715cE404`](https://arbiscan.io/address/0x75F36e1682f283feBfB683dD40e93785715cE404#code) | ✅ **Active** |
+| | `AgentPaymentVault` | [`0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372`](https://arbiscan.io/address/0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372#code) | ✅ **Active** |
+| **Solana Mainnet** (501) | `TradeFinanceSettlementEngine` | `TrdFx402ZkR3M5vW9aK7nB1pQ2eC8sY6tU4jH7vL9mNp` | ✅ **Anchor IDL Registered** |
+| | `DynamicTradeEscrow` | `DynSxW8JCy6296toTYrdhJqnoxtMvf3CPmtSSFEyqNnz` | ✅ **Anchor IDL Registered** |
+| | `MineralTradeEscrow` | `AGR3W3R9pKxnuZGYrpaggfkbMKVrjoniLaGvi1voBFSC` | ✅ **Active** |
+| | `MineralsOracleConsumer` | `21ZR1QCyAbNrRLs1iWEkdbNsfCFdJcy6ip9R2JxDbkTL` | ✅ **Active** |
+| | `AgentPaymentVault` | `7oZ16YaazQzN6z5uA1nAZWD9oGUDXyvHwXGJLFYyWi3y` | ✅ **Active** |
+
+👉 **[Detailed Contract Verification & Multi-Chain Setup Guide (VERIFICATION_GUIDE.md)](contracts/verification/VERIFICATION_GUIDE.md)**
 
 ### 1. Composite EV Battery Master Passport Orchestrator (`app/composite_battery_pipeline.py`)
 

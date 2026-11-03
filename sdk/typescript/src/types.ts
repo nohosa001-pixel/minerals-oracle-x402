@@ -379,3 +379,137 @@ export interface BrainDiagnosticsResponse {
   immune_threats_neutralized: number;
   threat_fingerprints: string[];
 }
+
+export interface DDSGenerationRequest {
+  operator_eori: string;
+  operator_name: string;
+  operator_address: string;
+  operator_country: string;
+  commodity_type: string;
+  net_mass_kg: number;
+  latitude: number;
+  longitude: number;
+  area_hectares?: number;
+  concession_id: string;
+  concession_name: string;
+  concession_country: string;
+  bill_of_lading_number: string;
+  vessel_name?: string;
+  destination_port_unlocode?: string;
+}
+
+export interface DDSGenerationResponse {
+  status: string;
+  dds_reference_number: string;
+  customs_pre_clearance_status: string;
+  sha256_attestation_digest: string;
+  dds_json: Record<string, any>;
+  xml_preview: string;
+}
+
+export interface InspectionCertificate {
+  certificate_id: string;
+  inspection_agency: 'SGS' | 'INTERTEK' | 'BUREAU_VERITAS' | 'ALEX_STEWART' | string;
+  inspection_date: string;
+  moisture_pct: number;
+  dry_metric_tons: number;
+  assayed_grade_pct: number;
+  assay_method?: string;
+  certificate_sha256?: string;
+}
+
+export interface CommercialSettlementRequest {
+  deal_id: string;
+  commodity_type: string;
+  contract_wet_tonnage_mt: number;
+  contract_target_grade_pct: number;
+  base_price_per_dmt_usdc: number;
+  loading_cert: InspectionCertificate;
+  discharging_cert: InspectionCertificate;
+  umpire_cert?: InspectionCertificate;
+  tolerance_grade_pct?: number;
+  rwa_yield_annual_pct?: number;
+  transit_days?: number;
+}
+
+export interface CommercialSettlementResponse {
+  status: string;
+  clearing_verdict: Record<string, any>;
+}
+
+export interface MultiChainGasBalancesResponse {
+  relayer_address: string;
+  creator_wallet: string;
+  timestamp_utc: string;
+  chains: {
+    polygon: {
+      network: string;
+      chain_id: number;
+      gas_token: string;
+      balance: number;
+      balance_formatted: string;
+      sufficient_for_gas: boolean;
+      status: string;
+    };
+    base: {
+      network: string;
+      chain_id: number;
+      gas_token: string;
+      balance: number;
+      balance_formatted: string;
+      sufficient_for_gas: boolean;
+      status: string;
+    };
+    arbitrum: {
+      network: string;
+      chain_id: number;
+      gas_token: string;
+      balance: number;
+      balance_formatted: string;
+      sufficient_for_gas: boolean;
+      status: string;
+    };
+  };
+  all_chains_active: boolean;
+}
+
+export const MULTICHAIN_DEPLOYED_CONTRACTS = {
+  creator: '0xA185B43fDD19619f99952AAed6eabf1029bF36a1',
+  polygon: {
+    chainId: 137,
+    tradeFinanceSettlementEngine: '0x1dD725fB4860e1e9E00aA887F4bda5acD3789d10',
+    dynamicTradeEscrow: '0x3A863A2b1018B47FE79041FCDF56efEa3f8b978F',
+    mineralTradeEscrow: '0xd1F37196A1fe73Caa89ce7f4a58D6Fe49FD47655',
+    mineralsOracleConsumer: '0x5F565115441188b5dCa06539615Fc154BC7f3028',
+    agentPaymentVault: '0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68',
+    usdc: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359',
+  },
+  base: {
+    chainId: 8453,
+    tradeFinanceSettlementEngine: '0x9462587838fb8436C286AC9E04AAb6D42Eaf6D93',
+    dynamicTradeEscrow: '0x54786360Db4582AEC2435E216479FD4ff093CB80',
+    mineralTradeEscrow: '0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68',
+    mineralsOracleConsumer: '0xF0A781372cd7E32485603823390c791495140ca9',
+    agentPaymentVault: '0x8eB40eF1f032dd66CD54c6e1D0C29980C31d5E57',
+    usdc: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+  },
+  arbitrum: {
+    chainId: 42161,
+    tradeFinanceSettlementEngine: '0x402E95B6aE9BBD26A227A1AE2aC7f52E14E1A314',
+    dynamicTradeEscrow: '0x54786360Db4582AEC2435E216479FD4ff093CB80',
+    mineralTradeEscrow: '0x1884025dD7E510a4490533eC46A362fCb08D3822',
+    mineralsOracleConsumer: '0x75F36e1682f283feBfB683dD40e93785715cE404',
+    agentPaymentVault: '0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372',
+    usdc: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+  },
+  solana: {
+    chainId: 501,
+    creator: '411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp',
+    tradeFinanceSettlementEngine: 'TrdFx402ZkR3M5vW9aK7nB1pQ2eC8sY6tU4jH7vL9mNp',
+    dynamicTradeEscrow: 'DynSxW8JCy6296toTYrdhJqnoxtMvf3CPmtSSFEyqNnz',
+    mineralTradeEscrow: 'AGR3W3R9pKxnuZGYrpaggfkbMKVrjoniLaGvi1voBFSC',
+    mineralsOracleConsumer: '21ZR1QCyAbNrRLs1iWEkdbNsfCFdJcy6ip9R2JxDbkTL',
+    agentPaymentVault: '7oZ16YaazQzN6z5uA1nAZWD9oGUDXyvHwXGJLFYyWi3y',
+    usdc: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+  },
+} as const;
