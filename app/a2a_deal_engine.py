@@ -745,7 +745,7 @@ class A2ATradeDealEngine:
 
             seller_address = Web3.to_checksum_address(spec.seller_agent_address)
             buyer_address = Web3.to_checksum_address(spec.buyer_agent_address)
-            inspector = Web3.to_checksum_address(inspector_address or os.getenv("ORACLE_TREASURY_WALLET", "0xA185B43fDD19619f99952AAed6eabf1029bF36a1"))
+            inspector = Web3.to_checksum_address(inspector_address or os.getenv("ORACLE_TREASURY_WALLET", "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b"))
 
             # Pyth Price ID (bytes32) - defaults to Commodity Feed identifier
             if pyth_price_id and pyth_price_id.startswith("0x") and len(pyth_price_id) == 66:

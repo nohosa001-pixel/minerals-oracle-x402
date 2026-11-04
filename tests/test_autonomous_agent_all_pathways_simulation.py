@@ -1,3 +1,4 @@
+import os
 """
 Comprehensive Autonomous Agent Entry & Usage Pathways Simulation.
 Tests EVERY pathway an autonomous AI agent can take when entering and using Minerals Oracle:
@@ -285,7 +286,8 @@ def test_pathway_4_x402_native_challenge_flow():
     assert chal_resp.status_code == 402
     assert chal_resp.headers["X-Payment-Required"] == "true"
     assert chal_resp.headers["X-Payment-ChainId"] == "137"
-    assert chal_resp.headers["X-Payment-Recipient"] == "0xA185B43fDD19619f99952AAed6eabf1029bF36a1"
+    expected_treasury = os.getenv("ORACLE_TREASURY_WALLET", "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b")
+    assert chal_resp.headers["X-Payment-Recipient"] == expected_treasury
 
     chal_body = chal_resp.json()["payment_challenge"]
     nonce = chal_body["nonce"]

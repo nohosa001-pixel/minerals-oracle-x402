@@ -56,7 +56,7 @@ class OnChainOracleSigner:
 
     def is_signer_aligned_with_mainnet(self) -> bool:
         """Verifies if the current signer matches the trustedSigner of the deployed mainnet contract."""
-        trusted_treasury = Web3.to_checksum_address(os.getenv("ORACLE_TREASURY_WALLET", "0xA185B43fDD19619f99952AAed6eabf1029bF36a1"))
+        trusted_treasury = Web3.to_checksum_address(os.getenv("ORACLE_TREASURY_WALLET", "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b"))
         return self.signer_address.lower() == trusted_treasury.lower()
 
     @classmethod

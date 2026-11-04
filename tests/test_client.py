@@ -1,3 +1,4 @@
+import os
 import base64
 import json
 import pytest
@@ -33,7 +34,8 @@ def test_ap2_manifest_and_mcp_spec():
     assert ap2_data["ap2_version"] == "0.2.0"
     assert ap2_data["name"] == "minerals-oracle-x402"
     assert ap2_data["payment"]["chain_id"] == 137
-    assert ap2_data["payment"]["recipient_address"] == "0xA185B43fDD19619f99952AAed6eabf1029bF36a1"
+    expected_treasury = os.getenv("ORACLE_TREASURY_WALLET", "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b")
+    assert ap2_data["payment"]["recipient_address"] == expected_treasury
 
     resp_mcp = client.get("/mcp/tools")
     assert resp_mcp.status_code == 200
@@ -51,7 +53,8 @@ def test_402_challenge_flow():
     assert "WWW-Authenticate" in resp.headers
     assert resp.headers["X-Payment-Required"] == "true"
     assert resp.headers["X-Payment-ChainId"] == "137"
-    assert resp.headers["X-Payment-Recipient"] == "0xA185B43fDD19619f99952AAed6eabf1029bF36a1"
+    expected_treasury = os.getenv("ORACLE_TREASURY_WALLET", "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b")
+    assert resp.headers["X-Payment-Recipient"] == expected_treasury
 
     body = resp.json()
     assert body["code"] == 402
@@ -60,7 +63,7 @@ def test_402_challenge_flow():
     assert challenge["chain_id"] == 137
     assert challenge["amount"] == "0.005"
     assert challenge["accepted_token"] == "USDC"
-    assert challenge["recipient_address"] == "0xA185B43fDD19619f99952AAed6eabf1029bF36a1"
+    assert challenge["recipient_address"] == expected_treasury
     assert len(challenge["nonce"]) > 0
 
 

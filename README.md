@@ -356,7 +356,7 @@ All M2M API invocations support micro-payments in USDC on Polygon (Chain ID `137
 - **Composite Battery Master Verification**: 0.10 USDC (`PricingTier.STANDARD`)
 - **Dedicated Mineral Lot Verification**: 0.05 USDC (`PricingTier.LIGHT`)
 - **Polygon USDC Address**: `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`
-- **Treasury Recipient**: `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
+- **Treasury Recipient**: `0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b`
 - **Agent Vault Fast-Path**: Zero-latency verification via pre-funded `X-Agent-Vault-Key` headers.
 
 ---

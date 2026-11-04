@@ -465,7 +465,7 @@ async def onboard_autonomous_agent(body: AgentOnboardRequest):
         initial_trial_balance_usdc=0.05,
     )
     import os
-    treasury_wallet = os.getenv("ORACLE_TREASURY_WALLET", "0xA185B43fDD19619f99952AAed6eabf1029bF36a1")
+    treasury_wallet = os.getenv("ORACLE_TREASURY_WALLET", "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b")
     return {
         "status": "success",
         "meta": STANDARD_DISCLAIMER_META,
