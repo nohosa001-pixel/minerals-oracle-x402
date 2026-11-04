@@ -59,6 +59,6 @@ def test_live_mainnet_account_and_contract_binding():
 
     assert result["status"] == "SUCCESS"
     assert result["chain_id"] == 137
-    assert result["wallet"].lower() == "0xA185B43fDD19619f99952AAed6eabf1029bF36a1".lower()
+    assert result["wallet"].lower() == "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b".lower()
     assert result["balance_pol"] > 0
     assert result["sim_latency_ms"] < 5000.0  # Allow reasonable RPC network latency

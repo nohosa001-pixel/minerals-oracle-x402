@@ -82,7 +82,7 @@ def test_signer_alignment_with_mainnet():
     that matches the trustedSigner of the deployed Polygon Mainnet contract.
     """
     assert onchain_signer.is_signer_aligned_with_mainnet()
-    assert onchain_signer.signer_address.lower() == "0xA185B43fDD19619f99952AAed6eabf1029bF36a1"
+    assert onchain_signer.signer_address.lower() == "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b"
 
 
 def test_production_mode_disables_demo_account(monkeypatch):

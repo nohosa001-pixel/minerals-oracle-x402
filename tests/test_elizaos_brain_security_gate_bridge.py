@@ -173,7 +173,7 @@ def test_outbound_execution_and_rwa_yield():
     # EIP-712 Cryptographic Attestation
     attestation = res["eip712_attestation"]
     assert attestation["deal_id"] == "DEAL-LITH-2026-AUT-CRML"
-    assert attestation["attested_by"] == "0xA185B43fDD19619f99952AAed6eabf1029bF36a1"
+    assert attestation["attested_by"] == "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b"
     assert attestation["truth_hash"].startswith("0x")
 
     # RWA Sovereign Yield Vault Allocation

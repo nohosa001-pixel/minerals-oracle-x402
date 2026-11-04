@@ -4,7 +4,7 @@ Live Multi-Chain Deployment Script for TradeFinanceSettlementEngine.sol
 ========================================================================
 Deploys TradeFinanceSettlementEngine on Polygon (137), Base (8453), and Arbitrum One (42161)
 paying native on-chain gas fees from canonical creator wallet:
-0xA185B43fDD19619f99952AAed6eabf1029bF36a1.
+0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b.
 """
 
 import os

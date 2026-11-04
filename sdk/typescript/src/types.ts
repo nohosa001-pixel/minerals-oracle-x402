@@ -474,7 +474,7 @@ export interface MultiChainGasBalancesResponse {
 }
 
 export const MULTICHAIN_DEPLOYED_CONTRACTS = {
-  creator: '0xA185B43fDD19619f99952AAed6eabf1029bF36a1',
+  creator: '0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b',
   polygon: {
     chainId: 137,
     tradeFinanceSettlementEngine: '0x1dD725fB4860e1e9E00aA887F4bda5acD3789d10',

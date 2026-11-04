@@ -26,7 +26,7 @@ This guide provides everything required to verify and publicly display **`AgentP
 * **Source File**: [`contracts/verification/AgentPaymentVault.flattened.sol`](AgentPaymentVault.flattened.sol)
 * **Constructor Arguments**:
   * `_usdcTokenAddress` (Polygon Native USDC): `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`
-  * `_oracleOperator` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
+  * `_oracleOperator` (Treasury): `0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b`
 
 ---
 
@@ -37,7 +37,7 @@ This guide provides everything required to verify and publicly display **`AgentP
 * **Direct Verification URL**: [https://polygonscan.com/verifyContract?a=0x835d01534a5D2e63D52636Fafb1019f889d1E66B](https://polygonscan.com/verifyContract?a=0x835d01534a5D2e63D52636Fafb1019f889d1E66B)
 * **Source File**: [`contracts/verification/MineralsOracleConsumer.flattened.sol`](MineralsOracleConsumer.flattened.sol)
 * **Constructor Arguments**:
-  * `_trustedOracleSigner` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
+  * `_trustedOracleSigner` (Treasury): `0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b`
 
 ---
 
@@ -51,7 +51,7 @@ This guide provides everything required to verify and publicly display **`AgentP
 * **Source File**: [`contracts/verification/DynamicTradeEscrow.flattened.sol`](DynamicTradeEscrow.flattened.sol)
 * **Constructor Arguments**:
   * `_usdcToken` (Polygon Native USDC): `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`
-  * `_trustedOracle` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
+  * `_trustedOracle` (Treasury): `0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b`
   * `_pythAddress` (Polygon Pyth Network): `0xff1a0f4744e8582DF1aE09D5611b887B6a12925C`
 
 ---
@@ -66,8 +66,8 @@ This guide provides everything required to verify and publicly display **`AgentP
 * **Source File**: [`contracts/verification/TradeFinanceSettlementEngine.flattened.sol`](TradeFinanceSettlementEngine.flattened.sol)
 * **Constructor Arguments**:
   * `_usdcAddress` (Polygon Native USDC): `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`
-  * `_settlementOracle` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
-  * `_protocolTreasury` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
+  * `_settlementOracle` (Treasury): `0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b`
+  * `_protocolTreasury` (Treasury): `0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b`
 * **Constructor Arguments (HEX)**:
 
 ```text
@@ -103,7 +103,7 @@ This guide provides everything required to verify and publicly display **`AgentP
 * **Source File**: [`contracts/verification/DynamicTradeEscrow.flattened.sol`](DynamicTradeEscrow.flattened.sol)
 * **Constructor Arguments**:
   * `_usdcToken` (Base Native USDC): `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
-  * `_trustedOracle` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
+  * `_trustedOracle` (Treasury): `0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b`
   * `_pythAddress` (Base Pyth Network): `0x8250f4aF4B972684F7b336503E2D6dFeDeB72416`
 
 ---
@@ -118,8 +118,8 @@ This guide provides everything required to verify and publicly display **`AgentP
 * **Source File**: [`contracts/verification/TradeFinanceSettlementEngine.flattened.sol`](TradeFinanceSettlementEngine.flattened.sol)
 * **Constructor Arguments**:
   * `_usdcAddress` (Base Native USDC): `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
-  * `_settlementOracle` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
-  * `_protocolTreasury` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
+  * `_settlementOracle` (Treasury): `0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b`
+  * `_protocolTreasury` (Treasury): `0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b`
 * **Constructor Arguments (HEX)**:
 
 ```text
@@ -155,7 +155,7 @@ This guide provides everything required to verify and publicly display **`AgentP
 * **Source File**: [`contracts/verification/DynamicTradeEscrow.flattened.sol`](DynamicTradeEscrow.flattened.sol)
 * **Constructor Arguments**:
   * `_usdcToken` (Arbitrum Native USDC): `0xaf88d065e77c8cC2239327C5EDb3A432268e5831`
-  * `_trustedOracle` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
+  * `_trustedOracle` (Treasury): `0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b`
   * `_pythAddress` (Arbitrum Pyth Network): `0xff1a0f4744e8582DF1aE09D5611b887B6a12925C`
 
 ---
@@ -170,8 +170,8 @@ This guide provides everything required to verify and publicly display **`AgentP
 * **Source File**: [`contracts/verification/TradeFinanceSettlementEngine.flattened.sol`](TradeFinanceSettlementEngine.flattened.sol)
 * **Constructor Arguments**:
   * `_usdcAddress` (Arbitrum Native USDC): `0xaf88d065e77c8cC2239327C5EDb3A432268e5831`
-  * `_settlementOracle` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
-  * `_protocolTreasury` (Treasury): `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`
+  * `_settlementOracle` (Treasury): `0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b`
+  * `_protocolTreasury` (Treasury): `0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b`
 * **Constructor Arguments (HEX)**:
 
 ```text

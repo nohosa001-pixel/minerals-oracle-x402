@@ -210,7 +210,7 @@ class ElizaOSBrainSecurityBridge:
             "mineral_type": req.mineral_type,
             "origin_country": req.origin_country,
             "truth_hash": f"0x{truth_hash}",
-            "attested_by": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+            "attested_by": "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b",
             "eip712_verifiable": True,
             "timestamp": now_ts
         }

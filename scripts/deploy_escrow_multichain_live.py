@@ -1,6 +1,6 @@
 """
 Live Multi-Chain Deployment Script for MineralTradeEscrow.sol.
-Deploys on Base Mainnet (8453) and Arbitrum One (42161) from canonical creator wallet 0xA185B43fDD19619f99952AAed6eabf1029bF36a1.
+Deploys on Base Mainnet (8453) and Arbitrum One (42161) from canonical creator wallet 0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b.
 """
 
 import os
@@ -15,7 +15,7 @@ ROOT_DIR = Path(__file__).parent.parent
 load_dotenv(ROOT_DIR / ".env")
 
 DEPLOYER_PK = os.getenv("POLYGON_DEPLOYER_PRIVATE_KEY") or os.getenv("DEPLOYER_PRIVATE_KEY")
-TREASURY_WALLET = os.getenv("ORACLE_TREASURY_WALLET", "0xA185B43fDD19619f99952AAed6eabf1029bF36a1")
+TREASURY_WALLET = os.getenv("ORACLE_TREASURY_WALLET", "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b")
 
 CHAINS_TO_DEPLOY = [
     {

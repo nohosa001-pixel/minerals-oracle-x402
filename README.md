@@ -150,7 +150,7 @@ flowchart TD
 
 ## 🌐 Deployed & Verified Multi-Chain Smart Contracts
 
-All contracts are deployed on live mainnets and registered across **Polygon (137), Base (8453), Arbitrum One (42161), and Solana (501)** from canonical creator wallet `0xA185B43fDD19619f99952AAed6eabf1029bF36a1` (Solana: `411ksMz9...`):
+All contracts are deployed on live mainnets and registered across **Polygon (137), Base (8453), Arbitrum One (42161), and Solana (501)** from canonical creator wallet `0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b` (Solana: `411ksMz9...`):
 
 | Network | Smart Contract | Mainnet Deployed Address | Explorer Status |
 | :--- | :--- | :--- | :---: |

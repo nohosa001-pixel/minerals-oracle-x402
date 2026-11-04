@@ -175,7 +175,7 @@ print("EIP-712 Battery Passport Signature:", audit_result["eip712_signature"])
 
 Autonomous agents settling physical commodity contracts (lithium, nickel, cobalt, copper, silver) replace legacy bank Letters of Credit (L/C, $50,000+ fees) with deterministic 3-stage milestone escrows on EVM chains.
 
-### ⛓️ Verified Live Multi-Chain Deployments (Creator: `0xA185B43fDD19619f99952AAed6eabf1029bF36a1`)
+### ⛓️ Verified Live Multi-Chain Deployments (Creator: `0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b`)
 #### 1. TradeFinanceSettlementEngine (EUDR Umpire Settlement & Sovereign Tollgate)
 - **Polygon (137)**: `0x1dD725fB4860e1e9E00aA887F4bda5acD3789d10` (Tx: `0x09e995feb09ae1f22f9b947604e81c889df159fdeddd96c0fd08139d655f4627`)
 - **Base (8453)**: `0x9462587838fb8436C286AC9E04AAb6D42Eaf6D93` (Tx: `0x2b06d6cc192fc7c49115f7825534c07390faf4ee80b03110cb8d9de54b3f6b06`)

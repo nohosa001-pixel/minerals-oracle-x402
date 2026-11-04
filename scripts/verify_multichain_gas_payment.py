@@ -3,7 +3,7 @@
 Multi-Chain Live Gas Payment & Solvency Verification Script
 ===========================================================
 Validates real-time gas fee payment capability for Polygon (POL), Base (ETH),
-and Arbitrum One (ETH) signed by creator wallet 0xA185B43fDD19619f99952AAed6eabf1029bF36a1.
+and Arbitrum One (ETH) signed by creator wallet 0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b.
 """
 
 import os
@@ -16,7 +16,7 @@ from eth_account import Account
 ROOT_DIR = Path(__file__).parent.parent
 load_dotenv(ROOT_DIR / ".env")
 
-WALLET_ADDRESS = "0xA185B43fDD19619f99952AAed6eabf1029bF36a1"
+WALLET_ADDRESS = "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b"
 DEPLOYER_KEY = os.getenv("POLYGON_DEPLOYER_PRIVATE_KEY") or os.getenv("DEPLOYER_PRIVATE_KEY")
 
 NETWORKS = [

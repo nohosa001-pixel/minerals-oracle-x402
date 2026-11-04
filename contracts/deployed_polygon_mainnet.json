@@ -1,8 +1,8 @@
 {
   "chain_id": 137,
   "chain_name": "Polygon Mainnet",
-  "deployer": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
-  "creator": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+  "deployer": "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b",
+  "creator": "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b",
   "contracts": {
     "AgentPaymentVault": "0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68",
     "MineralsOracleConsumer": "0x5F565115441188b5dCa06539615Fc154BC7f3028",
@@ -16,13 +16,13 @@
   "contracts_metadata": {
     "TradeFinanceSettlementEngine": {
       "address": "0x1dD725fB4860e1e9E00aA887F4bda5acD3789d10",
-      "creator": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+      "creator": "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b",
       "creation_tx": "09e995feb09ae1f22f9b947604e81c889df159fdeddd96c0fd08139d655f4627",
       "blockNumber": 96591217,
       "gas_used": 1091127,
       "gas_fee_paid": "0.284443 POL",
-      "trustedOracle": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
-      "protocolTreasury": "0xA185B43fDD19619f99952AAed6eabf1029bF36a1",
+      "trustedOracle": "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b",
+      "protocolTreasury": "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b",
       "standard": "TradeFinanceSettlementEngine-EUDR-Umpire-v1",
       "protocolFeeBps": 15,
       "settlementToken": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"

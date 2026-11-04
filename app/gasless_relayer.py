@@ -10,7 +10,7 @@ Architecture:
 - Native Gas Sponsorship (Polygon POL, Base ETH, Arbitrum ETH)
 - Sponsored Meta-Transactions / Relayer Subsidies (EIP-2771 / Account Abstraction)
 - Full EIP-1559 dynamic fee calculation (baseFee + maxPriorityFee)
-- Live on-chain execution signed by canonical creator/relayer wallet 0xA185B43fDD19619f99952AAed6eabf1029bF36a1
+- Live on-chain execution signed by canonical creator/relayer wallet 0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b
 """
 
 from __future__ import annotations
@@ -354,7 +354,7 @@ class GaslessRelayer:
     def pay_and_broadcast_transaction(self, req: MultiChainBroadcastRequest) -> Dict[str, Any]:
         """
         Directly executes an on-chain transaction paying gas fees in native token (POL / ETH)
-        from deployer wallet 0xA185B43fDD19619f99952AAed6eabf1029bF36a1.
+        from deployer wallet 0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b.
         """
         with self._lock:
             chain_key = req.chain.lower().strip()
