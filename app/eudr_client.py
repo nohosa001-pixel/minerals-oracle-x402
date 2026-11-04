@@ -271,7 +271,8 @@ class EUDRClient:
                             latitude=latitude,
                             longitude=longitude,
                             area_hectares=area_ha,
-                            concession_id=concession_id
+                            concession_id=concession_id,
+                            country_code=norm_country
                         )
                     except Exception:
                         pass
@@ -318,6 +319,7 @@ class EUDRClient:
                 longitude=longitude,
                 area_hectares=area_hectares,
                 concession_id=concession_id,
+                country_code=norm_country,
             )
             return {
                 "is_compliant": True,

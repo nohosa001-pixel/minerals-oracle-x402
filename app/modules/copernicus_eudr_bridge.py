@@ -60,7 +60,8 @@ class CopernicusEUDRBridge:
         longitude: float,
         area_hectares: float = 10.0,
         concession_id: Optional[str] = None,
-        commodity: Optional[str] = None
+        commodity: Optional[str] = None,
+        country_code: Optional[str] = None
     ) -> Dict[str, Any]:
         """Queries live European Copernicus Sentinel satellite trajectory & Hansen GFC for given coordinates."""
         area_ha = max(0.1, float(area_hectares))
@@ -105,7 +106,8 @@ class CopernicusEUDRBridge:
             f"{cls.EVALSCRIPT_HASH}:{cls.EUDR_CUTOFF_DATE}:{concession_id or 'CONCESSION'}"
         )
         evidence_hash = "0x" + hashlib.sha256(evidence_seed.encode("utf-8")).hexdigest()
-        traces_ref = f"DDS-EUDR-2026-SAT-{evidence_hash[2:10].upper()}"
+        cc = (country_code or "SAT").strip().upper()[:2]
+        traces_ref = f"DDS-EUDR-2026-{cc}-{evidence_hash[2:10].upper()}"
 
         return {
             "status": "VERIFIED_LIVE_COPERNICUS",
