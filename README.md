@@ -378,7 +378,7 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-### 2. Run Tests (278 Automated Tests - 100% Passing)
+### 2. Run Tests (424 Automated Tests - 100% Passing)
 
 ```bash
 # Run full regression suite
@@ -400,6 +400,9 @@ Navigate to:
 - **Autonomous Agent Observatory Console**: [http://localhost:8000/dashboard](http://localhost:8000/dashboard)
 - **Interactive OpenAPI Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
 - **Model Context Protocol (MCP) Tools**: [http://localhost:8000/mcp/tools](http://localhost:8000/mcp/tools)
+- **OpenAI-Compatible Model Registry**: [http://localhost:8000/v1/models](http://localhost:8000/v1/models) (Supports Cursor, AutoGen, LangChain)
+- **Official EU 2023/1542 Battery Passport Sample**: [http://localhost:8000/sample-battery-passport.json](http://localhost:8000/sample-battery-passport.json)
+
 
 ---
 
