@@ -7,7 +7,11 @@ Write-Host "========================================================" -Foregroun
 Write-Host "  minerals-oracle-x402 24/7 Cloud Deployment" -ForegroundColor Cyan
 Write-Host "========================================================" -ForegroundColor Cyan
 
-# 1. Check gcloud CLI
+# 1. Check & Inject gcloud CLI
+$gcloudBin = "C:\Users\nohos\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin"
+if (Test-Path $gcloudBin) {
+    $env:PATH = "$gcloudBin;$env:PATH"
+}
 if (-not (Get-Command gcloud -ErrorAction SilentlyContinue)) {
     Write-Host "[ERROR] gcloud CLI is not installed or not in PATH." -ForegroundColor Red
     exit 1
@@ -34,11 +38,12 @@ gcloud run deploy minerals-oracle-x402 `
     --region asia-northeast3 `
     --platform managed `
     --allow-unauthenticated `
-    --memory 512Mi `
+    --memory 1Gi `
     --cpu 1 `
     --min-instances 1 `
     --no-cpu-throttling `
     --max-instances 10 `
+    --concurrency 80 `
     --env-vars-file .env.yaml `
     --quiet
 
@@ -49,7 +54,7 @@ if ($LASTEXITCODE -eq 0) {
     $serviceUrl = (gcloud run services describe minerals-oracle-x402 --region asia-northeast3 --format="value(status.url)").Trim()
     Write-Host "Service URL (EN): $serviceUrl" -ForegroundColor Cyan
     Write-Host "Agent Terminal HUD: $serviceUrl/dashboard" -ForegroundColor Cyan
-    Write-Host "Agent Evolution API: $serviceUrl/api/v1/oracle/agent/feedback" -ForegroundColor Cyan
+    Write-Host "Sample Battery Passport: $serviceUrl/api/v1/oracle/sample/battery-passport" -ForegroundColor Cyan
     Write-Host "API Swagger Docs: $serviceUrl/docs" -ForegroundColor Cyan
 } else {
     Write-Host "`n[ERROR] Deployment failed. Check the logs above." -ForegroundColor Red

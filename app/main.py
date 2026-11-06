@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi import (
     FastAPI,
     Request,
@@ -17,6 +18,7 @@ from fastapi import (
     WebSocketDisconnect,
 )
 from fastapi.responses import (
+    RedirectResponse,
     JSONResponse,
     FileResponse,
     PlainTextResponse,
@@ -75,6 +77,56 @@ app.add_middleware(SecurityGateMiddleware)
 
 
 @app.middleware("http")
+async def clean_markdown_trailing_url_middleware(request: Request, call_next):
+    """
+    Catches and auto-redirects URLs with trailing punctuation artifacts from markdown / chat auto-linkers
+    (e.g., '/dashboard)', '/dashboard.', '/mcp/tools%29', etc.) back to clean endpoints with HTTP 301.
+    Preserves legit static file extensions like .json, .js, .css, .html, .svg, .png, .txt.
+    """
+    path = request.url.path
+    clean_path = path
+    changed = False
+
+    # 1. Strip raw trailing punctuation characters including markdown backticks, quotes, parens
+    trailing_outer = "`*~\"'!,;)]>\\"
+    if any(clean_path.endswith(ch) for ch in trailing_outer):
+        clean_path = clean_path.rstrip(trailing_outer)
+        changed = True
+
+    # 2. Handle common URL-encoded punctuation suffixes
+    outer_encoded = [
+        ("%60", "`"), ("%29", ")"), ("%5D", "]"), ("%3E", ">"),
+        ("%22", "\""), ("%27", "'"), ("%2C", ","), ("%3B", ";"), ("%25", "%")
+    ]
+    for enc, _ in outer_encoded:
+        if clean_path.endswith(enc):
+            clean_path = clean_path[:-len(enc)]
+            changed = True
+
+    # 3. Strip trailing curly brace '}' or '%7D' ONLY if NOT part of a balanced placeholder like {symbol}
+    last_seg = clean_path.split("/")[-1]
+    if not (last_seg.startswith("{") and last_seg.endswith("}")):
+        if clean_path.endswith("}"):
+            clean_path = clean_path.rstrip("}")
+            changed = True
+    if not (last_seg.startswith("%7B") and last_seg.endswith("%7D")):
+        if clean_path.endswith("%7D"):
+            clean_path = clean_path[:-3]
+            changed = True
+
+    # 4. Strip trailing period ONLY if it is not part of a known file extension
+    if clean_path.endswith("."):
+        clean_path = clean_path.rstrip(".")
+        changed = True
+
+    if changed and clean_path != path:
+        clean_url = clean_path or "/"
+        if request.url.query:
+            clean_url = f"{clean_url}?{request.url.query}"
+        return RedirectResponse(url=clean_url, status_code=301)
+    return await call_next(request)
+
+@app.middleware("http")
 async def a2a_machine_protocol_middleware(request: Request, call_next):
     response = await call_next(request)
     # Sovereign Machine Protocol & AEO Directives (Zero-Human Distribution)
@@ -85,6 +137,101 @@ async def a2a_machine_protocol_middleware(request: Request, call_next):
     response.headers["X-Agrid-Rebate-Bps"] = "2000"
     response.headers["X-Robots-Tag"] = "all, index, follow"
     return response
+
+# Fast <3ms Scanner Shield & Error Envelopes (FastAPI & Agent Compatible)
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
+    detail_msg = exc.detail if exc.detail else "HTTP Error"
+
+    if exc.status_code == 404:
+        if detail_msg == "Not Found":
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "detail": f"Endpoint '{request.url.path}' was not found on Minerals Oracle.",
+                    "error": {
+                        "code": "ENDPOINT_NOT_FOUND",
+                        "message": f"Endpoint '{request.url.path}' was not found on Minerals Oracle.",
+                        "recoverable": True,
+                        "suggested_action": "Consult /openapi.json or /mcp/tools for valid autonomous agent endpoints.",
+                        "valid_entrypoints": [
+                            "/api/v1/oracle/compliance/verify",
+                            "/api/v1/battery/composite-verify",
+                            "/mcp/tools",
+                            "/openapi.json",
+                            "/llms.txt"
+                        ]
+                    }
+                }
+            )
+        return JSONResponse(
+            status_code=404,
+            content={
+                "detail": detail_msg,
+                "error": {
+                    "code": "RESOURCE_NOT_FOUND",
+                    "message": detail_msg,
+                }
+            }
+        )
+
+    if exc.status_code == 405:
+        return JSONResponse(
+            status_code=405,
+            content={
+                "detail": f"HTTP method '{request.method}' is not supported for '{request.url.path}'.",
+                "error": {
+                    "code": "METHOD_NOT_ALLOWED",
+                    "message": f"HTTP method '{request.method}' is not supported for '{request.url.path}'.",
+                    "recoverable": True,
+                    "suggested_action": "This endpoint typically expects a POST request with JSON payload or consult /docs.",
+                    "sample_battery_passport": "/api/v1/oracle/sample/battery-passport",
+                    "docs_url": "/docs",
+                    "dashboard_url": "/dashboard"
+                }
+            }
+        )
+
+    if exc.status_code >= 500:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={
+                "detail": str(detail_msg),
+                "error": {
+                    "code": "SERVER_ERROR",
+                    "message": "The compliance engine intercepted an unhandled condition safely.",
+                    "recoverable": True,
+                    "detail": str(detail_msg)
+                }
+            }
+        )
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "detail": detail_msg,
+            "error": {"code": "HTTP_ERROR", "detail": detail_msg}
+        }
+    )
+
+
+@app.exception_handler(Exception)
+async def global_unhandled_exception_handler(request: Request, exc: Exception):
+    """Zero-crash shield against unhandled internal exceptions / template crashes."""
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": {
+                "code": "INTERNAL_EXCEPTION_SHIELDED",
+                "message": "The compliance engine intercepted an unexpected condition safely.",
+                "recoverable": True,
+                "suggested_action": "Verify URL parameters or inspect /openapi.json.",
+                "path": request.url.path,
+                "docs_url": "/docs",
+                "dashboard_url": "/dashboard"
+            }
+        }
+    )
 
 
 STATIC_DIR = Path(__file__).parent / "static"
@@ -99,9 +246,12 @@ MCP_SPEC_FILE_PATH = Path(__file__).parent.parent / "mcp_tool_spec.json"
 # ==========================================
 # Root & System Endpoints
 # ==========================================
-@app.get("/", tags=["System"])
+@app.api_route("/", methods=["GET", "HEAD", "OPTIONS", "POST"], tags=["System"])
 async def root(request: Request):
     """Serves Autonomous Agent Interactive Web UI Console (English RFC Compliant) or JSON metadata."""
+    if request.method in ("HEAD", "OPTIONS"):
+        return Response(status_code=200, headers={"Allow": "GET, HEAD, OPTIONS, POST"})
+
     accept_header = request.headers.get("accept", "")
     no_cache_headers = {
         "Cache-Control": "no-cache, no-store, must-revalidate",
@@ -110,13 +260,14 @@ async def root(request: Request):
         "X-Language-Policy": "en-US-Agent-Only",
     }
     # If a browser requests text/html, serve the HTML dashboard
-    if "text/html" in accept_header or request.query_params.get("ui") == "true":
+    if request.method == "GET" and ("text/html" in accept_header or request.query_params.get("ui") == "true"):
         if INDEX_HTML_PATH.exists():
             return FileResponse(INDEX_HTML_PATH, media_type="text/html; charset=utf-8", headers=no_cache_headers)
 
-    # API clients, test clients, and curl get JSON service metadata
-    return {
+    # API clients, autonomous AI agents, and POST / callers get JSON service metadata
+    metadata = {
         "service": "minerals-oracle-x402",
+        "status": "online",
         "description": "Autonomous Critical Minerals & Battery Supply-Chain Compliance Oracle (Agent-Exclusive)",
         "version": "2.0.0",
         "protocol": "x402 (HTTP 402 Monetized)",
@@ -159,8 +310,87 @@ async def root(request: Request):
             "brain_execute": "/api/v1/brain/execute",
             "brain_diagnostics": "/api/v1/brain/diagnostics",
             "solana_settle": "/api/v1/escrow/universal/settle-solana",
+            "sample_battery_passport": "/api/v1/oracle/sample/battery-passport",
+            "openai_models": "/v1/models",
             "docs": "/docs",
         },
+    }
+    return JSONResponse(content=metadata, headers=no_cache_headers)
+
+@app.get("/api/v1/oracle/sample/battery-passport", tags=["System"], summary="Download official EU 2023/1542 Battery Passport Sample (EIP-712 Dual-Signed)")
+@app.get("/sample-battery-passport.json", include_in_schema=False)
+async def get_sample_battery_passport():
+    """Returns official EU Battery Regulation 2023/1542 & US IRA Section 30D compliant battery passport sample."""
+    sample_path = STATIC_DIR / "EU_BATTERY_PASSPORT_EIP712_SAMPLE.json"
+    if sample_path.exists():
+        return FileResponse(
+            sample_path,
+            media_type="application/json",
+            headers={
+                "Content-Disposition": 'attachment; filename="EU_BATTERY_PASSPORT_EIP712_SAMPLE.json"',
+                "Cache-Control": "public, max-age=3600"
+            }
+        )
+    return JSONResponse(status_code=404, content={"error": "Sample passport not found"})
+
+
+@app.get("/v1/models", tags=["OpenAI Compatibility"], summary="List OpenAI-compatible models")
+@app.get("/models", tags=["OpenAI Compatibility"], include_in_schema=False)
+@app.get("/api/v1/models", tags=["OpenAI Compatibility"], include_in_schema=False)
+@app.get("/openai/v1/models", tags=["OpenAI Compatibility"], include_in_schema=False)
+async def list_openai_compatible_models():
+    """
+    OpenAI-compatible Model Registry for autonomous AI agent frameworks
+    (Cursor, AutoGen, LangChain, LiteLLM, threads-api-watcher).
+    """
+    return {
+        "object": "list",
+        "data": [
+            {
+                "id": "critical-minerals-oracle-v2",
+                "object": "model",
+                "created": 1730000000,
+                "owned_by": "minerals-oracle-x402",
+                "permission": [],
+                "root": "critical-minerals-oracle-v2",
+                "parent": None,
+                "capabilities": {
+                    "eup_battery_passport": True,
+                    "ira_30d_tax_credit": True,
+                    "trade_jurisprudence_precedents": True,
+                    "x402_usdc_settlement": True,
+                },
+                "description": "Autonomous critical minerals compliance, ESG, EUDR & battery passport oracle"
+            },
+            {
+                "id": "eu-battery-passport-eip712",
+                "object": "model",
+                "created": 1730000000,
+                "owned_by": "minerals-oracle-x402",
+                "permission": [],
+                "root": "eu-battery-passport-eip712",
+                "parent": None,
+                "capabilities": {
+                    "eip712_dual_signing": True,
+                    "polygon_calldata_relay": True,
+                },
+                "description": "EU 2023/1542 & IRA 30D compliant battery passport synthesis & verification"
+            }
+        ]
+    }
+
+
+@app.get("/v1/models/{model_id}", tags=["OpenAI Compatibility"], summary="Retrieve specific model descriptor")
+@app.get("/models/{model_id}", tags=["OpenAI Compatibility"], include_in_schema=False)
+async def get_openai_compatible_model(model_id: str):
+    return {
+        "id": model_id,
+        "object": "model",
+        "created": 1730000000,
+        "owned_by": "minerals-oracle-x402",
+        "permission": [],
+        "root": model_id,
+        "parent": None,
     }
 
 
@@ -234,11 +464,14 @@ async def get_robots_txt():
         "Allow: /.well-known/\n"
         "Allow: /api/v1/oracle/alpha-signals\n"
         "Allow: /api/v1/oracle/battery-passports\n"
+        "Allow: /api/v1/oracle/sample/battery-passport\n"
+        "Allow: /v1/models\n"
         "\n"
         "User-agent: *\n"
         "Allow: /\n"
         "Allow: /llms.txt\n"
         "Allow: /sitemap.xml\n"
+        "Allow: /v1/models\n"
         "\n"
         "Sitemap: https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/sitemap.xml\n"
         "LLMs-Txt: https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/llms.txt\n"
@@ -262,6 +495,8 @@ async def get_sitemap_xml():
         f'  <url><loc>{base}/mcp/tools</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
         f'  <url><loc>{base}/openapi.json</loc><changefreq>daily</changefreq><priority>0.8</priority></url>\n'
         f'  <url><loc>{base}/api/v1/oracle/alpha-signals</loc><changefreq>hourly</changefreq><priority>0.9</priority></url>\n'
+        f'  <url><loc>{base}/api/v1/oracle/sample/battery-passport</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
+        f'  <url><loc>{base}/v1/models</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n'
         f'  <url><loc>{base}/api/v1/oracle/economics-roi</loc><changefreq>daily</changefreq><priority>0.7</priority></url>\n'
         f'  <url><loc>{base}/dashboard</loc><changefreq>daily</changefreq><priority>0.5</priority></url>\n'
         '</urlset>'

@@ -186,6 +186,20 @@ async def get_price_by_symbol(
     request: Request,
     symbol: str = FPath(..., description="Mineral commodity symbol"),
 ):
+    clean_sym = symbol.strip("{}'`\" \t\r\n").upper()
+    if not clean_sym or clean_sym in ("SYMBOL", "COMMODITY", "URL", "TOKEN"):
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": {
+                    "code": "INVALID_TEMPLATE_PARAMETER",
+                    "message": f"'{symbol}' is a documentation template placeholder. Please supply a valid mineral symbol.",
+                    "valid_symbols": ["LITHIUM", "NICKEL", "COBALT", "GRAPHITE", "COPPER", "SILVER", "PLATINUM"],
+                    "example": "/api/v1/oracle/prices/LITHIUM"
+                }
+            }
+        )
+
     resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
     if resp_402:
         return resp_402
@@ -194,7 +208,7 @@ async def get_price_by_symbol(
     data = {
         "status": "success",
         "meta": STANDARD_DISCLAIMER_META,
-        "symbol": symbol.upper(),
+        "symbol": clean_sym,
         "oracle": "minerals-oracle-x402",
         "compliance_ready": True,
         "ira_feoc_rules": "Strict <25% equity/control verification active",
@@ -234,7 +248,20 @@ async def get_spreads(request: Request):
 @router.get("/api/v1/oracle/realtime-price/{symbol}", tags=["Oracle Feed"])
 async def get_pyth_realtime_price_route(symbol: str):
     """Retrieves real-time spot price and confidence interval for commodities from Pyth Network."""
-    return pyth_oracle_client.get_realtime_price(symbol)
+    clean_sym = symbol.strip("{}'`\" \t\r\n").upper()
+    if not clean_sym or clean_sym in ("SYMBOL", "COMMODITY", "URL", "TOKEN"):
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": {
+                    "code": "INVALID_TEMPLATE_PARAMETER",
+                    "message": f"'{symbol}' is a documentation template placeholder. Please supply a valid mineral symbol.",
+                    "valid_symbols": ["Cu", "Ag", "Pt", "Au", "CARBON", "EU_ETS", "Li", "Ni"],
+                    "example": "/api/v1/oracle/realtime-price/Cu"
+                }
+            }
+        )
+    return pyth_oracle_client.get_realtime_price(clean_sym)
 
 
 @router.get("/api/v1/oracle/onchain-payload/{symbol}", tags=["On-Chain Smart Contract Binding"])
