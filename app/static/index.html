@@ -805,7 +805,7 @@
       <div class="stat-pill"><span style="color: var(--cyan);">AGENT INTERFACE: PURE M2M</span></div>
     </div>
     <div style="display: flex; gap: 8px; align-items: center;">
-      <a href="/api/v1/oracle/sample/battery-passport" download class="lang-btn" style="border-color: #f59e0b; color: #fbbf24; font-weight: 700; background: rgba(245, 158, 11, 0.12);" title="Download official EU 2023/1542 Battery Passport Sample (EIP-712 Dual-Signed)">⚡ Battery Passport (EU 2023/1542)</a>
+      <a href="#battery-observatory" class="lang-btn" style="border-color: #f59e0b; color: #fbbf24; font-weight: 700; background: rgba(245, 158, 11, 0.12);" title="Inspect Multi-Chemistry Battery Observatory & Download EU 2023/1542 EIP-712 Samples">⚡ Battery Passport (EU 2023/1542)</a>
       <a href="#a2a-escrow" class="lang-btn" style="border-color: var(--cyan); color: var(--cyan); font-weight: 700; background: rgba(6, 182, 212, 0.1);">📜 Escrow Terminal</a>
       <a href="/llms.txt" target="_blank" class="lang-btn" style="border-color: #a855f7; color: #c084fc; font-weight: 700; background: rgba(168, 85, 247, 0.1);">📄 llms.txt</a>
       <a href="/.well-known/agent.json" target="_blank" class="lang-btn" style="border-color: var(--emerald); color: var(--emerald); font-weight: 700;">🤖 agent.json</a>
@@ -1384,6 +1384,60 @@
           </button>
         </div>
 
+        <!-- Interactive Battery Cell Chemistry Lineup Selector -->
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 6px; padding: 12px 14px; margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+            <span style="font-family: var(--mono); font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+              ⚡ Standard Automotive & BESS Battery Cell Chemistry Catalog (IEC 62660 / ISO 12405 / SAE J2990 / EU 2023/1542)
+            </span>
+            <span style="font-family: var(--mono); font-size: 10px; color: var(--emerald); background: rgba(16, 185, 129, 0.12); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.3);">
+              6 COMMERCIAL ARCHITECTURES READY
+            </span>
+          </div>
+
+          <div class="preset-pill-bar" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+            <button class="preset-btn active" id="btnChemNCM811" onclick="selectBatteryArchitecture('NCM811')">
+              ⚡ NCM 811 (High-Nickel)
+            </button>
+            <button class="preset-btn" id="btnChemNCM9" onclick="selectBatteryArchitecture('NCM9')">
+              🔋 NCM 9 (Ultra-Ni 9½½)
+            </button>
+            <button class="preset-btn" id="btnChemNCA" onclick="selectBatteryArchitecture('NCA')">
+              💎 NCA (High-Power)
+            </button>
+            <button class="preset-btn" id="btnChemNCMA" onclick="selectBatteryArchitecture('NCMA')">
+              🛡️ NCMA (Quaternary)
+            </button>
+            <button class="preset-btn" id="btnChemLFP" onclick="selectBatteryArchitecture('LFP')">
+              🌿 LFP (Zero-Co/Ni)
+            </button>
+            <button class="preset-btn" id="btnChemSolidState" onclick="selectBatteryArchitecture('SOLID_STATE')">
+              🚀 Solid-State (ASB Pilot)
+            </button>
+          </div>
+
+          <!-- Engineering Telemetry Badge Bar -->
+          <div id="chemSpecCard" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; background: #080c14; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border); font-size: 11px; font-family: var(--mono);">
+            <div><span style="color: var(--text-dim);">Stoichiometry:</span> <strong id="specFormula" style="color: var(--cyan);">LiNi0.80Co0.10Mn0.10O2</strong></div>
+            <div><span style="color: var(--text-dim);">Gravimetric:</span> <strong id="specGrav" style="color: var(--emerald);">285 Wh/kg</strong></div>
+            <div><span style="color: var(--text-dim);">Volumetric:</span> <strong id="specVol" style="color: var(--emerald);">720 Wh/L</strong></div>
+            <div><span style="color: var(--text-dim);">Nominal V:</span> <strong id="specVolt" style="color: #fff;">3.65V (4.25V)</strong></div>
+            <div><span style="color: var(--text-dim);">Cycle Life:</span> <strong id="specCycles" style="color: #fff;">1,200 cyc</strong></div>
+            <div><span style="color: var(--text-dim);">Baseline CO₂e:</span> <strong id="specCo2" style="color: #fbbf24;">51.5 kg/kWh</strong></div>
+            <div style="grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 6px; margin-top: 2px;">
+              <span style="color: var(--text-dim); font-size: 10px;" id="specHighlights">High volumetric packaging efficiency in 800V skateboard platforms; OECD Annex II & RMI RMAP compliant cobalt.</span>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button type="button" onclick="openQrModal()" class="lang-btn" style="border-color: #06b6d4; color: #22d3ee; font-size: 11px; padding: 3px 8px; font-weight: 700; background: rgba(6, 182, 212, 0.12); cursor: pointer;" title="Scan with mobile camera to verify live EU 2023/1542 battery passport">
+                  📱 Scan EU Passport QR
+                </button>
+                <a id="btnDownloadActivePassport" href="/api/v1/oracle/sample/battery-passport?chemistry=NCM811" download class="lang-btn" style="border-color: #f59e0b; color: #fbbf24; font-size: 11px; padding: 3px 8px; font-weight: 700; background: rgba(245, 158, 11, 0.12);" title="Download verifiable EIP-712 Dual-Signed JSON">
+                  📥 Download EIP-712 JSON
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Battery Pack Input Row -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: rgba(15, 23, 42, 0.5); padding: 14px; border-radius: 6px; border: 1px solid var(--border);">
           <div class="field-row">
@@ -1392,10 +1446,15 @@
           </div>
           <div class="field-row">
             <label class="field-label">Cathode Chemistry</label>
-            <select id="compChem">
-              <option value="NCM811" selected>NCM 811 (Ni 80%, Co 10%, Mn 10%)</option>
-              <option value="NCM622">NCM 622 (Ni 60%, Co 20%, Mn 20%)</option>
-              <option value="NCM523">NCM 523 (Ni 50%, Co 20%, Mn 30%)</option>
+            <select id="compChem" onchange="onSelectChemDropdown(this.value)">
+              <option value="NCM811" selected>NCM 811 (LiNi0.80Co0.10Mn0.10O2 - Standard High-Ni)</option>
+              <option value="NCM9">NCM 9 (LiNi0.90Co0.05Mn0.05O2 - Ultra-High Nickel 9½½)</option>
+              <option value="NCA">NCA (LiNi0.88Co0.09Al0.03O2 - High-Power Prismatic)</option>
+              <option value="NCMA">NCMA (LiNi0.89Co0.05Mn0.05Al0.01O2 - Quaternary Advanced)</option>
+              <option value="LFP">LFP (LiFePO4 - Zero-Cobalt / Zero-Nickel Olivine)</option>
+              <option value="SOLID_STATE">All-Solid-State ASB (Li-Metal / Sulfide Argyrodite 450 Wh/kg)</option>
+              <option value="NCM622">NCM 622 (Ni 60%, Co 20%, Mn 20% - Legacy)</option>
+              <option value="NCM523">NCM 523 (Ni 50%, Co 20%, Mn 30% - Legacy)</option>
             </select>
           </div>
           <div class="field-row">
@@ -2593,6 +2652,178 @@ curl -s http://localhost:8000/mcp/tools`
       if (activePane) activePane.style.display = 'flex';
     }
 
+    const BATTERY_CHEMISTRIES_DATA = {
+      'NCM811': {
+        code: 'NCM811',
+        name: 'NCM 811 (High-Nickel Ternary)',
+        formula: 'LiNi0.80Co0.10Mn0.10O2',
+        cap: 84.0,
+        densityWhKg: 285.0,
+        densityWhL: 720.0,
+        voltage: '3.65V (4.25V)',
+        cycles: '1,200 cyc',
+        baseCarbon: 51.5,
+        standard: 'IEC 62660-3 / ISO 12405-4',
+        packId: 'BATT-NCM811-2026-PACK01',
+        downloadUrl: '/api/v1/oracle/sample/battery-passport?chemistry=NCM811',
+        highlights: 'High volumetric packaging efficiency in 800V skateboard platforms; OECD Annex II & RMI RMAP compliant cobalt.'
+      },
+      'NCM9': {
+        code: 'NCM9',
+        name: 'NCM 9 (Ultra-High Nickel 9½½)',
+        formula: 'LiNi0.90Co0.05Mn0.05O2',
+        cap: 98.0,
+        densityWhKg: 320.0,
+        densityWhL: 810.0,
+        voltage: '3.70V (4.30V)',
+        cycles: '1,400 cyc',
+        baseCarbon: 49.8,
+        standard: 'SAE J2990 / UN 38.3 / ISO 12405-4',
+        packId: 'BATT-NCM9-2026-SERIES01',
+        downloadUrl: '/api/v1/oracle/sample/battery-passport?chemistry=NCM9',
+        highlights: '50% cobalt reduction vs NCM811; single-crystal Zr/Ti doping preventing microcracks; sub-50 kg CO2e/kWh.'
+      },
+      'NCA': {
+        code: 'NCA',
+        name: 'NCA (Nickel-Cobalt-Aluminum High-Power)',
+        formula: 'LiNi0.88Co0.09Al0.03O2',
+        cap: 80.0,
+        densityWhKg: 310.0,
+        densityWhL: 780.0,
+        voltage: '3.65V (4.25V)',
+        cycles: '1,300 cyc',
+        baseCarbon: 48.9,
+        standard: 'IEC 62660-2 / DIN EN 62660',
+        packId: 'BATT-NCA-2026-SERIES01',
+        downloadUrl: '/api/v1/oracle/sample/battery-passport?chemistry=NCA',
+        highlights: 'Al substitution stabilizes transition metal layer during high C-rates; hard-can prismatic architecture with CID & vent.'
+      },
+      'NCMA': {
+        code: 'NCMA',
+        name: 'NCMA (Quaternary High-Nickel Aluminum-Doped)',
+        formula: 'LiNi0.89Co0.05Mn0.05Al0.01O2',
+        cap: 105.0,
+        densityWhKg: 315.0,
+        densityWhL: 795.0,
+        voltage: '3.68V (4.25V)',
+        cycles: '1,500 cyc',
+        baseCarbon: 49.2,
+        standard: 'ISO 12405-4 / IEC 62660-3',
+        packId: 'BATT-NCMA-2026-SERIES01',
+        downloadUrl: '/api/v1/oracle/sample/battery-passport?chemistry=NCMA',
+        highlights: 'Quaternary CAM micro-grain pairing Mn thermal barrier with Al stress buffering; maintains >80% capacity past 1,500 cycles.'
+      },
+      'LFP': {
+        code: 'LFP',
+        name: 'LFP (Lithium Iron Phosphate / Zero-Cobalt)',
+        formula: 'LiFePO4',
+        cap: 60.0,
+        densityWhKg: 185.0,
+        densityWhL: 420.0,
+        voltage: '3.20V (3.65V)',
+        cycles: '3,500+ cyc',
+        baseCarbon: 41.0,
+        standard: 'IEC 62660-1 / UL 9540A / GB/T 31485',
+        packId: 'BATT-LFP-2026-SERIES01',
+        downloadUrl: '/api/v1/oracle/sample/battery-passport?chemistry=LFP',
+        highlights: 'Zero cobalt & zero nickel eliminates DRC conflict & CBAM surcharges; 3,500+ cycles with CTP 3.0 blade integration.'
+      },
+      'SOLID_STATE': {
+        code: 'SOLID_STATE',
+        name: 'All-Solid-State (ASB / Sulfide Electrolyte)',
+        formula: 'Li-Metal / Li6PS5Cl Argyrodite / High-Ni CAM',
+        cap: 120.0,
+        densityWhKg: 450.0,
+        densityWhL: 900.0,
+        voltage: '3.80V (4.40V)',
+        cycles: '1,000+ cyc',
+        baseCarbon: 44.5,
+        standard: 'ISO/PAS 8848 / SAE J2990-B / IEC TC 21',
+        packId: 'BATT-ASB-2026-SERIES01',
+        downloadUrl: '/api/v1/oracle/sample/battery-passport?chemistry=SOLID_STATE',
+        highlights: 'Non-flammable solid sulfide ceramic electrolyte; anode-less 450 Wh/kg; dry-electrode roll-to-roll process eliminating NMP.'
+      }
+    };
+
+    let activeBatteryChemCode = 'NCM811';
+
+    function selectBatteryArchitecture(chemCode) {
+      const spec = BATTERY_CHEMISTRIES_DATA[chemCode];
+      if (!spec) return;
+      activeBatteryChemCode = chemCode;
+
+      const chemBtnIds = {
+        'NCM811': 'btnChemNCM811',
+        'NCM9': 'btnChemNCM9',
+        'NCA': 'btnChemNCA',
+        'NCMA': 'btnChemNCMA',
+        'LFP': 'btnChemLFP',
+        'SOLID_STATE': 'btnChemSolidState'
+      };
+      Object.keys(chemBtnIds).forEach(k => {
+        const b = document.getElementById(chemBtnIds[k]);
+        if (b) {
+          if (k === chemCode) b.classList.add('active');
+          else b.classList.remove('active');
+        }
+      });
+
+      const selChem = document.getElementById('compChem');
+      if (selChem) selChem.value = chemCode;
+
+      const inpCap = document.getElementById('compCap');
+      if (inpCap) inpCap.value = spec.cap.toFixed(1);
+
+      const inpPack = document.getElementById('compPackId');
+      if (inpPack) inpPack.value = spec.packId;
+
+      const elFormula = document.getElementById('specFormula');
+      if (elFormula) elFormula.innerText = spec.formula;
+
+      const elGrav = document.getElementById('specGrav');
+      if (elGrav) elGrav.innerText = `${spec.densityWhKg} Wh/kg`;
+
+      const elVol = document.getElementById('specVol');
+      if (elVol) elVol.innerText = `${spec.densityWhL} Wh/L`;
+
+      const elVolt = document.getElementById('specVolt');
+      if (elVolt) elVolt.innerText = spec.voltage;
+
+      const elCycles = document.getElementById('specCycles');
+      if (elCycles) elCycles.innerText = spec.cycles;
+
+      const elCo2 = document.getElementById('specCo2');
+      if (elCo2) elCo2.innerText = `${spec.baseCarbon.toFixed(1)} kg/kWh`;
+
+      const elHigh = document.getElementById('specHighlights');
+      if (elHigh) elHigh.innerText = spec.highlights;
+
+      const elDl = document.getElementById('btnDownloadActivePassport');
+      if (elDl) {
+        elDl.href = spec.downloadUrl;
+        elDl.setAttribute('download', `EU_BATTERY_PASSPORT_EIP712_${chemCode}.json`);
+      }
+
+      const qrModalImg = document.getElementById('qrModalImg');
+      if (qrModalImg) qrModalImg.src = '/api/v1/oracle/qr/battery-passport?chemistry=' + chemCode;
+      const qrModalLink = document.getElementById('qrModalDirectLink');
+      if (qrModalLink) qrModalLink.href = '/passport/' + chemCode.toLowerCase();
+      const qrModalTitle = document.getElementById('qrModalTitle');
+      if (qrModalTitle) qrModalTitle.innerText = spec.name;
+      const qrModalSub = document.getElementById('qrModalSubtitle');
+      if (qrModalSub) qrModalSub.innerText = `${spec.standard} · ${chemCode}`;
+
+      runCompositeBatterySimulation();
+    }
+
+    function onSelectChemDropdown(chemCode) {
+      if (BATTERY_CHEMISTRIES_DATA[chemCode]) {
+        selectBatteryArchitecture(chemCode);
+      } else {
+        runCompositeBatterySimulation();
+      }
+    }
+
     function loadCompositePreset(preset) {
       currentCompositePreset = preset;
       const presetIds = {
@@ -2839,6 +3070,17 @@ curl -s http://localhost:8000/mcp/tools`
           stLi.innerHTML = v.lithium_cleared ? '<span style="color: var(--emerald);">● Verified</span>' : '<span style="color: var(--amber);">❌ Defect Found</span>';
           stNi.innerHTML = v.nickel_cleared ? '<span style="color: var(--emerald);">● Verified</span>' : '<span style="color: var(--amber);">❌ Defect Found</span>';
           stCo.innerHTML = v.cobalt_cleared ? '<span style="color: var(--emerald);">● Verified</span>' : '<span style="color: var(--amber);">❌ Defect Found</span>';
+
+          if (cellChem === 'LFP') {
+            stNi.innerHTML = '<span style="color: var(--cyan);">● Zero-Ni Olivine</span>';
+            stCo.innerHTML = '<span style="color: var(--emerald);">● Zero-Co Ethical Clean</span>';
+            const elMNi = document.getElementById('stMineNi');
+            if (elMNi) elMNi.innerText = 'N/A - Zero Nickel Olivine';
+            const elMCo = document.getElementById('stMineCo');
+            if (elMCo) elMCo.innerText = 'N/A - Zero Cobalt Olivine';
+            const elLCo = document.getElementById('stLaborCo');
+            if (elLCo) elLCo.innerText = '100% Conflict-Free (Zero Cobalt Exposure)';
+          }
 
           if (data.lithium_summary) {
             document.getElementById('stProofLi').innerText = data.lithium_summary.onchain_attestation_hash ? data.lithium_summary.onchain_attestation_hash.slice(0, 16) + '...' : '0xVerified';
@@ -3744,6 +3986,26 @@ curl -s http://localhost:8000/mcp/tools`
       }
     }
 
+    function openQrModal() {
+      const code = activeBatteryChemCode || 'NCM811';
+      const data = BATTERY_CHEMISTRIES_DATA[code];
+      const titleEl = document.getElementById('qrModalTitle');
+      if (titleEl) titleEl.innerText = data ? data.name : (code + ' Battery Passport');
+      const subEl = document.getElementById('qrModalSubtitle');
+      if (subEl) subEl.innerText = data ? (data.standard + ' · ' + code) : code;
+      const imgEl = document.getElementById('qrModalImg');
+      if (imgEl) imgEl.src = '/api/v1/oracle/qr/battery-passport?chemistry=' + code;
+      const linkEl = document.getElementById('qrModalDirectLink');
+      if (linkEl) linkEl.href = '/passport/' + code.toLowerCase();
+      const modal = document.getElementById('qrModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeQrModal() {
+      const modal = document.getElementById('qrModal');
+      if (modal) modal.style.display = 'none';
+    }
+
     // Initialize proposals on page load & trigger initial simulation
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
@@ -3757,5 +4019,29 @@ curl -s http://localhost:8000/mcp/tools`
       setTimeout(generateEscrowCalldata, 300);
     }
   </script>
+
+  <!-- QR Code Verification Modal -->
+  <div id="qrModal" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(2, 6, 23, 0.88); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 16px;">
+    <div style="background: #0b1329; border: 1px solid #1e293b; border-radius: 12px; max-width: 440px; width: 100%; padding: 24px 20px; text-align: center; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.85);">
+      <button onclick="closeQrModal()" style="position: absolute; top: 12px; right: 14px; background: transparent; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; line-height: 1;">✕</button>
+      <div style="font-family: var(--mono); font-size: 11px; color: #3b82f6; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px;">🇪🇺 REGULATION (EU) 2023/1542</div>
+      <div style="font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 4px;" id="qrModalTitle">Digital Battery Passport QR</div>
+      <div style="font-size: 11px; color: #94a3b8; font-family: var(--mono); margin-bottom: 16px;" id="qrModalSubtitle">ISO 12405-4 · IEC 62660-3 · Art. 77 Engraved QR</div>
+      <div style="background: #fff; padding: 12px; border-radius: 8px; display: inline-block; margin-bottom: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.4);">
+        <img id="qrModalImg" src="/api/v1/oracle/qr/battery-passport?chemistry=NCM811" alt="EU Battery Passport QR" style="width: 180px; height: 180px; display: block;">
+      </div>
+      <div style="font-size: 11px; color: #64748b; font-family: var(--mono); margin-bottom: 16px; line-height: 1.5;">
+        Point your smartphone camera at this QR code to view live onchain cryptographic proof & conformity assessment on mobile.
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <a id="qrModalDirectLink" href="/passport/ncm811" target="_blank" style="flex: 1; background: rgba(6, 182, 212, 0.15); border: 1px solid #06b6d4; color: #22d3ee; font-family: var(--mono); font-size: 12px; font-weight: 700; padding: 10px 12px; border-radius: 6px; text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">
+          🔗 Open Mobile Passport View
+        </a>
+        <button onclick="closeQrModal()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; font-family: var(--mono); font-size: 12px; padding: 10px 16px; border-radius: 6px; cursor: pointer;">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

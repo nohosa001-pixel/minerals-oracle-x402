@@ -1,6 +1,6 @@
 {
-  "_legal_disclaimer": "OFFICIAL COMPLIANT SAMPLE - Regulation (EU) 2023/1542 Battery Passport & US IRA Section 30D Mineral Attestation",
-  "_statutory_framework": "European Union Battery Regulation (EU) 2023/1542 / US Inflation Reduction Act Section 30D / OECD Due Diligence Annex II",
+  "_legal_disclaimer": "OFFICIAL COMPLIANT SAMPLE - Regulation (EU) 2023/1542 Battery Passport & US IRA Section 30D Mineral Attestation [NCM 811 (High-Nickel Ternary)]",
+  "_statutory_framework": "IEC 62660-3 / ISO 12405-4 / Regulation (EU) 2023/1542 / US Public Law 117-169 Section 30D / OECD Due Diligence Annex II",
   "_verified_by": "Autonomous Critical Minerals & Battery Supply-Chain Compliance Oracle (https://mineralsoracle.com / minerals-oracle-x402)",
   "_enterprise_inquiries": "For enterprise batch battery passport issuance & real-time OEM supply-chain API, contact: contact@mineralsoracle.com",
   "_cryptographic_provenance": {
@@ -8,6 +8,35 @@
     "merkle_root": "0xbd4988cb3d1ad7f718b19dece7d2aa424d1a26895824c4509b471a1ceed69036",
     "master_onchain_proof": "0x60109746ea6442c9e671e3ee6994f704101f38c7eff5d07eddfe06074c878f9d010552a7ffae5b7e653567a43fca30af12d8f1c7a2bc40162d49961f699fd1841c",
     "attestation_status": "APPROVED_COMPLIANT_ZERO_FEOC"
+  },
+  "technical_specifications": {
+    "chemistry_code": "NCM811",
+    "chemistry_name": "NCM 811 (High-Nickel Ternary)",
+    "stoichiometry": "LiNi0.80Co0.10Mn0.10O2",
+    "regulatory_standard": "IEC 62660-3 / ISO 12405-4",
+    "cell_category": "High-Nickel Ternary NMC",
+    "gravimetric_energy_density_wh_kg": 285.0,
+    "volumetric_energy_density_wh_l": 720.0,
+    "nominal_cell_voltage_v": 3.65,
+    "max_charge_voltage_v": 4.25,
+    "cycle_life_80pct_soh": 1200,
+    "thermal_runaway_initiation_temp_c": 210.0,
+    "cam_elemental_ratios": {
+      "nickel": 0.80,
+      "cobalt": 0.10,
+      "manganese": 0.10,
+      "aluminum": 0.00
+    },
+    "target_applications": [
+      "Mainstream C/D-Segment EV",
+      "Performance Sedan",
+      "Commercial Electric Van"
+    ],
+    "engineering_highlights": [
+      "High volumetric packaging efficiency in 800V skateboard platforms",
+      "Refined LiOH monohydrate and low-carbon HPAL nickel MHP feedstock",
+      "OECD Annex II and RMI RMAP compliant cobalt supply chain"
+    ]
   },
   "passport_data": {
     "status": "success",
@@ -24,29 +53,30 @@
     "lithium_summary": {
       "trace_id": "LITH-AU-2026-B01",
       "mine": "Greenbushes Lithium Mine",
+      "chemical_form": "Lithium Hydroxide Monohydrate (Battery Grade 56.5% LiOH)",
       "ira_compliant": true,
       "confidence_score": 100.0,
-      "proof": "0xc2af27acd94da1..."
+      "proof": "0xc2af27acd94da1765102f9e4210a44b8"
     },
     "nickel_summary": {
       "trace_id": "NIC-IDN-2026-MHP01",
-      "concession": "PT Indonesia Morowali Industrial Park (IMIP)",
+      "concession": "PT Indonesia Morowali Industrial Park (IMIP) / QMB Clean HPAL",
       "simbara_cleared": true,
       "cbam_ready": true,
       "confidence_score": 100.0,
-      "proof": "0xb29b21a99ec687..."
+      "proof": "0xb29b21a99ec687e14902cd9a88514ef1"
     },
     "cobalt_summary": {
       "trace_id": "COB-COD-2026-HYD01",
-      "concession": "Kamoto Copper Company (KCC - Glencore / Gécamines)",
+      "concession": "Kamoto Copper Company (KCC - Glencore / Gécamines LSM Tier 1)",
       "ceec_cleared": true,
       "child_labor_free": true,
       "confidence_score": 100.0,
-      "proof": "0xc8520260295c41..."
+      "proof": "0xc8520260295c41f71a0029b47a98ec21"
     },
     "composite_verdict": {
       "ira_30d_tax_credit_eligible": true,
-      "ira_critical_mineral_fta_ratio_pct": 86.35,
+      "ira_critical_mineral_fta_ratio_pct": 86.4,
       "eu_battery_passport_approved": true,
       "blended_carbon_footprint_kg_per_kwh": 51.5,
       "composite_confidence_score": 100.0,
@@ -57,11 +87,11 @@
       "cbam_carbon_penalty_alert": false,
       "composite_defenses_applied": [
         "DEFENSE_IRA_30D_QUALIFIED: FTA procurement value ratio 86.4% >= 50.0% and zero FEOC taint; fully eligible for $3,750 clean vehicle credit.",
-        "DEFENSE_EU_LOW_CARBON_CLEARED: Mineral refining pathways utilize renewable/grid power, complying with EU Battery Regulation carbon limits.",
+        "DEFENSE_EU_LOW_CARBON_CLEARED: Mineral refining pathways utilize renewable/grid power (51.5 kg CO2e/kWh), complying with EU Battery Regulation carbon limits.",
         "DEFENSE_EU_BATTERY_PASSPORT_APPROVED: Verified under EU 2023/1542, OECD Annex II, and CSDDD due diligence standards."
       ]
     },
     "master_onchain_proof": "0x60109746ea6442c9e671e3ee6994f704101f38c7eff5d07eddfe06074c878f9d010552a7ffae5b7e653567a43fca30af12d8f1c7a2bc40162d49961f699fd1841c",
-    "timestamp": "2026-11-05T23:50:01.384044+00:00"
+    "timestamp": "2026-11-07T00:00:00.000000+00:00"
   }
 }

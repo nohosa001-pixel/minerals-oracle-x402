@@ -214,13 +214,38 @@ def handle_tools_list(req_id: Any) -> Dict[str, Any]:
                         "type": "object",
                         "properties": {
                             "battery_pack_id": {"type": "string", "description": "Unique battery pack serial (e.g. BATT-NCM811-2026-PACK01)"},
-                            "cell_chemistry": {"type": "string", "default": "NCM811", "description": "Cathode chemistry (NCM811, NCM622, NCM523)"},
+                            "cell_chemistry": {
+                                "type": "string",
+                                "enum": ["NCM811", "NCM9", "NCA", "NCMA", "LFP", "SOLID_STATE"],
+                                "default": "NCM811",
+                                "description": "Standard automotive battery cell architecture (IEC 62660 / ISO 12405 / SAE J2990)"
+                            },
                             "pack_capacity_kwh": {"type": "number", "default": 84.0, "description": "Pack capacity in kWh"},
                             "lithium_lot": {"type": "object", "description": "LithiumOriginVerifyRequest payload"},
                             "nickel_lot": {"type": "object", "description": "NickelOriginVerifyRequest payload"},
                             "cobalt_lot": {"type": "object", "description": "CobaltOriginVerifyRequest payload"}
                         },
                         "required": ["battery_pack_id", "lithium_lot", "nickel_lot", "cobalt_lot"]
+                    }
+                },
+                {
+                    "name": "get_battery_cell_passport_sample",
+                    "description": (
+                        "Retrieves official EU 2023/1542 & US IRA Section 30D compliant EIP-712 dual-signed battery passport sample "
+                        "for any standard chemistry (NCM811, NCM9, NCA, NCMA, LFP, SOLID_STATE) with stoichiometric CAM ratios, energy densities, and Polygon Merkle Root."
+                    ),
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "cell_chemistry": {
+                                "type": "string",
+                                "enum": ["NCM811", "NCM9", "NCA", "NCMA", "LFP", "SOLID_STATE"],
+                                "default": "NCM811",
+                                "description": "Battery cell architecture: NCM811, NCM9, NCA, NCMA, LFP, SOLID_STATE"
+                            },
+                            "battery_pack_id": {"type": "string", "description": "Optional custom pack serial ID"},
+                            "pack_capacity_kwh": {"type": "number", "description": "Optional custom capacity in kWh"}
+                        }
                     }
                 },
                 {

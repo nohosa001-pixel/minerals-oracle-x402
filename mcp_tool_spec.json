@@ -124,13 +124,41 @@
         "type": "object",
         "properties": {
           "battery_pack_id": {"type": "string"},
-          "cell_chemistry": {"type": "string", "default": "NCM811"},
+          "cell_chemistry": {
+            "type": "string",
+            "enum": ["NCM811", "NCM9", "NCA", "NCMA", "LFP", "SOLID_STATE"],
+            "default": "NCM811",
+            "description": "Standard automotive battery cell architecture (IEC 62660 / ISO 12405 / SAE J2990)"
+          },
           "pack_capacity_kwh": {"type": "number", "default": 84.0},
           "lithium_lot": {"type": "object"},
           "nickel_lot": {"type": "object"},
           "cobalt_lot": {"type": "object"}
         },
         "required": ["battery_pack_id", "lithium_lot", "nickel_lot", "cobalt_lot"]
+      }
+    },
+    {
+      "name": "get_battery_cell_passport_sample",
+      "description": "Retrieves official EU 2023/1542 & US IRA Section 30D compliant EIP-712 dual-signed battery passport sample for any standard chemistry (NCM811, NCM9, NCA, NCMA, LFP, SOLID_STATE) with stoichiometric CAM ratios, energy densities, and Polygon Merkle Root.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "cell_chemistry": {
+            "type": "string",
+            "enum": ["NCM811", "NCM9", "NCA", "NCMA", "LFP", "SOLID_STATE"],
+            "default": "NCM811",
+            "description": "Battery cell architecture: NCM811 (Ternary), NCM9 (Ultra-High Ni 9½½), NCA (High-Power), NCMA (Quaternary), LFP (Zero-Co/Ni), SOLID_STATE (All-Solid-State ASB)"
+          },
+          "battery_pack_id": {
+            "type": "string",
+            "description": "Optional custom pack serial ID"
+          },
+          "pack_capacity_kwh": {
+            "type": "number",
+            "description": "Optional custom capacity in kWh"
+          }
+        }
       }
     },
     {

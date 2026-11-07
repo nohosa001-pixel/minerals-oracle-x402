@@ -7,6 +7,8 @@ Write-Host "========================================================" -Foregroun
 Write-Host "  minerals-oracle-x402 24/7 Cloud Deployment" -ForegroundColor Cyan
 Write-Host "========================================================" -ForegroundColor Cyan
 
+Set-Location $PSScriptRoot
+
 # 1. Check & Inject gcloud CLI
 $gcloudBin = "C:\Users\nohos\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin"
 if (Test-Path $gcloudBin) {

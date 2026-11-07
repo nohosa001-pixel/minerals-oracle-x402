@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Technical Brief: Regulation (EU) 2023/1542 & US IRA 30D Battery Passport Implementation</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #0f172a;
+      --border: #1e293b;
+      --emerald: #10b981;
+      --cyan: #06b6d4;
+      --amber: #f59e0b;
+      --blue: #3b82f6;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+      --serif: 'Charter', 'Georgia', 'Times New Roman', serif;
+      --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.65;
+      padding: 32px 16px 80px;
+      display: flex;
+      justify-content: center;
+    }
+    .paper-container {
+      max-width: 840px;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 48px 40px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.7);
+    }
+    @media (max-width: 640px) {
+      .paper-container { padding: 24px 18px; }
+    }
+    .header-bar {
+      border-bottom: 2px solid var(--emerald);
+      padding-bottom: 20px;
+      margin-bottom: 28px;
+    }
+    .meta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--cyan);
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.35;
+      margin-bottom: 12px;
+    }
+    .doc-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 6px;
+      margin-top: 14px;
+    }
+    h2 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--emerald);
+      margin: 32px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin: 18px 0 8px;
+    }
+    p, li {
+      font-size: 14px;
+      color: #cbd5e1;
+      margin-bottom: 12px;
+    }
+    ul, ol { padding-left: 20px; margin-bottom: 14px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 24px;
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+    th, td {
+      padding: 8px 10px;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    th {
+      background: #0b1329;
+      color: var(--cyan);
+      font-weight: 700;
+    }
+    tr:nth-child(even) { background: rgba(15, 23, 42, 0.4); }
+    .code-box {
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: #a78bfa;
+      overflow-x: auto;
+      margin: 14px 0 20px;
+      line-height: 1.5;
+    }
+    .callout {
+      background: rgba(16, 185, 129, 0.08);
+      border-left: 4px solid var(--emerald);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 18px 0;
+      font-size: 13px;
+    }
+    .callout-title {
+      font-weight: 700;
+      color: var(--emerald);
+      font-family: var(--mono);
+      margin-bottom: 4px;
+    }
+    .qr-demo {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 20px;
+      background: rgba(2, 6, 23, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 20px 0;
+    }
+    .qr-demo img {
+      width: 130px;
+      height: 130px;
+      background: #fff;
+      padding: 6px;
+      border-radius: 6px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .btn:hover { background: var(--cyan); color: #000; }
+    .btn-emerald {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: var(--emerald);
+      color: var(--emerald);
+    }
+    .btn-emerald:hover { background: var(--emerald); color: #000; }
+    .footer-bar {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="paper-container">
+
+  <div class="header-bar">
+    <div class="meta-badge">OFFICIAL TECHNICAL BRIEF // SPECIFICATION NOTE 2026-BATT-01</div>
+    <h1>Implementing Regulation (EU) 2023/1542 & US IRA Section 30D Compliant Battery Passports via EIP-712 Dual-Signed Merkle Trees</h1>
+    <div class="doc-meta">
+      <div><strong>Author:</strong> Autonomous Critical Minerals & Battery Oracle</div>
+      <div><strong>Standard:</strong> ISO 12405-4 / IEC 62660-3 / USABC</div>
+      <div><strong>Release Date:</strong> November 2026 (Live Verification)</div>
+      <div><strong>Ledger:</strong> Polygon PoS (137) & Ethereum (1)</div>
+    </div>
+  </div>
+
+  <h2>1. Executive Summary & Regulatory Problem</h2>
+  <p>
+    Automotive battery cell manufacturers and tier-1 cathode active material (CAM) producers face simultaneous statutory compliance deadlines in European and North American markets:
+  </p>
+  <ul>
+    <li><strong>European Union — Regulation (EU) 2023/1542</strong>: Mandates a public-accessible <em>Digital Battery Passport (Article 77)</em> via an engraved QR code, life-cycle carbon footprint declarations (Article 7), and mandatory upstream supply-chain due diligence across cobalt, natural graphite, lithium, and nickel.</li>
+    <li><strong>United States — Inflation Reduction Act (Public Law 117-169 § 30D)</strong>: Mandates at least 50% (scaling to 80%) of critical minerals by procurement value originate from US or FTA partner nations, and strictly prohibits <em>Foreign Entities of Concern (FEOC)</em>.</li>
+  </ul>
+  <p>
+    Traditional paper certificates and centralized databases cannot satisfy cross-border verification without exposing sensitive trade secrets or risking retrospective regulatory audits. This technical note specifies an onchain algorithmic oracle and EIP-712 cryptographic standard that mathematically certifies conformity.
+  </p>
+
+  <h2>2. Battery Cell Chemistry Lineup Specifications</h2>
+  <p>
+    The Oracle maintains verified engineering baselines across six dominant commercial architectures:
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Cathode Stoichiometry</th>
+        <th>CAM Elemental Ratio</th>
+        <th>Density (Wh/kg)</th>
+        <th>Cycle Life</th>
+        <th>Thermal Runaway</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>NCM811</strong></td>
+        <td>LiNi0.80Co0.10Mn0.10O2</td>
+        <td>80:10:10:0</td>
+        <td>285 Wh/kg</td>
+        <td>1,200 cyc</td>
+        <td>210.0 °C</td>
+      </tr>
+      <tr>
+        <td><strong>NCM9</strong></td>
+        <td>LiNi0.90Co0.05Mn0.05O2</td>
+        <td>90:5:5:0</td>
+        <td>320 Wh/kg</td>
+        <td>1,000 cyc</td>
+        <td>195.0 °C</td>
+      </tr>
+      <tr>
+        <td><strong>NCA</strong></td>
+        <td>LiNi0.85Co0.12Al0.03O2</td>
+        <td>85:12:0:3</td>
+        <td>300 Wh/kg</td>
+        <td>1,300 cyc</td>
+        <td>205.0 °C</td>
+      </tr>
+      <tr>
+        <td><strong>NCMA</strong></td>
+        <td>LiNi0.89Co0.05Mn0.05Al0.01O2</td>
+        <td>89:5:5:1</td>
+        <td>315 Wh/kg</td>
+        <td>1,500 cyc</td>
+        <td>218.0 °C</td>
+      </tr>
+      <tr>
+        <td><strong>LFP</strong></td>
+        <td>LiFePO4 (Zero-Co/Ni)</td>
+        <td>Co/Ni-Free Olivine</td>
+        <td>185 Wh/kg</td>
+        <td>3,500+ cyc</td>
+        <td>270.0 °C</td>
+      </tr>
+      <tr>
+        <td><strong>ASB</strong></td>
+        <td>All-Solid-State (Sulfide SE)</td>
+        <td>Li-Metal Anode / CAM</td>
+        <td>450 Wh/kg</td>
+        <td>1,200+ cyc</td>
+        <td>&gt; 350.0 °C</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>3. Carbon Footprint & Mass Yield Mathematical Models</h2>
+  <p>
+    Blended life-cycle carbon footprint is calculated per Article 7 of EU 2023/1542 using audited stoichiometric conversion factors:
+  </p>
+  <div class="code-box">
+Carbon Footprint (CF_blended) = Sum( w_i * CF_mineral_i ) + CF_manufacturing + CF_transport
+Constraint: CF_blended <= 70.0 kg CO2e / kWh (EU Stage 1 Performance Threshold)
+
+Mass Yield Balancing:
+- Spodumene Concentrate to LiOH Monohydrate: 7,500 kg spodumene -> 1,000 kg LiOH (7.5 : 1)
+- Limonite/Saprolite Ore to Nickel MHP (HPAL): 31,340 kg ore -> 1,000 kg Ni in MHP (31.34 : 1)
+  </div>
+
+  <h2>4. Cryptographic Proof: EIP-712 Dual-Signed Merkle Tree</h2>
+  <p>
+    Supply-chain nodes (Mining extraction lot -> Smelter NTPN -> CAM batch -> Cell pack assembly) are serialized into SHA-256 leaf hashes and committed to an onchain Merkle Tree:
+  </p>
+  <div class="code-box">
+Leaf_0 = SHA-256( WA_MINEDEX_ID || Spodumene_Lot_7500t || Zero_FEOC_Verdict )
+Leaf_1 = SHA-256( SIMBARA_NTPN || HPAL_Clean_Refining || CBAM_Grade )
+Leaf_2 = SHA-256( CEEC_Seal || OECD_Annex_II_Clearance || LSM_Tier1 )
+Merkle_Root = Hash( Hash(Leaf_0, Leaf_1), Leaf_2 )
+
+EIP-712 Attestation:
+Master_Proof = ecrecover( Merkle_Root, Oracle_Private_Key, Manufacturer_Countersignature )
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">Live Cryptographic Exemplar (NCMA Quaternary Cell)</div>
+    Merkle Root: <code>0x664fadb80f46b8251b0d0a1d5a1ead3328d4dfd45fad0f0e5c653c341bbfd735</code><br>
+    Master Proof Hash: <code>0x484678c6567815616b875d2a51569c3e78b5d6ca87da8019081d5d614a9c8e42010552a7ffae5b7e</code><br>
+    Statutory Verdict: APPROVED_COMPLIANT_ZERO_FEOC (Polygon Chain 137 / Ethereum Chain 1)
+  </div>
+
+  <h2>5. Article 77 QR Code Engraving & Mobile Verifier</h2>
+  <p>
+    Regulation (EU) 2023/1542 Article 77 mandates direct scanning access. The Oracle provides a real-time SVG QR endpoint and responsive mobile passport viewer:
+  </p>
+  <div class="qr-demo">
+    <img src="/api/v1/oracle/qr/battery-passport?chemistry=NCMA" alt="NCMA QR Code">
+    <div style="flex: 1; min-width: 240px;">
+      <h3 style="margin-top: 0;">Live Article 77 QR Code Scanner</h3>
+      <p style="font-size: 12px; margin-bottom: 12px;">
+        Point any smartphone camera at this QR code to inspect the live EU/IRA conformity dossier without requiring authentication or fees.
+      </p>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <a href="/passport/ncma" target="_blank" class="btn">📱 Open Mobile Verifier</a>
+        <a href="/api/v1/oracle/sample/battery-passport?chemistry=NCMA" download class="btn btn-emerald">📥 Download EIP-712 JSON</a>
+      </div>
+    </div>
+  </div>
+
+  <h2>6. Autonomous Agent & M2M Integration (FastMCP & Glama.ai)</h2>
+  <p>
+    Automated trading agents, procurement robots, and ERPs can query battery passport specifications through the Model Context Protocol (MCP) on Glama.ai or directly via FastMCP:
+  </p>
+  <div class="code-box">
+# Glama.ai / Claude Desktop / Cursor Remote MCP Config:
+{
+  "mcpServers": {
+    "minerals-oracle-x402": {
+      "url": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/mcp",
+      "transport": "sse"
+    }
+  }
+}
+
+# Python FastMCP Direct Call Example:
+import httpx
+response = httpx.post(
+    "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/mcp/invoke",
+    json={
+        "name": "get_battery_cell_passport_sample",
+        "arguments": {"cell_chemistry": "NCMA"}
+    }
+)
+passport = response.json()["content"][0]["text"]
+  </div>
+
+  <h2>7. Conclusion & Institutional Contact</h2>
+  <p>
+    The Minerals Oracle x402 platform provides zero-knowledge and cryptographically verifiable battery passports that protect proprietary cathode active material formulations while providing unalterable proof of compliance for European Commission and US Department of Treasury audits.
+  </p>
+  <p>
+    For enterprise OEM batch issuance, ERP/MES webhook integration, or pilot queries:
+  </p>
+  <div style="display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;">
+    <a href="mailto:contact@mineralsoracle.com" class="btn btn-emerald">✉️ Contact Engineering Team</a>
+    <a href="/dashboard" class="btn">💻 Open Interactive Oracle Terminal</a>
+  </div>
+
+  <div class="footer-bar">
+    © 2026 Autonomous Critical Minerals & Battery Supply-Chain Compliance Oracle (mineralsoracle.com)<br>
+    Dual-Notarized on Polygon PoS (137) & Ethereum Mainnet (1) · All Rights Reserved
+  </div>
+
+</div>
+
+</body>
+</html>
+

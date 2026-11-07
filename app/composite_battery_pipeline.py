@@ -21,6 +21,7 @@ from app.lithium_pipeline import lithium_pipeline
 from app.nickel_pipeline import nickel_pipeline
 from app.cobalt_pipeline import cobalt_pipeline
 from app.onchain_signer import onchain_signer
+from app.battery_chemistry_catalog import get_chemistry_spec
 
 
 # 2026-09 Market Baseline Valuations for Critical Mineral Components (USD / metric ton)
@@ -42,13 +43,15 @@ class CompositeBatteryPipeline:
         # -----------------------------------------------------------------
         # 1. Evaluate Individual Mineral Supply-Chain Streams
         # -----------------------------------------------------------------
+        spec = get_chemistry_spec(req.cell_chemistry)
+
         li_res = lithium_pipeline.evaluate_lithium_lot(req.lithium_lot)
         ni_res = nickel_pipeline.evaluate_nickel_lot(req.nickel_lot)
         co_res = cobalt_pipeline.evaluate_cobalt_lot(req.cobalt_lot)
 
         li_cleared = li_res.audit_verdict.crma_origin_eligible and li_res.audit_verdict.confidence_score >= 80.0
-        ni_cleared = ni_res.audit_verdict.simbara_export_cleared and ni_res.audit_verdict.confidence_score >= 80.0
-        co_cleared = co_res.audit_verdict.ceec_export_cleared and co_res.audit_verdict.child_labor_free and co_res.audit_verdict.asm_segregated
+        ni_cleared = (ni_res.audit_verdict.simbara_export_cleared and ni_res.audit_verdict.confidence_score >= 80.0) or (spec.code == "LFP")
+        co_cleared = (co_res.audit_verdict.ceec_export_cleared and co_res.audit_verdict.child_labor_free and co_res.audit_verdict.asm_segregated) or (spec.code == "LFP")
 
         # -----------------------------------------------------------------
         # 2. US IRA Section 30D Critical Mineral 50% FTA Value-Added Ratio
@@ -58,13 +61,12 @@ class CompositeBatteryPipeline:
         val_ni = (req.nickel_lot.mhp_output_tons * (req.nickel_lot.mhp_grade_ni_pct / 100.0)) * VALUATION_NICKEL_METAL_EQUIV_USD_PER_TON
         val_co = (req.cobalt_lot.cobalt_hydroxide_output_tons * (req.cobalt_lot.hydroxide_grade_co_pct / 100.0)) * VALUATION_COBALT_METAL_EQUIV_USD_PER_TON
 
-        total_mineral_value = max(1.0, val_li + val_ni + val_co)
-
-        # Qualifying FTA value:
-        # Australia is a US Free Trade Agreement (FTA) partner nation -> Lithium is 100% qualifying
-        # Indonesia & DRC are non-FTA nations -> 0% qualifying
-        qualifying_fta_value = val_li
-        fta_value_ratio_pct = (qualifying_fta_value / total_mineral_value) * 100.0
+        if spec.code == "LFP":
+            fta_value_ratio_pct = spec.ira_fta_procurement_ratio_pct
+        else:
+            total_mineral_value = max(1.0, val_li + val_ni + val_co)
+            qualifying_fta_value = val_li
+            fta_value_ratio_pct = (qualifying_fta_value / total_mineral_value) * 100.0
 
         # Statutory IRA 2026 Critical Mineral threshold: >= 50.0%
         fta_ratio_passed = fta_value_ratio_pct >= 50.0
@@ -75,8 +77,8 @@ class CompositeBatteryPipeline:
         feoc_tainted = (
             req.lithium_lot.refinery_feoc_equity_pct >= 25.0
             or req.lithium_lot.refinery_country == "CHN"
-            or req.nickel_lot.feoc_equity_pct >= 25.0
-            or req.cobalt_lot.feoc_equity_pct >= 25.0
+            or (req.nickel_lot.feoc_equity_pct >= 25.0 and spec.code != "LFP")
+            or (req.cobalt_lot.feoc_equity_pct >= 25.0 and spec.code != "LFP")
         )
 
         if feoc_tainted:
@@ -92,24 +94,23 @@ class CompositeBatteryPipeline:
         # -----------------------------------------------------------------
         # 4. EU Battery Regulation (2023/1542) & Carbon Footprint Audit
         # -----------------------------------------------------------------
-        cbam_alert = req.nickel_lot.captive_coal_power
+        cbam_alert = req.nickel_lot.captive_coal_power and spec.code != "LFP"
 
         # Blended Scope 1-3 Carbon Footprint benchmark (kg CO2e / kWh)
-        # Baseline NCM cathode footprint ~ 56.0 kg CO2e / kWh
-        base_carbon_kg_kwh = 56.0
+        base_carbon_kg_kwh = spec.base_carbon_kg_co2_kwh
         if cbam_alert:
             blended_carbon = base_carbon_kg_kwh + 26.5  # Captive coal penalty
             defenses.append("FLAG_EU_BATTERY_CBAM_SURCHARGE: Nickel stream utilizes captive coal power; triggers mandatory EU CBAM carbon border certificate surrender.")
         else:
-            blended_carbon = base_carbon_kg_kwh - 4.5   # Clean hydro/grid reward
-            defenses.append("DEFENSE_EU_LOW_CARBON_CLEARED: Mineral refining pathways utilize renewable/grid power, complying with EU Battery Regulation carbon limits.")
+            blended_carbon = base_carbon_kg_kwh
+            defenses.append(f"DEFENSE_EU_LOW_CARBON_CLEARED: Mineral refining pathways ({spec.display_name}) utilize renewable/grid power ({blended_carbon:.1f} kg CO2e/kWh), complying with EU Battery Regulation carbon limits.")
 
         eu_approved = (
             li_cleared
             and ni_cleared
             and co_cleared
-            and co_res.audit_verdict.child_labor_free
-            and co_res.audit_verdict.asm_segregated
+            and (co_res.audit_verdict.child_labor_free or spec.code == "LFP")
+            and (co_res.audit_verdict.asm_segregated or spec.code == "LFP")
             and not cbam_alert
         )
 

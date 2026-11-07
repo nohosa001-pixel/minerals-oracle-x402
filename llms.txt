@@ -6,8 +6,21 @@
 
 ---
 
-## ⚡ 1-Click MCP Setup (Claude Desktop, Cursor & uvx)
+## 🔌 1-Click FastMCP Setup (Glama.ai, Claude Desktop, Cursor)
 
+### Option A: Glama.ai & Remote SSE Protocol (Cloud Serverless)
+```json
+{
+  "mcpServers": {
+    "minerals-oracle-x402": {
+      "url": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/mcp",
+      "transport": "sse"
+    }
+  }
+}
+```
+
+### Option B: Local stdio Execution (uvx)
 ```json
 {
   "mcpServers": {
@@ -18,6 +31,15 @@
   }
 }
 ```
+
+---
+
+## 📄 Official Technical Whitepaper & Engineering Specification
+- **Title**: *Implementing Regulation (EU) 2023/1542 & US IRA Section 30D Compliant Battery Passports via EIP-712 Dual-Signed Merkle Trees*
+- **URL**: `https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/whitepaper/eu-battery-passport-ira-30d`
+- **Glama Directory Manifest**: `https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/glama.json` & `/.well-known/mcp.json`
+- **Article 77 Mobile Passport**: `https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/passport/{ncm811|ncm9|nca|ncma|lfp|solid-state}`
+- **Real-Time SVG QR Code**: `https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/api/v1/oracle/qr/battery-passport?chemistry={code}`
 
 ---
 
@@ -58,6 +80,9 @@
 - **South American Copper Provenance**: `POST /api/v1/copper/verify-origin` (Chilean COCHILCO, Codelco/Escondida geofencing, ASTM B115 Grade 1 Cu)
 - **Mexican / Global Silver Provenance**: `POST /api/v1/silver/verify-origin` (Terronera/Fresnillo geofencing, N-Type TOPCon solar PV assay >=99.99%)
 - **Compliance Engine Status**: `GET /api/v1/oracle/compliance/status` (Active 10-nation laws & 14-trap status)
+- **Standard Battery Chemistries Catalog**: `GET /api/v1/oracle/battery/chemistries` (IEC 62660 / ISO 12405 / SAE J2990 full technical specs for NCM811, NCM9, NCA, NCMA, LFP, SOLID_STATE)
+- **Official Dual-Signed Battery Passport**: `GET /api/v1/oracle/sample/battery-passport?chemistry={code}` (EIP-712 Dual-Signed EU 2023/1542 & IRA 30D passport sample for NCM811, NCM9, NCA, NCMA, LFP, SOLID_STATE)
+- **Direct Static Battery Passports**: `GET /sample-battery-passport-{ncm811|ncm9|nca|ncma|lfp|solid-state}.json`
 - **Trade Jurisprudence Precedents**: `GET /api/v1/oracle/compliance/precedents` (WTO DS592, DS431, ICSID, US CIT)
 - **Free Public Alpha Hook**: `GET /api/v1/oracle/alpha-signals` (Pollable 24/7 without authentication)
 - **Direct 402 Challenge**: `GET /api/v1/oracle/challenge`

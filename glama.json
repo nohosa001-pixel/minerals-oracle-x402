@@ -1,139 +1,25 @@
 {
-  "$schema": "https://glama.ai/mcp/schemas/server.json",
-  "name": "battery-passport-oracle",
-  "description": "Deterministic Web3 x402 Battery Passport compliance and critical raw minerals provenance algorithmic calculation oracle for autonomous AI agents on Polygon.",
-  "homepage": "https://github.com/nohosa001-pixel/minerals-oracle-x402",
-  "maintainers": [
-    "nohosa001-pixel"
-  ],
-  "tools": [
-    {
-      "name": "verify_composite_battery_passport",
-      "description": "Evaluates end-to-end composite EV battery pack compliance and issues a Master Passport on Polygon. Orchestrates Australian Lithium, Indonesian Nickel, and DRC Cobalt streams; enforces US IRA 30D FEOC clean origin and EU Battery Regulation 2023/1542 carbon footprint/CSDDD due diligence."
-    },
-    {
-      "name": "verify_lithium_origin",
-      "description": "Verifies Australian hard-rock Spodumene to Lithium Hydroxide supply-chain provenance. Evaluates WA MINEDEX GIS geofencing (Greenbushes, Pilgangoora), stoichiometric mass balance, and US IRA Section 30D FEOC 25% clean origin."
-    },
-    {
-      "name": "verify_nickel_origin",
-      "description": "Verifies Indonesian laterite Limonite-to-Nickel MHP supply-chain provenance. Evaluates Sulawesi/Halmahera concession geofencing (IMIP, IWIP), SIMBARA NTPN tax validation, HPAL stoichiometric mass balance, Captive Coal EU CBAM screening, and US IRA FEOC compliance."
-    },
-    {
-      "name": "verify_cobalt_origin",
-      "description": "Verifies DRC Katanga heterogenite-to-cobalt hydroxide supply-chain provenance. Evaluates Katanga Copperbelt concession geofencing, CEEC tamper-proof barcode seal, ASM segregation, ILO 138/182 zero child labor due diligence, and US IRA FEOC screening."
-    },
-    {
-      "name": "verify_mineral_lot_compliance",
-      "description": "Fetches raw algorithmic indices derived from open satellite/market data and computes 12-trap regulatory rule heuristics for a critical mineral consignment."
-    },
-    {
-      "name": "eudr_satellite_mine_audit",
-      "description": "Audits mining concession plot coordinates against EUDR (EU 2023/1115) deforestation cutoff (2020-12-31) and indigenous territory boundaries using multi-satellite radar (Sentinel-1/2 SAR) & Hansen GFC. Generates cryptographic evidence hash and official EU TRACES-NT DDS reference format."
-    },
-    {
-      "name": "simulate_procurement_rfq",
-      "description": "Simulates multi-mineral consignment RFQ for battery manufacturing. Computes US IRA 50% FTA threshold and FEOC 25% taint propagation before placing contracts."
-    },
-    {
-      "name": "register_agent_account",
-      "description": "Self-service onboarding for autonomous AI agents. Instantly returns a session key and seeds an initial free trial balance (e.g. 0.05 USDC)."
-    },
-    {
-      "name": "get_agent_vault_balance",
-      "description": "Retrieves pre-funded USDC vault balance, total consumed, query count, and remaining query capacity across tiers for an agent."
-    },
-    {
-      "name": "request_x402_payment_challenge",
-      "description": "Generates a fresh multi-chain payment challenge nonce with pricing tier details and gasless Permit2 contract address."
-    },
-    {
-      "name": "get_global_trade_flows",
-      "description": "Queries global critical mineral physical trade corridor flows, monthly bulk volumes, standard transit days, vessel classes, and maritime chokepoints."
-    },
-    {
-      "name": "calculate_trade_tariffs",
-      "description": "Resolves WCO 6-digit Harmonized System (HS) Code, MFN base duty, applicable FTA preferential duty, US Section 301 punitive tariffs, and EU CBAM benchmarks."
-    },
-    {
-      "name": "estimate_maritime_freight_and_carbon",
-      "description": "Calculates maritime voyage distance (nautical miles), transit duration, freight charter costs ($/MT), chokepoint detour surcharges (Red Sea/Panama), IMO CII rating, and EU CBAM carbon costs."
-    },
-    {
-      "name": "verify_electronic_bill_of_lading",
-      "description": "Cryptographically audits UNCITRAL MLETR / FIT Alliance electronic Bill of Lading (eBL). Validates 7-digit IMO checksum, UN/LOCODE port pairs, manifest weight, and screens for AIS dark fleet anomalies."
-    },
-    {
-      "name": "optimize_mineral_trade_route",
-      "description": "Autonomous trade route optimizer for AI procurement agents. Compares direct marine transit vs chokepoint detour corridors, computing landed cost arbitrage ($/MT), total freight and tariffs, and delivery timelines."
-    },
-    {
-      "name": "open_agent_session",
-      "description": "Opens a high-speed allowance session for autonomous AI agents, enabling <0.1ms micro-queries without per-query on-chain gas latency."
-    },
-    {
-      "name": "close_agent_session",
-      "description": "Closes an active agent session, computes refund of unspent balance, and generates an immutable settlement receipt hash."
-    },
-    {
-      "name": "propose_a2a_trade_deal",
-      "description": "Seller AI agent proposes a canonical bilateral trade agreement for a critical mineral consignment with cryptographic signature."
-    },
-    {
-      "name": "dual_sign_trade_deal",
-      "description": "Buyer AI agent countersigns an existing trade proposal; Oracle mints an immutable 3-party deal attestation seal."
-    },
-    {
-      "name": "verify_a2a_trade_deal",
-      "description": "Cryptographically audits a dual-signed A2A trade deal, verifying seller, buyer, and oracle signatures, along with FEOC and mass-balance compliance."
-    },
-    {
-      "name": "get_agent_session_info",
-      "description": "Queries real-time balance, query capacity, and status for an active session without debiting a fee."
-    },
-    {
-      "name": "reject_a2a_trade_deal",
-      "description": "Buyer AI agent rejects an existing trade proposal with structured reasoning and optional cryptographic signature."
-    },
-    {
-      "name": "cancel_a2a_trade_deal",
-      "description": "Seller AI agent revokes or cancels a pending trade deal proposal before buyer countersignature."
-    },
-    {
-      "name": "list_a2a_trade_deals",
-      "description": "Lists A2A bilateral trade deals, optionally filtered by agent EVM address or status."
-    },
-    {
-      "name": "get_a2a_trade_deal",
-      "description": "Retrieves the full specification, audit notes, and current status of an A2A trade agreement."
-    },
-    {
-      "name": "get_trade_escrow_calldata",
-      "description": "Generates deterministic EVM calldata and transaction parameters for the buyer AI agent to lock USDC funds into the on-chain MineralTradeEscrow (Polygon/Base/Arbitrum) for a dual-signed trade agreement."
-    },
-    {
-      "name": "verify_copper_origin",
-      "description": "Verifies South American Copper-to-Cathode supply-chain provenance. Evaluates Codelco/Escondida GIS geofencing, flotation-to-cathode mass balance, sulfuric acid deficit screening, Chilean COCHILCO export clearance, and AI Data Center/HVDC Power Grid specs (ASTM B115 Grade 1, 99.9935% Cu)."
-    },
-    {
-      "name": "verify_silver_origin",
-      "description": "Verifies Mexican and Global Silver supply-chain provenance. Evaluates Terronera/Fresnillo GIS geofencing, electrolytic mass balance, N-Type TOPCon High-Efficiency Solar PV paste purity (>= 99.99% Ag), and anti-cartel conflict ASM screening."
-    },
-    {
-      "name": "list_trade_precedents",
-      "description": "Queries international trade jurisprudence precedents embedded in the oracle: WTO DS592 (Indonesia Raw Materials), WTO DS431 (China Rare Earths), ICSID ARB/15/31 (Gabriel Resources), and US CIT Superior Wire."
-    },
-    {
-      "name": "get_compliance_status",
-      "description": "Checks current regulatory monitoring operational health across 10 monitored jurisdictions and 12-trap defenses."
-    },
-    {
-      "name": "minerals_submit_agent_feedback",
-      "description": "Allows an autonomous AI agent to submit an evolution proposal, mineral dataset request, regulatory edge case, or protocol improvement to continuously evolve the Minerals Oracle."
-    },
-    {
-      "name": "minerals_list_evolution_proposals",
-      "description": "Lists active autonomous agent evolution proposals and improvement requests to coordinate agent consensus."
-    }
+  "$schema": "https://glama.ai/mcp/v1/schema.json",
+  "name": "minerals-oracle-x402",
+  "displayName": "Minerals Oracle x402 - Battery Passport & Critical Minerals",
+  "description": "Autonomous Critical Minerals & Battery Supply-Chain Compliance Oracle on Polygon. Verifies Regulation (EU) 2023/1542 Battery Passports, US IRA Section 30D, CBAM, and EIP-712 Dual-Signed Merkle proofs.",
+  "homepage": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app",
+  "icon": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/static/favicon.svg",
+  "transport": {
+    "type": "sse",
+    "url": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/mcp"
+  },
+  "endpoints": {
+    "sse": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/mcp/sse",
+    "messages": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/mcp/messages",
+    "tools": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/mcp/tools",
+    "openapi": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/openapi.json"
+  },
+  "categories": [
+    "compliance",
+    "supply-chain",
+    "battery-passport",
+    "web3",
+    "automotive"
   ]
 }

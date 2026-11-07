@@ -39,6 +39,7 @@ async def invoke_mcp_tool(request: Request, tool_call: MCPToolCallRequest):
     args = tool_call.arguments
 
     free_tools = {
+        "get_battery_cell_passport_sample",
         "minerals_submit_agent_feedback",
         "minerals_list_evolution_proposals",
         "register_agent_account",

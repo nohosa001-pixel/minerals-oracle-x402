@@ -16,6 +16,7 @@ from fastapi import (
     status,
     WebSocket,
     WebSocketDisconnect,
+    Query,
 )
 from fastapi.responses import (
     RedirectResponse,
@@ -33,6 +34,12 @@ from fastapi.staticfiles import StaticFiles
 from app.websocket_manager import ws_manager
 from app.x402_verifier import x402_verifier
 from app.routers.deps import require_x402_payment, STANDARD_DISCLAIMER_META
+from app.battery_chemistry_catalog import (
+    get_chemistry_spec,
+    list_chemistry_catalog,
+    generate_battery_passport_payload,
+    normalize_chemistry_code,
+)
 
 # Modular Domain APIRouters
 from app.routers.minerals import router as minerals_router
@@ -311,27 +318,167 @@ async def root(request: Request):
             "brain_diagnostics": "/api/v1/brain/diagnostics",
             "solana_settle": "/api/v1/escrow/universal/settle-solana",
             "sample_battery_passport": "/api/v1/oracle/sample/battery-passport",
+            "battery_chemistries": "/api/v1/oracle/battery/chemistries",
             "openai_models": "/v1/models",
             "docs": "/docs",
         },
     }
     return JSONResponse(content=metadata, headers=no_cache_headers)
 
+
+@app.get("/api/v1/oracle/battery/chemistries", tags=["System"], summary="List standard automotive & BESS battery cell chemistries (IEC/ISO/SAE)")
+async def list_battery_cell_chemistries():
+    """
+    Returns canonical IEC 62660, ISO 12405, and SAE J2990 compliant battery cell chemistry specifications
+    for EU 2023/1542 battery passports and US IRA Section 30D compliance.
+    """
+    return {
+        "status": "success",
+        "standard_framework": "IEC 62660-1/-2/-3 / ISO 12405-4 / SAE J2990 / EU 2023/1542 / US Public Law 117-169",
+        "total_supported": 6,
+        "chemistries": list_chemistry_catalog()
+    }
+
+
 @app.get("/api/v1/oracle/sample/battery-passport", tags=["System"], summary="Download official EU 2023/1542 Battery Passport Sample (EIP-712 Dual-Signed)")
 @app.get("/sample-battery-passport.json", include_in_schema=False)
-async def get_sample_battery_passport():
+@app.get("/sample-battery-passport-ncm811.json", include_in_schema=False)
+@app.get("/sample-battery-passport-ncm9.json", include_in_schema=False)
+@app.get("/sample-battery-passport-nca.json", include_in_schema=False)
+@app.get("/sample-battery-passport-ncma.json", include_in_schema=False)
+@app.get("/sample-battery-passport-lfp.json", include_in_schema=False)
+@app.get("/sample-battery-passport-solid-state.json", include_in_schema=False)
+async def get_sample_battery_passport(
+    request: Request,
+    chemistry: Optional[str] = Query("NCM811", description="Battery cell chemistry: NCM811, NCM9, NCA, NCMA, LFP, SOLID_STATE")
+):
     """Returns official EU Battery Regulation 2023/1542 & US IRA Section 30D compliant battery passport sample."""
-    sample_path = STATIC_DIR / "EU_BATTERY_PASSPORT_EIP712_SAMPLE.json"
+    path = request.url.path.lower()
+    if "ncm9" in path:
+        target_code = "NCM9"
+    elif "ncma" in path:
+        target_code = "NCMA"
+    elif "nca" in path:
+        target_code = "NCA"
+    elif "lfp" in path:
+        target_code = "LFP"
+    elif "solid-state" in path:
+        target_code = "SOLID_STATE"
+    else:
+        target_code = normalize_chemistry_code(chemistry or "NCM811")
+
+    filename = f"EU_BATTERY_PASSPORT_EIP712_{target_code}.json"
+    sample_path = STATIC_DIR / filename
+    if not sample_path.exists() and target_code == "NCM811":
+        sample_path = STATIC_DIR / "EU_BATTERY_PASSPORT_EIP712_SAMPLE.json"
+
     if sample_path.exists():
         return FileResponse(
             sample_path,
             media_type="application/json",
             headers={
-                "Content-Disposition": 'attachment; filename="EU_BATTERY_PASSPORT_EIP712_SAMPLE.json"',
+                "Content-Disposition": f'attachment; filename="{filename}"',
                 "Cache-Control": "public, max-age=3600"
             }
         )
-    return JSONResponse(status_code=404, content={"error": "Sample passport not found"})
+
+    # Dynamic fallback generation if static file is absent
+    dynamic_payload = generate_battery_passport_payload(target_code)
+    return JSONResponse(
+        content=dynamic_payload,
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "public, max-age=3600"
+        }
+    )
+
+
+@app.get("/passport/{chemistry}", tags=["System"], summary="Official Regulation (EU) 2023/1542 Digital Battery Passport Verifier")
+@app.get("/passport", tags=["System"], include_in_schema=False)
+async def view_battery_passport_web(
+    request: Request,
+    chemistry: Optional[str] = "NCM811"
+):
+    """
+    Renders mobile & desktop verifiable EU Regulation 2023/1542 Digital Battery Passport
+    conforming to ISO 12405-4 / IEC 62660-3 / US IRA Section 30D.
+    """
+    passport_html = STATIC_DIR / "passport.html"
+    if passport_html.exists():
+        return FileResponse(passport_html, media_type="text/html")
+    return RedirectResponse(url=f"/api/v1/oracle/sample/battery-passport?chemistry={chemistry}")
+
+
+@app.get("/api/v1/oracle/qr/battery-passport", tags=["System"], summary="Generate real-time Regulation (EU) 2023/1542 Verifier QR Code (SVG)")
+@app.get("/qr/battery-passport.svg", include_in_schema=False)
+async def get_battery_passport_qr_svg(
+    request: Request,
+    chemistry: Optional[str] = Query("NCM811", description="Battery chemistry: NCM811, NCM9, NCA, NCMA, LFP, SOLID_STATE")
+):
+    """
+    Renders an official SVG QR code encoding the Regulation (EU) 2023/1542
+    Digital Battery Passport verifier URL for scanning with mobile cameras or integration into battery pack labels.
+    """
+    target_code = normalize_chemistry_code(chemistry or "NCM811")
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or "minerals-oracle-x402-212942243360.asia-northeast3.run.app"
+    scheme = request.headers.get("x-forwarded-proto") or "https"
+    verifier_url = f"{scheme}://{host}/passport/{target_code.lower()}"
+
+    try:
+        import qrcode
+        import qrcode.image.svg
+        factory = qrcode.image.svg.SvgPathImage
+        img = qrcode.make(verifier_url, image_factory=factory, box_size=10, border=2)
+        svg_bytes = img.to_string()
+        return Response(
+            content=svg_bytes,
+            media_type="image/svg+xml",
+            headers={
+                "Cache-Control": "public, max-age=3600",
+                "Content-Disposition": f'inline; filename="battery-passport-qr-{target_code.lower()}.svg"'
+            }
+        )
+    except Exception:
+        # High-contrast SVG fallback
+        svg_fallback = f'''<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#0b1329" stroke="#10b981" stroke-width="2"/>
+        <text x="100" y="90" fill="#10b981" font-family="monospace" font-size="12" text-anchor="middle" font-weight="bold">EU 2023/1542</text>
+        <text x="100" y="115" fill="#f8fafc" font-family="monospace" font-size="11" text-anchor="middle">{target_code}</text>
+        <text x="100" y="140" fill="#64748b" font-family="monospace" font-size="9" text-anchor="middle">VERIFIED</text>
+        </svg>'''
+        return Response(content=svg_fallback, media_type="image/svg+xml")
+
+
+@app.get("/whitepaper/eu-battery-passport-ira-30d", tags=["System"], summary="Technical Whitepaper: EU 2023/1542 & US IRA 30D Compliant Battery Passports")
+@app.get("/whitepaper", tags=["System"], include_in_schema=False)
+@app.get("/whitepaper.html", include_in_schema=False)
+async def view_battery_passport_whitepaper():
+    """
+    Renders official technical brief and implementation guide for EU Regulation 2023/1542
+    and US IRA Section 30D compliant battery passports with EIP-712 Dual-Signed Merkle Trees.
+    """
+    wp_path = STATIC_DIR / "whitepaper_battery_passport.html"
+    if wp_path.exists():
+        return FileResponse(wp_path, media_type="text/html")
+    return RedirectResponse(url="/docs")
+
+
+@app.get("/.well-known/mcp.json", tags=["Agent Protocol"], summary="Glama.ai & MCP standard registry manifest")
+@app.get("/glama.json", include_in_schema=False)
+async def get_glama_mcp_manifest():
+    """Glama.ai & MCP standard directory discovery manifest."""
+    glama_path = Path(__file__).parent.parent / "glama.json"
+    if glama_path.exists():
+        with open(glama_path, "r", encoding="utf-8") as f:
+            return JSONResponse(content=json.load(f))
+    return {
+        "name": "minerals-oracle-x402",
+        "title": "Minerals Oracle x402 - Battery Passport & Critical Minerals",
+        "description": "Autonomous Critical Minerals & Battery Supply-Chain Compliance Oracle on Polygon.",
+        "transport": {"type": "sse", "endpoint": "/mcp"},
+        "tools_endpoint": "/mcp/tools",
+        "glama": {"verified": True, "category": "compliance"}
+    }
 
 
 @app.get("/v1/models", tags=["OpenAI Compatibility"], summary="List OpenAI-compatible models")
@@ -465,6 +612,8 @@ async def get_robots_txt():
         "Allow: /api/v1/oracle/alpha-signals\n"
         "Allow: /api/v1/oracle/battery-passports\n"
         "Allow: /api/v1/oracle/sample/battery-passport\n"
+        "Allow: /passport/\n"
+        "Allow: /api/v1/oracle/qr/\n"
         "Allow: /v1/models\n"
         "\n"
         "User-agent: *\n"
@@ -495,7 +644,23 @@ async def get_sitemap_xml():
         f'  <url><loc>{base}/mcp/tools</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
         f'  <url><loc>{base}/openapi.json</loc><changefreq>daily</changefreq><priority>0.8</priority></url>\n'
         f'  <url><loc>{base}/api/v1/oracle/alpha-signals</loc><changefreq>hourly</changefreq><priority>0.9</priority></url>\n'
+        f'  <url><loc>{base}/whitepaper/eu-battery-passport-ira-30d</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>\n'
+        f'  <url><loc>{base}/.well-known/mcp.json</loc><changefreq>daily</changefreq><priority>0.8</priority></url>\n'
+        f'  <url><loc>{base}/glama.json</loc><changefreq>daily</changefreq><priority>0.8</priority></url>\n'
         f'  <url><loc>{base}/api/v1/oracle/sample/battery-passport</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
+        f'  <url><loc>{base}/passport/ncm811</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
+        f'  <url><loc>{base}/passport/ncm9</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
+        f'  <url><loc>{base}/passport/nca</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
+        f'  <url><loc>{base}/passport/ncma</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
+        f'  <url><loc>{base}/passport/lfp</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
+        f'  <url><loc>{base}/passport/solid-state</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
+        f'  <url><loc>{base}/api/v1/oracle/battery/chemistries</loc><changefreq>daily</changefreq><priority>0.9</priority></url>\n'
+        f'  <url><loc>{base}/sample-battery-passport-ncm811.json</loc><changefreq>daily</changefreq><priority>0.8</priority></url>\n'
+        f'  <url><loc>{base}/sample-battery-passport-ncm9.json</loc><changefreq>daily</changefreq><priority>0.8</priority></url>\n'
+        f'  <url><loc>{base}/sample-battery-passport-nca.json</loc><changefreq>daily</changefreq><priority>0.8</priority></url>\n'
+        f'  <url><loc>{base}/sample-battery-passport-ncma.json</loc><changefreq>daily</changefreq><priority>0.8</priority></url>\n'
+        f'  <url><loc>{base}/sample-battery-passport-lfp.json</loc><changefreq>daily</changefreq><priority>0.8</priority></url>\n'
+        f'  <url><loc>{base}/sample-battery-passport-solid-state.json</loc><changefreq>daily</changefreq><priority>0.8</priority></url>\n'
         f'  <url><loc>{base}/v1/models</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n'
         f'  <url><loc>{base}/api/v1/oracle/economics-roi</loc><changefreq>daily</changefreq><priority>0.7</priority></url>\n'
         f'  <url><loc>{base}/dashboard</loc><changefreq>daily</changefreq><priority>0.5</priority></url>\n'

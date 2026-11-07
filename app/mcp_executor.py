@@ -219,6 +219,14 @@ class MCPToolExecutor:
             req_model = CompositeBatteryVerifyRequest(**arguments)
             return composite_battery_pipeline.evaluate_battery_pack(req_model).model_dump()
 
+        # 8b. get_battery_cell_passport_sample (Free EU 2023/1542 & IRA 30D Multi-Chemistry Sample)
+        elif name == "get_battery_cell_passport_sample":
+            chem = arguments.get("cell_chemistry", "NCM811")
+            pack_id = arguments.get("battery_pack_id")
+            kwh = arguments.get("pack_capacity_kwh")
+            from app.battery_chemistry_catalog import generate_battery_passport_payload
+            return generate_battery_passport_payload(chem, pack_id, kwh)
+
         # 9. verify_copper_origin
         elif name == "verify_copper_origin":
             req_model = CopperOriginVerifyRequest(**arguments)
