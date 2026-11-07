@@ -27,6 +27,7 @@ from app.x402_verifier import x402_verifier, PricingTier
 from app.security_gate_client import security_gate_client
 
 client = TestClient(app)
+DEFAULT_SOLANA_TREASURY = os.getenv("SOLANA_WALLET_ADDRESS", "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp")
 
 
 def test_solana_chain_configuration():
@@ -85,7 +86,7 @@ def test_solana_signature_verification_and_anti_replay():
 
     # 2. Simulated successful verification
     with patch("httpx.Client.post") as mock_post:
-        treasury_sol = "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp"
+        treasury_sol = DEFAULT_SOLANA_TREASURY
         usdc_mint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
         mock_resp = MagicMock()
         mock_resp.status_code = 200
@@ -190,7 +191,7 @@ async def test_solana_universal_escrow_settlement():
             "minerals_oracle_fee_usdc": 1.0,
             "security_gate_staking_fee_usdc": 1.0,
             "seller_agent_pubkey": "SellerAgent11111111111111111111111111111111",
-            "minerals_oracle_treasury": "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp",
+            "minerals_oracle_treasury": DEFAULT_SOLANA_TREASURY,
             "security_gate_staking_pool": "774hK5wmk5pStvsh5DH46pYPYYD3ro7tMfz1ASxcbiTK"
         },
         "solana_tx_signature": "5VerBQQuJYvHiU1fXb6Vd99Q3aP3h6k6yqgXfCjE288jC2jVn8P6wM7g8k8R7K8L2wM4pQ6k6yqgXfCjE288jC2",
@@ -228,7 +229,7 @@ def test_fastapi_security_gate_status_endpoint():
     assert "Solana Mainnet (501)" in data["supported_networks"]
     assert "solana_config" in data
     assert data["solana_config"]["chain_id"] == 501
-    assert "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp" in data["solana_config"]["treasury_pubkey"]
+    assert DEFAULT_SOLANA_TREASURY in data["solana_config"]["treasury_pubkey"]
 
 
 def test_fastapi_solana_attest_endpoint():
@@ -241,7 +242,7 @@ def test_fastapi_solana_attest_endpoint():
             "mineral": "cobalt",
             "provenance_status": "VERIFIED"
         },
-        "client_identity": "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp",
+        "client_identity": DEFAULT_SOLANA_TREASURY,
         "confidence_score": 0.999
     }
 
@@ -281,7 +282,7 @@ def test_solana_spl_usdc_balance_diff_verification():
     import secrets
     rand_chars = "".join(secrets.choice("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz") for _ in range(34))
     test_sig = "5VerBQQuJYvHiU1fXb6Vd99Q3aP3h6k6yqgXfCjE288jC2jVn8P6wM" + rand_chars
-    treasury_sol = "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp"
+    treasury_sol = DEFAULT_SOLANA_TREASURY
     usdc_mint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
 
     # Case A: Treasury balance increased by 0.05 USDC -> PASS
@@ -371,7 +372,7 @@ def test_multi_rpc_failover_resilience():
     mock_resp_fail = MagicMock()
     mock_resp_fail.status_code = 429
 
-    treasury_sol = "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp"
+    treasury_sol = DEFAULT_SOLANA_TREASURY
     usdc_mint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
     mock_resp_ok = MagicMock()
     mock_resp_ok.status_code = 200
@@ -510,7 +511,7 @@ def test_vault_manager_evm_and_solana_address_normalization():
     assert acc1.agent_address == acc2.agent_address
 
     # 2. Solana Base58 pubkey onboarding and retrieval
-    sol_addr = "411ksMz9RHYVtVMe6RUUErzZYtrU9zzvkgzswKbqx9qp"
+    sol_addr = DEFAULT_SOLANA_TREASURY
     acc_sol, s_key = vault_manager.register_agent_onboarding("TestAgentSol", agent_address=sol_addr)
     assert acc_sol.agent_address == sol_addr
 

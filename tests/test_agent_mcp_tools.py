@@ -14,8 +14,8 @@ client = TestClient(app)
 def test_mcp_stdio_tools_list():
     tools_resp = handle_tools_list("req_001")
     tool_names = [t["name"] for t in tools_resp["result"]["tools"]]
-    assert len(tool_names) == 38
-    assert len(set(tool_names)) == 38
+    assert len(tool_names) == 39
+    assert len(set(tool_names)) == 39
     assert "register_agent_account" in tool_names
     assert "get_agent_vault_balance" in tool_names
     assert "request_x402_payment_challenge" in tool_names
@@ -29,6 +29,7 @@ def test_mcp_stdio_tools_list():
     assert "verify_customs_clearance" in tool_names
     assert "generate_zk_compliance_proof" in tool_names
     assert "eudr_satellite_mine_audit" in tool_names
+    assert "get_battery_cell_passport_sample" in tool_names
 
 
 def test_mcp_stdio_register_and_check_balance():
