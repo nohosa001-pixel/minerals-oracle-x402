@@ -449,6 +449,15 @@ async def get_battery_passport_qr_svg(
         return Response(content=svg_fallback, media_type="image/svg+xml")
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+@app.get("/favicon.svg", include_in_schema=False)
+async def get_favicon():
+    fav_path = STATIC_DIR / "favicon.svg"
+    if fav_path.exists():
+        return FileResponse(fav_path, media_type="image/svg+xml")
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 @app.get("/whitepaper/eu-battery-passport-ira-30d", tags=["System"], summary="Technical Whitepaper: EU 2023/1542 & US IRA 30D Compliant Battery Passports")
 @app.get("/whitepaper", tags=["System"], include_in_schema=False)
 @app.get("/whitepaper.html", include_in_schema=False)
