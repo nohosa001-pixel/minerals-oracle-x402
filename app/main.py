@@ -458,6 +458,26 @@ async def get_favicon():
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
+@app.get("/terms", tags=["System"], summary="Institutional Terms of Service & Regulatory Disclosure")
+@app.get("/terms.html", include_in_schema=False)
+@app.get("/legal", include_in_schema=False)
+async def view_terms_and_legal():
+    """Renders official institutional terms of service, zero-PII data policies, and SLA disclosures."""
+    terms_path = STATIC_DIR / "terms.html"
+    if terms_path.exists():
+        return FileResponse(terms_path, media_type="text/html")
+    return RedirectResponse(url="/docs")
+
+
+@app.get("/og-card.png", include_in_schema=False)
+@app.get("/static/og-card.png", include_in_schema=False)
+async def get_og_card():
+    og_path = STATIC_DIR / "og-card.png"
+    if og_path.exists():
+        return FileResponse(og_path, media_type="image/png")
+    return Response(status_code=status.HTTP_404_NOT_FOUND)
+
+
 @app.get("/whitepaper/eu-battery-passport-ira-30d", tags=["System"], summary="Technical Whitepaper: EU 2023/1542 & US IRA 30D Compliant Battery Passports")
 @app.get("/whitepaper", tags=["System"], include_in_schema=False)
 @app.get("/whitepaper.html", include_in_schema=False)
