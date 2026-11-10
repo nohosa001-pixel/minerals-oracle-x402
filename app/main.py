@@ -393,8 +393,8 @@ async def get_sample_battery_passport(
     )
 
 
-@app.get("/passport/{chemistry}", tags=["System"], summary="Official Regulation (EU) 2023/1542 Digital Battery Passport Verifier")
-@app.get("/passport", tags=["System"], include_in_schema=False)
+@app.api_route("/passport/{chemistry}", methods=["GET", "HEAD"], tags=["System"], summary="Official Regulation (EU) 2023/1542 Digital Battery Passport Verifier")
+@app.api_route("/passport", methods=["GET", "HEAD"], tags=["System"], include_in_schema=False)
 async def view_battery_passport_web(
     request: Request,
     chemistry: Optional[str] = "NCM811"
@@ -403,14 +403,16 @@ async def view_battery_passport_web(
     Renders mobile & desktop verifiable EU Regulation 2023/1542 Digital Battery Passport
     conforming to ISO 12405-4 / IEC 62660-3 / US IRA Section 30D.
     """
+    if request.method == "HEAD":
+        return Response(status_code=200, headers={"Content-Type": "text/html; charset=utf-8"})
     passport_html = STATIC_DIR / "passport.html"
     if passport_html.exists():
         return FileResponse(passport_html, media_type="text/html")
     return RedirectResponse(url=f"/api/v1/oracle/sample/battery-passport?chemistry={chemistry}")
 
 
-@app.get("/api/v1/oracle/qr/battery-passport", tags=["System"], summary="Generate real-time Regulation (EU) 2023/1542 Verifier QR Code (SVG)")
-@app.get("/qr/battery-passport.svg", include_in_schema=False)
+@app.api_route("/api/v1/oracle/qr/battery-passport", methods=["GET", "HEAD"], tags=["System"], summary="Generate real-time Regulation (EU) 2023/1542 Verifier QR Code (SVG)")
+@app.api_route("/qr/battery-passport.svg", methods=["GET", "HEAD"], include_in_schema=False)
 async def get_battery_passport_qr_svg(
     request: Request,
     chemistry: Optional[str] = Query("NCM811", description="Battery chemistry: NCM811, NCM9, NCA, NCMA, LFP, SOLID_STATE")
@@ -419,6 +421,8 @@ async def get_battery_passport_qr_svg(
     Renders an official SVG QR code encoding the Regulation (EU) 2023/1542
     Digital Battery Passport verifier URL for scanning with mobile cameras or integration into battery pack labels.
     """
+    if request.method == "HEAD":
+        return Response(status_code=200, headers={"Content-Type": "image/svg+xml"})
     target_code = normalize_chemistry_code(chemistry or "NCM811")
     host = request.headers.get("x-forwarded-host") or request.headers.get("host") or "minerals-oracle-x402-212942243360.asia-northeast3.run.app"
     scheme = request.headers.get("x-forwarded-proto") or "https"
@@ -449,55 +453,72 @@ async def get_battery_passport_qr_svg(
         return Response(content=svg_fallback, media_type="image/svg+xml")
 
 
-@app.get("/favicon.ico", include_in_schema=False)
-@app.get("/favicon.svg", include_in_schema=False)
-async def get_favicon():
+@app.api_route("/favicon.ico", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/favicon.svg", methods=["GET", "HEAD"], include_in_schema=False)
+async def get_favicon(request: Request):
+    if request.method == "HEAD":
+        return Response(status_code=200, headers={"Content-Type": "image/svg+xml"})
     fav_path = STATIC_DIR / "favicon.svg"
     if fav_path.exists():
         return FileResponse(fav_path, media_type="image/svg+xml")
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@app.get("/terms", tags=["System"], summary="Institutional Terms of Service & Regulatory Disclosure")
-@app.get("/terms.html", include_in_schema=False)
-@app.get("/legal", include_in_schema=False)
-async def view_terms_and_legal():
+@app.api_route("/terms", methods=["GET", "HEAD"], tags=["System"], summary="Institutional Terms of Service & Regulatory Disclosure")
+@app.api_route("/terms.html", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/legal", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/privacy", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/privacy-policy", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/privacy.html", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/about", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/about.html", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/contact", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/contact.html", methods=["GET", "HEAD"], include_in_schema=False)
+async def view_terms_and_legal(request: Request):
     """Renders official institutional terms of service, zero-PII data policies, and SLA disclosures."""
+    if request.method == "HEAD":
+        return Response(status_code=200, headers={"Content-Type": "text/html; charset=utf-8"})
     terms_path = STATIC_DIR / "terms.html"
     if terms_path.exists():
         return FileResponse(terms_path, media_type="text/html")
     return RedirectResponse(url="/docs")
 
 
-@app.get("/og-card.png", include_in_schema=False)
-@app.get("/static/og-card.png", include_in_schema=False)
-async def get_og_card():
+@app.api_route("/og-card.png", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/static/og-card.png", methods=["GET", "HEAD"], include_in_schema=False)
+async def get_og_card(request: Request):
+    if request.method == "HEAD":
+        return Response(status_code=200, headers={"Content-Type": "image/png"})
     og_path = STATIC_DIR / "og-card.png"
     if og_path.exists():
         return FileResponse(og_path, media_type="image/png")
     return Response(status_code=status.HTTP_404_NOT_FOUND)
 
 
-@app.get("/whitepaper/eu-battery-passport-ira-30d", tags=["System"], summary="Technical Whitepaper: EU 2023/1542 & US IRA 30D Compliant Battery Passports")
-@app.get("/whitepaper", tags=["System"], include_in_schema=False)
-@app.get("/whitepaper.html", include_in_schema=False)
-async def view_battery_passport_whitepaper():
+@app.api_route("/whitepaper/eu-battery-passport-ira-30d", methods=["GET", "HEAD"], tags=["System"], summary="Technical Whitepaper: EU 2023/1542 & US IRA 30D Compliant Battery Passports")
+@app.api_route("/whitepaper", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/whitepaper.html", methods=["GET", "HEAD"], include_in_schema=False)
+async def view_battery_passport_whitepaper(request: Request):
     """
     Renders official technical brief and implementation guide for EU Regulation 2023/1542
     and US IRA Section 30D compliant battery passports with EIP-712 Dual-Signed Merkle Trees.
     """
+    if request.method == "HEAD":
+        return Response(status_code=200, headers={"Content-Type": "text/html; charset=utf-8"})
     wp_path = STATIC_DIR / "whitepaper_battery_passport.html"
     if wp_path.exists():
         return FileResponse(wp_path, media_type="text/html")
     return RedirectResponse(url="/docs")
 
 
-@app.get("/.well-known/mcp.json", tags=["Agent Protocol"], summary="Glama.ai & MCP standard registry manifest")
-@app.get("/glama.json", include_in_schema=False)
-@app.get("/.cursor/mcp.json", include_in_schema=False)
-@app.get("/mcp.json", include_in_schema=False)
-async def get_glama_mcp_manifest():
+@app.api_route("/.well-known/mcp.json", methods=["GET", "HEAD", "OPTIONS"], tags=["Agent Protocol"], summary="Glama.ai & MCP standard registry manifest")
+@app.api_route("/glama.json", methods=["GET", "HEAD", "OPTIONS"], include_in_schema=False)
+@app.api_route("/.cursor/mcp.json", methods=["GET", "HEAD", "OPTIONS"], include_in_schema=False)
+@app.api_route("/mcp.json", methods=["GET", "HEAD", "OPTIONS"], include_in_schema=False)
+async def get_glama_mcp_manifest(request: Request):
     """Glama.ai & MCP standard directory discovery manifest."""
+    if request.method in ("HEAD", "OPTIONS"):
+        return Response(status_code=200, headers={"Allow": "GET, HEAD, OPTIONS", "Content-Type": "application/json"})
     glama_path = Path(__file__).parent.parent / "glama.json"
     if glama_path.exists():
         with open(glama_path, "r", encoding="utf-8") as f:
@@ -729,6 +750,8 @@ async def health_check():
 # Machine Discovery: llms.txt & Agent Protocol
 # ==========================================
 @app.get("/llms.txt", tags=["Agent Protocol"])
+@app.get("/ai.txt", include_in_schema=False)
+@app.get("/humans.txt", include_in_schema=False)
 async def get_llms_txt():
     """Returns LLM-ready markdown documentation for autonomous web crawlers and agents."""
     llms_path = Path(__file__).parent.parent / "llms.txt"
