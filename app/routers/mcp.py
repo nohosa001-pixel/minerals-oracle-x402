@@ -21,6 +21,9 @@ _MCP_SSE_SESSIONS: Dict[str, asyncio.Queue] = {}
 
 
 @router.get("/mcp/tools", summary="Returns Model Context Protocol tool specifications")
+@router.get("/api/v1/mcp/tools", include_in_schema=False)
+@router.get("/api/v1/mcp/tool-specs", include_in_schema=False)
+@router.get("/api/v1/agent/tools", include_in_schema=False)
 async def get_mcp_tool_specs():
     """Returns Model Context Protocol (MCP) tool specifications for autonomous AI agents."""
     if MCP_SPEC_FILE_PATH.exists():
@@ -30,6 +33,8 @@ async def get_mcp_tool_specs():
 
 
 @router.post("/mcp/invoke", response_model=MCPToolCallResponse, summary="Direct HTTP tool dispatcher")
+@router.post("/api/v1/mcp/invoke", include_in_schema=False)
+@router.post("/api/v1/agent/tools/execute", include_in_schema=False)
 async def invoke_mcp_tool(request: Request, tool_call: MCPToolCallRequest):
     """
     Direct MCP tool dispatcher for LLM agents. Protected with x402 payment validation for data queries.

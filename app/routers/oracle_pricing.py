@@ -75,6 +75,11 @@ async def get_payment_challenge(
     tags=["Oracle Payment"],
     summary="Get 4-Tier Dynamic Computational Pricing Schedule",
 )
+@router.get("/pricing", include_in_schema=False)
+@router.get("/pricing.json", include_in_schema=False)
+@router.get("/api/v1/minerals/pricing.json", include_in_schema=False)
+@router.get("/api/v1/pricing", include_in_schema=False)
+@router.get("/api/v1/pricing.json", include_in_schema=False)
 async def get_pricing_tiers():
     """Returns the 4-tier computational pricing schedule for autonomous AI agents across all networks."""
     return {

@@ -494,6 +494,8 @@ async def view_battery_passport_whitepaper():
 
 @app.get("/.well-known/mcp.json", tags=["Agent Protocol"], summary="Glama.ai & MCP standard registry manifest")
 @app.get("/glama.json", include_in_schema=False)
+@app.get("/.cursor/mcp.json", include_in_schema=False)
+@app.get("/mcp.json", include_in_schema=False)
 async def get_glama_mcp_manifest():
     """Glama.ai & MCP standard directory discovery manifest."""
     glama_path = Path(__file__).parent.parent / "glama.json"
