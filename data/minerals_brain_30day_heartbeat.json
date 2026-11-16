@@ -1,7 +1,8 @@
 {
-  "pid": 8036,
-  "mode": "daemon",
-  "last_heartbeat_utc": "2026-11-16T01:11:29.458250+00:00",
+  "pid": 41160,
+  "mode": "server_native_daemon",
+  "environment": "Server Native (Container / Standalone)",
+  "last_heartbeat_utc": "2026-11-16T08:31:07.758726+00:00",
   "cycle": 1,
   "current_day": 19,
   "overall_readiness": 99.99,

@@ -103,3 +103,42 @@ def test_brain_absorb_intelligence_endpoint():
     assert res.status_code == 200
     data = res.json()
     assert data["status"] == "CONSOLIDATED_INTO_MEMORY"
+
+
+def test_brain_status_endpoint():
+    res = client.get("/api/v1/brain/status")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["engine"] == "ElizaOS Brain & Security Gate x402"
+    assert data["target_days"] == 30
+    assert "current_day" in data
+    assert "readiness_score" in data
+    assert "memory_stats" in data
+    assert "host_environment" in data
+
+
+def test_brain_heartbeat_endpoint():
+    res = client.get("/api/v1/brain/heartbeat")
+    assert res.status_code == 200
+    data = res.json()
+    assert "overall_readiness" in data or "readiness_score" in data
+    assert "current_day" in data
+
+
+def test_brain_trigger_cycle_endpoint():
+    res = client.post("/api/v1/brain/trigger-cycle")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "SUCCESS"
+    assert "heartbeat" in data
+
+
+def test_server_health_includes_elizaos_brain():
+    res = client.get("/health")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "healthy"
+    assert "elizaos_brain" in data
+    assert data["elizaos_brain"]["target_days"] == 30
+    assert data["elizaos_brain"]["readiness_score"] >= 80.0
+

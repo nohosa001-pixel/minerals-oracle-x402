@@ -294,6 +294,18 @@ class EUDRClient:
                     }
                 else:
                     self.record_failure(Exception(f"HTTP_{resp.status_code}"))
+                    if self.strict_mode:
+                        return {
+                            "is_compliant": False,
+                            "deforestation_detected": True,
+                            "forest_loss_pct": 100.0,
+                            "indigenous_territory_encroachment": False,
+                            "reason": f"Fail-Closed: EUDR agent returned HTTP {resp.status_code} under strict mode",
+                            "satellite_evidence_hash": "0x" + "0" * 64,
+                            "traces_nt_dds_reference": None,
+                            "audit_source": "FAIL_CLOSED_ERROR",
+                            "latency_ms": round((time.perf_counter() - start) * 1000.0, 2)
+                        }
             except Exception as e:
                 self.record_failure(e)
                 logger.debug(f"Remote EUDR check bypassed: {e}")

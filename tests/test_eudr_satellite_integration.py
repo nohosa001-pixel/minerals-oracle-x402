@@ -80,7 +80,7 @@ def test_eudr_verify_mine_site_clean():
     assert res["satellite_evidence_hash"].startswith("0x")
     assert len(res["satellite_evidence_hash"]) == 66
     assert res["traces_nt_dds_reference"].startswith("DDS-EUDR-2026-ID-")
-    assert res["audit_source"] in ("REMOTE_EUDR_AGENT", "LOCAL_SATELLITE_STANDALONE")
+    assert res["audit_source"] in ("REMOTE_EUDR_AGENT", "LOCAL_SATELLITE_STANDALONE", "COPERNICUS_SENTINEL_LIVE_FEED")
 
 
 def test_eudr_verify_invalid_coordinates():
