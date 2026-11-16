@@ -1,13 +1,13 @@
 {
-  "pid": 30988,
+  "pid": 8036,
   "mode": "daemon",
-  "last_heartbeat_utc": "2026-11-11T19:30:20.448798+00:00",
+  "last_heartbeat_utc": "2026-11-16T01:11:29.458250+00:00",
   "cycle": 1,
-  "current_day": 15,
+  "current_day": 19,
   "overall_readiness": 99.99,
   "threats_neutralized": 10,
   "working_memory_count": 15,
-  "episodic_memory_count": 30,
+  "episodic_memory_count": 33,
   "global_basins_grounded": 10,
   "status": "RUNNING"
 }
