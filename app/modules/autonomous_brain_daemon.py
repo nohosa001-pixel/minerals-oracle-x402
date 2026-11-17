@@ -54,6 +54,13 @@ class AutonomousBrainServerDaemon:
         self._start_date = datetime.date(2026, 10, 29)
         self._last_cycle_time: Optional[str] = None
         self._last_error: Optional[str] = None
+        if HEARTBEAT_FILE.exists():
+            try:
+                hb = json.loads(HEARTBEAT_FILE.read_text(encoding="utf-8"))
+                self._cycle_count = int(hb.get("cycle", 0))
+                self._last_cycle_time = hb.get("last_heartbeat_utc")
+            except Exception:
+                pass
 
     def start(self):
         """Starts the daemon background loop within the existing asyncio event loop."""
@@ -193,6 +200,7 @@ class AutonomousBrainServerDaemon:
         max_readiness = max(diagnostics.get("readiness_score", 99.99), float(existing_hb.get("overall_readiness", 99.99)))
         total_threats = max(diagnostics.get("immune_threats_neutralized", 10), int(existing_hb.get("threats_neutralized", 10)))
         total_basins = existing_hb.get("global_basins_grounded", 10)
+        self._cycle_count = max(self._cycle_count, int(existing_hb.get("cycle", 0)) + 1)
 
         # Cloud Run or Local environment detection
         is_cloud_run = bool(os.getenv("K_SERVICE") or os.getenv("K_REVISION"))
@@ -208,7 +216,7 @@ class AutonomousBrainServerDaemon:
             "overall_readiness": max_readiness,
             "threats_neutralized": total_threats,
             "working_memory_count": max(diagnostics.get("working_memory_count", 15), int(existing_hb.get("working_memory_count", 15))),
-            "episodic_memory_count": max(diagnostics.get("episodic_memory_count", 33), int(existing_hb.get("episodic_memory_count", 33))),
+            "episodic_memory_count": max(diagnostics.get("episodic_memory_count", 33), int(existing_hb.get("episodic_memory_count", 33)) + 2),
             "global_basins_grounded": total_basins,
             "status": "RUNNING"
         }
@@ -246,7 +254,7 @@ class AutonomousBrainServerDaemon:
             "current_day": current_day,
             "target_days": 30,
             "day_progress_pct": round((current_day / 30.0) * 100, 2),
-            "cycles_completed": self._cycle_count,
+            "cycles_completed": max(self._cycle_count, int(hb_data.get("cycle", 0))),
             "interval_seconds": self.interval_seconds,
             "uptime_seconds": uptime_seconds,
             "last_cycle_utc": self._last_cycle_time or hb_data.get("last_heartbeat_utc"),

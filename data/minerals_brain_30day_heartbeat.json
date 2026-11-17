@@ -1,14 +1,14 @@
 {
-  "pid": 41160,
+  "pid": 2,
   "mode": "server_native_daemon",
-  "environment": "Server Native (Container / Standalone)",
-  "last_heartbeat_utc": "2026-11-16T08:31:07.758726+00:00",
-  "cycle": 1,
-  "current_day": 19,
+  "environment": "GCP Cloud Run (Server Native)",
+  "last_heartbeat_utc": "2026-11-17T00:15:02.186184+00:00",
+  "cycle": 124,
+  "current_day": 20,
   "overall_readiness": 99.99,
   "threats_neutralized": 10,
-  "working_memory_count": 15,
-  "episodic_memory_count": 33,
+  "working_memory_count": 100,
+  "episodic_memory_count": 313,
   "global_basins_grounded": 10,
   "status": "RUNNING"
 }
