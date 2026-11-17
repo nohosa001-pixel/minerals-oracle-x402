@@ -1507,6 +1507,11 @@ class CBAMMarkupPenaltyRequest(BaseModel):
     default_embedded_emissions_tco2_per_ton: float = Field(default=2.1, gt=0.0, description="EU Default emission factor tCO2e/t")
     verified_scope1_2_emissions_tco2_per_ton: Optional[float] = Field(default=None, description="Accredited 3rd party verified specific emissions")
     eu_allowance_price_eur: float = Field(default=85.0, gt=0.0, description="EUA carbon price in EUR/tCO2")
+    third_country_carbon_price_paid_eur_per_ton: float = Field(
+        default=0.0,
+        ge=0.0,
+        description="Third-country carbon price effectively paid (e.g., Korea K-ETS) under EU Implementing Regulation 2026/2498 in EUR/t",
+    )
 
 
 class CBAMMarkupPenaltyResponse(BaseModel):
@@ -1519,6 +1524,7 @@ class CBAMMarkupPenaltyResponse(BaseModel):
     effective_emissions_billed_tco2: float
     total_cbam_liability_eur: float
     markup_penalty_surcharge_eur: float
+    third_country_carbon_deduction_eur: float = 0.0
     savings_with_verified_report_eur: float
     audit_advice: str
 

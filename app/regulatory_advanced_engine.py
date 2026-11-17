@@ -69,6 +69,14 @@ class RegulatoryAdvancedEngine:
                 f"Incurring €{markup_penalty_surcharge_eur:,.2f} in penalty surcharges. Engage accredited verifier immediately."
             )
 
+        # EU Implementing Regulation (IR 2026/2498): Third-country effective carbon price deduction (e.g., Korea K-ETS)
+        third_country_deduction = request.tonnage * getattr(request, "third_country_carbon_price_paid_eur_per_ton", 0.0)
+        if third_country_deduction > 0.0:
+            total_cbam_liability_eur = max(0.0, total_cbam_liability_eur - third_country_deduction)
+            if is_verified:
+                savings += third_country_deduction
+            advice += f" [IR 2026/2498: Deducted €{third_country_deduction:,.2f} for third-country carbon price paid.]"
+
         return CBAMMarkupPenaltyResponse(
             status="success",
             import_year=request.import_year,
@@ -79,6 +87,7 @@ class RegulatoryAdvancedEngine:
             effective_emissions_billed_tco2=round(effective_emissions_billed, 2),
             total_cbam_liability_eur=round(total_cbam_liability_eur, 2),
             markup_penalty_surcharge_eur=round(markup_penalty_surcharge_eur, 2),
+            third_country_carbon_deduction_eur=round(third_country_deduction, 2),
             savings_with_verified_report_eur=round(savings, 2),
             audit_advice=advice,
         )

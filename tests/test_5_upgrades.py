@@ -149,6 +149,45 @@ def test_cbam_markup_penalty_verified_exempt():
     assert resp.savings_with_verified_report_eur > 0.0
 
 
+def test_cbam_ir_2026_2498_third_country_carbon_deduction():
+    """Verifies EU Implementing Regulation (IR 2026/2498) third-country carbon price deduction (e.g., Korea K-ETS)."""
+    req = CBAMMarkupPenaltyRequest(
+        import_year=2026,
+        product_category="ALUMINUM",
+        tonnage=1000.0,
+        default_embedded_emissions_tco2_per_ton=2.3,
+        verified_scope1_2_emissions_tco2_per_ton=1.8,
+        eu_allowance_price_eur=75.0,
+        third_country_carbon_price_paid_eur_per_ton=15.0,  # €15/t paid in Korea K-ETS
+    )
+    resp = regulatory_advanced_engine.calculate_cbam_markup_penalty(req)
+    assert resp.is_verified_exempt is True
+    # Base verified liability = 1000 * 1.8 * 75 = €135,000; Deduction = 1000 * 15 = €15,000 -> Net = €120,000
+    assert resp.third_country_carbon_deduction_eur == 15000.0
+    assert resp.total_cbam_liability_eur == 120000.0
+    assert "IR 2026/2498" in resp.audit_advice
+
+
+def test_core_schema_26_minerals_surface_parity():
+    """Verifies 100% parity between all 26 MineralType enum members in schemas.py and /health surface."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.schemas import MineralType, SourceCountry
+
+    client = TestClient(app)
+    res = client.get("/health")
+    assert res.status_code == 200
+    data = res.json()
+
+    tracked = set(data["commodities_tracked"])
+    for mineral in MineralType:
+        assert mineral.value in tracked, f"Mineral {mineral.value} missing from /health commodities_tracked"
+
+    jurisdictions = set(data["monitored_jurisdictions"])
+    for country in SourceCountry:
+        assert country.value in jurisdictions, f"Country {country.value} missing from /health monitored_jurisdictions"
+
+
 def test_eu_industrial_act_verify():
     req = EUIndustrialActVerifyRequest(
         component_type="EV_BATTERY_PACK",

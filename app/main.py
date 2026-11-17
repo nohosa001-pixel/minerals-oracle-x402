@@ -760,11 +760,22 @@ async def health_check():
         "traps_defended": 12,
         "commodities_tracked": [
             "NICKEL_MHP", "LITHIUM_HYDROXIDE", "LITHIUM_CARBONATE",
-            "COBALT_HYDROXIDE", "NATURAL_GRAPHITE", "SYNTHETIC_GRAPHITE",
-            "MANGANESE_SULFATE", "NEODYMIUM_DYSPROSIUM", "ANTIMONY_TRIOXIDE",
+            "COBALT_HYDROXIDE", "COPPER_CATHODE", "COPPER_CONCENTRATE",
+            "SILVER_DORE", "SILVER_POWDER_SOLAR_PV", "NATURAL_GRAPHITE",
+            "SYNTHETIC_GRAPHITE", "MANGANESE_SULFATE", "NEODYMIUM_DYSPROSIUM",
+            "ANTIMONY_TRIOXIDE", "LITHIUM_BLACK_MASS", "NICKEL_COBALT_BLACK_MASS",
+            "TUNGSTEN_SCRAP", "TUNGSTEN_APT", "RARE_EARTHS_NDPR",
+            "RECYCLED_BLACK_MASS", "FERRONIOBIUM", "SCANDIUM_OXIDE",
+            "INDIUM_INGOT", "GALLIUM_METAL", "YTTRIUM_OXIDE",
+            "ANTIMONY_INGOT", "ALUMINIUM_INGOT",
             "Ag", "Pt", "Cu"
         ],
-        "monitored_jurisdictions": ["IDN", "COD", "CHL", "ARG", "AUS", "BRA", "CHN", "ZAF"],
+        "monitored_jurisdictions": [
+            "IDN", "COD", "CHL", "ARG", "AUS", "BRA", "CHN", "ZAF",
+            "USA", "MEX", "PER", "CAN", "PRT", "AGO", "ZMB", "VNM",
+            "KOR", "DEU", "GRL", "EST", "KAZ", "ESP", "JPN", "AUT",
+            "TJK", "UZB", "GIN"
+        ],
     }
 
 
