@@ -194,23 +194,26 @@ def test_replay_attack_prevention():
 
 
 def test_free_tier_quota_and_exhaustion():
-    """Verify sandbox free tier grants 2 trials and requires payment on 3rd query."""
+    """Verify One-Shot Proof grants 1 free Light/Standard trial and requires payment on 2nd query, while Heavy/On-Chain = 0."""
     test_ip = "192.0.2.123"
     
-    # 1st query: Free trial (1 remaining)
+    # 1st query: One-Shot Proof free trial (0 remaining)
     r1 = client.get("/api/v1/oracle/prices", headers={"X-Forwarded-For": test_ip})
     assert r1.status_code == 200
-    assert r1.headers.get("X-Free-Tier-Remaining") == "1"
+    assert r1.headers.get("X-Free-Tier-Remaining") == "0"
 
-    # 2nd query: Free trial (0 remaining)
+    # 2nd query: Quota exhausted -> 402 Payment Required with machine-executable vault_settlement
     r2 = client.get("/api/v1/oracle/prices", headers={"X-Forwarded-For": test_ip})
-    assert r2.status_code == 200
-    assert r2.headers.get("X-Free-Tier-Remaining") == "0"
+    assert r2.status_code == 402
+    assert "WWW-Authenticate" in r2.headers
+    body2 = r2.json()
+    assert "vault_settlement" in body2
+    assert body2["vault_settlement"]["mode"] == "pure_tokenized_onchain_usdc"
 
-    # 3rd query: Quota exhausted -> 402 Payment Required
-    r3 = client.get("/api/v1/oracle/prices", headers={"X-Forwarded-For": test_ip})
-    assert r3.status_code == 402
-    assert "WWW-Authenticate" in r3.headers
+    # On-Chain Tier (0 free trials even for brand-new IP)
+    fresh_ip = "192.0.2.250"
+    r_onchain = client.get("/api/v1/oracle/onchain-payload/LITHIUM_HYDROXIDE", headers={"X-Forwarded-For": fresh_ip})
+    assert r_onchain.status_code == 402
 
 
 def test_free_alpha_signals_and_economics():
@@ -305,32 +308,28 @@ def test_mcp_stdio_jsonrpc_protocol():
 
 
 def test_sandbox_free_trial_and_preset_defaults():
-    """Verify Sandbox Free Trial grants first 2 queries without auth header and includes presets."""
+    """Verify One-Shot Proof grants 1 free query without auth header and requires 402 on 2nd call."""
     from app.x402_verifier import _FREE_TRIAL_USAGE
 
     # Reset IP usage for fresh test
     test_ip = "192.168.100.1"
     _FREE_TRIAL_USAGE.pop(test_ip, None)
 
-    # 1. First Trial Query (Should return 200 OK with Sandbox Headers)
-    resp1 = client.get("/api/v1/oracle/prices", headers={"X-Forwarded-For": test_ip})
+    # 1. First Trial Query (Preset alias 'Neodymium' -> 200 OK with 0 remaining)
+    resp1 = client.get("/api/v1/oracle/prices/Neodymium", headers={"X-Forwarded-For": test_ip})
     assert resp1.status_code == 200
     assert resp1.headers.get("x-sandbox-trial") == "active"
-    assert resp1.headers.get("x-free-tier-remaining") == "1"
+    assert resp1.headers.get("x-free-tier-remaining") == "0"
+    data1 = resp1.json()
+    assert data1["symbol"] == "NEODYMIUM"
 
-    # 2. Second Trial Query (Preset alias 'Neodymium')
-    resp2 = client.get("/api/v1/oracle/prices/Neodymium", headers={"X-Forwarded-For": test_ip})
-    assert resp2.status_code == 200
-    assert resp2.headers.get("x-free-tier-remaining") == "0"
-    data2 = resp2.json()
-    assert data2["symbol"] == "NEODYMIUM"
+    # 2. Second Query (One-Shot Proof exhausted -> must return 402 Challenge)
+    resp2 = client.get("/api/v1/oracle/prices", headers={"X-Forwarded-For": test_ip})
+    assert resp2.status_code == 402
+    assert "payment_challenge" in resp2.json()
+    assert "vault_settlement" in resp2.json()
 
-    # 3. Third Query (Free Trial exhausted -> should return 402 Challenge)
-    resp3 = client.get("/api/v1/oracle/prices", headers={"X-Forwarded-For": test_ip})
-    assert resp3.status_code == 402
-    assert "payment_challenge" in resp3.json()
-
-    # 4. Compliance Precedents Route Verification
+    # 3. Compliance Precedents Route Verification
     resp_prec = client.get("/api/v1/oracle/compliance/precedents")
     assert resp_prec.status_code == 200
     prec_data = resp_prec.json()

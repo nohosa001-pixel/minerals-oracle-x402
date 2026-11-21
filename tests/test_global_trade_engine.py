@@ -221,12 +221,12 @@ def test_mcp_trade_tools_via_rest():
     assert res_mcp.status_code == 200
     assert "CORR_AUS_KOR_LI" in res_mcp.json()["content"][0]["text"]
 
-    # Tool: calculate_trade_tariffs
+    # Tool: calculate_trade_tariffs (2nd call requires payment/auth after One-Shot Proof)
     call_tariff = {
         "name": "calculate_trade_tariffs",
         "arguments": {"mineral_type": "LITHIUM_CARBONATE", "importer_jurisdiction": "USA"}
     }
-    res_tariff = client.post("/mcp/invoke", json=call_tariff)
+    res_tariff = client.post("/mcp/invoke", json=call_tariff, headers={"X-Dev-Bypass": "true"})
     assert res_tariff.status_code == 200
     assert "2825.20.00" in res_tariff.json()["content"][0]["text"]
 

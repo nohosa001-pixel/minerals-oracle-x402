@@ -65,9 +65,53 @@ _ACTIVE_NONCES: Dict[str, float] = {}
 _NONCE_LOCK = threading.Lock()
 NONCE_TTL_SECONDS = 300  # 5 minutes
 
-# Free Tier Sandbox Quota (IP-based, allows 2 free trial queries before requiring x402)
+# Free Tier Sandbox Quota (IP-based One-Shot Proof: allows 1 free Light/Standard trial query; Heavy/On-Chain = 0)
 _FREE_TRIAL_USAGE: Dict[str, int] = {}
-FREE_TRIAL_LIMIT = 2
+FREE_TRIAL_LIMIT = 1
+_FREE_TRIAL_DB_PATH = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) / "data" / "x402_store.db"
+
+
+def _get_free_trial_count(identifier: str) -> int:
+    if "PYTEST_CURRENT_TEST" in os.environ:
+        return _FREE_TRIAL_USAGE.get(identifier, 0)
+    if identifier in _FREE_TRIAL_USAGE:
+        return _FREE_TRIAL_USAGE[identifier]
+    try:
+        import sqlite3
+        if _FREE_TRIAL_DB_PATH.exists():
+            with sqlite3.connect(str(_FREE_TRIAL_DB_PATH), timeout=2.0) as conn:
+                row = conn.execute(
+                    "SELECT usage_count FROM free_trials WHERE identifier = ?",
+                    (identifier,),
+                ).fetchone()
+                if row:
+                    _FREE_TRIAL_USAGE[identifier] = int(row[0])
+                    return int(row[0])
+    except Exception:
+        pass
+    return 0
+
+
+def _increment_free_trial_count(identifier: str) -> int:
+    new_count = _get_free_trial_count(identifier) + 1
+    _FREE_TRIAL_USAGE[identifier] = new_count
+    if "PYTEST_CURRENT_TEST" not in os.environ:
+        try:
+            import sqlite3
+            _FREE_TRIAL_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+            with sqlite3.connect(str(_FREE_TRIAL_DB_PATH), timeout=2.0) as conn:
+                conn.execute(
+                    "CREATE TABLE IF NOT EXISTS free_trials (identifier TEXT PRIMARY KEY, usage_count INTEGER, last_used_at REAL)"
+                )
+                conn.execute(
+                    "INSERT INTO free_trials (identifier, usage_count, last_used_at) VALUES (?, ?, ?) "
+                    "ON CONFLICT(identifier) DO UPDATE SET usage_count = excluded.usage_count, last_used_at = excluded.last_used_at",
+                    (identifier, new_count, time.time()),
+                )
+                conn.commit()
+        except Exception:
+            pass
+    return new_count
 
 # In-memory store for generated PaymentReceipts: receipt_id -> PaymentReceipt
 _ISSUED_RECEIPTS: Dict[str, PaymentReceipt] = {}
@@ -205,6 +249,19 @@ class X402Verifier:
                     "instruction": "Sign Permit2 or EIP-712 payment message without spending native gas tokens.",
                 },
                 "vault_option": "Deposit USDC to AgentPaymentVault and pass 'X-Agent-Vault-Key' header for zero-latency execution.",
+                "vault_settlement": {
+                    "mode": "pure_tokenized_onchain_usdc",
+                    "contracts": {
+                        "polygon": {"chain_id": 137, "vault": "0xbFc79F55E410508aBCa2FF8ebA1120de4F209f68", "usdc": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"},
+                        "base": {"chain_id": 8453, "vault": "0x8eB40eF1f032dd66CD54c6e1D0C29980C31d5E57", "usdc": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"},
+                        "arbitrum": {"chain_id": 42161, "vault": "0xC089E5f72a7F5550Bb383C31B04Bf430a4E31372", "usdc": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"},
+                        "solana": {"chain_id": 501, "treasury": "G7doJyFj1tw2mTpApCoyeCPqA3QzyuuKwKNAZvzLErsT", "spl_usdc": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"},
+                    },
+                    "deposit_function": "deposit(uint256 amountUsdc)",
+                    "deposit_api": "POST /api/v1/vault/deposit",
+                    "x402_manifest": "GET /.well-known/x402",
+                    "auth_header": "X-Agent-Vault-Key",
+                },
             },
             headers=headers,
         )
@@ -391,7 +448,7 @@ class X402Verifier:
         if xfwd:
             client_ip = xfwd.split(",")[0].strip()
 
-        usage_count = _FREE_TRIAL_USAGE.get(client_ip, 0)
+        usage_count = _get_free_trial_count(client_ip)
         skip_trial = request.headers.get("X-Trial-Bypass") == "true"
         
         referer = request.headers.get("referer", "")
@@ -419,19 +476,20 @@ class X402Verifier:
             })
             return True, f"web-dashboard-{client_ip}", extra_headers
 
-        # 4. Check Sandbox Free Trial
+        # 4. Check Sandbox Free Trial (One-Shot Proof: 1 free query for Light/Standard only; Heavy & On-Chain = 0)
         x402_auth = request.headers.get("Authorization")
         x402_sig = request.headers.get("X-402-Signature")
         x_payment_auth = request.headers.get("X-PAYMENT-AUTH")
+        is_trial_eligible_tier = tier in (PricingTier.LIGHT, PricingTier.STANDARD)
 
         if not (x402_auth or x402_sig or x_payment_auth):
-            if not skip_trial and usage_count < FREE_TRIAL_LIMIT:
-                _FREE_TRIAL_USAGE[client_ip] = usage_count + 1
-                remaining_trials = FREE_TRIAL_LIMIT - (usage_count + 1)
+            if not skip_trial and is_trial_eligible_tier and usage_count < FREE_TRIAL_LIMIT:
+                new_usage = _increment_free_trial_count(client_ip)
+                remaining_trials = max(0, FREE_TRIAL_LIMIT - new_usage)
                 extra_headers.update({
                     "X-Sandbox-Trial": "active",
                     "X-Free-Tier-Remaining": str(remaining_trials),
-                    "X-Upgrade-Notice": f"Trial active. Pay {float_cost} USDC ({tier.value}) on Polygon, Base, or Arbitrum.",
+                    "X-Upgrade-Notice": f"One-Shot Proof consumed. Next call requires {float_cost} USDC ({tier.value}) via x402 or AgentPaymentVault.",
                 })
                 return True, f"sandbox-free-trial-{client_ip}", extra_headers
 

@@ -28,7 +28,14 @@ async def get_mcp_tool_specs():
     """Returns Model Context Protocol (MCP) tool specifications for autonomous AI agents."""
     if MCP_SPEC_FILE_PATH.exists():
         with open(MCP_SPEC_FILE_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
+            spec = json.load(f)
+        if isinstance(spec, dict):
+            spec["_x402_settlement_policy"] = {
+                "one_shot_free_trial": "1 free Light/Standard verification per agent IP (persisted)",
+                "heavy_and_onchain_free_trial": 0,
+                "post_trial_settlement": "Pure Tokenized x402 USDC (Polygon/Base/Arbitrum/Solana) via /.well-known/x402",
+            }
+        return spec
     return {"tools": []}
 
 

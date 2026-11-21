@@ -513,3 +513,73 @@ async def get_voucher_audit_package(passport_id: str):
     """Generates official audit evidence package aligned with South Korea MOTIE K-CBAM calculation rules."""
     result = compliance_engine.generate_voucher_audit_package(passport_id)
     return JSONResponse(content=result.model_dump())
+
+
+from typing import Optional
+from pydantic import BaseModel
+
+
+class FastMineralVerifyRequest(BaseModel):
+    document_text: Optional[str] = None
+    file_uri: Optional[str] = None
+    mime_type: Optional[str] = None
+
+
+@router.post(
+    "/api/v1/minerals/fast-verify",
+    summary="Fast Multimodal ESG, RMAP & Battery Passport Verifier via Gemini Decisions API (x402 Verified)",
+    responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
+)
+async def fast_verify_minerals_dossier(
+    request: Request,
+    body: FastMineralVerifyRequest,
+):
+    """Evaluates ESG audit PDFs, RMAP certificates, and NCM811/NCA battery dossiers in ~200ms with 0 output tokens."""
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    from app.decisions_verifier import minerals_decisions_verifier
+    result = minerals_decisions_verifier.fast_verify(
+        document_text=body.document_text,
+        file_uri=body.file_uri,
+        mime_type=body.mime_type,
+    )
+    return JSONResponse(content=result, headers=headers)
+
+
+from typing import Any, Dict, List
+
+
+class MineralPhysicalHazardRequest(BaseModel):
+    waypoints: List[Dict[str, Any]]
+    use_live_feed: bool = True
+
+
+@router.post(
+    "/api/v1/minerals/physical-hazard-check",
+    summary="Pre-Settlement Physical Hazard Check via Seismic & Climate Sub-Oracles (x402 Verified)",
+    responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
+)
+async def check_minerals_physical_hazard(
+    request: Request,
+    body: MineralPhysicalHazardRequest,
+):
+    """
+    Concurrently queries global-earthquake-agent and climate-insurance-agent
+    for Ring-of-Fire mine/smelter seismic & maritime climate clearance before settlement.
+    """
+    resp_402 = await require_x402_payment(request, tier=PricingTier.LIGHT)
+    if resp_402:
+        return resp_402
+
+    headers = getattr(request.state, "extra_headers", {}) or {}
+    from app.physical_hazard_bridge import physical_hazard_bridge
+    result = await physical_hazard_bridge.assess_trade_route(
+        waypoints=body.waypoints,
+        use_live_feed=body.use_live_feed,
+    )
+    return JSONResponse(content=result, headers=headers)
+
+

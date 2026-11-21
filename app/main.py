@@ -377,24 +377,54 @@ async def get_sample_battery_passport(
     if not sample_path.exists() and target_code == "NCM811":
         sample_path = STATIC_DIR / "EU_BATTERY_PASSPORT_EIP712_SAMPLE.json"
 
+    next_action_directive = {
+        "notice": "STATIC_SAMPLE_ONLY_NOT_VALID_FOR_CUSTOMS",
+        "one_shot_free_trial_quota": 1,
+        "heavy_and_onchain_free_quota": 0,
+        "live_verification_endpoints": {
+            "instant_200ms_rmap_check": "POST /api/v1/minerals/fast-verify",
+            "full_eip712_battery_passport": "POST /api/v1/oracle/compliance/verify",
+            "satellite_eudr_audit": "POST /api/v1/compliance/eudr-satellite-audit",
+            "cbam_k_ets_deduction": "POST /api/v1/compliance/cbam/calculate",
+        },
+        "post_trial_settlement": "Pure Tokenized x402 USDC (Polygon/Base/Arbitrum/Solana) via /.well-known/x402",
+    }
+
     if sample_path.exists():
-        return FileResponse(
-            sample_path,
-            media_type="application/json",
-            headers={
-                "Content-Disposition": f'attachment; filename="{filename}"',
-                "Cache-Control": "public, max-age=3600"
-            }
-        )
+        try:
+            with open(sample_path, "r", encoding="utf-8") as sf:
+                sample_data = json.load(sf)
+            if isinstance(sample_data, dict):
+                sample_data = {"_agent_next_action": next_action_directive, **sample_data}
+            return JSONResponse(
+                content=sample_data,
+                headers={
+                    "Content-Disposition": f'attachment; filename="{filename}"',
+                    "Cache-Control": "public, max-age=3600",
+                    "X-Next-Action": "POST /api/v1/minerals/fast-verify (1 free trial, then x402 USDC)",
+                },
+            )
+        except Exception:
+            return FileResponse(
+                sample_path,
+                media_type="application/json",
+                headers={
+                    "Content-Disposition": f'attachment; filename="{filename}"',
+                    "Cache-Control": "public, max-age=3600",
+                },
+            )
 
     # Dynamic fallback generation if static file is absent
     dynamic_payload = generate_battery_passport_payload(target_code)
+    if isinstance(dynamic_payload, dict):
+        dynamic_payload = {"_agent_next_action": next_action_directive, **dynamic_payload}
     return JSONResponse(
         content=dynamic_payload,
         headers={
             "Content-Disposition": f'attachment; filename="{filename}"',
-            "Cache-Control": "public, max-age=3600"
-        }
+            "Cache-Control": "public, max-age=3600",
+            "X-Next-Action": "POST /api/v1/minerals/fast-verify (1 free trial, then x402 USDC)",
+        },
     )
 
 
@@ -872,6 +902,64 @@ async def get_ap2_manifest():
         except Exception:
             pass
     return manifest
+
+
+@app.get("/.well-known/x402", tags=["Agent Protocol"])
+@app.get("/.well-known/x402.json", tags=["Agent Protocol"])
+async def get_x402_manifest():
+    """Coinbase x402 discovery manifest for critical minerals & battery passport oracle."""
+    return {
+        "protocol": "x402",
+        "version": "2.0.0",
+        "name": "Minerals-Oracle-x402 Battery Passport & Supply Chain Oracle",
+        "description": "EU Battery Regulation 2023/1542, US IRA Sec 30D FEOC, RMAP Smelter Audit, and Gemini Decisions Fast-Verify.",
+        "homepage": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app",
+        "payee": x402_verifier.recipient_wallet,
+        "solanaTreasury": "G7doJyFj1tw2mTpApCoyeCPqA3QzyuuKwKNAZvzLErsT",
+        "supportedChains": [
+            {
+                "network": "polygon",
+                "chainId": 137,
+                "currency": "USDC",
+                "currencyAddress": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+                "settlementRail": "EIP-3009 TransferWithAuthorization / Polygon OMS"
+            },
+            {
+                "network": "base",
+                "chainId": 8453,
+                "currency": "USDC",
+                "currencyAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "settlementRail": "EIP-3009 TransferWithAuthorization"
+            },
+            {
+                "network": "arbitrum",
+                "chainId": 42161,
+                "currency": "USDC",
+                "currencyAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+                "settlementRail": "EIP-3009 TransferWithAuthorization"
+            },
+            {
+                "network": "solana",
+                "chainId": 501,
+                "currency": "SPL-USDC",
+                "currencyAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                "treasury": "G7doJyFj1tw2mTpApCoyeCPqA3QzyuuKwKNAZvzLErsT",
+                "finalitySeconds": 0.4
+            }
+        ],
+        "capabilities": {
+            "fastMineralVerify": {
+                "endpoint": "/api/v1/minerals/fast-verify",
+                "method": "POST",
+                "model": "gemini-decision-1",
+                "latency": "~150-250ms"
+            },
+            "batteryPassportQr": {
+                "endpoint": "/api/v1/oracle/qr/battery-passport",
+                "method": "GET"
+            }
+        }
+    }
 
 
 @app.get("/.well-known/ai-plugin.json", tags=["Agent Protocol"])

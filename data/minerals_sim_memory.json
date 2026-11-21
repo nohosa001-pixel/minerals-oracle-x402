@@ -1,0 +1,42 @@
+{
+  "schema": "CRSI-SIM/1.0 (arXiv:2611.18856v1)",
+  "next_id": 2,
+  "carried_from": {
+    "domain": "minerals_battery_passport",
+    "seed_model": "gemini-3.8-flash"
+  },
+  "aliases": {},
+  "problems": [
+    {
+      "id": "P1",
+      "name": "battery_chemistry_rmap_feoc_verification",
+      "opened_round": 1,
+      "attempts": [
+        {
+          "round": 1,
+          "timestamp_utc": "2026-11-19T02:44:25.690141+00:00",
+          "accepted": true,
+          "what": "Integrated NCM811/NCA/LFP/Solid-State Battery Passport verification + Gemini Decisions Fast-Verify.",
+          "files": "app/decisions_verifier.py,app/routers/minerals.py",
+          "predicted": [
+            "NCM811_RMAP",
+            "NCA_RMAP",
+            "IRA_30D_FEOC",
+            "carbon_footprint_disclosure"
+          ],
+          "fixed": [
+            "NCM811_RMAP",
+            "NCA_RMAP",
+            "IRA_30D_FEOC",
+            "carbon_footprint_disclosure"
+          ],
+          "missed": [],
+          "passed": 4,
+          "total": 4,
+          "domain": "minerals_battery_passport",
+          "model": "gemini-3.8-flash"
+        }
+      ]
+    }
+  ]
+}

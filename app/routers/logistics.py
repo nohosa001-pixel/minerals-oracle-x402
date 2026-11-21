@@ -131,7 +131,7 @@ def calculate_cbam_liability_endpoint(
 @router.post(
     "/api/v1/logistics/customs-clearance-verify",
     response_model=CustomsVerificationResponse,
-    summary="Anchors ocean carrier B/L to mineral batch and issues Customs Clearance Proof Bundle (Alias)",
+    include_in_schema=False,
     responses={402: {"description": "Payment Required (0.05 USDC on Polygon)"}},
 )
 async def verify_customs_clearance_endpoint(

@@ -1,8 +1,8 @@
 # Critical Minerals & Battery Supply-Chain Compliance Oracle (LLM & Autonomous Agent Standard)
 
-> **The Decentralized Micro-Oracle for Autonomous Trading, Critical Mineral Provenance, and Battery Passport Compliance on Polygon Network (Chain ID: 137).**
-> Features real-time spot pricing, 7-pillar provenance audit, 12-trap regulatory defense, and EIP-712 cryptographic battery passports.
-> Zero Subscriptions. Machine-to-Machine HTTP 402 Micropayments (0.005 ~ 0.50 USDC per verification).
+> **The Decentralized Tokenized Micro-Oracle for Autonomous Trading, 26 Critical Minerals Provenance across 27 Jurisdictions, and Battery Passport Compliance on Multi-Chain Rails (Polygon, Base, Arbitrum, Solana).**
+> Features real-time spot pricing, 7-pillar provenance audit, 12-trap regulatory defense, EU CBAM IR 2026/2498 K-ETS deduction, Gemini Decisions 1 Fast-Verify, and EIP-712 cryptographic battery passports.
+> Zero Legacy Subscriptions. Pure Tokenized Machine-to-Machine HTTP 402 Micropayments (0.001 ~ 0.020 USDC per verification).
 
 ---
 
@@ -43,9 +43,10 @@
 
 ---
 
-## 🧪 Free Tier Sandbox & Example Presets
+## 🧪 One-Shot Proof Sandbox & Example Presets
 
-- **Sandbox Free Trial**: First 2 queries per agent IP are completely FREE without wallet signature.
+- **One-Shot Proof (Strict Policy)**: First **1** Light/Standard verification query per agent IP is FREE (persisted across restarts). From the 2nd call onward, HTTP 402 USDC settlement is strictly enforced.
+- **Zero-Free Heavy/On-Chain Attestations**: Tier 3 (Heavy) and Tier 4 (On-Chain EIP-712 Signature) require immediate x402 USDC or AgentPaymentVault settlement from the very first call (0 free trials).
 - **Example Presets**:
   - `mineral_type`: `"NICKEL_MHP"` (or `"LITHIUM_HYDROXIDE"`, `"COBALT_HYDROXIDE"`, `"NATURAL_GRAPHITE"`, `"NEODYMIUM_DYSPROSIUM"`)
   - `source_country`: `"IDN"` (or `"COD"`, `"CHL"`, `"ARG"`, `"AUS"`, `"BRA"`, `"CHN"`, `"ZAF"`)
@@ -56,6 +57,9 @@
 
 ## ⚡ Quick Agent API Directory
 
+- **Gemini Decisions 1 Fast-Verify (0 Output Tokens, ~200ms)**: `POST /api/v1/minerals/fast-verify` (Instant RMAP, conflict-free, carbon footprint & NCM811/NCA/LFP/SOLID_STATE battery passport verification powered by `gemini-decision-1`, x402 Tier 1 Light 0.001 USDC)
+- **Coinbase x402 Protocol Manifest**: `GET /.well-known/x402` & `GET /.well-known/x402.json` (Multi-chain USDC discovery for Polygon, Base, Arbitrum, Solana)
+- **EU CBAM IR 2026/2498 Carbon Deduction (K-ETS)**: `POST /api/v1/compliance/cbam/calculate` (Third-country paid carbon deduction formula `third_country_carbon_deduction_eur` synchronized with EU Implementing Regulation 2026/2498)
 - **ElizaOS Brain Inbound Perception Shield**: `POST /api/v1/brain/perceive` (OWASP prompt injection/AST guard & adversarial immune memory encoding)
 - **ElizaOS Brain Outbound Sovereign Execution**: `POST /api/v1/brain/execute` (Metallurgical NLI bounds, EU AI Act Art. 50 watermark, ephemeral sub-account & RWA USDY yield)
 - **ElizaOS Brain Cognitive Diagnostics**: `GET /api/v1/brain/diagnostics` (Real-time 90.89%+ readiness score, working/episodic memory & immune stats)
@@ -97,7 +101,9 @@
 
 ---
 
-## 💎 Monitored Critical Minerals & Supply Chains
+## 💎 Monitored Critical Minerals & Supply Chains (26 Minerals / 27 Jurisdictions)
+
+Full coverage across **26 strategic & battery minerals** (`LITHIUM_HYDROXIDE`, `LITHIUM_CARBONATE`, `NICKEL_MHP`, `COBALT_HYDROXIDE`, `COPPER_CATHODE`, `SILVER_REFINED`, `NATURAL_GRAPHITE`, `SYNTHETIC_GRAPHITE`, `NEODYMIUM_DYSPROSIUM`, `MANGANESE_SULFATE`, `ALUMINUM`, `IRON_ORE`, `TUNGSTEN`, `ANTIMONY`, `TIN`, `PLATINUM`, `PALLADIUM`, `CHROME`, `MOLYBDENUM`, etc.) and **27 origin jurisdictions**:
 
 1. **Nickel (`NICKEL_MHP`)**: Indonesia UU 3/2020 SIMBARA & DHE 30% export forex verification.
 2. **Lithium (`LITHIUM_HYDROXIDE` / `LITHIUM_CARBONATE`)**: Chile DGA water permit & Argentine Ley 26.639 periglacial compliance.
@@ -122,16 +128,24 @@ X-Agent-Vault-Key: vault_key_...
 
 ---
 
-## 🤖 Python Client Quickstart
+## 🤖 Python Client Quickstart (Live Production Endpoint)
 
 ```python
 import httpx
 
-base_url = "http://localhost:8000"
+base_url = "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app"
 
-# 1. Zero-friction self-onboarding (Free trial key)
+# 1. Zero-friction self-onboarding (Free trial key / Tokenized Vault)
 onboard_resp = httpx.post(f"{base_url}/api/v1/agent/onboard", json={"agent_name": "ComplianceAgent"}).json()
 session_key = onboard_resp["session_key"]
+
+# 1-A. Instant Gemini Decisions 1 Fast-Verify (~200ms, 0 Output Tokens)
+fast_verdict = httpx.post(
+    f"{base_url}/api/v1/minerals/fast-verify",
+    headers={"X-Agent-Vault-Key": session_key},
+    json={"document_text": "RMAP Conformant Smelter CID001234. NCA high-nickel cell carbon footprint 48.9 kg CO2/kWh."}
+).json()
+print("Fast-Verify Verdict:", fast_verdict)
 
 # 2. Verify mineral lot compliance
 audit_result = httpx.post(
