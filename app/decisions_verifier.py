@@ -22,13 +22,14 @@ class MineralsDecisionsVerifier:
         self._client = None
 
     def _get_client(self):
+        if self._client is not None:
+            return self._client
         if not HAS_GENAI or not self.api_key:
             return None
-        if self._client is None:
-            self._client = genai.Client(
-                api_key=self.api_key,
-                http_options={"api_version": "v1beta"},
-            )
+        self._client = genai.Client(
+            api_key=self.api_key,
+            http_options={"api_version": "v1beta"},
+        )
         return self._client
 
     def fast_verify(

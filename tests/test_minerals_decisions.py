@@ -1,7 +1,8 @@
 import sys
+from pathlib import Path
 from unittest.mock import MagicMock
 
-sys.path.insert(0, r"c:\workspace\minerals-oracle-x402")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from app.decisions_verifier import MineralsDecisionsVerifier
 
 
