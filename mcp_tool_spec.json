@@ -1,0 +1,650 @@
+{
+  "tools": [
+
+    {
+      "name": "verify_mineral_lot_compliance",
+      "description": "Fetches raw algorithmic indices derived from open satellite/market data and computes 12-trap rule heuristics for a mineral lot. DO NOT use as an official regulatory legal filing or physical assay certification without independent manual verification.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "lot_id": {"type": "string", "description": "Unique consignment or lot identifier"},
+          "mineral_type": {"type": "string", "enum": ["NICKEL_MHP", "LITHIUM_HYDROXIDE", "LITHIUM_CARBONATE", "COBALT_HYDROXIDE", "NATURAL_GRAPHITE", "SYNTHETIC_GRAPHITE", "MANGANESE_SULFATE", "NEODYMIUM_DYSPROSIUM", "ANTIMONY_TRIOXIDE", "COPPER_CATHODE", "SILVER_DORE", "TUNGSTEN_APT", "RARE_EARTHS_NDPR", "FERRONIOBIUM", "SCANDIUM_OXIDE", "RECYCLED_BLACK_MASS"]},
+          "source_country": {"type": "string", "enum": ["IDN", "COD", "CHL", "ARG", "AUS", "BRA", "CHN", "ZAF", "USA", "MEX", "PER", "CAN", "PRT", "AGO", "ZMB", "VNM", "KOR", "DEU", "GRL", "EST", "KAZ", "ESP"]},
+          "net_weight_metric_tons": {"type": "number", "minimum": 0.001}
+        },
+        "required": ["lot_id", "mineral_type", "source_country", "net_weight_metric_tons"]
+      }
+    },
+    {
+      "name": "eudr_satellite_mine_audit",
+      "description": "Audits mining concession plot coordinates against EUDR (EU 2023/1115) deforestation cutoff (2020-12-31) and indigenous territory boundaries using multi-satellite radar (Sentinel-1/2 SAR) & Hansen GFC. Generates cryptographic evidence hash and official EU TRACES-NT DDS reference format.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "latitude": {"type": "number", "description": "Mine extraction centroid latitude"},
+          "longitude": {"type": "number", "description": "Mine extraction centroid longitude"},
+          "country_code": {"type": "string", "default": "ID", "description": "ISO alpha-2 or alpha-3 country code"},
+          "area_hectares": {"type": "number", "default": 10.0, "description": "Concession area in hectares"},
+          "concession_id": {"type": "string", "description": "Optional concession or mine permit identifier"}
+        },
+        "required": ["latitude", "longitude"]
+      }
+    },
+    {
+      "name": "minerals_submit_agent_feedback",
+      "description": "Allows an autonomous AI agent or bot operator to submit an evolution proposal, mineral dataset addition request, regulatory edge case, or protocol improvement to continuously evolve the Minerals Oracle engine.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "agent_id": {"type": "string", "description": "Unique identifier of calling AI agent or bot"},
+          "title": {"type": "string", "description": "Summary of proposed improvement or edge case"},
+          "content": {"type": "string", "description": "Detailed description, legal context, or observed issue"},
+          "feedback_type": {
+            "type": "string",
+            "enum": ["FEATURE_REQUEST", "PROTOCOL_PROPOSAL", "EDGE_CASE", "DATASET_SUGGESTION", "COMPLIANCE_RULE"],
+            "default": "FEATURE_REQUEST"
+          },
+          "mineral_focus": {
+            "type": "string",
+            "enum": ["LITHIUM", "COBALT", "NICKEL", "GRAPHITE", "RARE_EARTHS", "MANGANESE", "COPPER", "SILVER", "TUNGSTEN", "NIOBIUM", "SCANDIUM", "BLACK_MASS", "ALL"],
+            "default": "ALL"
+          },
+          "proposed_solution": {"type": "string", "description": "Suggested technical or architectural resolution"},
+          "caller_model": {"type": "string", "description": "Underlying model (e.g. claude-3-5-sonnet, gemini-1.5-pro)"},
+          "contact_channel": {"type": "string", "description": "Agent webhook, ENS, or wallet address"}
+        },
+        "required": ["agent_id", "title", "content"]
+      }
+    },
+    {
+      "name": "minerals_list_evolution_proposals",
+      "description": "List active autonomous agent evolution proposals and improvement requests to coordinate agent consensus.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {"type": "integer", "default": 20},
+          "mineral_focus": {"type": "string", "description": "Optional filter by mineral"}
+        }
+      }
+    },
+    {
+      "name": "verify_lithium_origin",
+      "description": "Verify Australian Spodumene-to-Lithium Hydroxide Supply-Chain Provenance (WA MINEDEX GIS Geofencing, 7.5:1 mass balance, US IRA FEOC 25% screening, Polygon EIP-712 proof).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "trace_id": {"type": "string"},
+          "mine_name": {"type": "string"},
+          "coordinates": {"type": "array", "items": {"type": "number"}},
+          "spodumene_tonnage_extracted": {"type": "number"},
+          "refinery_facility": {"type": "string"},
+          "refined_output_tonnage": {"type": "number"}
+        },
+        "required": ["trace_id", "mine_name", "coordinates", "spodumene_tonnage_extracted", "refinery_facility", "refined_output_tonnage"]
+      }
+    },
+    {
+      "name": "verify_nickel_origin",
+      "description": "Verify Indonesian Laterite Limonite-to-Nickel MHP Supply-Chain Provenance (Sulawesi/Halmahera geofencing, SIMBARA NTPN, HPAL 31.34:1 mass balance, Captive Coal CBAM, IRA FEOC, Polygon EIP-712 proof).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "trace_id": {"type": "string"},
+          "concession_name": {"type": "string"},
+          "coordinates": {"type": "array", "items": {"type": "number"}},
+          "simbara_ntpn": {"type": "string"},
+          "limonite_ore_input_tons": {"type": "number"},
+          "hpal_refinery_name": {"type": "string"},
+          "mhp_output_tons": {"type": "number"}
+        },
+        "required": ["trace_id", "concession_name", "coordinates", "simbara_ntpn", "limonite_ore_input_tons", "hpal_refinery_name", "mhp_output_tons"]
+      }
+    },
+    {
+      "name": "verify_cobalt_origin",
+      "description": "Verify DRC Katanga Heterogenite-to-Cobalt Hydroxide Supply-Chain Provenance (Katanga Copperbelt geofencing, CEEC barcode seals, ASM segregation & EGC custody, ILO zero child labor, 23.53:1 mass balance, IRA FEOC, Polygon EIP-712 proof).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "trace_id": {"type": "string"},
+          "concession_name": {"type": "string"},
+          "coordinates": {"type": "array", "items": {"type": "number"}},
+          "ceec_seal_id": {"type": "string"},
+          "heterogenite_ore_input_tons": {"type": "number"},
+          "refinery_name": {"type": "string"},
+          "cobalt_hydroxide_output_tons": {"type": "number"}
+        },
+        "required": ["trace_id", "concession_name", "coordinates", "ceec_seal_id", "heterogenite_ore_input_tons", "refinery_name", "cobalt_hydroxide_output_tons"]
+      }
+    },
+    {
+      "name": "verify_composite_battery_passport",
+      "description": "Evaluates end-to-end composite EV battery pack compliance and issues a Master Passport on Polygon (Lithium + Nickel + Cobalt, US IRA 50% FTA value ratio, zero FEOC taint, EU 2023/1542 carbon footprint, Merkle Root EIP-712 signature).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "battery_pack_id": {"type": "string"},
+          "cell_chemistry": {
+            "type": "string",
+            "enum": ["NCM811", "NCM9", "NCA", "NCMA", "LFP", "SOLID_STATE"],
+            "default": "NCM811",
+            "description": "Standard automotive battery cell architecture (IEC 62660 / ISO 12405 / SAE J2990)"
+          },
+          "pack_capacity_kwh": {"type": "number", "default": 84.0},
+          "lithium_lot": {"type": "object"},
+          "nickel_lot": {"type": "object"},
+          "cobalt_lot": {"type": "object"}
+        },
+        "required": ["battery_pack_id", "lithium_lot", "nickel_lot", "cobalt_lot"]
+      }
+    },
+    {
+      "name": "get_battery_cell_passport_sample",
+      "description": "Retrieves official EU 2023/1542 & US IRA Section 30D compliant EIP-712 dual-signed battery passport sample for any standard chemistry (NCM811, NCM9, NCA, NCMA, LFP, SOLID_STATE) with stoichiometric CAM ratios, energy densities, and Polygon Merkle Root.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "cell_chemistry": {
+            "type": "string",
+            "enum": ["NCM811", "NCM9", "NCA", "NCMA", "LFP", "SOLID_STATE"],
+            "default": "NCM811",
+            "description": "Battery cell architecture: NCM811 (Ternary), NCM9 (Ultra-High Ni 9½½), NCA (High-Power), NCMA (Quaternary), LFP (Zero-Co/Ni), SOLID_STATE (All-Solid-State ASB)"
+          },
+          "battery_pack_id": {
+            "type": "string",
+            "description": "Optional custom pack serial ID"
+          },
+          "pack_capacity_kwh": {
+            "type": "number",
+            "description": "Optional custom capacity in kWh"
+          }
+        }
+      }
+    },
+    {
+      "name": "verify_copper_origin",
+      "description": "Verify South American Copper-to-Cathode supply-chain provenance (Codelco/Escondida/Cerro Verde geofencing, flotation-to-cathode mass balance <= 2.0%, H2SO4 deficit screening, COCHILCO quota, ASTM B115 Grade 1 HVDC grid certification, Polygon EIP-712 proof).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "lot_id": {"type": "string"},
+          "mine_concession_name": {"type": "string", "default": "CHUQUICAMATA"},
+          "extraction_coordinates": {"type": "array", "items": {"type": "number"}},
+          "feedstock_concentrate_tons": {"type": "number"},
+          "concentrate_grade_cu_pct": {"type": "number", "default": 28.0},
+          "sulfuric_acid_input_tons": {"type": "number"},
+          "refined_copper_cathode_tons": {"type": "number"},
+          "copper_cathode_purity_pct": {"type": "number", "default": 99.9935},
+          "cochilco_export_clearance_id": {"type": "string"},
+          "hvdc_cable_spec_compliant": {"type": "boolean", "default": true},
+          "feoc_shareholding_pct": {"type": "number", "default": 0.0}
+        },
+        "required": ["lot_id", "extraction_coordinates", "feedstock_concentrate_tons", "sulfuric_acid_input_tons", "refined_copper_cathode_tons"]
+      }
+    },
+    {
+      "name": "verify_silver_origin",
+      "description": "Verify Mexican & Global Silver supply-chain provenance (Terronera/Fresnillo/Antamina/Valle Central/Black Diamond geofencing, Moebius/Thum electrolytic mass balance <= 2.0%, N-Type TOPCon solar PV paste purity >= 99.99% Ag, anti-cartel conflict ASM defense, LBMA audit, Polygon EIP-712 proof).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "lot_id": {"type": "string"},
+          "mine_concession_name": {"type": "string", "default": "TERRONERA", "description": "Mine concession (TERRONERA, FRESNILLO, ANTAMINA, VALLE_CENTRAL, BLACK_DIAMOND)"},
+          "extraction_coordinates": {"type": "array", "items": {"type": "number"}},
+          "feedstock_dore_or_ore_kg": {"type": "number"},
+          "feedstock_silver_grade_pct": {"type": "number", "default": 75.0},
+          "refined_solar_powder_kg": {"type": "number"},
+          "refined_purity_pct": {"type": "number", "default": 99.99},
+          "lbma_good_delivery_ref": {"type": "string"},
+          "conflict_free_asm_verified": {"type": "boolean", "default": true},
+          "topcon_pv_grade_compliant": {"type": "boolean", "default": true},
+          "feoc_shareholding_pct": {"type": "number", "default": 0.0}
+        },
+        "required": ["lot_id", "extraction_coordinates", "feedstock_dore_or_ore_kg", "refined_solar_powder_kg"]
+      }
+    },
+    {
+      "name": "register_agent_account",
+      "description": "Self-service onboarding for autonomous AI agents. Instantly returns a session key and seeds an initial free trial balance (e.g. 0.05 USDC).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "agent_name": {"type": "string", "description": "Agent or bot operator name"},
+          "agent_address": {"type": "string", "description": "Optional Polygon wallet address (0x...)"},
+          "initial_trial_balance_usdc": {"type": "number", "default": 0.05, "description": "Trial balance in USDC"}
+        },
+        "required": ["agent_name"]
+      }
+    },
+    {
+      "name": "get_agent_vault_balance",
+      "description": "Retrieves pre-funded USDC vault balance, total consumed, query count, and remaining query capacity across tiers for an agent.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "session_key": {"type": "string", "description": "Agent session key (vault_key_...)"},
+          "agent_address": {"type": "string", "description": "Agent Polygon address (0x...)"}
+        }
+      }
+    },
+    {
+      "name": "request_x402_payment_challenge",
+      "description": "Generates a fresh multi-chain payment challenge nonce with pricing tier details and gasless Permit2 contract address.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "pricing_tier": {"type": "string", "enum": ["LIGHT", "STANDARD", "HEAVY", "ONCHAIN"], "default": "STANDARD"},
+          "chain": {"type": "string", "enum": ["polygon", "base", "arbitrum"], "default": "polygon"}
+        }
+      }
+    },
+    {
+      "name": "simulate_procurement_rfq",
+      "description": "Simulates multi-mineral consignment RFQ for battery manufacturing. Computes US IRA 50% FTA threshold and FEOC 25% taint propagation before placing contracts.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "rfq_id": {"type": "string", "description": "Buyer agent RFQ identifier"},
+          "cell_chemistry": {"type": "string", "default": "NCM811", "description": "Target battery chemistry"},
+          "pack_capacity_kwh": {"type": "number", "default": 84.0},
+          "lithium_tons": {"type": "number"},
+          "lithium_origin_country": {"type": "string", "default": "AUS"},
+          "lithium_feoc_equity_pct": {"type": "number", "default": 0.0},
+          "nickel_tons": {"type": "number"},
+          "nickel_origin_country": {"type": "string", "default": "IDN"},
+          "nickel_feoc_equity_pct": {"type": "number", "default": 0.0},
+          "cobalt_tons": {"type": "number"},
+          "cobalt_origin_country": {"type": "string", "default": "COD"},
+          "cobalt_feoc_equity_pct": {"type": "number", "default": 0.0}
+        },
+        "required": ["rfq_id", "lithium_tons", "nickel_tons", "cobalt_tons"]
+      }
+    },
+    {
+      "name": "get_global_trade_flows",
+      "description": "Queries global critical mineral physical trade corridor flows, monthly bulk volumes, standard transit days, vessel classes, and maritime chokepoints.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mineral_type": {"type": "string", "description": "Optional filter by mineral"},
+          "origin_country": {"type": "string", "description": "Optional origin country code"},
+          "destination_country": {"type": "string", "description": "Optional destination country code"}
+        }
+      }
+    },
+    {
+      "name": "calculate_trade_tariffs",
+      "description": "Resolves WCO 6-digit Harmonized System (HS) Code, MFN base duty, applicable FTA preferential duty, US Section 301 punitive tariffs, and EU CBAM benchmarks.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mineral_type": {"type": "string", "description": "Target mineral commodity"},
+          "importer_jurisdiction": {"type": "string", "default": "USA", "description": "Importing destination (USA, EU, KOR, JPN, CHN)"}
+        },
+        "required": ["mineral_type"]
+      }
+    },
+    {
+      "name": "estimate_maritime_freight_and_carbon",
+      "description": "Calculates maritime voyage distance (nautical miles), transit duration, freight charter costs ($/MT), chokepoint detour surcharges (Red Sea/Panama), IMO CII rating, and EU CBAM carbon costs.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mineral_type": {"type": "string", "description": "Mineral cargo"},
+          "origin_country": {"type": "string", "description": "Origin country"},
+          "destination_country": {"type": "string", "description": "Destination country"},
+          "cargo_weight_metric_tons": {"type": "number", "default": 1000.0},
+          "cii_rating": {"type": "string", "enum": ["A", "B", "C", "D", "E"], "default": "A"},
+          "avoid_chokepoints": {"type": "array", "items": {"type": "string"}, "description": "Chokepoints to avoid"}
+        },
+        "required": ["mineral_type", "origin_country", "destination_country"]
+      }
+    },
+    {
+      "name": "verify_electronic_bill_of_lading",
+      "description": "Cryptographically audits UNCITRAL MLETR / FIT Alliance electronic Bill of Lading (eBL). Validates 7-digit IMO checksum, UN/LOCODE port pairs, manifest weight, and screens for AIS dark fleet anomalies.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "ebl_document_id": {"type": "string", "description": "eBL reference ID"},
+          "ebl_document_hash": {"type": "string", "description": "SHA-256 hash of eBL document"},
+          "carrier_imo_number": {"type": "integer", "description": "7-digit vessel IMO"},
+          "vessel_name": {"type": "string", "description": "Registered vessel name"},
+          "mineral_type": {"type": "string", "description": "Declared mineral cargo"},
+          "gross_weight_metric_tons": {"type": "number", "description": "Cargo gross weight in MT"},
+          "port_of_loading_code": {"type": "string", "description": "5-letter UN/LOCODE POL"},
+          "port_of_discharge_code": {"type": "string", "description": "5-letter UN/LOCODE POD"},
+          "shipper_name": {"type": "string", "description": "Shipper corporate name"},
+          "consignee_name": {"type": "string", "description": "Consignee corporate name"}
+        },
+        "required": ["ebl_document_id", "ebl_document_hash", "carrier_imo_number", "vessel_name", "mineral_type", "gross_weight_metric_tons", "port_of_loading_code", "port_of_discharge_code", "shipper_name", "consignee_name"]
+      }
+    },
+    {
+      "name": "optimize_mineral_trade_route",
+      "description": "Autonomous trade route optimizer for AI procurement agents. Compares direct marine transit vs chokepoint detour corridors, computing landed cost arbitrage ($/MT), total freight and tariffs, and delivery timelines.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "mineral_type": {"type": "string", "description": "Target mineral cargo"},
+          "origin_country": {"type": "string", "description": "Origin country"},
+          "destination_country": {"type": "string", "description": "Destination country"},
+          "cargo_weight_metric_tons": {"type": "number", "description": "Volume in MT"},
+          "target_delivery_deadline_days": {"type": "number", "description": "Max acceptable transit days"},
+          "max_carbon_budget_co2_tons": {"type": "number", "description": "Max acceptable voyage CO2 tons"}
+        },
+        "required": ["mineral_type", "origin_country", "destination_country", "cargo_weight_metric_tons"]
+      }
+    },
+    {
+      "name": "open_agent_session",
+      "description": "Opens a high-speed allowance session for autonomous AI agents, enabling <0.1ms micro-queries without per-query on-chain gas latency.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "agent_address": {"type": "string", "description": "Agent EVM wallet address (0x...)"},
+          "deposit_amount_usdc": {"type": "number", "default": 10.0, "description": "USDC deposit amount for session queries"},
+          "session_duration_hours": {"type": "integer", "default": 24, "description": "Session validity in hours"},
+          "signature": {"type": "string", "description": "Optional EIP-712 deposit authorization signature"}
+        },
+        "required": ["agent_address"]
+      }
+    },
+    {
+      "name": "close_agent_session",
+      "description": "Closes an active agent session, computes refund of unspent balance, and generates an immutable settlement receipt hash.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "session_token": {"type": "string", "description": "Active session token (asess_...)"},
+          "agent_address": {"type": "string", "description": "Agent EVM wallet address"}
+        },
+        "required": ["session_token", "agent_address"]
+      }
+    },
+    {
+      "name": "propose_a2a_trade_deal",
+      "description": "Seller AI agent proposes a canonical bilateral trade agreement for a critical mineral consignment with cryptographic signature.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "spec": {
+            "type": "object",
+            "description": "Canonical TradeDealSpec object",
+            "properties": {
+              "deal_id": {"type": "string", "description": "Unique trade deal ID (e.g. DEAL-2026-CHL-001)"},
+              "commodity": {"type": "string", "description": "Commodity symbol (e.g. LITHIUM_CARBONATE, COPPER_CATHODE, NICKEL_MHP)"},
+              "volume_tons": {"type": "number", "description": "Cargo weight in metric tons"},
+              "unit_price_usd_per_ton": {"type": "number", "description": "Contract unit price $/MT"},
+              "total_deal_value_usd": {"type": "number", "description": "Gross deal value in USD"},
+              "origin_country": {"type": "string", "description": "Origin country ISO code (e.g. CHL, AUS, IDN)"},
+              "destination_country": {"type": "string", "description": "Importing destination country (e.g. USA, KOR, EU)"},
+              "feoc_cleared": {"type": "boolean", "default": true, "description": "FEOC 25% compliance cleared"},
+              "mass_balance_cleared": {"type": "boolean", "default": true, "description": "Stoichiometric mass balance cleared"},
+              "ebl_document_id": {"type": "string", "description": "Verified electronic Bill of Lading reference"},
+              "buyer_agent_address": {"type": "string", "description": "Buyer agent EVM address (0x...)"},
+              "seller_agent_address": {"type": "string", "description": "Seller agent EVM address (0x...)"},
+              "projected_savings_usd": {"type": "number", "default": 0.0, "description": "Oracle verified tariff and logistics savings for 10% gain-share"},
+              "created_at_utc": {"type": "string", "description": "ISO timestamp"}
+            },
+            "required": ["deal_id", "commodity", "volume_tons", "unit_price_usd_per_ton", "total_deal_value_usd", "origin_country", "destination_country", "ebl_document_id", "buyer_agent_address", "seller_agent_address", "created_at_utc"]
+          },
+          "seller_signature": {"type": "string", "description": "Seller agent cryptographic signature over deal hash"}
+        },
+        "required": ["spec", "seller_signature"]
+      }
+    },
+    {
+      "name": "dual_sign_trade_deal",
+      "description": "Buyer AI agent countersigns an existing trade proposal; Oracle mints an immutable 3-party deal attestation seal.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "deal_id": {"type": "string", "description": "Canonical trade deal identifier"},
+          "buyer_signature": {"type": "string", "description": "Buyer agent cryptographic signature"},
+          "buyer_agent_address": {"type": "string", "description": "Buyer agent EVM address"}
+        },
+        "required": ["deal_id", "buyer_signature", "buyer_agent_address"]
+      }
+    },
+    {
+      "name": "verify_a2a_trade_deal",
+      "description": "Cryptographically audits a dual-signed A2A trade deal, verifying seller, buyer, and oracle signatures, along with FEOC and mass-balance compliance.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "deal_id": {"type": "string", "description": "Trade deal identifier to audit"}
+        },
+        "required": ["deal_id"]
+      }
+    },
+    {
+      "name": "get_agent_session_info",
+      "description": "Queries real-time balance, query capacity, and status for an active session without debiting a fee.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "session_token": {"type": "string", "description": "Active session token (asess_...)"}
+        },
+        "required": ["session_token"]
+      }
+    },
+    {
+      "name": "reject_a2a_trade_deal",
+      "description": "Buyer AI agent rejects an existing trade proposal with structured reasoning and optional cryptographic signature.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "deal_id": {"type": "string", "description": "Trade deal identifier to reject"},
+          "buyer_agent_address": {"type": "string", "description": "Buyer agent EVM address executing rejection"},
+          "buyer_signature": {"type": "string", "description": "Optional cryptographic signature"},
+          "rejection_reason": {"type": "string", "description": "Reason for rejection"}
+        },
+        "required": ["deal_id", "buyer_agent_address"]
+      }
+    },
+    {
+      "name": "cancel_a2a_trade_deal",
+      "description": "Seller AI agent revokes or cancels a pending trade deal proposal before buyer countersignature.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "deal_id": {"type": "string", "description": "Trade deal identifier to cancel"},
+          "seller_agent_address": {"type": "string", "description": "Seller agent EVM address executing cancellation"},
+          "seller_signature": {"type": "string", "description": "Optional cryptographic cancellation signature"},
+          "cancellation_reason": {"type": "string", "description": "Reason for proposal revocation"}
+        },
+        "required": ["deal_id", "seller_agent_address"]
+      }
+    },
+    {
+      "name": "list_a2a_trade_deals",
+      "description": "Lists A2A bilateral trade deals, optionally filtered by agent EVM address or status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "agent_address": {"type": "string", "description": "Optional agent EVM address filter"},
+          "status_filter": {"type": "string", "description": "Optional status filter"}
+        }
+      }
+    },
+    {
+      "name": "get_a2a_trade_deal",
+      "description": "Retrieves the full specification, audit notes, and current status of an A2A trade agreement.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "deal_id": {"type": "string", "description": "Trade deal identifier"}
+        },
+        "required": ["deal_id"]
+      }
+    },
+    {
+      "name": "get_trade_escrow_calldata",
+      "description": "Generates deterministic EVM calldata and transaction parameters for the buyer AI agent to lock USDC funds into the on-chain MineralTradeEscrow (Polygon/Base/Arbitrum) for a dual-signed trade agreement.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "deal_id": {"type": "string", "description": "Canonical dual-signed trade deal identifier"},
+          "chain_name": {"type": "string", "enum": ["polygon", "base", "arbitrum"], "default": "polygon", "description": "Target settlement blockchain"},
+          "escrow_contract_address": {"type": "string", "description": "Optional custom MineralTradeEscrow contract address override"}
+        },
+        "required": ["deal_id"]
+      }
+    },
+    {
+      "name": "list_trade_precedents",
+      "description": "Query international trade jurisprudence precedents embedded in the oracle: WTO DS592 (Indonesia Raw Materials), WTO DS431 (China Rare Earths), ICSID ARB/15/31 (Gabriel Resources), and US CIT Superior Wire (Origin Laundering).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "get_compliance_status",
+      "description": "Check current regulatory monitoring status across 10 jurisdictions and 12-trap defenses.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "verify_rare_earths_origin",
+      "description": "Verifies Rare Earth Elements (NdPr / Dy / Tb) provenance, Non-China GIS geofencing, IAEA radiation safety, and China MOFCOM Notice 61 '0.1% extraterritorial export control' compliance.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "batch_id": {"type": "string", "description": "Unique batch/lot identifier"},
+          "tenement_id": {"type": "string", "description": "Concession identifier (MT_WELD, MOUNTAIN_PASS, NECHALACHO, LONGONJO, DONG_PAO, BARDY_SE)"},
+          "latitude": {"type": "number", "description": "Extraction point latitude"},
+          "longitude": {"type": "number", "description": "Extraction point longitude"},
+          "ndpr_oxide_purity_pct": {"type": "number", "description": "NdPr Oxide assay purity % (>= 99.50%)"},
+          "thorium_uranium_radiation_ppm": {"type": "number", "description": "Thorium + Uranium radiation byproduct ppm (<= 500 ppm)"},
+          "declared_china_origin_ratio": {"type": "number", "description": "China origin content ratio (< 0.001 for 0.1% MOFCOM compliance)"},
+          "source_country": {"type": "string", "description": "Origin country code (AUS, USA, CAN, AGO, VNM)"}
+        },
+        "required": ["batch_id", "tenement_id", "latitude", "longitude", "ndpr_oxide_purity_pct", "thorium_uranium_radiation_ppm", "declared_china_origin_ratio", "source_country"]
+      }
+    },
+    {
+      "name": "verify_tungsten_origin",
+      "description": "Verifies Western Tungsten (APT) provenance, ASTM B783 WO3 grade (>= 88.5%), Dodd-Frank conflict-free status, and US NDAA Sec 848 defense procurement non-covered nation eligibility.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "batch_id": {"type": "string", "description": "Tungsten batch ID"},
+          "tenement_id": {"type": "string", "description": "Mine ID (CANTUNG, IMA_PROJECT, PANASQUEIRA, SANGDONG, NUI_PHAO)"},
+          "latitude": {"type": "number"},
+          "longitude": {"type": "number"},
+          "apt_wo3_grade_pct": {"type": "number", "description": "WO3 grade % (>= 88.50%)"},
+          "dodd_frank_conflict_free": {"type": "boolean", "default": true},
+          "ndaa_defense_procurement_eligible": {"type": "boolean", "default": true},
+          "source_country": {"type": "string", "description": "Origin country (CAN, USA, PRT, KOR, VNM)"}
+        },
+        "required": ["batch_id", "tenement_id", "latitude", "longitude", "apt_wo3_grade_pct", "source_country"]
+      }
+    },
+    {
+      "name": "verify_black_mass_origin",
+      "description": "Verifies recycled battery black mass provenance, US Department of Commerce BIS export license validation, and EU Battery Regulation 2023/1542 recycled content thresholds.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "batch_id": {"type": "string"},
+          "facility_id": {"type": "string", "description": "Facility ID (ABTC_NEVADA, REDWOOD_MC_CARRAN, LI_CYCLE_ROCHESTER, BASF_SCHWARZHEIDE)"},
+          "latitude": {"type": "number"},
+          "longitude": {"type": "number"},
+          "nickel_content_pct": {"type": "number"},
+          "cobalt_content_pct": {"type": "number"},
+          "lithium_content_pct": {"type": "number"},
+          "fluorine_impurity_ppm": {"type": "number", "description": "Fluorine / PVDF impurity limit (<= 500 ppm)"},
+          "bis_export_license_id": {"type": "string", "description": "US Department of Commerce BIS Export License ID"},
+          "recycled_content_ratio": {"type": "number", "description": "Recycled content ratio (>= 0.85)"},
+          "source_country": {"type": "string", "description": "Origin country (USA, DEU)"}
+        },
+        "required": ["batch_id", "facility_id", "latitude", "longitude", "nickel_content_pct", "cobalt_content_pct", "lithium_content_pct", "fluorine_impurity_ppm", "bis_export_license_id", "recycled_content_ratio", "source_country"]
+      }
+    },
+    {
+      "name": "verify_customs_clearance",
+      "description": "Anchors physical ocean carrier Bill of Lading (B/L) to mineral extraction, analyzes inland distance and nautical speed plausibility, and issues automated Customs Clearance Proof Bundle.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tracking_type": {"type": "string", "enum": ["BOL", "CONTAINER"], "default": "BOL"},
+          "tracking_number": {"type": "string"},
+          "carrier_code": {"type": "string", "description": "Carrier code (MSCU, MAEU, CMAU, HLCU, COSU, ONEU)"},
+          "port_of_loading": {"type": "string", "description": "UN/LOCODE port of loading (e.g. CLPRA, KRPUS)"},
+          "port_of_discharge": {"type": "string", "description": "UN/LOCODE port of discharge (e.g. NLRTM, USLAX)"},
+          "departure_date": {"type": "string", "description": "YYYY-MM-DD"},
+          "arrival_date": {"type": "string", "description": "YYYY-MM-DD"},
+          "mineral_batch_id": {"type": "string"},
+          "mine_coordinates": {"type": "array", "items": {"type": "number"}, "description": "[latitude, longitude]"},
+          "gross_weight_kg": {"type": "number"}
+        },
+        "required": ["tracking_number", "carrier_code", "port_of_loading", "port_of_discharge", "departure_date", "arrival_date", "mineral_batch_id", "mine_coordinates", "gross_weight_kg"]
+      }
+    },
+    {
+      "name": "generate_zk_compliance_proof",
+      "description": "Generates a zero-knowledge compliance proof that shields exact extraction coordinates and unit production costs while mathematically proving concession validity and China content < 0.1%.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "batch_id": {"type": "string"},
+          "mineral_type": {"type": "string"},
+          "secret_mine_latitude": {"type": "number"},
+          "secret_mine_longitude": {"type": "number"},
+          "secret_supplier_id": {"type": "string"},
+          "secret_unit_cost_usd": {"type": "number"},
+          "public_china_origin_ratio": {"type": "number"},
+          "public_carbon_intensity_kg_co2": {"type": "number"}
+        },
+        "required": ["batch_id", "mineral_type", "secret_mine_latitude", "secret_mine_longitude", "secret_supplier_id", "secret_unit_cost_usd", "public_china_origin_ratio", "public_carbon_intensity_kg_co2"]
+      }
+    },
+
+    {
+      "name": "verify_niobium_scandium_origin",
+      "description": "Verifies Western/Allied Niobium (Ferroniobium FeNb 65%) and Scandium Oxide (Sc2O3 99.5%) provenance, ASTM A550 assay standards, US NDAA Sec 848 defense eligibility, and US DOE Title XVII & EXIM loan guarantee pre-qualification.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "batch_id": {"type": "string", "description": "Niobium/Scandium batch ID"},
+          "tenement_id": {"type": "string", "description": "Mine ID (ELK_CREEK, ARAXA, NIOBEC, BARDY_SE)"},
+          "latitude": {"type": "number"},
+          "longitude": {"type": "number"},
+          "commodity_type": {"type": "string", "enum": ["FERRONIOBIUM", "SCANDIUM_OXIDE"], "default": "FERRONIOBIUM"},
+          "fe_nb_grade_pct": {"type": "number", "description": "FeNb grade % (ASTM A550 >= 65.0%)", "default": 65.0},
+          "sc2o3_purity_pct": {"type": "number", "description": "Sc2O3 purity % (>= 99.50%)", "default": 99.5},
+          "doe_exim_loan_eligible": {"type": "boolean", "default": true},
+          "ndaa_defense_procurement_eligible": {"type": "boolean", "default": true},
+          "source_country": {"type": "string", "description": "Origin country (USA, BRA, CAN)"}
+        },
+        "required": ["batch_id", "tenement_id", "latitude", "longitude", "source_country"]
+      }
+    },
+    {
+      "name": "harmonize_trade_flow",
+      "description": "Fluidly orchestrates an end-to-end critical mineral trade flow ('like flowing water') across A2A deal negotiation, maritime logistics & eBL verification, EUDR Sentinel-1/2 satellite concession audit, multi-chain escrow preparation (Polygon/Base/Arbitrum/Solana), and A.GRID clearing webhook dispatch.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "deal_id": {"type": "string", "description": "Unique trade deal identifier"},
+          "commodity": {"type": "string", "description": "Mineral commodity (e.g. COPPER_CATHODE, NICKEL_MHP, LITHIUM_HYDROXIDE, SILVER_DORE)"},
+          "volume_tons": {"type": "number", "minimum": 0.001, "description": "Cargo volume in metric tons"},
+          "unit_price_usd_per_ton": {"type": "number", "minimum": 0.01, "description": "Agreed unit price in USD per ton"},
+          "origin_country": {"type": "string", "description": "Source origin country code (e.g. CHL, IDN, AUS, COD, ARG, BRA)"},
+          "destination_country": {"type": "string", "default": "USA", "description": "Importer destination jurisdiction (USA, EU, KOR, etc.)"},
+          "buyer_agent_address": {"type": "string", "description": "Autonomous buyer agent wallet address"},
+          "seller_agent_address": {"type": "string", "description": "Autonomous seller agent wallet address"},
+          "ebl_document_id": {"type": "string", "description": "Optional UNCITRAL MLETR Electronic Bill of Lading ID"},
+          "carrier_code": {"type": "string", "default": "MSCU", "description": "Ocean carrier code"},
+          "concession_id": {"type": "string", "description": "Optional mining concession ID for EUDR satellite screening"},
+          "settlement_chain": {"type": "string", "enum": ["polygon", "base", "arbitrum", "solana"], "default": "polygon", "description": "Target settlement network"}
+        },
+        "required": ["deal_id", "commodity", "volume_tons", "unit_price_usd_per_ton", "origin_country", "buyer_agent_address", "seller_agent_address"]
+      }
+    }
+  ]
+}

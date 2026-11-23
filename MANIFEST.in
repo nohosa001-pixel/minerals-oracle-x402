@@ -1,0 +1,25 @@
+include README.md
+include LICENSE
+include mcp_tool_spec.json
+include glama.json
+include llms.txt
+include main.py
+include mcp_server.py
+recursive-include .well-known *
+
+prune app
+prune contracts
+prune scripts
+prune tests
+prune data
+prune logs
+prune docs
+prune sdk
+prune dist
+prune build
+
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *.so
+global-exclude .DS_Store
+global-exclude .env*

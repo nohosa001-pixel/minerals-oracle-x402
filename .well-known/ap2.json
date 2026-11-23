@@ -1,0 +1,189 @@
+{
+  "ap2_version": "0.2.0",
+  "name": "minerals-oracle-x402",
+  "display_name": "Critical Raw Minerals & Urban Mining Oracle",
+  "description": "High-performance micro-oracle serving deterministic real-time prices, cross-exchange arbitrage spreads, and urban-mining scrap valuations for critical raw minerals (Silver, Platinum, Copper, Lithium, Nd/Dy Rare Earths).",
+  "version": "1.6.0",
+  "protocol": "ap2",
+  "homepage": "https://github.com/nohosa001-pixel/minerals-oracle-x402",
+  "contact": {
+    "organization": "Minerals Oracle Labs",
+    "email": "oracle@minerals-x402.eth"
+  },
+  "payment": {
+    "scheme": "x402",
+    "version": "1.0",
+    "network": "polygon",
+    "chain_id": 137,
+    "currency": "USDC",
+    "token_contract": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+    "cost_per_request_usdc": 0.005,
+    "cost_per_request_atomic_units": "5000",
+    "recipient_address": "0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b",
+    "settlement_facilitator": "https://facilitator.polygon.technology/v1/verify"
+  },
+  "capabilities": [
+    {
+      "id": "oracle:all_prices",
+      "name": "Get All Critical Mineral Quotes",
+      "endpoint": "/api/v1/oracle/prices",
+      "method": "GET",
+      "description": "Returns spot prices, bid/ask, 24h change %, and multi-unit conversions for Ag, Pt, Cu, Li, and NdDy.",
+      "rate_limit": "600/min",
+      "cost_usdc": 0.005
+    },
+    {
+      "id": "oracle:single_price",
+      "name": "Get Single Mineral Quote",
+      "endpoint": "/api/v1/oracle/prices/{symbol}",
+      "method": "GET",
+      "parameters": {
+        "symbol": {
+          "type": "string",
+          "enum": [
+            "Ag",
+            "Pt",
+            "Cu",
+            "Li",
+            "NdDy"
+          ],
+          "description": "Commodity symbol"
+        }
+      },
+      "cost_usdc": 0.005
+    },
+    {
+      "id": "oracle:arbitrage_spreads",
+      "name": "Cross-Exchange Arbitrage Spreads",
+      "endpoint": "/api/v1/oracle/spreads",
+      "method": "GET",
+      "description": "Returns basis point spreads and net arbitrage margins for COMEX, LME, SMM, and LPPM pairs.",
+      "cost_usdc": 0.005
+    },
+    {
+      "id": "analytics:urban_mining",
+      "name": "Urban Mining Scrap Batch Valuation",
+      "endpoint": "/api/v1/oracle/urban-mining/calculate",
+      "method": "POST",
+      "description": "Calculates gross contained metal value, recovery rates, and net settlement after refining charges for EV Battery Black Mass, Auto Catalysts, E-Waste, and Rare Earth Magnets.",
+      "cost_usdc": 0.005
+    },
+    {
+      "id": "compliance:eudr_satellite",
+      "name": "EUDR Satellite Concession Audit",
+      "endpoint": "/api/v1/compliance/eudr-satellite-audit",
+      "method": "POST",
+      "description": "Multi-satellite Sentinel-1/2 SAR radar deforestation (2020-12-31 cutoff), indigenous land protection, and TRACES-NT DDS reference generation.",
+      "cost_usdc": 0.02
+    },
+    {
+      "id": "compliance:rare_earths",
+      "name": "Rare Earths Permanent Magnet Metal Origin",
+      "endpoint": "/api/v1/rare-earths/verify-origin",
+      "method": "POST",
+      "description": "Non-China GIS geofencing, NdPr 99.5% purity, IAEA radiation safety, and MOFCOM 0.1% extraterritorial export control defense.",
+      "cost_usdc": 0.005
+    },
+    {
+      "id": "compliance:tungsten",
+      "name": "Western Tungsten APT Origin & US NDAA 848",
+      "endpoint": "/api/v1/tungsten/verify-origin",
+      "method": "POST",
+      "description": "Western GIS geofencing, ASTM B783 WO3 88.5% grade, Dodd-Frank conflict-free audit, and US NDAA defense procurement eligibility.",
+      "cost_usdc": 0.005
+    },
+    {
+      "id": "compliance:black_mass",
+      "name": "Recycled Battery Black Mass & US BIS License",
+      "endpoint": "/api/v1/black-mass/verify-origin",
+      "method": "POST",
+      "description": "Hydrometallurgical recycling geofencing, US DOC BIS license check, and EU Battery Reg 85% recycled content verification.",
+      "cost_usdc": 0.005
+    },
+    {
+      "id": "logistics:customs_clearance",
+      "name": "Physical Logistics B/L Customs Clearance Bridge",
+      "endpoint": "/api/v1/logistics/customs-clearance-verify",
+      "method": "POST",
+      "description": "Ocean carrier B/L tracking, inland mine-to-port spatial analysis, vessel transit plausibility, and customs clearance bundle.",
+      "cost_usdc": 0.005
+    },
+    {
+      "id": "privacy:zk_compliance",
+      "name": "Zero-Knowledge Origin & Purity Prover",
+      "endpoint": "/api/v1/zk/compliance-proof/generate",
+      "method": "POST",
+      "description": "Blinds mine GPS coordinates and commercial costs while cryptographically proving concession inclusion and China content < 0.1%.",
+      "cost_usdc": 0.01
+    },
+    {
+      "id": "brain:perceive",
+      "name": "ElizaOS Brain Inbound Perception Shield",
+      "endpoint": "/api/v1/brain/perceive",
+      "method": "POST",
+      "description": "4-Tier Security Gate prompt injection, AST code guard, and memory poisoning filter with immune memory encoding.",
+      "cost_usdc": 0.005
+    },
+    {
+      "id": "brain:execute",
+      "name": "ElizaOS Brain Outbound Sovereign Execution",
+      "endpoint": "/api/v1/brain/execute",
+      "method": "POST",
+      "description": "Physical metallurgical NLI check, EU AI Act Art. 50 watermark, ephemeral sub-account ($1-$5), EIP-712 proof & USDY RWA yield.",
+      "cost_usdc": 0.02
+    },
+    {
+      "id": "brain:diagnostics",
+      "name": "ElizaOS Brain Cognitive & Immune Diagnostics",
+      "endpoint": "/api/v1/brain/diagnostics",
+      "method": "GET",
+      "description": "Returns real-time readiness score (90.89%+), episodic memory depth, and neutralized threat fingerprints.",
+      "cost_usdc": 0.0
+    }
+  ],
+  "supported_commodities": [
+    {
+      "symbol": "Ag",
+      "name": "Silver (99.9% Bullion)",
+      "benchmark": "COMEX / LBMA"
+    },
+    {
+      "symbol": "Pt",
+      "name": "Platinum (99.95% Sponge)",
+      "benchmark": "LPPM / NYMEX"
+    },
+    {
+      "symbol": "Cu",
+      "name": "Copper (Grade A Cathode)",
+      "benchmark": "LME / COMEX"
+    },
+    {
+      "symbol": "Li",
+      "name": "Lithium Carbonate (Battery Grade 99.5%)",
+      "benchmark": "SMM / Fastmarkets"
+    },
+    {
+      "symbol": "NdDy",
+      "name": "Neodymium-Dysprosium Magnet Benchmark",
+      "benchmark": "Asian Metal / SMM"
+    }
+  ],
+  "supported_scrap_categories": [
+    {
+      "id": "EV_BATTERY_BLACK_MASS",
+      "description": "Hydrometallurgical recycling of Li-ion battery scrap (Li, Ni, Co, Mn)"
+    },
+    {
+      "id": "AUTO_CATALYST_CERAMIC",
+      "description": "Spent catalytic converter monolith scrap (Pt, Pd, Rh)"
+    },
+    {
+      "id": "E_WASTE_HIGH_GRADE_PCB",
+      "description": "High-grade shredded circuit boards (Au, Ag, Cu)"
+    },
+    {
+      "id": "WIND_EV_PERMANENT_MAGNETS",
+      "description": "NdFeB permanent magnet scrap (Nd, Dy, Pr)"
+    }
+  ]
+}

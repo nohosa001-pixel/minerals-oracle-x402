@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "minerals-oracle-x402"
+version = "2.0.0"
+description = "Thin MCP & x402 Client for the Autonomous Critical Minerals & Battery Passport Compliance Oracle (Polygon, Base, Arbitrum, Solana)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+    { name = "Minerals Oracle Team", email = "developer@minerals-oracle.com" }
+]
+keywords = [
+    "ai-agent",
+    "x402",
+    "mcp",
+    "polygon-network",
+    "polygon",
+    "web3",
+    "critical-minerals",
+    "battery-passport",
+    "compliance",
+    "rwa",
+    "thin-client"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
+]
+dependencies = [
+    "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/nohosa001-pixel/minerals-oracle-x402"
+Repository = "https://github.com/nohosa001-pixel/minerals-oracle-x402"
+
+[project.scripts]
+minerals-oracle-x402 = "main:main"
+x402-minerals-agent = "main:main"
+minerals-mcp = "mcp_server:main"
+
+[tool.setuptools]
+packages = []
+py-modules = ["mcp_server", "main"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+asyncio_mode = "auto"

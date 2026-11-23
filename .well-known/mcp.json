@@ -1,0 +1,17 @@
+{
+  "name": "minerals-oracle-x402",
+  "version": "2.1.0",
+  "protocol": "mcp-2024-11-05",
+  "title": "Minerals Oracle x402 - Battery Passport & Critical Minerals",
+  "description": "Autonomous Critical Minerals & Battery Supply-Chain Compliance Oracle on Polygon. Verifies Regulation (EU) 2023/1542 Battery Passports, US IRA Section 30D, CBAM, and EIP-712 Dual-Signed Merkle proofs.",
+  "transport": {
+    "type": "sse",
+    "endpoint": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/mcp"
+  },
+  "tools_endpoint": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/mcp/tools",
+  "glama": {
+    "verified": true,
+    "category": "compliance"
+  }
+}
+

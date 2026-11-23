@@ -1,0 +1,40 @@
+name: Thin Client CI & Zero-Leak Verification
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-verify-package:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]" build twine
+      - name: Run Thin Client tests
+        run: pytest -v
+      - name: Build & verify zero server code leak
+        run: |
+          python -m build
+          python -m twine check dist/*
+          python -c "
+          import zipfile, tarfile, glob
+          whl = glob.glob('dist/*.whl')[0]
+          tar = glob.glob('dist/*.tar.gz')[0]
+          with zipfile.ZipFile(whl) as z: w = z.namelist()
+          with tarfile.open(tar) as t: s = t.getnames()
+          assert not any('app/' in f for f in w), f'Leak in wheel: {w}'
+          assert not any('/app/' in f for f in s), f'Leak in sdist: {s}'
+          print('ZERO SERVER LEAK VERIFIED:', len(w), 'whl files,', len(s), 'sdist files')
+          "

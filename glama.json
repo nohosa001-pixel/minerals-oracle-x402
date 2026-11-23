@@ -1,0 +1,25 @@
+{
+  "$schema": "https://glama.ai/mcp/v1/schema.json",
+  "name": "minerals-oracle-x402",
+  "displayName": "Minerals Oracle x402 - Battery Passport & Critical Minerals",
+  "description": "Autonomous Critical Minerals & Battery Supply-Chain Compliance Oracle on Polygon. Verifies Regulation (EU) 2023/1542 Battery Passports, US IRA Section 30D, CBAM, and EIP-712 Dual-Signed Merkle proofs.",
+  "homepage": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app",
+  "icon": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/static/favicon.svg",
+  "transport": {
+    "type": "sse",
+    "url": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/mcp"
+  },
+  "endpoints": {
+    "sse": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/mcp/sse",
+    "messages": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/mcp/messages",
+    "tools": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/mcp/tools",
+    "openapi": "https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/openapi.json"
+  },
+  "categories": [
+    "compliance",
+    "supply-chain",
+    "battery-passport",
+    "web3",
+    "automotive"
+  ]
+}
