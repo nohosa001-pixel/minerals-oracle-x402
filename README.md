@@ -356,7 +356,8 @@ All M2M API invocations support micro-payments in USDC on Polygon (Chain ID `137
 - **Composite Battery Master Verification**: 0.10 USDC (`PricingTier.STANDARD`)
 - **Dedicated Mineral Lot Verification**: 0.05 USDC (`PricingTier.LIGHT`)
 - **Polygon USDC Address**: `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`
-- **Treasury Recipient**: `0x356ECeA957b85120fef8cF5D89b85Cb3d4c13D5b`
+- **EVM Treasury Recipient (Polygon / Base / Arbitrum)**: `0xEbA2821B8E37eb5a231c074345c991Cb1F139920`
+- **Solana USDC Treasury Recipient**: `G7doJyFj1tw2mTpApCoyeCPqA3QzyuuKwKNAZvzLErsT`
 - **Agent Vault Fast-Path**: Zero-latency verification via pre-funded `X-Agent-Vault-Key` headers.
 
 ---
@@ -397,11 +398,11 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 
 Navigate to:
 
-- **Autonomous Agent Observatory Console**: [http://localhost:8000/dashboard](http://localhost:8000/dashboard)
-- **Interactive OpenAPI Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- **Model Context Protocol (MCP) Tools**: [http://localhost:8000/mcp/tools](http://localhost:8000/mcp/tools)
-- **OpenAI-Compatible Model Registry**: [http://localhost:8000/v1/models](http://localhost:8000/v1/models) (Supports Cursor, AutoGen, LangChain)
-- **Official EU 2023/1542 Battery Passport Sample**: [http://localhost:8000/sample-battery-passport.json](http://localhost:8000/sample-battery-passport.json)
+- **Autonomous Agent Observatory Console**: [https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/dashboard](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/dashboard)
+- **Interactive OpenAPI Documentation**: [https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/docs](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/docs)
+- **Model Context Protocol (MCP) Tools**: [https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/mcp/tools](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/mcp/tools)
+- **OpenAI-Compatible Model Registry**: [https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/v1/models](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/v1/models) (Supports Cursor, AutoGen, LangChain)
+- **Official EU 2023/1542 Battery Passport Sample**: [https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/sample-battery-passport.json](https://minerals-oracle-x402-212942243360.asia-northeast3.run.app/sample-battery-passport.json)
 
 
 ---
