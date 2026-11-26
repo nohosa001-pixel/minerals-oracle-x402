@@ -1,5 +1,8 @@
 {
-  "$schema": "https://glama.ai/mcp/v1/schema.json",
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "maintainers": [
+    "nohosa001-pixel"
+  ],
   "name": "minerals-oracle-x402",
   "displayName": "Minerals Oracle x402 - Battery Passport & Critical Minerals",
   "description": "Autonomous Critical Minerals & Battery Supply-Chain Compliance Oracle on Polygon. Verifies Regulation (EU) 2023/1542 Battery Passports, US IRA Section 30D, CBAM, and EIP-712 Dual-Signed Merkle proofs.",
